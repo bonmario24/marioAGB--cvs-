@@ -1,0 +1,224 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@@********************************************************************
+@@*          crt0_child.s                                            *
+@@*            スタートアップルーチン		                    *
+@@*                                                                  *
+@@*          Copyright (C) 1999-2000 NINTENDO Co.,Ltd.               *
+@@********************************************************************
+    .INCLUDE    "AgbDefine.s"
+    .INCLUDE    "AgbMemoryMap.s"
+    .INCLUDE    "AgbSyscallDefine.s"
+    .INCLUDE    "AgbMacro.s"
+    .TEXT
+
+    .INCLUDE    "MultiSioDefine.s"
+
+    .GLOBAL     _start
+_start:
+@@   .INCLUDE    "rom_header.s"
+
+@@--------------------------------------------------------------------
+@@-                          リセット                                -
+@@--------------------------------------------------------------------
+    .EXTERN     ChildMain
+    .GLOBAL     start_vector
+    .CODE 32
+start_vector:
+        mov     r0, #PSR_IRQ_MODE       @@ IRQモードへ切り換え
+        msr     cpsr, r0
+        ldr     sp, sp_irq              @@ SP_irq のセット
+        mov     r0, #PSR_SYS_MODE       @@ システムモードへ切り換え
+        msr     cpsr, r0
+        ldr     sp, sp_usr              @@ SP_usr のセット
+        ldr     r1, =INTR_VECTOR_BUF    @@ 割り込みアドレスのセット
+        adr     r0, intr_main
+        str     r0, [r1]
+        ldr     r1, =ChildMain           @@ スタート ＆ 16bitコードへの切換
+        mov     lr, pc
+        bx      r1
+        b       start_vector            @@ リセット
+
+    .ALIGN
+sp_usr: .word   WRAM_END - 0x200
+sp_irq: .word   WRAM_END - 0x080
+
+
+@@--------------------------------------------------------------------
+@@-          割り込み分岐処理（テーブル引き）32Bit            25-62c -
+@@--------------------------------------------------------------------
+    .EXTERN     IntrTableBuf
+    .GLOBAL     intr_main
+    .ALIGN
+    .CODE 32
+@@intr_main:
+@@        mov     r12, #REG_BASE           @@ r12: REG_BASE
+@@        add     r3, r12, #OFFSET_REG_IE  @@ r3:  REG_IE
+@@        ldr     r2, [r3]
+@@        and     r1, r2, r2, lsr #16      @@ r1:  IE & IF
+@@        mov     r2, #0                       @@ IE/IF チェック
+@@
+@@@@        ands    r0, r1, #V_BLANK_INTR_FLAG   @@ Vブランク 割り込み
+@@	ands    r0, r1, #SIO_INTR_FLAG       @@ シリアル通信 割り込み
+@@        strneh  r0, [r12, #INTR_CHECK_BUF - WRAM_END] @@ 割り込みチェック セット
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@@@	ands    r0, r1, #SIO_INTR_FLAG       @@ シリアル通信 割り込み
+@@        ands    r0, r1, #V_BLANK_INTR_FLAG   @@ Vブランク 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #MULTI_SIO_TIMER_INTR_FLAG
+@@        bne     jump_intr                    @@ マルチプレイ通信用タイマー 割り込み
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #H_BLANK_INTR_FLAG   @@ Hブランク 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #V_COUNT_INTR_FLAG   @@ Vカウンタ 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #DMA0_INTR_FLAG      @@ DMA0 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #DMA1_INTR_FLAG      @@ DMA1 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #DMA2_INTR_FLAG      @@ DMA2 割り込み
+@@        bne     jump_intr
+@@	
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #DMA3_INTR_FLAG      @@ DMA3 割り込み
+@@        bne     jump_intr
+@@
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #KEY_INTR_FLAG       @@ キー 割り込み
+@@        bne     jump_intr
+@@
+@@        add     r2, r2, #4
+@@        ands    r0, r1, #CASSETTE_INTR_FLAG  @@ カセット 割り込み
+@@jump_intr:
+@@        strh    r0, [r3, #2]            @@ IF クリア           11c
+@@        ldr     r1, =IntrTableBuf       @@ ユーザIRQ処理へジャンプ
+@@        add     r1, r1, r2
+@@        ldr     r0, [r1]
+@@        bx      r0
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+intr_main:
+        mov     r3, #REG_BASE           @@ IE/IF 読み込み
+        add     r3, r3, #OFFSET_REG_IE  @@ r3:  REG_IE
+        ldr     r12, [r3]               @@ r12: IF|IE
+
+        mrs     r0, spsr                @@ レジスタ退避（IRQモード）
+        stmfd   sp!, {r0, r3, r12, lr}  @@ {spsr, REG_IE, IF|IE, lr}
+
+        and     r1, r12, r12, lsr #16   @@ IE/IF チェック
+        mov     r2, #0
+	
+        ands    r0, r1, #SIO_INTR_FLAG | MULTI_SIO_TIMER_INTR_FLAG
+        bne     jump_intr                    @@ シリアル通信 割り込み
+        add     r2, r2, #4                   @@ or マルチプレイ通信用タイマー 割り込み
+
+        ands    r0, r1, #V_BLANK_INTR_FLAG   @@ Vブランク 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+
+        ands    r0, r1, #H_BLANK_INTR_FLAG   @@ Hブランク 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #V_COUNT_INTR_FLAG   @@ Vカウンタ 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #DMA0_INTR_FLAG      @@ DMA0 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #DMA1_INTR_FLAG      @@ DMA1 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #DMA2_INTR_FLAG      @@ DMA2 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #DMA3_INTR_FLAG      @@ DMA3 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #KEY_INTR_FLAG       @@ キー 割り込み
+        bne     jump_intr
+        add     r2, r2, #4
+        ands    r0, r1, #CASSETTE_INTR_FLAG  @@ カートリッジ 割り込み
+        mov     r3, #BG_PLTT
+        strh    r0, [r3, #0]
+loop:   bne     loop
+jump_intr:
+        strh    r0, [r3, #2]			@@ IF クリア         23c
+                                                @@ IE セット <- 多重割り込み選択
+        ldr     r1, =CASSETTE_INTR_FLAG | SIO_INTR_FLAG | MULTI_SIO_TIMER_INTR_FLAG
+        and     r1, r1, r12
+        strh    r1, [r3]
+        mrs     r3, cpsr                        @@ 多重割り込み 許可 ＆ システムモードへ切換
+        bic     r3, r3, #PSR_CPU_MODE_MASK | PSR_IRQ_DISABLE | PSR_FIQ_DISABLE
+        orr     r3, r3, #PSR_SYS_MODE
+        msr     cpsr, r3
+@@---------------------------------------------------------------------システムモード
+        ldr     r1, =IntrTableBuf               @@ ユーザIRQ処理へジャンプ
+        add     r1, r1, r2
+        ldr     r0, [r1]
+
+        stmfd   sp!, {lr}                       @@ レジスタ退避（システムモード）
+        adr     lr, intr_return                 @@ リターンアドレスのセット
+        bx      r0
+intr_return:
+        ldmfd   sp!, {lr}                       @@ レジスタ復帰（システムモード）
+
+        mrs     r3, cpsr                        @@ 多重割り込み 不許可 ＆ IRQモードへ切換
+        bic     r3, r3, #PSR_CPU_MODE_MASK | PSR_IRQ_DISABLE | PSR_FIQ_DISABLE
+        orr     r3, r3, #PSR_IRQ_MODE      | PSR_IRQ_DISABLE
+        msr     cpsr, r3
+@@---------------------------------------------------------------------IRQモード
+        ldmfd   sp!, {r0, r3, r12, lr}          @@ レジスタ復帰（IRQモード）
+        strh    r12, [r3]                       @@ {spsr, REG_IE, IF|IE, lr}
+        msr     spsr, r0
+        bx      lr                              @@ 割り込み前へ復帰
+
+    .END
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,254 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@ /*
+ *****************************************************************
+ *              
+ *     ゲームプレイヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __MGAME_PLANE_H_
+#define __MGAME_PLANE_H_
+
+#include "course_data.h"
+
+/*----------------- ラウンド数表示用構造体 ------------------*/
+typedef struct{
+    u8		roundID;		// オブジェデータインデックス
+    u8		roundNo[3];		// 桁ごとの数字
+    s32		BonusXpos[2];		// ボーナス文字Ｘ座標
+    u8		BonusMuKi;		// ボーナス文字の流れる向き
+    u8		BonusTM;		// ボーナス文字の表示タイマー
+    u8		BonusColTM;		// ボーナス文字のカラータイマー
+    u8		BonusColIDX;		// ボーナス文字のカラーインデックス
+} roundDT_c;
+
+#define	mGS_ROUNDID(p)		((p)->roundID)
+#define	mGS_ROUNDNO(p, i)	((p)->roundNo[(i)])
+#define	mGS_BONUSXPOS(p, i)	((p)->BonusXpos[(i)])
+#define	mGS_BONUSMUKI(p)	((p)->BonusMuKi)
+#define	mGS_BONUSTM(p)		((p)->BonusTM)
+#define	mGS_BONUSCOLTM(p)	((p)->BonusColTM)
+#define	mGS_BONUSCOLIDX(p)	((p)->BonusColIDX)
+
+/*------------------- スコア表示用構造体 --------------------*/
+typedef struct{
+    u16		CoinFlashTM;		// コインフラッシングタイマー
+    u8		CoinFlashID;		// コインフラッシングインデックス
+    s32		RoundXpos;		// ラウンド数表示Ｘ座標
+    s32		RoundYpos;		// ラウンド数表示Ｙ座標
+    u8		WinnerNo;		// 勝者ナンバー
+    s32		WinnerXpos;		// "WINNER"表示Ｘ座標
+    u16		FaceSize;		// 顔オブジェサイズ
+    u16		MoJiSize[7];		// "WINNER!!"文字拡縮率
+    u8		MoJiPltt;		// "WINNER!!"パレット
+    u16		WinTime;		// 勝ち文字アトリビュート変えタイマー
+    s32		SccvWait;		// 縦スクロールＷＡＩＴ
+    u8		FaceTM[4];		// 顔アニメーションタイマー
+    u8		FaceIDX[4];		// 顔のアニメーションインデックス
+    u8		WinIDX;			// 総合結果画面の勝ち負けインデックス
+    u8		FlashIDX;		// 勝者勝ちカウントフラッシュのアニメーションタイマー
+} scoreDT_c;
+
+#define	mGS_COINFLASHTM(p)	((p)->CoinFlashTM)
+#define	mGS_COINFLASHID(p)	((p)->CoinFlashID)
+#define	mGS_ROUNDXPOS(p)	((p)->RoundXpos)
+#define	mGS_ROUNDYPOS(p)	((p)->RoundYpos)
+#define	mGS_WINNERNO(p)		((p)->WinnerNo)
+#define	mGS_WINNERXPOS(p)	((p)->WinnerXpos)
+#define	mGS_FACESIZE(p)		((p)->FaceSize)
+#define	mGS_MOJISIZE(p, i)	((p)->MoJiSize[(i)])
+#define	mGS_MOJIPLTT(p)		((p)->MoJiPltt)
+#define	mGS_WINTIME(p)		((p)->WinTime)
+#define	mGS_SCCVWAIT(p)		((p)->SccvWait)
+#define	mGS_FACETM(p, i)	((p)->FaceTM[(i)])
+#define	mGS_FACEIDX(p, i)	((p)->FaceIDX[(i)])
+#define	mGS_WINIDX(p)		((p)->WinIDX)
+#define	mGS_FLASHIDX(p)		((p)->FlashIDX)
+
+/*-------------------- プレイ画面構造体 ---------------------*/
+typedef struct{
+    u8 *pBgBuf;			//ＢＧチェックバッファ@
+    u16		EnSetTimer;	//敵セットタイマー
+    EnTmTbl_c	NextEnemy_L;	//次の敵(左の土管)
+    EnTmTbl_c	NextEnemy_R;	//	(右の土管)
+    u8		NextSet_L;	//
+    u8		NextSet_R;	//
+    StageEnTbl_c *pEnSetTbl;	//敵セットタイムテーブル
+    u16		RFBallTimer;	//ファ@イアボール出現タイマー(赤)
+    u8		RFBallTarget;	//標的自機@ナンバー(赤)
+    u16		GFBallTimer;	//ファ@イアボール出現タイマー(緑)
+    u8		GFBallTarget;	//標的自機@ナンバー(緑)
+//#if ICICLEFG
+    u16		IcicleTimer[4];	//つらら出現タイマー
+//#endif
+    u8		IciclePlace;	//つらら出現場所
+    u8		FreezerFlag;	//フリーザ出現フラグ
+    u8		FreezeFloor;	//フリーザが凍らせた床
+} playDT_c;
+
+/*------------------------ 定数定義 -------------------------*/
+////////#define	PLAY_V_POS	0x038
+#define	PLAY_V_POS	0x150
+#define	BG0_ADDRESS	0x8000
+#define	BG1_ADDRESS	0x9000
+////////#define	BG2_ADDRESS	0xB000
+#define	BG2_ADDRESS	0xB800
+#define	BG3_ADDRESS	0xB000
+#define	BG_CHR_ADDRESS	0xE800			// キャラクタ転送元アドレス
+////////#define	BG0_ADDRESS	0x5000
+////////#define	BG1_ADDRESS	0x6000
+////////#define	BG2_ADDRESS	0x8000
+////////#define	BG3_ADDRESS	0xA000
+////////#define	BG_CHR_ADDRESS	0xC000			// キャラクタ転送元アドレス
+#define	MAX_COURSE	16			// 最大コース数
+#define	SCROLL_UP	4			// 縦スクロールスピード
+#define	BaseRoundXpos	0x00000058
+#define	BaseRoundYpos	0x00000040
+#define	RoundTime0	16
+#define	RoundTime1	(RoundTime0 + 8)
+#define	ROUND_DISP_TM	(60 * 2)		// ラウンドナンバー表示タイマー
+
+/*-------------------- モード定義 --------------------*/
+enum {
+    GMPL_INIT,		// イニシャル処理
+    GMPL_ROUND,		// ラウンド数表示処理
+    GMPL_MOVE,		// メイン処理
+    GMPL_TITL,		// ホワイトアウト処理
+    GMPL_NEXT,		// 次へのホワイトアウト処理
+    GMPL_WININIT,	// 勝者表示イニシャル
+    GMPL_WPND,		// 勝者プレイヤーナンバー表示ＷＡＩＴ
+    GMPL_VSCROLL,	// ゲーム画面の縦スクロール処理
+    GMPL_WPNO,		// 勝者プレイヤーナンバー退場
+    GMPL_WINFACE,	// 勝者顔表示
+    GMPL_WINMOJI,	// 勝者文字表示
+    GMPL_WINWAIT,	// "WINNER"表示ＷＡＩＴ
+    GMPL_SCORE,		// スコア処理
+    GMPL_HSCROLL,	// 画面横移動処理
+    GMPL_TTLSCRWT,	// 総合成績画面ＷＡＩＴ
+    GMPL_ROUNDOUT,		// ラウンドナンバー退出
+    GMPL_TOTALIN,		// ＴＯＴＡＬ登場
+    GMPL_WINCNTUP,		// 勝者の勝ち数カウントアップ
+    GMPL_TWAIT,		// 勝ち負け顔でウエイト
+    GMPL_TSCORE,		// 普通顔でウェイト(スタート待ち)
+    GMPL_TTLSCR,		// 総合成績画面処理(誰かが５勝したとき)
+    GMPL_WINLOSE,		// 何勝かした時の区切り
+
+    //--------------------------------------- クラシック用のゲームモード
+    GMPL_GMOVR = GMPL_WININIT,	// ゲームオーバー処理
+    GMPL_COSCL,		// コースクリア処理
+    GMBNS_CLINIT,	// ボーナス面クリアデモのイニシャル
+    GMBNS_DSIPCLS,	// ゲーム画面の消去
+    GMBNS_DISPSET,	// ボーナスクリア画面の登場
+    GMBNS_STARTWT,	// ボーナスクリア画面のカウント開始ＷＡＩＴ
+    GMBNS_COINCT1,	// ボーナスクリア画面のコインカウント開始１
+    GMBNS_COINWT1,	// ボーナスクリア画面のカウントＷＡＩＴ
+    GMBNS_COINCT2,	// ボーナスクリア画面のコインカウント開始２
+    GMBNS_COINWT2,	// ボーナスクリア画面のカウントＷＡＩＴ
+    GMBNS_COINCT3,	// ボーナスクリア画面のコインカウント開始３
+    GMBNS_COINWT3,	// ボーナスクリア画面のカウントＷＡＩＴ
+    GMBNS_COINCT4,	// ボーナスクリア画面のコインカウント開始４
+    GMBNS_COINWT4,	// ボーナスクリア画面のカウントＷＡＩＴ
+    GMBNS_PFCTWT,	// パーフェクトＷＡＩＴ
+    GMBNS_PFCTCHK,	// パーフェクトチェック
+    GMBNS_DISP,		// ボーナスクリア画面の表示
+};
+
+/*-------------------- EXTURN  -----------------------*/
+extern	const	u16	MoveYuKaCHRDT1[4];
+extern	const	u16	MoveYuKaCHRDT2[4];
+extern	u16	d_bros_BG_sclDT[256];
+extern	u16	d_Bros_obj_sclDT[256];
+extern	const	u8	WinTimeTBL[4];
+extern	const	u8	LoseTimeTBL[4];
+extern	u16	d_Bros_obj_winner_sclDT[256];
+
+extern	const	u16	BrosRedColorDT[4];
+
+extern	void	BrosPause(u16);
+extern	void	VramInit(courseDT *);
+extern	void	RoundDispSUB(u16, s32, s32);
+extern	void	WinnerCoinFlash(void);
+extern	void	WinnerCoinFlashReset(void);
+extern	void	WinCountFlashSet(s32 Xpos, s32 Ypos);
+extern	void	WinnerColorSet(void);
+extern	void	WinOAMSET(s32, s32);
+extern	void	WinLoseFace(s32, s32, u8, u8, u8);
+//extern	u16	YouWinLoseMoJiSet(s32, s32);
+extern	void	game_play_VscrollSUB(void);
+extern	void	WinnerPlayerNo(s32, s32, u8);
+extern	void	game_play_scoreInitSUB(void);
+extern	void	PushStartOAM(s32);
+extern	void	WinCountUP(void);
+extern	void	TotalScoreOAM(s32, u8);
+extern	void	GrayColorSet(void);
+extern	void	CoinWrite(u8 *);
+extern	void	game_OAMSET(void);
+
+/**************** バトル ****************/
+extern	void	BattleGame_roundDisp(void);
+extern	void	BattleGame_play_main(void);
+extern	void	BattleGame_play_winInit(void);
+extern	void	BattleGame_play_winPLNumbarDisp(void);
+extern	void	BattleGame_play_Vscroll(void);
+extern	void	BattleGame_play_winPLNumbarOut(void);
+extern	void	BattleGame_play_winFace(void);
+extern	void	BattleGame_play_winMoji(void);
+extern	void	BattleGame_play_winWait(void);
+extern	void	BattleGame_play_score(void);
+extern	void	BattleGame_play_PushStart(void);
+extern	void	BattleGame_play_Hscroll(void);
+extern	void	BattleGame_play_TotalScoreWait(void);
+extern	void	BattleGame_play_WinCountUP(void);
+extern	void	BattleGame_play_RoundOut(void);
+extern	void	BattleGame_play_TotalIn(void);
+extern	void    BattleGame_play_TotalWait(void);
+extern	void	BattleGame_play_TotalScore(void);
+extern	void	BattleGame_play_TotalScore_Win(void);
+extern	void    BattleGame_play_WinLose(void);
+extern	void	PlacardOamSet(playerDT_c *, s32);
+extern	void	PLNumPlacard(void);
+
+/***************** 共通 *****************/
+extern	void	BrosBGCoinAnime(void);
+extern	void	BrosBGWaterFace(void);
+extern  void	ScoreBoxDraw(u16 *Address, u8 x_size, u8 y_size, u8 color);
+extern	void	GetCoinBGWrite(void);
+extern	void	HajimekaraRamReset(void);
+#endif /* __MGAME_PLANE_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

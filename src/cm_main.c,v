@@ -1,0 +1,312 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*								*/
+/*		マルチブート子機@プログラム			*/
+/*		作成開始日 2000/10/10				*/
+/*								*/
+/****************************************************************/
+#include "m_main.h"
+#include "cm_game.h"
+
+
+/*-------------------- グローバル 変数  ----------------------------*/
+gameDT_c game;
+OamData  	OamBak[128];	// OAM バックアップ
+vBgCnt		BgControl[4];
+u8              Bgcalcbf[0x500];
+
+//char string[20];
+
+u16	 UsrSendBuf[MULTI_SIO_BLOCK_SIZE];    // 送信バッファ@
+u16	 UsrRecvBuf[4][MULTI_SIO_BLOCK_SIZE]; // 受信バッファ@
+u32     SioFlags;       // 通信状態
+u8	SioModeFlg;	// 通信モード
+u8	ConnectAGB;	// 接続台数(親機@を含む)----┐※どちらも電源投入時に
+u8	ConnectFlg;	// 接続フラグ--------------┘　@確認された接続状態
+			// 00000000
+			//     |||+--- 1P(親)
+			//     ||+---- 2P(子１)
+			//     |+----- 3P(子２)
+			//     +------ 4P(子３)
+u8	vs_mode;	// 対戦モード(0:ROM /1:MultiBoot)
+u8	play_mode;	// ゲームモード(0:classic / 1:battle)
+
+
+/*---------------------- サブルーチン ------------------------*/
+void KeyRead(void);
+
+static void child_boot(void);
+static void IntrDummy(void);
+
+extern void ChildMain(void);
+
+/*-------------------------------------------------------------*/
+/*     			割り込みテーブル	   	       */
+/*-------------------------------------------------------------*/
+void VBlankIntr(void);
+void HBlankIntr(void);
+void VCountIntr(void);
+const IntrFuncp IntrTable[14] = {
+    VBlankIntr,                 // Ｖブランク割り込み
+    MultiSioIntr,   // シリアル通信割り込み
+//    VBlankIntr,                 // Ｖブランク割り込み
+    MultiSioIntr,   // マルチプレイ通信用タイマー割り込み
+    IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+};
+
+IntrFuncp IntrTableBuf[14];
+
+/*==========================================================*/
+/*     			メインルーチン			    */
+/*==========================================================*/
+void ChildMain(void)
+{
+    u8	i;
+
+    child_boot();  /* ワークRAMクリアなど */
+    DmaCopy(3,IntrTable,IntrTableBuf,sizeof(IntrTableBuf),32);
+
+    cmGm_Main();	//ＧＡＭＥスタート
+}
+
+/*=============================================================*/
+/*		Ｖブランク割り込み処理	  		      */
+/*============================================================*/
+void VBlankIntr(void)
+{
+    /******** ＤＭＡストップ ********/
+//    DmaStop(0);
+
+    /******** サウンド ********/
+#if SOUND_ON
+#if SOUNDVSYNC_ON
+    if(!mGm_SOUNDFG){
+	m4aSoundVSync();
+//	m4aSoundMain();
+    }
+#endif
+    if(VSYNC_OFF){
+	m4aSoundVSyncOff();
+	VSYNC_OFF = OFF;
+    }
+#endif
+
+    /******** スクロール値セット ********/
+    scroll_set();
+
+    /******** 回転拡縮パラメータセット ********/
+    m_angpra();
+
+    /******* カラー特殊効果設定 ********/
+    if( mGm_BLDMOD ){
+	*(vu16 *)REG_BLDCNT = mGm_BLDMOD;
+	*(vu16 *)REG_BLDALPHA = mGm_COLEV;
+	*(vu16 *)REG_BLDY = mGm_COLY;
+    }
+
+    /******** Ｖブランク割込要求フラグのクリア＆セット ********/
+    *(vu16 *)REG_IF = game.IntrCheck = V_BLANK_INTR_FLAG;
+
+#if SOUND_ON
+//    m4aSoundMain();
+#endif
+}
+/*-------------------------------------------------------------*/
+/*     		キー読み込み	    			       */
+/*-------------------------------------------------------------*/
+void KeyRead(void)
+{
+	u16 ReadData = (*(vu16 *)REG_KEYINPUT ^ 0xffff);
+/* トリガ 入力 */
+	game.Trg  = ReadData & (ReadData ^ game.Cont);
+/* ベタ 入力   */
+	game.Cont = ReadData;
+}
+/*--------------------------------------------------------------*/
+/*		ダミー割り込み処理				*/
+/*--------------------------------------------------------------*/
+void IntrDummy(void)
+{
+}
+
+/****************************************************************/
+/*	子機@ブートプログラム					*/
+/****************************************************************/
+static void child_boot(void)
+{
+    u16		tmp;
+    u8		i;
+
+/*******	内部ワークＲＡＭクリア */
+    DmaClear(3, 0, CPU_WRAM, CPU_WRAM_SIZE - 0x400, 32);
+/*******	ＶＲＡＭクリア */
+//    DmaClear(3, 0, VRAM, VRAM_SIZE, 16);
+/*******	パレットＶＲＡＭクリア */
+    DmaClear(3, 0, PLTT, PLTT_SIZE, 16);
+    DmaClear(3, 0, VRAM + 0x2800, VRAM_SIZE - 0xA800, 16);
+/*******	ＳＩＯレジスタリセット */
+    RegisterRamReset(RESET_REG_SIO_FLAG);
+
+/*******	割り込みﾒｲﾝﾙｰﾁﾝ ｾｯﾄ******/
+    DmaCopy(3, intr_main, game.IntrMainBuf,
+	    sizeof(game.IntrMainBuf), 16);
+    IntrAddrSet(game.IntrMainBuf);
+////    *(vu32 *)INTR_VECTOR_BUF = (vu32)game.IntrMainBuf;
+
+/*******	OAMRAM ｸﾘｱ	******/
+	DmaClear(3, 0, OAM,  OAM_SIZE,		  32);
+
+/******* ＶＲＡＭＤ用フラグ初期化 *******/
+//    mGm_VRFLG = 0;
+
+/******* malloc の初期化 *************/
+	mGm_INITIAL(mGm_HEAP_SIZE);
+
+/******* ブロス用メモリ確保 *******/
+    mGm_BROS = mGm_MALLOC(sizeof(brosDT_c));
+
+/******* ブロス専用メモリ領域の初期化 ********/
+    mGm_QUAKEFG = 0;
+    mGm_COLFLG = 0;
+    mGm_PAUSEFG = 0;
+    mGm_SCORECALC = 0;
+    mGm_EnmyTest = 0;
+    mGm_ETC = 0;
+    mGm_ENMYCNT = 0;
+    mGm_COURSE = 0;
+    mGm_TIME = 0;
+    mGm_ROUND = 0;
+    mGm_PLTYPE = 0;
+    mGm_AGBNO = 0;
+    mGm_OBJchrFG = 0;
+    mGm_WINCNT[0] = 0;
+    mGm_WINCNT[1] = 0;
+    mGm_WINCNT[2] = 0;
+    mGm_WINCNT[3] = 0;
+    mGm_COINFG = mGm_COINIDX = mGm_COINTM = 0;
+    mGm_WATERFACEIDX = mGm_WATERFACETM = 0;
+    mGm_BNSCOIN = 0;
+    mGm_EnEn_hitchk = NULL;
+    mGm_bgbuf_check = NULL;
+    mGm_PLEnemyHitCheck = NULL;
+    mGm_OamOtherSet = NULL;
+    mGm_player_OamSet = NULL;
+    mGm_ROUND_DISP = NULL;
+    mGm_SCORE_DISP = NULL;
+
+/******* 各モードフラグのクリア	******/
+    mGm_SLMODE = mGm_GMMODE = 0;
+    mGm_SOUNDFG = 0;
+    SioFlags = 0;
+    SioModeFlg = 0;
+    ConnectAGB = *(u8 *)0x020000D0 & 0x0F;//(接続台数２～４)
+    mGm_PLTYPE = ConnectAGB - 1;
+    vs_mode = VS_MULTI;
+    play_mode = PLAY_BATL;
+    tmp = *(u16 *)0x020000D2;
+    for(i=0; i<ConnectAGB; i++){
+	mGm_HANDICAP(i) = (tmp >> (9 - i * 3)) & 0x07;
+    }
+    mGm_DIFFICULTY = (tmp & 0x3000) >> 12;
+    mGm_FIREBALLFLAG = (tmp & 0x4000) >> 14;
+
+#if DEBUG
+/*******	デバックプリント ｸﾘｱ	******/
+    AGBPrintInit();
+#endif
+
+/*******	サウンドイニシャル	******/
+#if SOUND_ON
+	m4aSoundInit();
+#if SOUNDVSYNC_ON
+#else
+	*(vu32 *)REG_TM0CNT &= ~TMR_ENABLE;	//タイマー０ストップ
+#endif
+#endif
+}
+
+/****************************************************************/
+/*		関数名	:ObjVanishAll				*/
+/*		内容	:ＯＢＪを全て非表示にする		*/
+/*		入力	:なし					*/
+/*		備考	:なし					*/
+/****************************************************************/
+static OamData Oamclr = {
+    160,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+};
+
+void ObjVanishAll(void)
+{
+    int		i;
+#if 1
+    for (i=0; i<128; i+=2) {
+	OamBak[i] = Oamclr;
+	OamBak[i+1] = Oamclr;
+    }
+#else
+//    u64		*obj = (u64 *)&OamBak[0];
+//#if 1
+//    for(i=0; i<32; i++){
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//    }
+//#else
+//    u64		*end = (u64 *)&OamBak[128];
+//
+//    while(obj<end){
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//    }
+//#endif
+
+    CpuArrayClear(0x000000A0, OamBak, 32);
+
+#endif
+//    mGm_OAMIDX = 0;
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

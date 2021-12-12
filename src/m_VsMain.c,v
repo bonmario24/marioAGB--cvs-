@@ -1,0 +1,230 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*								*/
+/*		ＲＯＭ対戦メインプログラム			*/
+/*		作成開始日 2000/12/20				*/
+/*								*/
+/****************************************************************/
+#include "m_main.h"
+#include "cm_game.h"
+#include "m_classic_sub.h"
+#include "m_score.h"
+#include "m_VsGame.h"
+
+
+/*-------------------- グローバル 変数  ----------------------------*/
+u16	 UsrSendBuf[MULTI_SIO_BLOCK_SIZE];    // 送信バッファ@
+u16	 UsrRecvBuf[4][MULTI_SIO_BLOCK_SIZE]; // 受信バッファ@
+u32     SioFlags;       // 通信状態
+u8	SioModeFlg;	// 通信モード
+u8	ConnectAGB;	// 接続台数(親機@を含む)----┐※どちらも電源投入時に
+u8	ConnectFlg;	// 接続フラグ--------------┘　@確認された接続状態
+			// 00000000
+			//     |||+--- 1P(親)
+			//     ||+---- 2P(子１)
+			//     |+----- 3P(子２)
+			//     +------ 4P(子３)
+u8	vs_mode;	// 対戦モード(0:ROM /1:MultiBoot)
+u8	play_mode;	// ゲームモード(0:classic / 1:battle)
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void IntrDummy(void);
+
+/*-------------------------------------------------------------*/
+/*     			割り込みテーブル	   	       */
+/*-------------------------------------------------------------*/
+extern void intr_main2(void);
+void VBlankIntr2(void);
+//extern	IntrFuncp IntrTable[14];
+const IntrFuncp IntrTable2[14] = {
+    VBlankIntr2,    // Ｖブランク割り込み
+    MultiSioIntr,   // シリアル通信割り込み
+    MultiSioIntr,   // マルチプレイ通信用タイマー割り込み
+    IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+    IntrDummy,	IntrDummy,
+};
+extern IntrFuncp IntrTableBuf[14];
+
+extern	void ChildMain(void);
+
+/*=============================================================*/
+/*		Ｖブランク割り込み処理	  		      */
+/*============================================================*/
+void VBlankIntr2(void)
+{
+    /******** サウンド ********/
+#if SOUND_ON
+#if SOUNDVSYNC_ON
+    if(!mGm_SOUNDFG){
+	m4aSoundVSync();
+    }
+#endif
+    if(VSYNC_OFF){
+	m4aSoundVSyncOff();
+	VSYNC_OFF = OFF;
+    }
+#endif
+
+    /******** スクロール値セット ********/
+    scroll_set();
+
+    /******** 回転拡縮パラメータセット ********/
+    m_angpra();
+
+    /******* カラー特殊効果設定 ********/
+    if( mGm_BLDMOD ){
+	*(vu16 *)REG_BLDCNT = mGm_BLDMOD;
+	*(vu16 *)REG_BLDALPHA = mGm_COLEV;
+	*(vu16 *)REG_BLDY = mGm_COLY;
+    }
+
+    /******** Ｖブランク割込要求フラグのクリア＆セット ********/
+    *(vu16 *)REG_IF = game.IntrCheck = V_BLANK_INTR_FLAG;
+
+#if SOUND_ON
+//    m4aSoundMain();
+#endif
+}
+/*--------------------------------------------------------------*/
+/*		ダミー割り込み処理				*/
+/*--------------------------------------------------------------*/
+void IntrDummy(void)
+{
+}
+
+/****************************************************************/
+/*	ブートプログラム					*/
+/****************************************************************/
+static void child_boot(void)
+{
+    u32		vram;
+    u16		tmp;
+    u8		i;
+
+/*******	内部ワークＲＡＭクリア */
+    DmaClear(3, 0, CPU_WRAM, CPU_WRAM_SIZE - 0x400, 32);
+/*******	ＶＲＡＭクリア */
+    DmaClear(3, 0, VRAM, VRAM_SIZE, 16);
+/*******	パレットＶＲＡＭクリア */
+    DmaClear(3, 0, PLTT, PLTT_SIZE, 16);
+/*******	ＳＩＯレジスタリセット */
+    RegisterRamReset(RESET_REG_SIO_FLAG);
+
+/******* ウエイトステート設定＆プリフェッチＯＮ *****/
+    *(vu16 *)REG_WAITCNT = CST_ROM0_1ST_3WAIT |
+	CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE;
+
+/*******	割り込みﾒｲﾝﾙｰﾁﾝ ｾｯﾄ******/
+//    DmaCopy(3, intr_main, game.IntrMainBuf,sizeof(game.IntrMainBuf), 16);
+    DmaCopy(3, intr_main2, game.IntrMainBuf,sizeof(game.IntrMainBuf), 16);
+    IntrAddrSet(game.IntrMainBuf);
+
+/*******	OAMRAM ｸﾘｱ	******/
+	DmaClear(3, 0, OAM,  OAM_SIZE,		  32);
+
+/******* malloc の初期化 *************/
+	mGm_INITIAL(mGm_HEAP_SIZE);
+
+	BrosMemoryInit();
+
+	ScoreInit();
+
+/******* 各モードフラグのクリア	******/
+    VS_flag = ON;
+    mGm_SLMODE = mGm_GMMODE = 0;
+    mGm_SOUNDFG = 0;
+    SioFlags = 0;
+    SioModeFlg = 0;
+    ConnectAGB = *(u8 *)0x020000D0 & 0x0F;//(接続台数２～４)
+    mGm_PLTYPE = ConnectAGB - 1;
+    vs_mode = VS_ROM;
+//    play_mode = *(u8 *)0x020000D2;
+    play_mode = (*(u8 *)0x020000D0 & 0x20) >> 5;
+    if(play_mode == PLAY_BATL){
+	vram = *(u32 *)0x020000DC;
+	CpuCopy(vram, BG_VRAM, 0x2800, 16);
+	vram = *(u32 *)0x020000D4;
+	CpuCopy(vram, OBJ_MODE0_VRAM, 0xD00, 16);
+	vram = *(u32 *)0x020000D8;
+	CpuCopy(vram, OBJ_MODE0_VRAM+0xD00, 0x7300, 16);
+	tmp = *(u16 *)0x020000D2;
+	for(i=0; i<ConnectAGB; i++){
+	    mGm_HANDICAP(i) = (tmp >> (9 - i * 3)) & 0x07;
+	}
+	mGm_DIFFICULTY = (tmp & 0x3000) >> 12;
+	mGm_FIREBALLFLAG = (tmp & 0x4000) >> 14;
+    }
+#if DEBUG
+/*******	デバックプリント ｸﾘｱ	******/
+    AGBPrintInit();
+#endif
+
+/*******	サウンドイニシャル	******/
+#if SOUND_ON
+	m4aSoundInit();
+#if SOUNDVSYNC_ON
+#else
+	*(vu32 *)REG_TM0CNT &= ~TMR_ENABLE;	//タイマー０ストップ
+#endif
+#endif
+}
+
+/*==========================================================*/
+/*     			メインルーチン			    */
+/*==========================================================*/
+void ChildMain(void)
+{
+    child_boot();  /* ワークRAMクリアなど */
+//    DmaCopy(3,IntrTable,IntrTableBuf,sizeof(IntrTableBuf),32);
+    DmaCopy(3,IntrTable2,IntrTableBuf,sizeof(IntrTableBuf),32);
+
+    if(play_mode == PLAY_BATL){
+	cmGm_Main();		//Battleスタート
+    }else{
+	VsClassicGame();	//Classicスタート
+    }
+}
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

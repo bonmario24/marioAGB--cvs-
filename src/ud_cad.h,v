@@ -1,0 +1,303 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		ヘッダーファ@イル				*/
+/****************************************************************/
+#ifndef __UD_CAD_H_
+#define __UD_CAD_H_
+
+/*------------- EXTERN -----------------------------------------*/
+/*------------- s2-y-1f_sch.c -------------*/
+//extern u32 sm_2_y_1f_schDT[8*1024];
+
+/*------------- title_scl.c -------------*/
+extern u16 title_sclDT[256];
+
+/*------------- m_game_base_chr.c -------------*/
+extern u32 base_char1DT[8*512];
+extern u32 base_char2DT[8*64];
+extern u32 base_char3DT[8*192];
+extern u32 base_chenge_chrDT[8*768];
+extern u16 base_bg_char_table1[7];
+extern u16 base_obj_char_table11[7];
+extern u16 base_obj_char_table12[7];
+extern u16 base_obj_char_table13[7];
+extern u32 obj_jyochu_schDT[8*320];
+extern u32 obj_jyochu_sch1DT[8*64];
+extern u32 obj_dat1DT[8*256];
+extern u32 obj_dat2DT[8*256];
+extern u32 obj_dat3DT[8*512];
+extern u32 obj_tensoDT[8*96];
+extern u16 bg_2_table1[20*11];
+extern u16 bg_2_table2[20*11];
+extern u16 bg_2_table3[20*11];
+//extern u16 tubo_bg_2_table1[20];
+//extern u16 tubo_bg_2_table2[20];
+//extern u16 tubo_bg_2_table3[20];
+extern u32 bg_2_0_schDT[8*192];
+extern u32 bg_2_1_schDT[8*640];
+extern u32 bg_2_2_schDT[8*640];
+extern u32 bg_2_3_schDT[8*640];
+extern u32 d_bg1_200_schDT[8*128];
+extern u32 d_bg1_240_schDT[8*64];
+extern u32 d_baikaku_schDT[8*384];
+
+/*------------- d_player_sch.c -------------*/
+extern u32 d_player_schDT[8*768];	// プレイヤーキャラ
+
+/*------------- a_base_col.c -------------*/
+extern u16 *bg_col_table[7];
+extern u16 m_obj_base[];
+extern u16 *obj_col_table[7];
+extern u16 m_boss_col[];
+extern u16 m_chasa_col[];
+extern u16 chasa_table[];
+extern u16 *player_col_table[];
+extern u16 W22CGDT[];
+extern u16 W63CGDT[];
+extern u16 W23CGDT[];
+extern u16 TNCGDT[];
+extern u16 STCGDT[];
+extern u16 ICCGDT[];
+extern u16 TOCGDT06[];
+extern u16 TOCGDT07[];
+extern u16 TOCGDT0C[];
+extern u16 *gradation_table[4];
+extern u16 *KSRTBL[];
+extern u16 **player_pjumpcol_table[];
+extern u16 MAMUCGDT[];
+extern u16 d_debu_chasalin_sclDT[];
+extern u16 ud_usa_score_sclDT[32];
+extern u16 ud_yoshi_tamago_sclDT[96];
+
+/*------------- d_hajimari_sch.c -------------*/
+extern u32 d_hajimari_schDT[8*512];
+
+/*------------- d_player_sel_scl.c -------------*/
+extern u16 d_player_sel_sclDT[256];
+
+/*------------- 元d_player_sel_ssc.c関係 -------------*/
+extern u16 d_player_sel_BG0_sscDTCP[];
+extern u16 d_player_sel_BG1_sscDTCP[];
+extern u16 d_player_sel_BG2_sscDTCP[];
+extern u16 d_player_sel_BG3_sscDTCP[];
+extern u16 d_hajimari_main_sscDTCP[];
+extern u16 d_hajimari_win2_sscDTCP[];
+extern u16 d_hajimari_win_sscDTCP[];
+extern u16 d_hajimari_main_yossy_sscDTCP[];
+extern u16 d_hajimari_win_yossy_sscDTCP[];
+extern u16 d_redcoin_normal_sscDTCP[];
+extern u16 d_redcoin_yossy_sscDTCP[];
+extern u16 d_course_sel_sscDTCP[];
+
+/*------------- d_hajimari_obj_sch.c -------------*/
+extern u32 d_hajimari_obj_schDT[8*7];
+
+/*------------- d_hajimari_tenso_sch.c -------------*/
+extern u32 d_hajimari_tenso_schDT[8*128];
+
+/*------------- d_bg3_sch.c -------------*/
+extern u32 d_bg3_schDT[8*128];
+
+/*------------- d_slot_ssc.c -------------*/
+extern u16 d_slot_sscDTCP[];
+extern u16 d_slot_effect_sscDTCP[];
+
+/*------------- d_slot_BG1_ssc.c -------------*/
+extern u16 d_slot_BG1_sscDTCP[];
+
+/*------------- d_slot_scl.c -------------*/
+extern u16 d_leach_sclDT[256];
+extern u16 d_atari_sclDT[256];
+extern u16 d_coinup_sclDT[64];
+
+/*------------- d_slot_obj_sch.c -------------*/
+extern u16 d_slot_obj_schDT[8*160];
+
+/*------------- d_slot_obj_scl.c -------------*/
+extern u16 d_slot_obj_sclDT[256];
+
+/*------------- d_game_over_ssc.c -------------*/
+extern u16 d_game_over_sscDT[32*32/1];
+
+///*------------- d_main_title_ssc.c -------------*/
+//extern u16 d_main_title_sscDT[32*32/1];
+
+///*-------------	ud_warp_sch.c -------------*/
+//extern u32 d_warp_schDT[8*64];
+
+/*-------------	ud_warp_ssc.c -------------*/
+extern u16 d_warp_sscDT[32*32/1];
+
+/*------------- ud_pause_sch.c -------------*/
+extern u32 ud_pause_schDT[8*128];
+
+/*------------- ud_player_selobj_sch.c -------------*/
+extern u32 d_player_selobj_schDT[8*576];
+
+/*------------- ud_pl_selobj_scl.c -------------*/
+extern u16 d_player_selobj_sclDT[256];
+
+/*------------- ud_ending_sch.c -------------*/
+extern u32 ud_ending_schDT[8*64];
+
+/*------------- ud_ending_ssc.c -------------*/
+extern u16 ud_ending0_1_sscDT[32*32/1];
+extern u16 ud_ending0_2_sscDT[32*32/1];
+extern u16 ud_ending0_3_sscDT[32*32/1];
+extern u16 ud_ending1_1_sscDT[32*32/1];
+extern u16 ud_ending1_2_sscDT[32*32/1];
+extern u16 ud_ending1_3_sscDT[32*32/1];
+extern u16 ud_ending2_1_sscDT[32*32/1];
+//extern u16 ud_ending2_2_sscDT[32*32/1];
+
+/*------------- ud_ending_scl.c -------------*/
+extern u16 ud_ending_sclDT[16*3];
+
+/*------------- ud_ending1_sch.c -------------*/
+extern u32 ud_ending1_schDT[8*96];
+
+/*------------- ud_ending1_obj_sch.c -------------*/
+extern u32 ud_ending1_obj_schDT[8*256];
+
+/*------------- ud_ending1_scl.c -------------*/
+extern u16 ud_ending1_bg_sclDT[256];
+extern u16 ud_ending1_obj_sclDT[256];
+
+/*------------- ud_ending2_scl.c -------------*/
+extern u16 ud_ending2_bg_sclDT[256];
+extern u16 ud_ending2_obj_sclDT[256];
+
+/*------------- ud_ending2_bg_sch.c -------------*/
+extern u32 ud_ending2_bg_schDT[8*448];
+
+/*------------- ud_ending2_bg_base_sch.c -------------*/
+extern u32 ud_ending2_bg_base_schDT[8*192];
+
+/*------------- ud_ending2_obj_sch.c -------------*/
+extern u32 ud_ending2_obj_schDT[8*576];
+
+/*------------- ud_yoshi_scl.c -----------------*/
+extern u16 d_yoshi_sclDT[256];
+
+/*------------- ud_yoshi_BG_sch.c -----------------*/
+extern u32 d_yoshi_BG_schDT[8*176];
+
+/*------------- ud_yoshi_BG2_sch.c -----------------*/
+extern u32 d_yoshi_BG2_schDT[8*16];
+
+/*------------- ud_yoshi_obj_sch.c -----------------*/
+extern u32 d_yoshi_obj_schDT[8*480];
+
+/*------------- ud_yoshi_BG0_ssc.c -----------------*/
+extern u16 d_yoshi_BG0_sscDTCP[];
+
+/*------------- ud_yoshi_BG1_ssc.c -----------------*/
+extern u16 d_yoshi_BG1_sscDTCP[];
+extern u16 d_yoshi_BG1_2_sscDTCP[];
+
+/*------------- ud_yoshi_BG2_ssc.c -----------------*/
+extern u16 d_yoshi_BG2_sscDT[32*30/1];
+
+/*------------- ud_gondola_BG_sch.c -------------*/
+extern u32 ud_gondola_BG_schDT[8*320];
+
+/*------------- ud_gondola_BG_scl.c -------------*/
+extern u16 ud_gondola_BG_sclDT[64];
+
+/*------------- ud_gondola_BG2_ssc.c -------------*/
+extern u16 ud_gondola_BG2_sscDT[160];
+
+/*------------- ud_gondola_BG3_ssc.c -------------*/
+extern u16 ud_gondola_BG3_sscDT[32*32/1];
+
+/*------------- ud_gondola_OBJ_scl.c -------------*/
+extern u16 ud_gondola_OBJ_sclDT[144];
+
+/*------------- ud_gondola_obj2_sch.c -------------*/
+extern u32 ud_gondola_obj2_schDT[8*16];
+
+/*------------- ud_slot_BG2_ssc.c -------------*/
+extern u16 ud_slot_BG2_sscDT[32*32/1];
+
+/*------------- ud_tubo_BG_scl.c -------------*/
+extern u16 ud_tubo_BG_sclDT[48];
+
+/*------------- ud_bighakkun_sch.c -------------*/
+extern u32 ud_bighakkun_schDT[8*32];
+
+/*------------- ud_courseclear_sch.c -------------*/
+extern u32 ud_courseclear_schDT[8*96];
+
+/*------------- ud_back_up_sch.c -------------*/
+extern u32 ud_back_up_schDT[8*48];
+
+/*------------- ud_back_up_scl.c -------------*/
+extern u16 ud_back_up_sclDT[256];
+
+/*------------- ud_waku_base_sch.c -------------*/
+extern u32 ud_waku_base_schDT[8*240];
+
+/*------------- ud_waku_tenso_sch.c -------------*/
+extern u32 ud_waku_tenso_schDT[8*272];
+
+
+#endif /* __UD_CAD_H_ */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d159 1
+a159 1
+extern u32 ud_ending1_obj_schDT[8*192];
+d176 1
+a176 1
+extern u32 ud_ending2_obj_schDT[8*480];
+d240 1
+a240 1
+extern u32 ud_waku_tenso_schDT[8*192];
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

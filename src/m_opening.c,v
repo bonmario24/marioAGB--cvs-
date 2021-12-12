@@ -1,0 +1,2624 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*--------------------------------------------------------------*/
+/*		オープニング用ファ@イル				*/
+/*--------------------------------------------------------------*/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "m_title_sub.h"
+#include "ua_save.h"
+#include "m_opening.h"
+#include "ua_common.h"
+
+#define CLOUD_SPEED	(-0x2000)
+#define CURSOL1P	0x04
+#define	CURSOL2P	0x14
+
+// キャラクターの向き
+enum {
+    LEFT,
+    RIGHT,
+};
+// マリオモード定義
+enum {
+    WAIT_m,
+    DASH_m,
+    JUMP_m,
+    WALK_m,
+    PULL_m,
+    WAIT2_m,
+};
+
+// ピーチモード定義
+enum {
+    WAIT_p,
+    WALK_p,
+    WALK2_p,
+    PULL_p,
+    WAIT2_p,
+};
+
+// キノピオモード定義
+enum {
+    WAIT_k,
+    WALK_k,
+    WALK2_k,
+    PULL_k,
+    WAIT2_k,
+};
+
+// ルイージモード定義
+enum {
+    WAIT_l,
+    DASH_l,
+    WALK_l,
+    PULL_l,
+    WAIT2_l,
+};
+
+Opening_obj_c Op_obj_clr = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0x100, 0x100, 0, 0, 0, 0
+};
+Opening_eff_c Op_eff_clr = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+static s32 EXCHRJMPSPD[4] = {
+    -0x30000, -0x2C000, -0x2B000, -0x2C000
+};
+static s32 KUSAPOS[4] = {
+    0x1880000, 0x1680000, 0x1480000, 0x1A80000
+};
+
+static s32 StoneSpd_Tbl[0x10] = {
+    0x18000, 0x24000, -0x18000, -0x24000,	// x
+    0x12000, 0x28000, -0x12000, -0x28000,	// x
+    -0x30000, -0x38000, -0x40000, -0x28000	// y
+    -0x2C000, -0x34000, -0x3C000, -0x24000	// y
+};
+
+static u16 marioDT[] = {
+    0x2,
+    0x0000, 0xFFFF, 0x0000, 0x0220,	// 00
+    0x0000, 0x000F, 0x0002, 0x0220,
+    0x0000, 0x0000, 0x0000, 0x0220,	// 01
+    0x0000, 0x0010, 0x0004, 0x0220,
+    0x0000, 0x0000, 0x0000, 0x0220,	// 02
+    0x0000, 0x0010, 0x0006, 0x0220,
+    0x0000, 0x0000, 0x0008, 0x0240,	// 03
+    0x0000, 0x0010, 0x000A, 0x0240,
+    0x0000, 0x0000, 0x000C, 0x0220,	// 04
+    0x0000, 0x0010, 0x000E, 0x0220,
+    0x0000, 0x0000, 0x0010, 0x0220,	// 05
+    0x0000, 0x0010, 0x0012, 0x0220,
+    0x0000, 0x0000, 0x0000, 0x0220,	// 06
+    0x0000, 0x0010, 0x0014, 0x0220,
+    0x0000, 0x0000, 0x0016, 0x0220,	// 07
+    0x0000, 0x0010, 0x0018, 0x0220,
+    0x0000, 0x0000, 0x00C8, 0x0220,	// 08
+    0x0000, 0x0010, 0x00CA, 0x0220,
+    0x0000, 0x0000, 0x0108, 0x0220,	// 09	Jump
+    0x0000, 0x0010, 0x010A, 0x0220,
+    0x0000, 0x0000, 0x0000, 0x0220,	// 0A	Jump2
+    0x0000, 0x0010, 0x0110, 0x0220,
+};
+
+static u16 luigiDT[] = {
+    0x2,
+    0x0000, 0xFFFF, 0x001A, 0x0223,	// 00
+    0x0000, 0x000F, 0x001C, 0x0223,
+    0x0000, 0x0000, 0x001A, 0x0223,	// 01
+    0x0000, 0x0010, 0x001E, 0x0223,
+    0x0000, 0x0000, 0x001A, 0x0223,	// 02
+    0x0000, 0x0010, 0x0040, 0x0223,
+    0x0000, 0x0000, 0x0042, 0x0243,	// 03
+    0x0000, 0x0010, 0x0044, 0x0243,
+    0x0000, 0x0000, 0x0046, 0x0223,	// 04
+    0x0000, 0x0010, 0x0048, 0x0223,
+    0x0000, 0x0000, 0x004A, 0x0223,	// 05
+    0x0000, 0x0010, 0x004C, 0x0223,
+    0x0000, 0x0000, 0x001A, 0x0223,	// 06
+    0x0000, 0x0010, 0x004E, 0x0223,
+    0x0000, 0x0000, 0x0050, 0x0223,	// 07
+    0x0000, 0x0010, 0x0052, 0x0223,
+    0x0000, 0x0000, 0x010C, 0x0223,	// 08
+    0x0000, 0x0010, 0x010E, 0x0223,
+};
+
+static u16 peachDT[] = {
+    0x2,
+    0x0000, 0x0000, 0x0054, 0x0221,	// 00
+    0x0000, 0x0010, 0x0056, 0x0221,
+    0x0000, 0x0000, 0x0054, 0x0221,	// 01
+    0x0000, 0x0010, 0x0058, 0x0221,
+    0x0000, 0x0000, 0x0054, 0x0221,	// 02
+    0x0000, 0x0010, 0x005A, 0x0221,
+    0x0000, 0x0000, 0x005C, 0x0241,	// 03
+    0x0000, 0x0010, 0x005E, 0x0241,
+    0x0000, 0x0000, 0x0080, 0x0221,	// 04
+    0x0000, 0x0010, 0x0082, 0x0221,
+    0x0000, 0x0000, 0x0084, 0x0221,	// 05
+    0x0000, 0x0010, 0x0086, 0x0221,
+    0x0000, 0x0000, 0x0054, 0x0221,	// 06
+    0x0000, 0x0010, 0x0088, 0x0221,
+    0x0000, 0x0000, 0x008A, 0x0221,	// 07
+    0x0000, 0x0010, 0x008C, 0x0221,
+    0x0000, 0x0000, 0x0054, 0x0221,	// 08	Jump
+    0x0000, 0x0010, 0x0114, 0x0221,
+};
+
+static u16 kinopioDT[] = {
+    0x2,
+    0x0000, 0xFFFF, 0x008E, 0x0222,	// 00
+    0x0000, 0x000F, 0x0090, 0x0222,
+    0x0000, 0x0000, 0x008E, 0x0222,	// 01
+    0x0000, 0x0010, 0x0092, 0x0222,
+    0x0000, 0x0000, 0x008E, 0x0222,	// 02
+    0x0000, 0x0010, 0x0094, 0x0222,
+    0x0000, 0x0000, 0x0096, 0x0242,	// 03
+    0x0000, 0x0010, 0x0098, 0x0242,
+    0x0000, 0x0000, 0x009A, 0x0222,	// 04
+    0x0000, 0x0010, 0x009C, 0x0222,
+    0x0000, 0x0000, 0x009E, 0x0222,	// 05
+    0x0000, 0x0010, 0x00C0, 0x0222,
+    0x0000, 0x0000, 0x008E, 0x0222,	// 06
+    0x0000, 0x0010, 0x00C2, 0x0222,
+    0x0000, 0x0000, 0x00C4, 0x0222,	// 07
+    0x0000, 0x0010, 0x00C6, 0x0222,
+    0x0000, 0x0000, 0x008E, 0x0222,	// 08	Jump
+    0x0000, 0x0010, 0x0116, 0x0222,
+};
+
+static u16 yossyDT[] = {
+    0x2,
+    0x0000, 0x0000, 0x0140, 0x4427,	// 00
+    0x0000, 0x0010, 0x0144, 0x4427,
+    0x0000, 0x0000, 0x0148, 0x4427,	// 01
+    0x0000, 0x0010, 0x014C, 0x4427,
+    0x0000, 0x0000, 0x0150, 0x4427,	// 02
+    0x0000, 0x0010, 0x0154, 0x4427,
+    0x0000, 0x0000, 0x0158, 0x4427,	// 03
+    0x0000, 0x0010, 0x0144, 0x4427,
+    0x0000, 0x0000, 0x015C, 0x4427,	// 04
+    0x0000, 0x0010, 0x0144, 0x4427,
+};
+
+static u16 eggDT[] = {
+    0x1,
+    0x0000, 0x0000, 0x00DC, 0x0426,	// 00
+};
+
+static u16 mode_selectDT[] = {
+    0x00A,
+    0x0000, 0x0000, 0x0180, 0x4409,	// 00 一人で遊ぶ
+    0x0020, 0x0000, 0x0184, 0x4409,
+    0x0040, 0x0000, 0x0188, 0x0209,
+    0x0010, 0x0010, 0x018A, 0x4009,
+    0x0038, 0x0010, 0x01AA, 0x4009,
+/*
+    0x0000, 0x0010, 0x018C, 0x4409,	// 二人で遊ぶ
+    0x0020, 0x0010, 0x0190, 0x4409,
+    0x0040, 0x0018, 0x01B4, 0x0009,
+    0x0028, 0x0020, 0x0195, 0x4009,
+    0x0018, 0x0020, 0x01B5, 0x0009,
+*/
+    0x0000, 0x0010, 0x018C, 0x4409,	// modified by yuting
+    0x0020, 0x0010, 0x0190, 0x4409,
+    0x0040, 0x0010, 0x0194, 0x4409,
+    0x0028, 0x0020, 0x0195, 0x4009,
+    0x0018, 0x0020, 0x01B5, 0x0009,
+};
+
+static u16 sel_cursolDT[] = {
+    0x07,
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 00
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x0180, 0x4405,
+    0x0020, 0x0000, 0x0184, 0x4405,
+    0x0040, 0x0000, 0x0188, 0x0205,
+    0x0010, 0x0010, 0x018A, 0x4005,
+    0x0038, 0x0010, 0x01AA, 0x4005,
+
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 01
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x0180, 0x4404,
+    0x0020, 0x0000, 0x0184, 0x4404,
+    0x0040, 0x0000, 0x0188, 0x0204,
+    0x0010, 0x0010, 0x018A, 0x4004,
+    0x0038, 0x0010, 0x01AA, 0x4004,
+
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 02
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x0180, 0x4400,
+    0x0020, 0x0000, 0x0184, 0x4400,
+    0x0040, 0x0000, 0x0188, 0x0200,
+    0x0010, 0x0010, 0x018A, 0x4000,
+    0x0038, 0x0010, 0x01AA, 0x4000,
+
+//  modified by yu ting
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 00
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x018C, 0x4405,
+    0x0020, 0x0000, 0x0190, 0x4405,
+    0x0040, 0x0000, 0x0194, 0x4405,
+    0x0028, 0x0010, 0x0195, 0x4005,
+    0x0018, 0x0010, 0x01B5, 0x0005,
+
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 01
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x018C, 0x4404,
+    0x0020, 0x0000, 0x0190, 0x4404,
+    0x0040, 0x0000, 0x0194, 0x4404,
+    0x0028, 0x0010, 0x0195, 0x4004,
+    0x0018, 0x0010, 0x01B5, 0x0004,
+
+    0xFFF6, 0x0006, 0x00D7, 0x0005,	// 02
+    0x0052, 0x0006, 0x00D7, 0x0005,
+    0x0000, 0x0000, 0x018C, 0x4400,
+    0x0020, 0x0000, 0x0190, 0x4400,
+    0x0040, 0x0000, 0x0194, 0x4400,
+    0x0028, 0x0010, 0x0195, 0x4000,
+    0x0018, 0x0010, 0x01B5, 0x0000,
+};
+
+static u16 cloud1DT[] = {
+    0x2,
+    0x0000, 0x0000, 0x00CC, 0x0264,	// 00
+    0x0010, 0x0000, 0x00CC, 0x02E4,
+};
+
+static u16 cloud2DT[] = {
+    0x2,
+    0x0000, 0x0000, 0x00CE, 0x0264,	// 00
+    0x0010, 0x0000, 0x00CE, 0x02E4,
+};
+
+static u16 cloud3DT[] = {
+    0x2,
+    0x0000, 0x0000, 0x00D0, 0x8064,	// 00
+    0x0008, 0x0000, 0x00D0, 0x80E4,
+};
+
+static u16 c_markDT[] = {		// modified by yu ting
+    0x14,
+    0x0000, 0x0000, 0x00D1, 0x0205,	// 00
+    0x0010, 0x0008, 0x0101, 0x0005,
+    0x0018, 0x0008, 0x0105, 0x0005,
+    0x0020, 0x0008, 0x0104, 0x0005,
+    0x0028, 0x0008, 0x0103, 0x0005,
+    0x0030, 0x0008, 0x0106, 0x0005,
+    0x0038, 0x0008, 0x0102, 0x0005,
+    0x0040, 0x0008, 0x0100, 0x0005,
+    0x0048, 0x0008, 0x0100, 0x0005,
+    0x0050, 0x0008, 0x019A, 0x0005,
+    
+    0x0060, 0x0000, 0x00D3, 0x0205,
+    0x0070, 0x0008, 0x00F5, 0x4205,
+    0x0088, 0x0000, 0x00D8, 0x0005,
+    0x0090, 0x0008, 0x00F9, 0x0005,
+
+    0x0028, 0x0008, 0x00D1, 0x0205,	// 00
+    0x0038, 0x0010, 0x0102, 0x0005,
+    0x0040, 0x0010, 0x0100, 0x0005,
+    0x0048, 0x0010, 0x0100, 0x0005,
+    0x0050, 0x0010, 0x019A, 0x0005,
+
+    0x0060, 0x0010, 0x019B, 0x4405,
+
+
+
+};
+
+static u16 stoneDT[] = {
+    0x1,
+    0x0000, 0x0000, 0x00D9, 0x0004,	// 00
+};
+
+static u16 smokDT[] = {
+    0x1,
+    0x0000, 0x0000, 0x00DA, 0x0004,	// 00
+    0x0000, 0x0000, 0x00DB, 0x0004,	// 01
+    0x0000, 0x0000, 0x00FA, 0x0004,	// 02
+    0x0000, 0x0000, 0x00FB, 0x0004,	// 03
+};
+
+static u16 start_tm[] = {
+    12, 16, 8,
+};
+
+static u16 yossy_tm[] = {
+    50, 3, 3, 50, 3, 3, 6, 3, 3,
+    30, 8, 8, 8, 8, 8, 16, 8,
+};
+
+static u8 yossy_ptrn_tbl[] = {
+    0, 3, 4, 0, 3, 4, 0, 3, 4,
+    0, 1, 0, 1, 0, 1, 2, 1,
+};
+
+/*==============================================================*/
+/*     	　@オープニング用　@OAMセットデータテーブルデータ		*/
+/*==============================================================*/
+static u16 *open_obj_tbl[] = {
+    marioDT,
+    peachDT,
+    kinopioDT,
+    luigiDT,
+    yossyDT,
+    eggDT,
+    c_markDT,
+    sel_cursolDT,
+    mode_selectDT,
+    cloud1DT,	// 大
+    cloud1DT,	// 大
+    cloud2DT,	// 中
+    cloud2DT,	// 中
+    cloud3DT,	// 小
+    cloud3DT,	// 小
+};
+
+static u16 *open_eff_tbl[] = {
+    smokDT,
+    stoneDT,
+};
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void (*Opening_menu[])(void);
+static void (*op_mario_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i);
+static void (*op_peach_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i);
+static void (*op_kinopio_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i);
+static void (*op_luigi_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i);
+static void (*op_egg_move_tbl[])(Opening_obj_c *opn_pt);
+static void (*op_obj_oam_tbl[])(u8 t_i);
+static  void (*op_obj_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i);
+
+static void open_obj_init2(void);
+static void op_oam_set(u8 index);
+static void op_c_mark_oam_set(u8 index);
+static void op_cursol_oam_set(u8 index);
+static void op_md_sel_oam_set(u8 index);
+static void op_yossy_oam_set(u8 index);
+static void op_egg_oam_set(u8 index);
+static void op_effect_oam_set(Opening_eff_c *ope_pt);
+
+static void op_mario_sub1(Opening_obj_c *opn_pt, u8 t_i);
+static void op_mario_sub2(Opening_obj_c *opn_pt, u8 t_i);
+static void op_mario_sub3(Opening_obj_c *opn_pt, u8 t_i);
+static void op_mario_sub4(Opening_obj_c *opn_pt, u8 t_i);
+static void op_mario_sub5(Opening_obj_c *opn_pt, u8 t_i);
+static void op_mario_sub6(Opening_obj_c *opn_pt, u8 t_i);
+
+static void op_peach_sub1(Opening_obj_c *opn_pt, u8 t_i);
+static void op_peach_sub2(Opening_obj_c *opn_pt, u8 t_i);
+static void op_peach_sub3(Opening_obj_c *opn_pt, u8 t_i);
+static void op_peach_sub4(Opening_obj_c *opn_pt, u8 t_i);
+static void op_peach_sub5(Opening_obj_c *opn_pt, u8 t_i);
+
+static void op_kinopio_sub1(Opening_obj_c *opn_pt, u8 t_i);
+static void op_kinopio_sub2(Opening_obj_c *opn_pt, u8 t_i);
+static void op_kinopio_sub3(Opening_obj_c *opn_pt, u8 t_i);
+static void op_kinopio_sub4(Opening_obj_c *opn_pt, u8 t_i);
+static void op_kinopio_sub5(Opening_obj_c *opn_pt, u8 t_i);
+
+static void op_luigi_sub1(Opening_obj_c *opn_pt, u8 t_i);
+static void op_luigi_sub2(Opening_obj_c *opn_pt, u8 t_i);
+static void op_luigi_sub3(Opening_obj_c *opn_pt, u8 t_i);
+static void op_luigi_sub4(Opening_obj_c *opn_pt, u8 t_i);
+static void op_luigi_sub5(Opening_obj_c *opn_pt, u8 t_i);
+
+static void op_eggsub_seishi(Opening_obj_c *opn_pt);
+static void op_eggsub_yure(Opening_obj_c *opn_pt);
+static void op_eggsub_buyo(Opening_obj_c *opn_pt);
+
+static void op_move_mario(Opening_obj_c *opn_pt, u8 index);
+static void op_move_peach(Opening_obj_c *opn_pt, u8 index);
+static void op_move_kinopio(Opening_obj_c *opn_pt, u8 index);
+static void op_move_luigi(Opening_obj_c *opn_pt, u8 index);
+static void op_move_cloud(Opening_obj_c *opn_pt, u8 index);
+static void op_move_extra(Opening_obj_c *opn_pt, u8 index);
+static void op_move_yossy(Opening_obj_c *opn_pt, u8 index);
+static void op_move_egg(Opening_obj_c *opn_pt, u8 index);
+static void op_move_effect(Opening_eff_c *ope_pt, u8 index);
+static void op_move_cursol(Opening_obj_c *opn_pt, u8 index);
+
+static void op_xclc(Opening_obj_c *opn_pt);
+static void op_yclc(Opening_obj_c *opn_pt);
+static void op_scene_1(void);
+static void op_scene_2(void);
+static void op_scene_3(void);
+static void op_scene_4(void);
+static void op_smok_set(Opening_obj_c *opn_pt);
+static void op_stone_set(void);
+static void op_back_to_1(void);
+static void op_cloud_set(void);
+
+/*--------------------------------------------------------------*/
+/*		オープニング用オブジェ初期化プログラム		*/
+/*--------------------------------------------------------------*/
+void open_obj_init(void)
+{
+    u8 t_i;
+    Opening_obj_c *opn_pt;
+
+    for( t_i = 0; t_i < OPOBJMAX; t_i++ ){
+	OPSETFG[t_i] = 0;
+	OPOBJDT[t_i] = Op_obj_clr;
+    }
+    for( t_i = 0; t_i < 16; t_i++ ){
+	OPESTFG[t_i] = 0;
+	OPEFFDT[t_i] = Op_eff_clr;
+    }
+    // マリオセット
+    OPSETFG[mario] = 1;
+    opn_pt = &OPOBJDT[mario];
+    OPXPOSH(opn_pt) = -0x40;
+    OPYPOSH(opn_pt) = 0xB0;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = WAIT_m;
+    OPOBJTIME(opn_pt) = 0x50;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = RIGHT;
+    OPVMUKI(opn_pt) = 0;
+    
+    // ピーチセット
+    OPSETFG[peach] = 1;
+    opn_pt = &OPOBJDT[peach];
+    OPXPOSH(opn_pt) = -0x10;
+    OPYPOSH(opn_pt) = 0xB0;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0x08000;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = WAIT_l;
+    OPOBJTIME(opn_pt) = 0;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = RIGHT;
+    OPVMUKI(opn_pt) = 0;
+    
+    // キノピオセット
+    OPSETFG[kinopio] = 1;
+    opn_pt = &OPOBJDT[kinopio];
+    OPXPOSH(opn_pt) = -0x48;
+    OPYPOSH(opn_pt) = 0xB0;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0x08000;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = WAIT_k;
+    OPOBJTIME(opn_pt) = 0;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = RIGHT;
+    OPVMUKI(opn_pt) = 0;
+
+    // ルイージセット
+    OPSETFG[luigi] = 1;
+    opn_pt = &OPOBJDT[luigi];
+    OPXPOSH(opn_pt) = -0x30;
+    OPYPOSH(opn_pt) = 0xB0;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0x00000;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = WAIT_p;
+    OPOBJTIME(opn_pt) = 0;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = RIGHT;
+    OPVMUKI(opn_pt) = 0;
+
+    // cマークセット
+    OPSETFG[c_mark] = 1;
+    opn_pt = &OPOBJDT[c_mark];
+    OPXPOSH(opn_pt) = 0x2C;
+    OPYPOSH(opn_pt) = 0x84;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = 0;
+    OPOBJTIME(opn_pt) = 0;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = 0;
+    OPVMUKI(opn_pt) = 0;
+
+    if( OPYOSFG ){
+	if( OPYOSFG == 2 ){
+	    // ヨッシーセット
+	    OPSETFG[yossy] = 1;
+	    opn_pt = &OPOBJDT[yossy];
+	    OPXPOSH(opn_pt) = 0x1DC;
+	    OPYPOSH(opn_pt) = 0x70;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	    OPXSPD(opn_pt) = 0;
+	    OPYSPD(opn_pt) = 0;
+	    OPOBJMODE(opn_pt) = 1;
+	    OPOBJTIME(opn_pt) = 30;
+	    OPPTRN(opn_pt) = 0;
+	    OPHSIZ(opn_pt) = 0x100;
+	    OPVSIZ(opn_pt) = 0x100;
+	    OPHMUKI(opn_pt) = 0;
+	    OPVMUKI(opn_pt) = 0;
+	}
+	else{
+	    // ヨッシー卵セット
+	    OPSETFG[egg] = 1;
+	    opn_pt = &OPOBJDT[egg];
+	    OPXPOSH(opn_pt) = 0x1DC;
+	    OPYPOSH(opn_pt) = 0x74;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	    OPXSPD(opn_pt) = 0;
+	    OPYSPD(opn_pt) = 0;
+	    OPOBJMODE(opn_pt) = 0;
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 0;
+	    OPHSIZ(opn_pt) = 0x100;
+	    OPVSIZ(opn_pt) = 0x100;
+	    OPHMUKI(opn_pt) = 0;
+	    OPVMUKI(opn_pt) = 0;
+	}
+    }
+
+    TITLE_WORK32(0) = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		オープニング用オブジェ初期化プログラム２	*/
+/*--------------------------------------------------------------*/
+void open_obj_init2(void)
+{
+    u8 t_i;
+    Opening_obj_c *opn_pt;
+
+    for( t_i = 0; t_i < OPOBJMAX; t_i++ ){
+	OPSETFG[t_i] = 0;
+	OPOBJDT[t_i] = Op_obj_clr;
+    }
+    for( t_i = 0; t_i < 16; t_i++ ){
+	OPESTFG[t_i] = 0;
+	OPEFFDT[t_i] = Op_eff_clr;
+    }
+    OPSETFG[c_mark] = 1;
+    opn_pt = &OPOBJDT[c_mark];
+    OPXPOSH(opn_pt) = 0x2C;
+    OPYPOSH(opn_pt) = 0x84;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = 0;
+    OPYSPD(opn_pt) = 0;
+    OPOBJMODE(opn_pt) = 0;
+    OPOBJTIME(opn_pt) = 0;
+    OPPTRN(opn_pt) = 0;
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPHMUKI(opn_pt) = 0;
+    OPVMUKI(opn_pt) = 0;
+
+    OPSETFG[mode_select] = 1;
+    opn_pt = &OPOBJDT[mode_select];
+    OPXPOSH(opn_pt) = 0x12;
+    OPYPOSH(opn_pt) = 0x04;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPSETFG[sel_cursol] = 1;
+    opn_pt = &OPOBJDT[sel_cursol];
+    OPXPOSH(opn_pt) = 0x12;
+    OPYPOSH(opn_pt) = 0x09;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPWORK(opn_pt) = 0;
+
+    OPSETFG[cloud1A] = 1;
+    opn_pt = &OPOBJDT[cloud1A];
+    OPXPOSH(opn_pt) = 0x200;
+    OPYPOSH(opn_pt) = 0x28;
+    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+    OPXSPD(opn_pt) = CLOUD_SPEED;
+
+    if( OPYOSFG ){
+	if( OPYOSFG == 2 ){
+	    // ヨッシーセット
+	    OPSETFG[yossy] = 1;
+	    opn_pt = &OPOBJDT[yossy];
+	    OPXPOSH(opn_pt) = 0x1DC;
+	    OPYPOSH(opn_pt) = 0x70;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	    OPXSPD(opn_pt) = 0;
+	    OPYSPD(opn_pt) = 0;
+	    OPOBJMODE(opn_pt) = 0;
+	    OPOBJTIME(opn_pt) = yossy_tm[0];
+	    OPPTRN(opn_pt) = 0;
+	    OPHSIZ(opn_pt) = 0x100;
+	    OPVSIZ(opn_pt) = 0x100;
+	    OPHMUKI(opn_pt) = 0;
+	    OPVMUKI(opn_pt) = 0;
+	}
+	else{
+	    // ヨッシー卵セット
+	    OPSETFG[egg] = 1;
+	    opn_pt = &OPOBJDT[egg];
+	    OPXPOSH(opn_pt) = 0x1DC;
+	    OPYPOSH(opn_pt) = 0x74;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	    OPXSPD(opn_pt) = 0;
+	    OPYSPD(opn_pt) = 0;
+	    OPOBJMODE(opn_pt) = 0;
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 0;
+	    OPHSIZ(opn_pt) = 0x100;
+	    OPVSIZ(opn_pt) = 0x100;
+	    OPHMUKI(opn_pt) = 0;
+	    OPVMUKI(opn_pt) = 0;
+	}
+    }
+
+    TITLE_WORK32(0) = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングマリオ移動サブプログラム			*/
+/*--------------------------------------------------------------*/
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub1(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 待機@
+    OPPTRN(opn_pt) = 2;
+    if( OPOBJTIME(opn_pt) == 0 ){	// 次のモードの準備
+	OPOBJMODE(opn_pt) = DASH_m;
+	OPXSPD(opn_pt) = 0x20000;
+//	OPOBJDT[luigi].xspd = 0;
+//	OPOBJDT[peach].xspd = 0;
+//	OPOBJDT[kinopio].xspd = 0;
+//	OPOBJDT[luigi].patrn = 2;
+//	OPOBJDT[peach].patrn = 2;
+//	OPOBJDT[kinopio].patrn = 2;
+    }
+}
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub2(Opening_obj_c *opn_pt, u8 t_i)
+{
+// ダッシュ→振り向きまで
+    if( OPXPOSH(opn_pt) < 0 ){
+	OPPTRN(opn_pt) = DivRem((-OPXPOSH(opn_pt))>>2,3);
+    }
+    else{
+	OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    }
+    if( OPXPOSH(opn_pt) > 0x60 && OPXSPD(opn_pt) > 0 ){
+	if( (mGm_FRAME_COUNT&0x3) == 3 ){
+	    op_smok_set(opn_pt);
+	    m4aSongNumStart(s_u_se_slip);
+	}
+	OPXSPD(opn_pt) -= 0x1800;
+	OPPTRN(opn_pt) = 8;
+	OPHMUKI(opn_pt) = LEFT;
+    }
+    else if( OPXSPD(opn_pt) <= 0 ){	// 次のモードの準備
+	OPXSPD(opn_pt) = 0;
+	OPHMUKI(opn_pt) = LEFT;
+	OPOBJMODE(opn_pt) = JUMP_m;
+	OPXSPD(opn_pt) = 0;
+	OPYSPD(opn_pt) = -0x38000;
+	m4aSongNumStart(s_u_se_jump);
+	OPWORK(opn_pt) = 0;
+    }
+}
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub3(Opening_obj_c *opn_pt, u8 t_i)
+{
+// ジャンプ
+    if( OPYPOSH(opn_pt) == 0xB0 ){
+	OPWORK(opn_pt)++;
+	OPYSPD(opn_pt) = -0x38000;
+	if( OPWORK(opn_pt) == 1 )
+	    m4aSongNumStart(s_u_se_jump);
+    }
+    if( OPYPOSH(opn_pt) < 0xB0 ){
+	OPPTRN(opn_pt) = 9;
+    }
+    else{
+	OPPTRN(opn_pt) = 2;
+    }
+    if( OPWORK(opn_pt) == 2 ){	// 次のモードの準備
+	OPOBJMODE(opn_pt) = WALK_m;
+	OPPTRN(opn_pt) = 2;
+	OPYSPD(opn_pt) = 0;
+	OPWORK(opn_pt) = 0;
+	OPOBJDT[luigi].mode = 0;
+	OPOBJDT[peach].mode = WALK_p;
+	OPOBJDT[peach].xspd = 0x8000;
+//	OPOBJDT[peach].mode = 1;
+//	OPOBJDT[kinopio].mode = 0;
+    }
+}
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub4(Opening_obj_c *opn_pt, u8 t_i)
+{
+// ４人そろって歩く
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+    else{
+	OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    }
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	if( OPYPOSH(opn_pt) < 0xA0 ){
+	    OPPTRN(opn_pt) = 10;
+	}
+    }
+    else{
+	if( OPYPOSH(opn_pt) < 0xB0 ){
+	    OPPTRN(opn_pt) = 10;
+	}
+    }
+
+//    if( OPOBJDT[luigi].mode == 3 ){
+//	OPHMUKI(opn_pt) = RIGHT;
+//	OPXSPD(opn_pt) = 0x8000;
+//	BLDCNT = 0x3F48;
+//    }
+    if( OPOBJDT[peach].mode == WALK2_p ){
+	OPHMUKI(opn_pt) = RIGHT;
+	OPXSPD(opn_pt) = 0x8000;
+	BLDCNT = 0x3F48;
+    }
+#if 0
+    if( OPOBJDT[luigi].mode == WALK_l &&
+	OPOBJDT[luigi].timer == 0 ){
+	OPHMUKI(opn_pt) = RIGHT;
+	OPXSPD(opn_pt) = 0x8000;
+	BLDCNT = 0x3F48;
+    }
+#endif
+    if( OPXPOSH(opn_pt) == 0x88 ){
+	OPYSPD(opn_pt) = EXCHRJMPSPD[t_i];
+	m4aSongNumStart(s_u_se_jump);
+    }
+    if( OPXPOS(opn_pt) >= KUSAPOS[mario] ){
+	OPXSPD(opn_pt) = 0;
+	OPPTRN(opn_pt) = 3;
+	OPHMUKI(opn_pt) = LEFT;
+	// モードチェンジはop_scene_1で行う
+    }
+}
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub5(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き中
+    OPOBJTIME(opn_pt)++;
+    if( OPTIME ){
+	if( OPOBJTIME(opn_pt) < 7 ){
+	    OPPTRN(opn_pt) = 4;
+	}
+	else if( OPOBJTIME(opn_pt) == 14 ){
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 5;
+	    if( OPTIME < 0x13A )
+		OPWORK(opn_pt)++;
+	}
+	else{
+	    OPPTRN(opn_pt) = 5;
+	}
+    }
+    OPYSPD(opn_pt) = 0;
+    if( ((OPOBJDT[mario].work)>>2) > 3 )
+	OPYPOSH(opn_pt) = 0xB0 - (((OPOBJDT[mario].work)>>2)-3);
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+}
+//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+void op_mario_sub6(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き後
+    u8 i;
+
+    if( OPOBJTIME(opn_pt) ){
+	OPOBJTIME(opn_pt)--;
+    }
+
+//    if( OPOBJTIME(opn_pt) > 0x19 ){
+    if( OPOBJTIME(opn_pt) > 0x14 ){
+	for( i = 0; i < 4; i++ ){
+	    OPOBJDT[i].patrn = 4;
+	}
+    }
+    else if( OPOBJTIME(opn_pt) > 0x12 ){
+//    else if( OPOBJTIME(opn_pt) > 0x15 ){
+	for( i = 0; i < 4; i++ ){
+	    OPOBJDT[i].patrn = 5;
+	}
+    }
+    else if( OPOBJTIME(opn_pt) > 0xF ){
+	for( i = 0; i < 4; i++ ){
+	    OPOBJDT[i].patrn = 6;
+	}
+    }
+    else if( OPOBJTIME(opn_pt) ){
+	for( i = 0; i < 4; i++ ){
+	    OPOBJDT[i].patrn = 7;
+	}
+    }
+    else{
+	for( i = 0; i < 4; i++ ){
+	    OPOBJDT[i].patrn = 2;
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニングピーチ移動サブプログラム			*/
+/*--------------------------------------------------------------*/
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+void op_peach_sub1(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 黒枠まで歩く
+    if( OPXPOS(opn_pt) > 0x160000 ){
+	OPXPOS(opn_pt) = 0x160000;
+	OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+	OPXSPD(opn_pt) = 0;
+    }
+
+    if( OPXPOSH(opn_pt) < 0 ){
+	OPPTRN(opn_pt) = DivRem((-OPXPOSH(opn_pt))>>2,3);
+    }
+    else{
+	OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    }
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+}
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+void op_peach_sub2(Opening_obj_c *opn_pt, u8 t_i)
+{
+// マリオまで歩いて待機@
+    if( OPXPOS(opn_pt) > 0x640000 ){
+	OPXPOS(opn_pt) = 0x640000;
+	OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+	OPXSPD(opn_pt) = 0;
+	OPHMUKI(opn_pt) = LEFT;
+#if 0
+	if( OPOBJDT[kinopio].mode != WALK_k ){
+	    OPOBJDT[kinopio].mode = WALK_k;
+	    OPOBJDT[kinopio].xspd = 0x8000;
+	}
+#endif
+    }
+    if( OPXPOS(opn_pt) == 0x1C0000 ){ 
+	if( OPOBJDT[kinopio].mode != WALK_k ){
+	    OPOBJDT[kinopio].mode = WALK_k;
+	    OPOBJDT[kinopio].xspd = 0x8000;
+	}
+    }
+    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+}
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+void op_peach_sub3(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き位置まで移動
+    if( OPOBJTIME(opn_pt) ){
+	OPOBJTIME(opn_pt)--;
+//	OPHMUKI(opn_pt) = RIGHT;
+	OPPTRN(opn_pt) = 2;
+	if( OPOBJTIME(opn_pt) == 0 ){
+	    OPXSPD(opn_pt) = 0x8000;
+	}
+	return;
+    }
+
+    if( OPXPOSH(opn_pt) == 0x88 ){
+	OPYSPD(opn_pt) = EXCHRJMPSPD[t_i];
+	m4aSongNumStart(s_u_se_jump);
+    }
+    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	if( OPYPOSH(opn_pt) < 0xA0 ){
+	    OPPTRN(opn_pt) = 8;
+	}
+    }
+    else{
+	if( OPYPOSH(opn_pt) < 0xB0 ){
+	    OPPTRN(opn_pt) = 8;
+	}
+    }
+    if( OPXPOS(opn_pt) >= KUSAPOS[t_i] ){
+	OPXPOS(opn_pt) = KUSAPOS[t_i];
+	OPXSPD(opn_pt) = 0;
+	OPPTRN(opn_pt) = 3;
+    }
+}
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+void op_peach_sub4(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き中
+    if( OPTIME != 0 ){
+	OPOBJTIME(opn_pt)++;
+	OPYSPD(opn_pt) = 0;
+	if( ((OPOBJDT[mario].work)>>2) > 3 )
+	    OPYPOSH(opn_pt) = 0xB0 - (((OPOBJDT[mario].work)>>2)-3);
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	if( OPOBJTIME(opn_pt) < 7 ){
+	    OPPTRN(opn_pt) = 4;
+	    OPWORK(opn_pt) = 0;
+	}
+	else if( OPOBJTIME(opn_pt) == 12 ){
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+	else{
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+    }
+}
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+void op_peach_sub5(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き後(ダミー)
+}
+/*--------------------------------------------------------------*/
+/*	オープニングキノピオ移動サブプログラム			*/
+/*--------------------------------------------------------------*/
+//▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+void op_kinopio_sub1(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 黒枠まで歩く
+    if( OPXPOS(opn_pt) >= 0x40000 ){
+	OPXPOS(opn_pt) = 0x40000;
+	OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+	OPXSPD(opn_pt) = 0;
+	OPOBJDT[mario].timer = 0;
+    }
+
+    if( OPXPOSH(opn_pt) < 0 ){
+	OPPTRN(opn_pt) = DivRem((-OPXPOSH(opn_pt))>>2,3);
+    }
+    else{
+	OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    }
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+}
+//▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+void op_kinopio_sub2(Opening_obj_c *opn_pt, u8 t_i)
+{
+// マリオまで歩いて待機@
+    if( OPXPOS(opn_pt) > 0x520000 ){
+	OPXPOS(opn_pt) = 0x520000;
+	OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+	OPXSPD(opn_pt) = 0;
+	OPHMUKI(opn_pt) = LEFT;
+	if( OPOBJDT[luigi].mode != DASH_l ){
+	    OPOBJDT[luigi].mode = DASH_l;
+	    OPOBJDT[luigi].xspd = 0x18000;
+	}
+    }
+    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+}
+//▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+void op_kinopio_sub3(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き位置まで移動
+    if( OPOBJTIME(opn_pt) ){
+	OPOBJTIME(opn_pt)--;
+//	OPHMUKI(opn_pt) = RIGHT;
+	OPPTRN(opn_pt) = 2;
+	if( OPOBJTIME(opn_pt) == 0 ){
+	    OPXSPD(opn_pt) = 0x8000;
+	}
+	return;
+    }
+
+    if( OPXPOSH(opn_pt) == 0x88 ){
+	OPYSPD(opn_pt) = EXCHRJMPSPD[t_i];
+	m4aSongNumStart(s_u_se_jump);
+    }
+    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	if( OPYPOSH(opn_pt) < 0xA0 ){
+	    OPPTRN(opn_pt) = 8;
+	}
+    }
+    else{
+	if( OPYPOSH(opn_pt) < 0xB0 ){
+	    OPPTRN(opn_pt) = 8;
+	}
+    }
+    if( OPXPOS(opn_pt) >= KUSAPOS[t_i] ){
+	OPXPOS(opn_pt) = KUSAPOS[t_i];
+	OPXSPD(opn_pt) = 0;
+	OPPTRN(opn_pt) = 3;
+    }
+}
+//▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+void op_kinopio_sub4(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き中
+    if( OPTIME != 0 ){
+	OPOBJTIME(opn_pt)++;
+	OPYSPD(opn_pt) = 0;
+	if( ((OPOBJDT[mario].work)>>2) > 3 )
+	    OPYPOSH(opn_pt) = 0xB0 - (((OPOBJDT[mario].work)>>2)-3);
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	if( OPOBJTIME(opn_pt) < 7 ){
+	    OPPTRN(opn_pt) = 4;
+	    OPWORK(opn_pt) = 0;
+	}
+	else if( OPOBJTIME(opn_pt) == 14 ){
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+	else{
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+    }
+}
+//▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+void op_kinopio_sub5(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き後(ダミー)
+}
+/*--------------------------------------------------------------*/
+/*	オープニングルイージ移動サブプログラム			*/
+/*--------------------------------------------------------------*/
+//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+void op_luigi_sub1(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 画面外で待機@(ダミー)
+}
+//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+void op_luigi_sub2(Opening_obj_c *opn_pt, u8 t_i)
+{
+// ダッシュで追いつく
+    if( OPXPOS(opn_pt) == 0x400000 ){
+	OPPTRN(opn_pt) = 2;
+	if( OPOBJTIME(opn_pt) ){
+	    OPOBJTIME(opn_pt)--;
+	}
+	else{
+	    OPOBJDT[mario].xpos += 0x8000;
+	    OPOBJDT[mario].xspd = 0x8000;
+	    OPOBJDT[mario].hmuki = RIGHT;
+	    OPOBJDT[peach].mode = WALK2_p;
+	    OPOBJDT[peach].timer = 0x10;
+	    OPOBJDT[kinopio].mode = WALK2_k;
+	    OPOBJDT[kinopio].timer = 0x20;
+	    OPOBJMODE(opn_pt) = WALK_l;
+	    OPOBJTIME(opn_pt) = 0x30;
+	}
+	return;
+    }
+    if( OPXPOS(opn_pt) >= 0x340000 ){
+	if( OPXPOS(opn_pt) >= 0x400000 ){
+	    OPXPOS(opn_pt) = 0x400000;
+	    OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+	    OPXSPD(opn_pt) = 0;
+	    OPOBJTIME(opn_pt) = 0x30;
+	    OPOBJDT[peach].hmuki = RIGHT;
+	    OPOBJDT[kinopio].hmuki = RIGHT;
+	}
+	else if( OPXSPD(opn_pt) > 0x8000 ){
+	    OPXSPD(opn_pt) -= 0x1000;
+	}
+    }
+
+    if( OPXPOSH(opn_pt) < 0 ){
+	OPPTRN(opn_pt) = DivRem((-OPXPOSH(opn_pt))>>2,3);
+    }
+    else{
+	OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    }
+    if( OPXSPD(opn_pt) == 0 ){
+	OPPTRN(opn_pt) = 2;
+    }
+}
+//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+void op_luigi_sub3(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き位置まで移動
+    if( OPOBJTIME(opn_pt) ){
+	OPOBJTIME(opn_pt)--;
+	OPHMUKI(opn_pt) = RIGHT;
+	OPPTRN(opn_pt) = 2;
+	if( OPOBJTIME(opn_pt) == 0 ){
+	    OPXSPD(opn_pt) = 0x8000;
+	}
+	return;
+    }
+
+    if( OPXPOSH(opn_pt) == 0x138 ){
+	OPXSPD(opn_pt) = 0x18000;
+    }
+
+    if( OPXPOSH(opn_pt) == 0x88 ){
+	OPYSPD(opn_pt) = EXCHRJMPSPD[t_i];
+	m4aSongNumStart(s_u_se_jump);
+    }
+    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt)>>2,3);
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	if( OPYPOSH(opn_pt) < 0xA0 ){
+	    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt),3);
+	}
+    }
+    else{
+	if( OPYPOSH(opn_pt) < 0xB0 ){
+	    OPPTRN(opn_pt) = DivRem(OPXPOSH(opn_pt),3);
+	}
+    }
+    if( OPXPOS(opn_pt) >= KUSAPOS[t_i] ){
+	OPXPOS(opn_pt) = KUSAPOS[t_i];
+	OPXSPD(opn_pt) = 0;
+	OPPTRN(opn_pt) = 3;
+    }
+    else{
+	if( OPXPOSH(opn_pt) >= 0x19C ){
+	    if( (mGm_FRAME_COUNT&0x3) == 3 ){
+		op_smok_set(opn_pt);
+		m4aSongNumStart(s_u_se_slip);
+	    }
+	    OPXSPD(opn_pt) -= 0x1780;
+	    OPPTRN(opn_pt) = 8;
+	    OPHMUKI(opn_pt) = 0;
+	}
+    }
+}
+//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+void op_luigi_sub4(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き中
+    if( OPTIME != 0 ){
+	OPOBJTIME(opn_pt)++;
+	OPYSPD(opn_pt) = 0;
+	if( ((OPOBJDT[mario].work)>>2) > 3 )
+	    OPYPOSH(opn_pt) = 0xB0 - (((OPOBJDT[mario].work)>>2)-3);
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	if( OPOBJTIME(opn_pt) < 7 ){
+	    OPPTRN(opn_pt) = 4;
+	    OPWORK(opn_pt) = 0;
+	}
+	else if( OPOBJTIME(opn_pt) == 14 ){
+	    OPOBJTIME(opn_pt) = 0;
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+	else{
+	    OPPTRN(opn_pt) = 5;
+	    OPWORK(opn_pt) = 1;
+	}
+    }
+}
+//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+void op_luigi_sub5(Opening_obj_c *opn_pt, u8 t_i)
+{
+// 引き抜き後(ダミー)
+}
+/*--------------------------------------------------------------*/
+/*	オープニングマリオ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_mario(Opening_obj_c *opn_pt, u8 t_i)
+{
+    op_mario_move_tbl[OPOBJMODE(opn_pt)](opn_pt, t_i);
+    op_xclc(opn_pt);
+    op_yclc(opn_pt);
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングピーチ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_peach(Opening_obj_c *opn_pt, u8 t_i)
+{
+    op_peach_move_tbl[OPOBJMODE(opn_pt)](opn_pt, t_i);
+    op_xclc(opn_pt);
+#if 0
+    op_yclc(opn_pt);
+#else
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	if( OPYSPD(opn_pt) == 0 &&
+	    OPWORK(opn_pt) <= 0x40 ){
+	    switch( OPWORK(opn_pt) ){
+	    case 4:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 6:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0xC:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0xE:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x14:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x16:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x1C:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x1E:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x24:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x26:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x2C:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x2E:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x34:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x36:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    case 0x3C:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x3E:
+		OPYPOS(opn_pt) -= 0x10000;
+		break;
+	    case 0x40:
+		OPYPOS(opn_pt) += 0x10000;
+		break;
+	    default:
+		break;
+	    }
+	    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+	    OPWORK(opn_pt)++;
+	}
+	else{
+	    op_yclc(opn_pt);
+	}
+    }
+    else{
+	op_yclc(opn_pt);
+    }
+#endif
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングキノピオ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_kinopio(Opening_obj_c *opn_pt, u8 t_i)
+{
+    op_kinopio_move_tbl[OPOBJMODE(opn_pt)](opn_pt, t_i);
+    op_xclc(opn_pt);
+    op_yclc(opn_pt);
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングルイージ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_luigi(Opening_obj_c *opn_pt, u8 t_i)
+{
+    s32 y_limit;
+    op_luigi_move_tbl[OPOBJMODE(opn_pt)](opn_pt, t_i);
+    op_xclc(opn_pt);
+
+    OPYSPD(opn_pt) += 0x1000;
+    OPYPOS(opn_pt) += OPYSPD(opn_pt);
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	y_limit = 0xA00000;
+    }
+    else{
+	y_limit = 0xB00000;
+    }
+    if( OPYPOS(opn_pt) > y_limit ){
+	OPYPOS(opn_pt) = y_limit;
+	OPYSPD(opn_pt) = 0;
+    }
+    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+//    op_yclc(opn_pt);
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング雲移動プログラム				*/
+/*--------------------------------------------------------------*/
+void op_move_cloud(Opening_obj_c *opn_pt, u8 t_i)
+{
+    if( OPXPOS(opn_pt) < 0xF00000 ){
+	OPXPOS(opn_pt) = 0x2000000;
+    }
+    OPXPOS(opn_pt) += OPXSPD(opn_pt);
+    OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+}
+/*--------------------------------------------------------------*/
+/*	オープニングその他キャラ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_extra(Opening_obj_c *opn_pt, u8 t_i)
+{
+    OPXPOS(opn_pt) += OPXSPD(opn_pt);
+    OPYPOS(opn_pt) += OPYSPD(opn_pt);
+    OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングヨッシー移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_yossy(Opening_obj_c *opn_pt, u8 t_i)
+{
+    if( OPOBJMODE(opn_pt) < 9 ){
+	if( OPOBJTIME(opn_pt) ){
+	    OPOBJTIME(opn_pt)--;
+	    if( OPOBJTIME(opn_pt) == 0 ){
+		if ( OPOBJMODE(opn_pt) != 8 ){
+		    OPOBJMODE(opn_pt)++;
+		    OPOBJTIME(opn_pt) = 
+			yossy_tm[OPOBJMODE(opn_pt)];
+		    OPPTRN(opn_pt) = 
+			yossy_ptrn_tbl[OPOBJMODE(opn_pt)];
+		}
+		else{
+		    OPOBJMODE(opn_pt) = 17;
+		}
+	    }
+	}
+    }
+    else{
+	if( OPOBJTIME(opn_pt) ){
+	    OPOBJTIME(opn_pt)--;
+	    if( OPOBJTIME(opn_pt) == 0 ){
+		if ( OPOBJMODE(opn_pt) != 16 ){
+		    OPOBJMODE(opn_pt)++;
+		    OPOBJTIME(opn_pt) = 
+			yossy_tm[OPOBJMODE(opn_pt)];
+		    OPPTRN(opn_pt) = 
+			yossy_ptrn_tbl[OPOBJMODE(opn_pt)];
+		}
+		else{
+		    OPOBJMODE(opn_pt) = 17;
+		}
+	    }
+	}
+    }
+    if( OPOBJMODE(opn_pt) == 17 ){
+	RDMSUB();
+	OPOBJMODE(opn_pt) = (ENRND[0]&1)*9;
+	OPPTRN(opn_pt) = yossy_ptrn_tbl[OPOBJMODE(opn_pt)];
+	OPOBJTIME(opn_pt) = yossy_tm[OPOBJMODE(opn_pt)];
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング卵移動用関数テーブル			*/
+/*--------------------------------------------------------------*/
+void (*op_egg_move_tbl[])(Opening_obj_c *opn_pt) = {
+    op_eggsub_seishi,
+    op_eggsub_yure,
+    op_eggsub_seishi,
+    op_eggsub_buyo,
+};
+
+/*--------------------------------------------------------------*/
+/*	オープニング卵移動プログラム				*/
+/*--------------------------------------------------------------*/
+void op_move_egg(Opening_obj_c *opn_pt, u8 t_i)
+{
+    op_egg_move_tbl[OPOBJMODE(opn_pt)](opn_pt);
+}
+
+/*------オープニング卵移動サブプログラム（静止）----------------*/
+void op_eggsub_seishi(Opening_obj_c *opn_pt)
+{
+    OPHSIZ(opn_pt) = 0x100;
+    OPVSIZ(opn_pt) = 0x100;
+    OPANGL(opn_pt) = 0;
+
+    if( OPOBJTIME(opn_pt) )
+	OPOBJTIME(opn_pt)--;
+
+    if( OPOBJTIME(opn_pt) == 0 ){
+	OPOBJMODE(opn_pt)++;
+	if( OPOBJMODE(opn_pt) == 1 )
+	    OPOBJTIME(opn_pt) = 4;
+    }
+}
+
+/*------オープニング卵移動サブプログラム（横揺れ）--------------*/
+void op_eggsub_yure(Opening_obj_c *opn_pt)
+{
+    if( OPOBJTIME(opn_pt)&0x8 ){	// 左揺れ
+	OPANGL(opn_pt) += 0x6;
+	OPXPOS(opn_pt) += 0x18000;
+	if( OPOBJTIME(opn_pt)&0x4 ){
+	    OPYPOS(opn_pt) += 0x2000;
+	}
+	else{
+	    OPYPOS(opn_pt) -= 0x2000;
+	}
+    }
+    else{				// 右揺れ
+	OPANGL(opn_pt) -= 0x6;
+	OPXPOS(opn_pt) -= 0x18000;
+	if( OPOBJTIME(opn_pt)&0x4 ){
+	    OPYPOS(opn_pt) += 0x2000;
+	}
+	else{
+	    OPYPOS(opn_pt) -= 0x2000;
+	}
+    }
+    OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+
+    OPOBJTIME(opn_pt)++;
+
+    if( OPOBJTIME(opn_pt) == 0x24 ){
+	OPOBJTIME(opn_pt) = 0x60;
+	OPOBJMODE(opn_pt)++;
+    }
+}
+
+/*------オープニング卵移動サブプログラム（ぶよぶよ）------------*/
+void op_eggsub_buyo(Opening_obj_c *opn_pt)
+{
+    if( OPOBJTIME(opn_pt) & 0x10 ){	// 伸び
+	OPHSIZ(opn_pt) += 3;
+	OPVSIZ(opn_pt) -= 0xA;
+	OPYPOS(opn_pt) -= 0x5000;
+    }
+    else{				// 縮み
+	OPHSIZ(opn_pt) -= 3;
+	OPVSIZ(opn_pt) += 0xA;
+	OPYPOS(opn_pt) += 0x5000;
+    }
+    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+
+    OPOBJTIME(opn_pt)++;
+
+    if( OPOBJTIME(opn_pt) == 0x40 ){
+	OPOBJTIME(opn_pt) = 0x60;
+	OPOBJMODE(opn_pt) = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングエフェクト移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_move_effect(Opening_eff_c *ope_pt, u8 index)
+{
+    if( OPMODE == 0 ){
+	OPEPTRN(ope_pt) = OPEOBJTIME(ope_pt)>>2;
+	OPEOBJTIME(ope_pt)++;
+	if( OPEOBJTIME(ope_pt) == 0x10 ){
+	    OPESTFG[index] = 0;
+	    OPEFFDT[index] = Op_eff_clr;
+	}
+    }
+    else{
+	if( OPEYSPD(ope_pt) < 0x3E000 )
+	    OPEYSPD(ope_pt) += 0x2000;
+	if( OPEYPOS(ope_pt) >= 0x2000000 ){
+	    OPESTFG[index] = 0;
+	    OPEFFDT[index] = Op_eff_clr;
+	}
+    }
+    OPXPOS(ope_pt) += OPXSPD(ope_pt);
+    OPYPOS(ope_pt) += OPYSPD(ope_pt);
+    OPXPOSH(ope_pt) = OPXPOS(ope_pt)>>16;
+    OPYPOSH(ope_pt) = OPYPOS(ope_pt)>>16;
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニングモードセレクト用カーソル移動プログラム	*/
+/*--------------------------------------------------------------*/
+void op_move_cursol(Opening_obj_c *opn_pt, u8 t_i)
+{
+    if( SOUND_TIMER )
+	return;
+
+    if( U_KEY_ON_T || D_KEY_ON_T || SELECT_BUTTON_ON ){
+	OPWORK(opn_pt) ^= 1;
+	m4aSongNumStart(s_u_se_kamekeri8);
+	OPTIME = 0;
+    }
+    if( OPWORK(opn_pt) ){
+	OPYPOSH(opn_pt) = CURSOL2P;
+    }
+    else{
+	OPYPOSH(opn_pt) = CURSOL1P;
+    }
+    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+
+    if( OPOBJTIME(opn_pt) ){
+	OPOBJTIME(opn_pt)--;
+    }
+    else{
+	if( OPPTRN(opn_pt) == 2 ){
+	    OPPTRN(opn_pt) = 0;
+	}
+	else{
+	    OPPTRN(opn_pt)++;
+	}
+	OPOBJTIME(opn_pt) = start_tm[OPPTRN(opn_pt)];
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング用ＯＢＪ移動テーブル			*/
+/*--------------------------------------------------------------*/
+void (*op_obj_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i) = {
+    op_move_mario,		// mario,
+    op_move_peach,		// peach,
+    op_move_kinopio,		// kinopio,
+    op_move_luigi,		// luigi,
+    op_move_yossy,		// yossy,
+    op_move_egg,		// egg,
+    op_move_extra,		// c_mark,
+    op_move_cursol,		// sel_cursol,
+    op_move_extra,		// mode_select,
+    op_move_cloud,		// cloud1A,	// 大
+    op_move_cloud,		// cloud1B,	// 大
+    op_move_cloud,		// cloud2A,	// 中
+    op_move_cloud,		// cloud2B,	// 中
+    op_move_cloud,		// cloud3A,	// 小
+    op_move_cloud,		// cloud3B,	// 小
+};
+/*--------------------------------------------------------------*/
+/*	マリオ用ＯＢＪ移動テーブル				*/
+/*--------------------------------------------------------------*/
+void (*op_mario_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i) = {
+    op_mario_sub1,	// マリオ待機@(WAIT_m)
+    op_mario_sub2,	// ダッシュ→振り向きまで(DASH_m)
+    op_mario_sub3,	// ジャンプ(２回)(JUMP_m)
+    op_mario_sub4,	// ４人そろって歩く(WALK_m)
+    op_mario_sub5,	// 引き抜き中(PULL_m)
+    op_mario_sub6,	// 引き抜き後(WAIT2_m)
+};
+
+/*--------------------------------------------------------------*/
+/*	ピーチ用ＯＢＪ移動テーブル				*/
+/*--------------------------------------------------------------*/
+void (*op_peach_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i) = {
+    op_peach_sub1,	// 黒枠まで歩いて待機@(WAIT_p)
+    op_peach_sub2,	// 振り向きまで(WALK_p)
+    op_peach_sub3,	// 引き抜き位置まで移動(WALK2_p)
+    op_peach_sub4,	// 引き抜き中(PULL_p)
+    op_peach_sub5,	// 引き抜き後(WAIT2_p)
+};
+
+/*--------------------------------------------------------------*/
+/*	キノピオ用ＯＢＪ移動テーブル				*/
+/*--------------------------------------------------------------*/
+void (*op_kinopio_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i) = {
+    op_kinopio_sub1,	// 黒枠まで歩いて待機@(WAIT_k)
+    op_kinopio_sub2,	// 振り向きまで(WALK_k)
+    op_kinopio_sub3,	// 引き抜き位置まで移動(WALK2_k)
+    op_kinopio_sub4,	// 引き抜き中(PULL_k)
+    op_kinopio_sub5,	// 引き抜き後(WAIT2_k)
+};
+
+/*--------------------------------------------------------------*/
+/*	ルイージ用ＯＢＪ移動テーブル				*/
+/*--------------------------------------------------------------*/
+void (*op_luigi_move_tbl[])(Opening_obj_c *opn_pt, u8 t_i) = {
+    op_luigi_sub1,	// 待機@(WAIT_l)
+    op_luigi_sub2,	// ダッシュ→追いつくまで(DASH_l)
+    op_luigi_sub3,	// 引き抜き位置まで移動(WALK_l)
+    op_luigi_sub4,	// 引き抜き中(PULL_l)
+    op_luigi_sub5,	// 引き抜き後(WAIT2_l)
+};
+
+/*--------------------------------------------------------------*/
+/*		オープニング用Ｘ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_xclc(Opening_obj_c *opn_pt){
+    OPXPOS(opn_pt) += OPXSPD(opn_pt);
+    OPXPOSH(opn_pt) = OPXPOS(opn_pt)>>16;
+}
+
+/*--------------------------------------------------------------*/
+/*		オープニング用Ｙ移動プログラム			*/
+/*--------------------------------------------------------------*/
+void op_yclc(Opening_obj_c *opn_pt){
+    s32 y_limit;
+
+    OPYSPD(opn_pt) += 0x2000;
+    OPYPOS(opn_pt) += OPYSPD(opn_pt);
+    if( OPXPOSH(opn_pt) > 0x90 &&
+	OPXPOSH(opn_pt) < 0xE8 ){
+	y_limit = 0xA00000;
+    }
+    else{
+	y_limit = 0xB00000;
+    }
+    if( OPYPOS(opn_pt) > y_limit ){
+	OPYPOS(opn_pt) = y_limit;
+	OPYSPD(opn_pt) = 0;
+    }
+    OPYPOSH(opn_pt) = OPYPOS(opn_pt)>>16;
+}
+
+/*--------------------------------------------------------------*/
+/*		オープニング用メニュー				*/
+/*--------------------------------------------------------------*/
+void (*Opening_menu[])(void) = {
+    op_scene_1,
+    op_scene_2,
+    op_scene_3,
+    op_scene_4,
+};
+
+/*--------------------------------------------------------------*/
+/*		オープニング用メイン				*/
+/*--------------------------------------------------------------*/
+void Opening_Main(void)
+{
+    u8 t_i;
+    Opening_obj_c *opn_pt;
+    Opening_eff_c *ope_pt;
+
+    OPIPT = 0;
+    OPAPT = 0;
+
+    for( t_i = 0; t_i < OPOBJMAX; t_i++ ){
+	if( OPSETFG[t_i] != 0 ){
+	    opn_pt = &OPOBJDT[t_i];
+	    op_obj_move_tbl[t_i](opn_pt, t_i);
+	    op_obj_oam_tbl[t_i](t_i);
+	}
+    }
+    for( t_i = 0; t_i < 16; t_i++ ){
+	if( OPESTFG[t_i] != 0 ){
+	    ope_pt = &OPEFFDT[t_i];
+	    op_move_effect(ope_pt, t_i);
+	    op_effect_oam_set(ope_pt);
+	}
+    }
+    Opening_menu[OPMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング用シーン１プログラム			*/
+/*	開始から引き抜き位置に立つところまで			*/
+/*--------------------------------------------------------------*/
+void op_scene_1(void)
+{
+    u16	t_alpha;
+    Opening_obj_c *opn_pt;
+
+    if( OPOBJDT[mario].xposh >= 0x89 ){
+//	mGm_SCCH1 = OPOBJDT[mario].xposh - 0x71;
+	if( mGm_FRAME_COUNT&1 ){
+	    mGm_SCCH1++;
+	}
+	if( mGm_SCCH1 >= 0x110 ){
+	    mGm_SCCH1 = 0x110;
+	}
+    }
+    if( OPOBJDT[luigi].xpos == KUSAPOS[luigi] ){
+	if( (mGm_FRAME_COUNT&0xF) == 0 ){
+	    t_alpha = BLDALPHA;
+	    BLDALPHA = (t_alpha&0xFF00) + 0x100;
+	    BLDALPHA |= ((t_alpha&0xFF) - 1);
+	    if( BLDALPHA >= 0x1000 ){
+		BLDCNT = 0;
+		BLDALPHA = 0;
+		DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+		    DISP_BG2_ON | DISP_OBJ_ON;
+		OPSETFG[c_mark] = 0;
+		OPOBJDT[mario].mode = PULL_m;
+		OPOBJDT[peach].mode = PULL_p;
+		OPOBJDT[kinopio].mode = PULL_k;
+		OPOBJDT[luigi].mode = PULL_l;
+		OPOBJDT[mario].timer = 0;
+		TITLE_WORK32(0) = 1;
+		OPMODE++;
+		OPTIME = 0x1B5;		// 引き抜き待ち時間
+		OPBG2YP = mGm_SCCV2<<16;
+		OPSPEED = -0x7E000;
+		// 雲セット
+		OPSETFG[cloud1A] = 1;
+		opn_pt = &OPOBJDT[cloud1A];
+		OPXPOSH(opn_pt) = 0x200;
+		OPYPOSH(opn_pt) = 0x28;
+		OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+		OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+		OPXSPD(opn_pt) = CLOUD_SPEED;
+		OPCLTIM = 0;
+	    }
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニング用シーン２プログラム			*/
+/*	抜き始めから③の位置までのスクロール			*/
+/*--------------------------------------------------------------*/
+void op_scene_2(void)
+{
+    op_cloud_set();
+
+    if( OPTIME != 0 ){
+	OPTIME--;
+	mGm_SCCV2 = (OPOBJDT[mario].work)>>2;
+	if( OPTIME == 12 ){
+	    m4aSongNumStart(s_u_se_titlemoti);
+	}
+	if( OPTIME == 0 ){
+//	    OPOBJDT[mario].timer = 0x1D;
+	    OPOBJDT[mario].timer = 0x16;
+	    OPOBJDT[mario].mode = WAIT2_m;
+	    OPOBJDT[peach].mode = WAIT2_p;
+	    OPOBJDT[kinopio].mode = WAIT2_k;
+	    OPOBJDT[luigi].mode = WAIT2_l;
+	    op_stone_set();
+	    TITLE_WORK32(0) = 3;
+	}
+	return;
+    }
+    if( OPBG2YP < 0xF00000 ){
+	OPBG2YP -= OPSPEED;
+	OPSPEED += 0x2000;
+	mGm_SCCV2 = OPBG2YP>>16;
+    }
+    else{
+	OPBG2YP = 0xF00000;
+	mGm_SCCV2 = 0xF0;
+	OPSPEED = 0;
+	if( mGm_SCCV1 > 0x00 ){
+	    mGm_SCCV1--;
+	    mGm_SCCV3--;
+	}
+	else{
+	    OPMODE++;
+	    TITLE_WORK32(0) = 2;
+	    TITLE_WORK32(1) = 0;
+	    OPBG2YP = mGm_SCCV2<<16;
+	    OPSPEED = 0;
+	    OPTIME = 0x80;
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニング用シーン３プログラム			*/
+/*	タイトル落下＆上下動					*/
+/*--------------------------------------------------------------*/
+void op_scene_3(void)
+{
+    Opening_obj_c *opn_pt;
+
+    op_cloud_set();
+
+    if( OPTIME ){
+	OPTIME--;
+	if( OPTIME == 0 )
+	    OPSPEED = 0x38000;
+	return;
+    }
+    OPBG2YP -= OPSPEED;
+    if( OPBG2YP <= 0x700000 ){
+	OPBG2YP = 0x700000;
+	TITLE_WORK32(1)++;
+	if( OPSPEED > 0x4000 ){
+	    OPSPEED = -(OPSPEED>>1);
+	    if( TITLE_WORK32(1) == 1 ){
+		m4aSongNumStart(s_u_se_cansel);
+	    }
+	    else if( TITLE_WORK32(1) == 2 ){
+		m4aSongNumStart(s_u_se_titledosun2);
+	    }
+	    else if( TITLE_WORK32(1) == 3 ){
+		m4aSongNumStart(s_u_se_titledosun3);
+	    }
+	}
+	else{
+	    OPSPEED = 0;
+	    OPMODE++;
+	    OPSETFG[mario] = 0;
+	    OPSETFG[luigi] = 0;
+	    OPSETFG[kinopio] = 0;
+	    OPSETFG[peach] = 0;
+	    OPSETFG[c_mark] = 1;
+
+	    OPSETFG[mode_select] = 1;
+	    opn_pt = &OPOBJDT[mode_select];
+	    OPXPOSH(opn_pt) = 0x12;
+	    OPYPOSH(opn_pt) = 0x04;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+
+	    OPSETFG[sel_cursol] = 1;
+	    opn_pt = &OPOBJDT[sel_cursol];
+	    OPXPOSH(opn_pt) = 0x12;
+	    OPYPOSH(opn_pt) = 0x05;
+	    OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	    OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+
+	    return;
+	}
+    }
+    OPSPEED += 0x2000;
+    mGm_SCCV2 = OPBG2YP>>16;
+}
+/*--------------------------------------------------------------*/
+/*	オープニング用シーン４プログラム			*/
+/*	タイトル固定＆雲セット					*/
+/*--------------------------------------------------------------*/
+void op_scene_4(void)
+{
+    op_cloud_set();
+
+    if( OPTIME < 0x940 ){
+	OPTIME++;
+    }
+    else if( OPTIME == 0x940 ){
+	VSYNC_OFF = 1;
+	OPTIME++;
+    }
+    else{
+	if( mGm_SLMODE < 2 )
+	    op_back_to_1();
+	else
+	    OPTIME = 0;
+    }
+
+}
+/*--------------------------------------------------------------*/
+/*		煙セットプログラム				*/
+/*--------------------------------------------------------------*/
+void op_smok_set(Opening_obj_c *opn_pt)
+{
+    u8 t_i;
+    Opening_eff_c *ope_pt;
+
+    for( t_i = 0; t_i < 16; t_i++ ){
+	if( OPESTFG[t_i] == 0 ){
+	    OPESTFG[t_i] = 1;
+	    ope_pt = &OPEFFDT[t_i];
+	    OPEXPOSH(ope_pt) = OPXPOSH(opn_pt);
+	    OPEYPOSH(ope_pt) = OPYPOSH(opn_pt)+0x18;
+	    OPEXPOS(ope_pt) = OPXPOSH(ope_pt)<<16;
+	    OPEYPOS(ope_pt) = OPYPOSH(ope_pt)<<16;
+	    OPEPTRN(ope_pt) = 0;
+	    return;
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*		石セットプログラム				*/
+/*--------------------------------------------------------------*/
+void op_stone_set(void)
+{
+    u8 t_i;
+    Opening_eff_c *ope_pt;
+
+    for( t_i = 0; t_i < 4; t_i++ ){
+	RDMSUB();
+	OPESTFG[(t_i<<2)+0] = 1;
+	ope_pt = &OPEFFDT[(t_i<<2)+0];
+	if( ENRND[1]&1 ){
+	    OPEXPOS(ope_pt) = 
+		0x1500000 + ((ENRND[0]&0xF)<<17);
+	}
+	else{
+	    OPEXPOS(ope_pt) = 
+		0x1500000 - ((ENRND[0]&0xF)<<17);
+	}
+	OPEYPOS(ope_pt) = 0xD00000;
+	OPEXPOSH(ope_pt) = OPEXPOS(ope_pt)>>16;
+	OPEYPOSH(ope_pt) = OPEYPOS(ope_pt)>>16;
+	OPEXSPD(ope_pt) = StoneSpd_Tbl[ENRND[0]&7];
+	OPEYSPD(ope_pt) = StoneSpd_Tbl[(ENRND[1]&7)+8];
+
+	OPESTFG[(t_i<<2)+1] = 1;
+	ope_pt = &OPEFFDT[(t_i<<2)+1];
+	if( ENRND[0]&1 ){
+	    OPEXPOS(ope_pt) = 
+		0x1700000 + ((ENRND[1]&0xF)<<17);
+	}
+	else{
+	    OPEXPOS(ope_pt) = 
+		0x1700000 - ((ENRND[1]&0xF)<<17);
+	}
+	OPEYPOS(ope_pt) = 0xD00000;
+	OPEXPOSH(ope_pt) = OPEXPOS(ope_pt)>>16;
+	OPEYPOSH(ope_pt) = OPEYPOS(ope_pt)>>16;
+	OPEXSPD(ope_pt) = StoneSpd_Tbl[ENRND[1]&7];
+	OPEYSPD(ope_pt) = StoneSpd_Tbl[(ENRND[0]&7)+8];
+
+	RDMSUB();
+	OPESTFG[(t_i<<2)+2] = 1;
+	ope_pt = &OPEFFDT[(t_i<<2)+2];
+	if( ENRND[0]&1 ){
+	    OPEXPOS(ope_pt) = 
+		0x1900000 + ((ENRND[1]&0xF)<<17);
+	}
+	else{
+	    OPEXPOS(ope_pt) = 
+		0x1900000 - ((ENRND[1]&0xF)<<17);
+	}
+	OPEYPOS(ope_pt) = 0xD00000;
+	OPEXPOSH(ope_pt) = OPEXPOS(ope_pt)>>16;
+	OPEYPOSH(ope_pt) = OPEYPOS(ope_pt)>>16;
+	OPEXSPD(ope_pt) = StoneSpd_Tbl[(ENRND[0]+ENRND[1])&7];
+	OPEYSPD(ope_pt) = StoneSpd_Tbl[((ENRND[0]+ENRND[1])&7)+8];
+
+	OPESTFG[(t_i<<2)+3] = 1;
+	ope_pt = &OPEFFDT[(t_i<<2)+3];
+	if( ENRND[1]&1 ){
+	    OPEXPOS(ope_pt) = 
+		0x1B00000 + ((ENRND[0]&0xF)<<17);
+	}
+	else{
+	    OPEXPOS(ope_pt) = 
+		0x1B00000 - ((ENRND[0]&0xF)<<17);
+	}
+	OPEYPOS(ope_pt) = 0xD00000;
+	OPEXPOSH(ope_pt) = OPEXPOS(ope_pt)>>16;
+	OPEYPOSH(ope_pt) = OPEYPOS(ope_pt)>>16;
+	OPEXSPD(ope_pt) = StoneSpd_Tbl[(ENRND[0]-ENRND[1])&7];
+	OPEYSPD(ope_pt) = StoneSpd_Tbl[((ENRND[0]-ENRND[1])&7)+8];
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング雲セットプログラム				*/
+/*--------------------------------------------------------------*/
+void op_cloud_set(void)
+{
+    Opening_obj_c *opn_pt;
+
+    if( OPCLTIM < 0xF00 ){
+	OPCLTIM++;
+    }
+
+    if( OPCLTIM == 0x440 ){
+	OPSETFG[cloud1B] = 1;
+	opn_pt = &OPOBJDT[cloud1B];
+	OPXPOSH(opn_pt) = 0x200;
+	OPYPOSH(opn_pt) = 0x38;
+	OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	OPXSPD(opn_pt) = CLOUD_SPEED;
+    }
+    else if( OPCLTIM == 0x7C0 ){
+	OPSETFG[cloud2A] = 1;
+	opn_pt = &OPOBJDT[cloud2A];
+	OPXPOSH(opn_pt) = 0x200;
+	OPYPOSH(opn_pt) = 0x48;
+	OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	OPXSPD(opn_pt) = CLOUD_SPEED;
+    }
+    else if( OPCLTIM == 0x330 ){
+	OPSETFG[cloud2B] = 1;
+	opn_pt = &OPOBJDT[cloud2B];
+	OPXPOSH(opn_pt) = 0x200;
+	OPYPOSH(opn_pt) = 0x58;
+	OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	OPXSPD(opn_pt) = CLOUD_SPEED;
+    }
+    else if( OPCLTIM == 0x600 ){
+	OPSETFG[cloud3A] = 1;
+	opn_pt = &OPOBJDT[cloud3A];
+	OPXPOSH(opn_pt) = 0x200;
+	OPYPOSH(opn_pt) = 0x68;
+	OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	OPXSPD(opn_pt) = CLOUD_SPEED;
+    }
+    else if( OPCLTIM == 0x100 ){
+	OPSETFG[cloud3B] = 1;
+	opn_pt = &OPOBJDT[cloud3B];
+	OPXPOSH(opn_pt) = 0x200;
+	OPYPOSH(opn_pt) = 0x78;
+	OPXPOS(opn_pt) = OPXPOSH(opn_pt)<<16;
+	OPYPOS(opn_pt) = OPYPOSH(opn_pt)<<16;
+	OPXSPD(opn_pt) = CLOUD_SPEED;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング冒頭に戻るためのプログラム			*/
+/*--------------------------------------------------------------*/
+void op_back_to_1(void)
+{
+    *(vu16 *)REG_IME = 0;
+    mGm_SCCH1 = 0;	// map
+    mGm_SCCV1 = 0x60;
+    mGm_SCCH2 = -0x02;	// title
+    mGm_SCCV2 = 0;
+    mGm_SCCH3 = 0;	// sky
+    mGm_SCCV3 = 0x60;
+    mGm_SCCH4 = 0;	// mask
+    mGm_SCCV4 = 0;
+    OPMODE = 0;
+    OPTIME = 0;
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0x2F48;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0x060A;
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+    NMI_NO = nmi_opening;
+    IRQ_NO = irq_title;
+    open_obj_init();
+    TITLE_WORK32(0) = 4;
+    mGm_FRAME_COUNT = 1;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();
+    m4aSongNumStart( s_u_usa_title );
+}
+/*--------------------------------------------------------------*/
+/*	オープニングシーン４に飛ぶためのプログラム		*/
+/*--------------------------------------------------------------*/
+void op_go_to_4(void)
+{
+    OPMODE = 3;
+    OPTIME = 0;
+    mGm_SCCH1 = 0x110;	// map
+    mGm_SCCV1 = 0;
+    mGm_SCCH2 = -0x02;	// title
+    mGm_SCCV2 = 0x70;
+    mGm_SCCH3 = 0;	// sky
+    mGm_SCCV3 = 0;
+    mGm_SCCH4 = 0;	// mask
+    mGm_SCCV4 = 0;
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0;
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_OBJ_ON;
+    NMI_NO = nmi_opening;
+    IRQ_NO = irq_title;
+    open_obj_init2();
+    TITLE_WORK32(0) = 5;
+    SOUND_TIMER = 0;
+    m4aSongNumStart(s_u_se_final);
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング用領域確保					*/
+/*--------------------------------------------------------------*/
+void mGm_MALLOC_p_opn(void)
+{
+    if( p_opn == NULL ){
+	p_opn = (Opening_c *)mGm_MALLOC(sizeof(Opening_c));
+    }
+    DmaClear(3, 0, p_opn, sizeof(Opening_c), 16);
+}
+/*--------------------------------------------------------------*/
+/*	オープニング用領域開放					*/
+/*--------------------------------------------------------------*/
+void mGm_FREE_p_opn(void)
+{
+    if( p_opn != NULL ){
+	mGm_FREE(p_opn);
+	p_opn = NULL;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	オープニング用共通ＯＡＭセットプログラム		*/
+/*--------------------------------------------------------------*/
+void op_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+
+    opn_pt = &OPOBJDT[index];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(opn_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt) - mGm_SCCH1;
+    base_yps = OPYPOSH(opn_pt) - mGm_SCCV1;
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	if( work0 < -0x10 || work0 > 0x100 ||
+	    work1 < -0x10 || work1 > 0xA0 )
+	    continue;
+
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	if( index < 4 ){
+	    if( OPMODE == 0 &&
+		OPOBJDT[index].xposh >= 0x138 ){
+		p_oam->Priority = 2;// 表示優先
+	    }
+	    else{
+		p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	    }
+	}
+	else{
+	    p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	}
+	if( OPHMUKI(opn_pt) == 0 ){
+	    p_oam->HFlip = (work3 >> 7) & 0x01;
+	}
+	else{
+	    p_oam->HFlip = ((work3 >> 7) & 0x01)^1;
+	}
+	if( OPVMUKI(opn_pt) == 0 ){
+	    p_oam->VFlip = (work3 >> 8) & 0x01;
+	}
+	else{
+	    p_oam->VFlip = ((work3 >> 8) & 0x01)^1;
+	}
+	if( index == egg && OPREDFG ){
+	    p_oam->Pltt = 8;
+	}
+	else if( index >= cloud1A && OPYOSFG ){
+	    p_oam->Pltt = 5;
+	}
+	else{
+	    p_oam->Pltt = work3 & 0x000F;
+	}
+
+/*	回転拡縮関係ＯＡＭセット	*/
+	if (((work3 >> 11) & 0x01) == 0){
+	    p_oam->AffineParamNo_L = 
+		(work3 >> 4) & 0x0018;
+	}
+	else{
+	    p_oam->AffineMode = (work3 >> 11) & 0x03;
+	    p_oam->VFlip = OPAPT >> 6;
+	    p_oam->HFlip = OPAPT >> 5;
+	    p_oam->AffineParamNo_L = OPAPT >> 2;
+	    Sraffp.RatioX = OPHSIZ(opn_pt);
+	    Sraffp.RatioY = OPVSIZ(opn_pt);
+	    Sraffp.Theta = 0;
+	    a_affinset(OPAPT);
+	    OPAPT += 0x04;
+	}		
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニングCマーク用ＯＡＭセットプログラム		*/
+/*--------------------------------------------------------------*/
+void op_c_mark_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+
+    opn_pt = &OPOBJDT[index];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(opn_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt);
+    base_yps = OPYPOSH(opn_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt ; //- 0x18;
+	obj_pt++;
+	work1 = base_yps + *obj_pt - 8;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニングモードセレクト文字用ＯＡＭセットプログラム	*/
+/*--------------------------------------------------------------*/
+void op_md_sel_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+    Opening_obj_c *opn_pt2;
+
+    opn_pt = &OPOBJDT[index];
+    opn_pt2 = &OPOBJDT[sel_cursol];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(opn_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt);
+    base_yps = OPYPOSH(opn_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[OPIPT]);
+	if( OPWORK(opn_pt2) ){
+	    if( i >= 5 ){
+		work0 -= 1;
+		work1 -= 1;
+	    }
+	}
+	else{
+	    if( i < 5 ){
+		work0 -= 1;
+		work1 -= 1;
+	    }
+	}
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*　@オープニングモードセレクトカーソル用ＯＡＭセットプログラム	*/
+/*--------------------------------------------------------------*/
+void op_cursol_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+
+    opn_pt = &OPOBJDT[index];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = ((OPPTRN(opn_pt)+OPWORK(opn_pt)*3) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt);
+    base_yps = OPYPOSH(opn_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニングヨッシー用ＯＡＭセットプログラム		*/
+/*--------------------------------------------------------------*/
+void op_yossy_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+
+    opn_pt = &OPOBJDT[index];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(opn_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt) - mGm_SCCH1;
+    base_yps = OPYPOSH(opn_pt) - mGm_SCCV1;
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	if( work0 < -0x10 || work0 > 0x100 ||
+	    work1 < -0x10 || work1 > 0xA0 )
+	    continue;
+
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;
+	if( OPREDFG ){
+	    p_oam->Pltt = 8;
+	}
+	else{
+	    p_oam->Pltt = work3 & 0x000F;
+	}
+
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニング卵用ＯＡＭセットプログラム			*/
+/*--------------------------------------------------------------*/
+void op_egg_oam_set(u8 index)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Opening_obj_c *opn_pt;
+
+    opn_pt = &OPOBJDT[index];
+    obj_pt = open_obj_tbl[index];
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(opn_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(opn_pt) - mGm_SCCH1;
+    base_yps = OPYPOSH(opn_pt) - mGm_SCCV1;
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	if( work0 < -0x10 || work0 > 0x100 ||
+	    work1 < -0x10 || work1 > 0xA0 )
+	    continue;
+
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	if( OPREDFG ){
+	    p_oam->Pltt = 8;
+	}
+	else{
+	    p_oam->Pltt = work3 & 0x000F;
+	}
+
+	OPIPT++;
+
+	p_oam->AffineMode = 1;
+	p_oam->VFlip = OPAPT >> 6;
+	p_oam->HFlip = OPAPT >> 5;
+	p_oam->AffineParamNo_L = OPAPT >> 2;
+	Sraffp.RatioX = OPHSIZ(opn_pt);
+	Sraffp.RatioY = OPVSIZ(opn_pt);
+	Sraffp.Theta = 
+	    ((OPANGL(opn_pt) ^ 0xFF) + 1) << 8;
+	a_affinset(OPAPT);
+	OPAPT += 0x04;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニングエフェクト用ＯＡＭセットプログラム		*/
+/*--------------------------------------------------------------*/
+void op_effect_oam_set(Opening_eff_c *ope_pt)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+
+    if( OPMODE == 0 ){
+	obj_pt = open_eff_tbl[0];
+    }
+    else{
+	obj_pt = open_eff_tbl[1];
+    }
+    loop_ct = *obj_pt;
+    obj_pt = (OPPTRN(ope_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = OPXPOSH(ope_pt) - mGm_SCCH1;
+    base_yps = OPYPOSH(ope_pt) - mGm_SCCV1;
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	if( work0 < -0x10 || work0 > 0x100 ||
+	    work1 < -0x10 || work1 > 0xA0 )
+	    continue;
+
+	p_oam = &(OamBak[OPIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+
+	OPIPT++;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	オープニング用ＯＡＭセットテーブル			*/
+/*--------------------------------------------------------------*/
+void (*op_obj_oam_tbl[])(u8 t_i) = {
+    op_oam_set,		// mario,
+    op_oam_set,		// peach,
+    op_oam_set,		// kinopio,
+    op_oam_set,		// luigi,
+    op_yossy_oam_set,	// yossy,
+    op_egg_oam_set,	// egg,
+    op_c_mark_oam_set,	// c_mark,
+    op_cursol_oam_set,	// sel_cursol,
+    op_md_sel_oam_set,	// mode_select,
+    op_oam_set,		// cloud1A,	// 大
+    op_oam_set,		// cloud1B,	// 大
+    op_oam_set,		// cloud2A,	// 中
+    op_oam_set,		// cloud2B,	// 中
+    op_oam_set,		// cloud3A,	// 小
+    op_oam_set,		// cloud3B,	// 小
+};
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d197 1
+a197 1
+
+d203 6
+d237 1
+d242 1
+a242 1
+    0x0040, 0x0008, 0x01B4, 0x0005,
+d250 1
+a250 1
+    0x0040, 0x0008, 0x01B4, 0x0004,
+d258 1
+a258 1
+    0x0040, 0x0008, 0x01B4, 0x0000,
+d281 2
+a282 2
+static u16 c_markDT[] = {
+    0xE,
+d292 2
+a293 1
+    0x0050, 0x0008, 0x0101, 0x0005,
+d298 11
+d2240 1
+a2240 1
+	work0 = base_xps + *obj_pt;
+d2242 1
+a2242 1
+	work1 = base_yps + *obj_pt;
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

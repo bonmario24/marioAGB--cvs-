@@ -1,0 +1,400 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#### アセンブラ・ローダ・コンパイラ・変換ツール定義
+SOUND_DIR = sound/
+include $(SOUND_DIR)Soundfiles
+
+AGBINC = $(AGBDIR)/include/
+AGBLIB = $(AGBDIR)/lib/
+
+AS = as
+LD = ld
+CC = gcc
+OBJCOPY = objcopy
+
+#### ソースファ@イル定義
+.SFILES =
+.SFILES += crt0.s
+
+.CFILES += ba_effect.c
+.CFILES += ba_player.c
+.CFILES += ba_reach.c
+.CFILES += cm_game.c
+.CFILES += m_battle_rom_play.c
+.CFILES += m_classic_play.c
+.CFILES += m_erase.c
+.CFILES += m_game.c
+.CFILES += m_game_sub.c
+.CFILES += m_game_title.c
+.CFILES += m_main.c
+.CFILES += m_opening.c
+.CFILES += m_score.c
+.CFILES += m_title.c
+.CFILES += m_title_sub.c
+.CFILES += m_vs.c
+.CFILES += m_VsGame.c
+.CFILES += m_VsMain.c
+.CFILES += ua_char_set.c
+.CFILES += ua_course.c
+.CFILES += ua_ending.c
+.CFILES += ua_game.c
+.CFILES += ua_game_over.c
+.CFILES += ua_pause.c
+.CFILES += ua_score.c
+.CFILES += ua_warp.c
+.CFILES += um_bonus.c
+.CFILES += um_courseclear.c
+.CFILES += um_select.c
+.CFILES += um_select_sub.c
+.CFILES += um_yossy.c
+.CFILES += up_common.c
+.CFILES += up_player.c
+
+.CFILES += d_title_bros_obj_Huff.c
+.CFILES += d_title_bros_bg_sch.c
+.CFILES += d_title_maruc_ssc.c
+.CFILES += d_demo_maruc_ssc.c
+.CFILES += d_classic_obj_sch_Huff.c
+.CFILES += d_classic_bg_sch_Huff.c
+
+#### オブジェクトファ@イル定義
+TARGET_OFILES =
+TARGET_OFILES += m_boot.o
+TARGET_OFILES += m_sub.o
+TARGET_OFILES += m_MultiSio.o
+TARGET_OFILES += MultiBoot.o
+TARGET_OFILES += m_bgcheck.o
+TARGET_OFILES += m_scroll.o
+TARGET_OFILES += m_classic_sub.o
+TARGET_OFILES += ua_save.o
+
+TARGET_OFILES += um_result.o
+TARGET_OFILES += um_math.o
+TARGET_OFILES += um_oamset.o
+TARGET_OFILES += um_mosaic.o
+TARGET_OFILES += um_coursecleardt.o
+
+TARGET_OFILES += cm_game_title.o
+
+TARGET_OFILES += ua_act.o
+TARGET_OFILES += ua_common.o
+TARGET_OFILES += ua_commondt.o
+TARGET_OFILES += ua_bg.o
+TARGET_OFILES += ua_unit_change.o
+TARGET_OFILES += ua_color.o
+TARGET_OFILES += ua_bg3_set.o
+TARGET_OFILES += ua_sort.o
+TARGET_OFILES += ua_eggmeter.o
+
+
+# ブロスアクター処理
+TARGET_OFILES += ba_act.o
+TARGET_OFILES += ba_bgYuKa.o
+TARGET_OFILES += ba_bucket.o
+TARGET_OFILES += ba_Coin.o
+TARGET_OFILES += ba_common.o
+TARGET_OFILES += ba_egg.o
+TARGET_OFILES += ba_enFly.o
+TARGET_OFILES += ba_enKani.o
+TARGET_OFILES += ba_enmy.o
+TARGET_OFILES += ba_enNoko.o
+TARGET_OFILES += ba_enToge.o
+TARGET_OFILES += ba_fire.o
+TARGET_OFILES += ba_fishBone.o
+TARGET_OFILES += ba_heart.o
+TARGET_OFILES += ba_ice.o
+TARGET_OFILES += ba_koura.o
+TARGET_OFILES += ba_kuppa.o
+TARGET_OFILES += ba_mutekiStar.o
+TARGET_OFILES += ba_PipeWave.o
+TARGET_OFILES += ba_point.o
+TARGET_OFILES += ba_pow.o
+TARGET_OFILES += ba_smoke.o
+TARGET_OFILES += ba_spark.o
+TARGET_OFILES += ba_splash.o
+TARGET_OFILES += ba_star.o
+TARGET_OFILES += ba_icicle.o
+TARGET_OFILES += ba_powsmk.o
+
+# Enemy,Item処理
+TARGET_OFILES += ua_fairy.o
+TARGET_OFILES += ua_walk.o
+TARGET_OFILES += ua_tori.o
+TARGET_OFILES += ua_huck0.o
+TARGET_OFILES += ua_shoot.o
+TARGET_OFILES += ua_force.o
+TARGET_OFILES += ua_burn0.o
+TARGET_OFILES += ua_bird.o
+TARGET_OFILES += ua_ninja.o
+TARGET_OFILES += ua_ninj1.o
+TARGET_OFILES += ua_flyng.o
+TARGET_OFILES += ua_pigmo.o
+TARGET_OFILES += ua_fish0.o
+TARGET_OFILES += ua_musi0.o
+TARGET_OFILES += ua_tubo.o
+TARGET_OFILES += ua_mask.o
+TARGET_OFILES += ua_hebi0.o
+TARGET_OFILES += ua_hebi1.o
+TARGET_OFILES += ua_sbten.o
+TARGET_OFILES += ua_boss0.o
+TARGET_OFILES += ua_mikey.o
+TARGET_OFILES += ua_ball1.o
+TARGET_OFILES += ua_snake.o
+TARGET_OFILES += ua_fire1.o
+TARGET_OFILES += ua_bkani.o
+TARGET_OFILES += ua_flwer.o
+TARGET_OFILES += ua_canon.o
+TARGET_OFILES += ua_fnsui.o
+TARGET_OFILES += ua_icemn.o
+TARGET_OFILES += ua_fireb.o
+TARGET_OFILES += ua_mamuu.o
+TARGET_OFILES += ua_bgkao.o
+TARGET_OFILES += ua_whats.o
+TARGET_OFILES += ua_wood.o
+TARGET_OFILES += ua_exit.o
+TARGET_OFILES += ua_item.o
+TARGET_OFILES += ua_rocket.o
+TARGET_OFILES += ua_heart.o
+TARGET_OFILES += ua_door.o
+TARGET_OFILES += ua_flag.o
+TARGET_OFILES += ua_lmp0.o
+TARGET_OFILES += ua_star.o
+TARGET_OFILES += ua_spae.o
+TARGET_OFILES += ua_pwbk.o
+TARGET_OFILES += ua_bigboss.o
+TARGET_OFILES += ua_gondola.o
+TARGET_OFILES += ua_gonboss.o
+TARGET_OFILES += ua_gondata.o
+TARGET_OFILES += ua_cherry.o
+TARGET_OFILES += ua_gohoubi.o
+TARGET_OFILES += ua_toge.o
+TARGET_OFILES += ua_egg.o
+TARGET_OFILES += ua_mask1.o
+TARGET_OFILES += ua_capsule.o
+TARGET_OFILES += ua_lift.o
+TARGET_OFILES += ua_bubble.o
+TARGET_OFILES += ua_sboss.o
+TARGET_OFILES += ua_itemball.o
+TARGET_OFILES += ua_mosaic.o
+TARGET_OFILES += ua_coin.o
+
+# Enemyデータ
+TARGET_OFILES += ua_endat0a.o
+TARGET_OFILES += ua_endat0b.o
+TARGET_OFILES += ua_endt.o
+
+# エフェクト処理
+TARGET_OFILES += ua_effect.o
+TARGET_OFILES += ua_effectdt.o
+TARGET_OFILES += ua_shock.o
+TARGET_OFILES += ua_stareffect.o
+TARGET_OFILES += ua_bosseffect.o
+
+# OBJ衝突
+TARGET_OFILES += ua_cros.o
+
+TARGET_OFILES += up_commondt.o
+TARGET_OFILES += up_exst.o
+
+TARGET_OFILES += um_yscr.o
+TARGET_OFILES += um_tscr.o
+
+TARGET_OFILES += m_mini_malloc.o
+
+TARGET_OFILES += course_data.o
+TARGET_OFILES += course_classic.o
+TARGET_OFILES += d_bros_BG_scl.o
+TARGET_OFILES += d_Bros_obj_winner_scl.o
+#TARGET_OFILES += d_classic_bg_sch_Huff.o
+TARGET_OFILES += d_classic_bg_scl.o
+#TARGET_OFILES += d_classic_obj_sch_Huff.o
+TARGET_OFILES += d_classic_obj_scl.o
+TARGET_OFILES += d_classic_haikeiA_LZ.o
+TARGET_OFILES += d_classic_haikeiB_LZ.o
+TARGET_OFILES += d_classic_haikeiC_LZ.o
+TARGET_OFILES += d_classic_haikeiD_LZ.o
+TARGET_OFILES += d_classic_BGanime_sch.o
+TARGET_OFILES += d_Bros_obj_scl.o
+TARGET_OFILES += d_playerA_sob.o
+TARGET_OFILES += d_playerB_sob.o
+#TARGET_OFILES += d_title_bros_bg_sch.o
+TARGET_OFILES += d_title_bros_bg_scl.o
+TARGET_OFILES += d_title_kabe_ssc.o
+TARGET_OFILES += d_title_waku_ssc.o
+#TARGET_OFILES += d_title_maruc_ssc.o
+#TARGET_OFILES += d_title_bros_obj_Huff.o
+TARGET_OFILES += d_title_bros_obj_scl.o
+TARGET_OFILES += d_classic_bonus2_1_Huff.o
+TARGET_OFILES += d_classic_bonus2_2_Huff.o
+TARGET_OFILES += d_classic_bonus2_3_Huff.o
+TARGET_OFILES += d_classic_bonus2_4_Huff.o
+#TARGET_OFILES += d_demo_maruc_ssc.o
+
+TARGET_OFILES += ud_course_data.o
+
+.OFILES = $(.SFILES:.s=.o) $(.CFILES:.c=.o)
+
+#### 各フラグ定義
+ASFLAGS = -I $(AGBINC) -mthumb-interwork
+CFLAGS  = -g -I $(AGBINC) -I$(AGBINC)/backup -mthumb-interwork -nostdlib
+CFLAGS += -D_LANGUAGE_C=1 -DOPTIMUM_MALLOC
+
+CFLAGS  += -W -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wformat -Wchar-subscripts
+CFLAGS  += -Wpointer-arith -Wmissing-declarations -Wmissing-prototypes
+
+LDFLAGS += -Map $(TARGET_MAP) -nostartfiles \
+           -Ttext 0x08000000 -Tbss 0x03000000 -L$(AGBLIB) -lagbsyscall -lisagbprn -lagbbackup \
+			USA_data/usa_data.a COS_data/usa_cos.a
+
+#### 出力ファ@イルフォーマット定義（外部ファ@イル）
+LDSCRIPT = AgbLink.x
+
+#### ターゲットファ@イル定義
+TARGET     = mariousa
+TARGET_BIN = $(TARGET).bin
+TARGET_ELF = $(TARGET).elf
+TARGET_MAP = $(TARGET).map
+
+CLIENT_OFILE =   client.o
+CLIENT_BIN   =   client.bin
+
+VS_OFILE =   vs.o
+VS_BIN   =   vs.bin
+
+BROS_BG_OFILE   =   bros_bg.o
+BROS_BG_BIN     =   bros_bg.bin
+BROS_OBJ0_OFILE =   bros_obj0.o
+BROS_OBJ0_BIN   =   bros_obj0.bin
+BROS_OBJ1_OFILE =   bros_obj1.o
+BROS_OBJ1_BIN   =   bros_obj1.bin
+
+#### 依存関係ファ@イル定義
+DEPENDFILE = Makedepend
+
+#### 各ファ@イル構造定義
+default:
+	@@$(MAKE) -f MakefileVS
+	@@$(MAKE) -f MakefileClient
+	@@$(MAKE) $(TARGET_BIN)
+
+$(TARGET_BIN): $(TARGET_ELF)
+	$(OBJCOPY) -v -O binary $< $@@
+
+$(TARGET_ELF):	$(.OFILES) $(TARGET_OFILES) $(SOUND_FILES) Makefile $(LDSCRIPT) $(DEPENDFILE) $(CLIENT_OFILE) $(BROS_BG_OFILE) $(BROS_OBJ1_OFILE) $(VS_OFILE) $(BROS_OBJ0_OFILE)
+	@@echo > $(TARGET_MAP)
+	$(CC) -g -o $@@  $(.OFILES) $(TARGET_OFILES) $(SOUND_FILES)  $(CLIENT_OFILE) $(BROS_BG_OFILE) $(BROS_OBJ1_OFILE) $(VS_OFILE) $(BROS_OBJ0_OFILE) -Wl,$(LDFLAGS)
+#$(TARGET_ELF):	$(.OFILES) $(SOUND_FILES) Makefile $(LDSCRIPT) $(DEPENDFILE) $(CLIENT_OFILE) $(VS_OFILE)
+#	$(CC) -g -o $@@  $(.OFILES) $(SOUND_FILES)  $(CLIENT_OFILE) $(VS_OFILE) -Wl,$(LDFLAGS)
+
+
+$(CLIENT_OFILE): $(CLIENT_BIN)
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+$(VS_OFILE): $(VS_BIN)
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+$(BROS_BG_OFILE): $(BROS_BG_BIN)
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+$(BROS_OBJ0_OFILE): $(BROS_OBJ0_BIN)
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+$(BROS_OBJ1_OFILE): $(BROS_OBJ1_BIN)
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+
+PHONY: all clean depend
+
+all:	clean depend default
+
+clean :
+	@@$(MAKE) -f MakefileVS clean
+	@@$(MAKE) -f MakefileClient clean
+	-rm -f $(.OFILES) $(DEPENDFILE) $(TARGET_ELF) $(TARGET_BIN)
+
+cln :
+	@@$(MAKE) -f MakefileVS clean
+	@@$(MAKE) -f MakefileClient clean
+	-rm -f $(.OFILES) $(DEPENDFILE) $(TARGET_ELF) $(TARGET_BIN)
+
+vscln:
+	@@$(MAKE) -f MakefileVS clean
+
+ccln:
+	@@$(MAKE) -f MakefileClient clean
+
+ucln:
+	-rm -f $(.OFILES) $(TARGET_ELF) $(TARGET_BIN)
+
+depend:
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+$(DEPENDFILE): 
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+
+#include Gasdepend
+include $(DEPENDFILE)
+
+## > $(DEPENDFILE)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d51 7
+d206 1
+a206 1
+TARGET_OFILES += d_classic_bg_sch_Huff.o
+d208 1
+a208 1
+TARGET_OFILES += d_classic_obj_sch_Huff.o
+d218 1
+a218 1
+TARGET_OFILES += d_title_bros_bg_sch.o
+d222 2
+a223 2
+TARGET_OFILES += d_title_maruc_ssc.o
+TARGET_OFILES += d_title_bros_obj_Huff.o
+d229 1
+a229 1
+TARGET_OFILES += d_demo_maruc_ssc.o
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

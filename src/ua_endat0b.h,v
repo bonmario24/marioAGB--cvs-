@@ -1,0 +1,158 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*==============================================================*/
+/*      Enemy 衝突　@データ       　@　@　@　@　@			*/
+/*==============================================================*/
+#ifndef __UA_ENDAT0B_H_
+#define __UA_ENDAT0B_H_
+
+#include "agb.h"
+
+/*---Enemy BG衝突テーブル---*/
+extern s16 *act_bgcross_tbl[];
+
+/*---Enemy OBJ衝突テーブル---*/
+extern s8 *act_hit_tbl[];
+extern u8 act_ENOJSZ_tbl[];
+extern s8 OSZBOMB_Dt[];
+extern u8 ENOZSZ_Dt[];		// OBJサイズデータ
+extern u8 ENCRSMD[];		// 結果テーブル
+
+/*---敵データ ---*/
+extern u8 ENATDT[];
+extern u8 ENCLDT[];
+extern u8 ENMDDT[];
+
+/*---プレイヤーＶＳ敵 衝突結果テーブル---*/
+extern u8 CROSMD[];
+
+/*---並び替え用データテーブル---*/
+extern u8 SORTDT[];
+
+/*------------- 敵ＯＢＪサイズ ---------------------------------*/
+#define	OSZ0	   	2
+#define	OSZB	   	3
+#define	OSZ1	   	4
+#define	OSZWOOD	   	7
+#define	OSZ2	   	8
+#define	OSZCRPT	   	9
+#define	OSZEXIT	   	11
+#define	OSZ3	   	12	// 未使用？
+#define	OSZ02	   	13	// 未使用？
+#define	OSZ03	   	14
+#define	OSZSNK	   	15
+#define	OSZCN	   	16
+#define	OSZMM	   	17
+#define	OSZFN	   	18
+#define	OSZKN	   	19
+#define OSZBOMB    	20
+#define OSZBGKAO 	21 
+#define OSZBIG     	22 
+#define OSZFISH1   	23 
+#define OSZFISH2   	24 
+#define OSZFISH3   	25 
+#define OSZFISH4   	26 
+#define OSZBGBS0    	27
+#define OSZGONDOLA 	28
+#define OSZBIGBR   	29
+#define OSZTOGE    	30
+#define OSZEXIT2   	31	// 開ききった出口用
+#define OSZEXIT3  	32	// 開き中の出口用
+#define OSZMASK1   	33	// ゴンドラ仮面
+#define OSZEGG	   	34	// ゴンドラ仮面
+#define OSZFACE	   	35	// 拡大FACE SIZE 0xC0 x:-8 y:-0xA
+#define OSZBLUE1   	36	// 青玉
+#define OSZBLUE2   	37	
+#define OSZBLUE3  	38	
+#define OSZBLUE4   	39	
+#define OSZBIRD		40	
+#define OSZBGBS1	41	
+#define OSZBGBS2	42	
+#define OSZLIFT		43	
+#define OSZLIFT2	44	
+#define OSZITEMBALL0	45	
+#define OSZITEMBALL1	46	
+#define OSZITEMBALL2	47	
+#define OSZBIGCOIN	48
+#define OSZBIGWALK1	49
+#define OSZBIGWALK2	4A
+#define OSZBIGWALK3	4B
+#define OSZBIGWALK4	4C
+
+/*------------- プレイヤーＶＳ敵 衝突結果 ----------------------*/
+enum {
+    CRS0,		/* (0) ＶＳ 敵             */ 
+    CRS1,		/* (1) ＶＳ マムー         */
+    CRS2,		/* (2) ＶＳ 持てるブロック */
+    CRS3,		/* (3) ＶＳ ＰＯＷブロック */
+    CRS4,		/* (4) ＶＳ ＯＢＪドア     */
+    CRS5		/* (5) ＶＳ チェリー       */
+};
+/*------------- 敵ＶＳ敵 衝突結果 ----------------------*/
+enum {
+    CRS_NOML,		/* (0) ＶＳ 敵             */ 
+    CRS_BOSS,		/* (1) ＶＳ ボス	   */
+    CRS_PIGM,		/* (2) ＶＳ ピグモ	　@ */
+    CRS_CANO,		/* (3) ＶＳ キャノン	　@ */
+    CRS_FOCE,		/* (4) ＶＳ ダチョウ       */
+    CRS_SBTN,		/* (5) ＶＳ サボテン       */
+    CRS_FIRS,		/* (6) ＶＳ ファ@イアー子   */
+};
+
+enum {
+    SORT_SCORE,		/* スコア＆メータ用(ダミー) */
+    SORT_EXIT,		/* 開閉中出口(ダミー) */
+    SORT_BURN,		/* 爆発(ダミー) */
+    SORT_KATUGI,	/* 担がれ敵(ダミー) */
+    SORT_SHOT,		/* 投げられ敵(ダミー) */
+    SORT_HIKARI,	/* 光の扉 */
+    SORT_PLAYER,	/* プレイヤー(ダミー) */
+    SORT_CAPSULE,	/* アイテムボール */
+    SORT_ITEM,		/* アイテム */
+    SORT_BULLET,	/* 弾丸等 */
+    SORT_BOSS,		/* ボス */
+    SORT_ZAKO,		/* 雑魚敵 */
+    SORT_FAIRY,		/* フェアリー */
+    SORT_LIFT,		/* リフト */
+    SORT_DOOR,		/* 扉 */
+    SORT_CMOD,		/* 特殊 */
+    SORT_CLOR,		/* ABASE_ENCLORに１が入ってるもの */
+    SORT_MAX,		/* 並び替えの種類 */
+};
+#endif /* __UA_ENDAT0B_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

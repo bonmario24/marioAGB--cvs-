@@ -1,0 +1,237 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#ifndef __CLIENT_MAIN_H_
+#define __CLIENT_MAIN_H_
+
+#include <agb.h>
+//#include "Sound/loader_set/m4aLib.h"
+
+/*-------------------- 型定義  -------------------------------*/
+#define MEATER_BUF_SIZE   640   		/* 32×20行分 */
+#define MEATER_CHR_BASE   0x0080
+#define MEATER_SPACE_CHR  (MEATER_CHR_BASE + 0x20)
+#define MEATER_SCR_ADDR   (BG_VRAM+0xc000)
+
+/* 下の数行はs_com.h の一部をコピー＆ペーストしたもの。 */
+/* "2,4,8,64byte単位",の境界調整を行う */
+#define sCo_2BYTE_ALIGN(v)   ((((unsigned int)(v) + 1U) >> 1) << 1)
+#define sCo_4BYTE_ALIGN(v)   ((((unsigned int)(v) + 3U) >> 2) << 2)
+#define sCo_8BYTE_ALIGN(v)   ((((unsigned int)(v) + 7U) >> 3) << 3)
+#define sCo_16BYTE_ALIGN(v)  ((((unsigned int)(v) + 15U) >> 4) << 4)
+#define sCo_64BYTE_ALIGN(v)  (((((unsigned int)(v)) + 63U) >> 6) << 6)
+#define sCo_KBYTE(v)         ((v) << 11)
+/* mini malloc 関連 */
+/* mini malloc は本来ヒープ領域を複数持てますが、今回は1つのみ(sMl_HEAP)
+   とします。なもんで、それ用のマクロ定義。mini malloc については、
+   m_mmalloc.[ch] 参照 */
+#define mGm_HEAP_SIZE        sCo_KBYTE(5/*5*/)  /* mallocのヒープ領域サイズ(n*2KB) */
+#define mGm_HEAP             game.mallocHeap  /* ヒープ領域 */
+#define mGm_INITIAL(s)       sMml_Init((mGm_HEAP),(s))
+#define mGm_MALLOC(s)        sMml_Malloc((mGm_HEAP),(s))
+#define mGm_FREE(p)          sMml_Free((mGm_HEAP),(p))
+#define mGm_GC               sMml_GarbageCollection(mGm_HEAP);  /* 強制ガベージコレクションであってガードキャンセルではない。 */
+
+/*-------------------- 型定義  -------------------------------*/
+typedef void (*mfunc)(void);
+typedef void (*VoidFuncp)(void);
+typedef void (*IntrFuncp)(void);
+
+
+/*-------------------- その他定義  -----------------------------*/
+#define SOUND_ON		0
+#define DEBUG			0
+#define	SKYFADE			1	//0:+1/16 1:+1
+#define FADETIME		0	//0:はやく 1:ゆっくり
+
+/*-------------------- ゲームメイン構造体  ----------------*/
+typedef struct{
+/*	スクロール構造体		*/
+    vu16	IntrCheck;		// 割り込み ﾁｪｯｸ
+    u16		Cont, Trg;		// ｷｰ入力
+    u32		IntrMainBuf[0x200];
+    u8		SLMODE;			// モードセレクト
+    u8		GMMODE;			// ゲームセレクト
+    u8		frameCnt;		// フレームカウンタ
+    u8		V_BLKFLG;
+    u8		SOUNDFG;		// サウンドプログラムキャンセルフラグ
+    u8		OamIDX;			// ＯＡＭセットインデックス
+///    u16		HScroll;		// スクロール値
+    u16		VScroll;
+//    u8		vrflg;
+//    u16		vramd[0x40];
+    u16		dispcnt;
+///    u16		bldmod;			// カラー特殊処理フラグ
+///    u16		colev;
+///    u16		coly;
+    u16		Time;			// タイマー
+    u16		ColBufBG[16][16];//[0x100];	// カラーバッファ@(ＢＧ)
+    u16		ColBufOBJ[16][16];//[0x100];	// カラーバッファ@(ＯＢＪ)
+    u8		ColFlg;			// カラーバッファ@転送フラグ
+#if	SKYFADE
+    u16		FadeCol[16];		// 空の色変えバッファ@
+    u16		FadeOBJCol[16];		// 雲の色変えバッファ@
+#endif
+
+/* ラム実行領域 */
+//    u8		Ramrunbf[0x300];
+
+/* mallocのヒープ領域 */
+//    mMml_class_t    mallocHeap[mGm_HEAP_SIZE / sizeof(mMml_class_t)];
+
+    void	*other;
+} cgameDT_c;
+
+/*-------------------- グローバル変数  -------------------------*/
+	extern cgameDT_c game;
+
+	extern OamData	OamBak[128];		// ＯＡＭ ﾊﾞｯｸｱｯﾌﾟ
+
+	extern	u8	SioFlags;
+	extern	u8	SioModeFlg;
+	extern	u32	*SendAddress;
+	extern	u32	*RecvAddress;
+	extern	u32	*EndAddress;
+	extern	u32	TransSize;
+	extern	u32	ReceiveSize;
+	extern	u32	CheckSumSend;
+	extern	u32	CheckSumRecv;
+	extern	u8	Connect;
+	extern	u8	PlayNum;	// 接続台数
+	extern	u8	ColMoveFlg;	// カラー転送フラグ
+	extern	u8	SioSuccess;	// 転送完了フラグ
+#if DEBUG
+	extern	u8	SioCount;
+	extern	u8	ErrorNo;	// エラーの種類
+#endif
+	extern	u8	ID_No;
+	extern	u8	TransCount;	
+	extern	u32	*SrcTable[4];
+	extern	u32	*DesTable[4];
+	extern	u32	*EndTable[4];
+
+	extern void intr_main(void);
+
+	extern	void	ChildMain(void);
+	extern	void	KeyRead(void);
+	extern	void	VBlankIntr(void);
+	extern	void	HBlankIntr(void);
+	extern	void	VCountIntr(void);
+	extern	const IntrFuncp IntrTable[13];
+	extern	IntrFuncp IntrTableBuf[13];
+	extern	void	ObjVanishAll(void);
+
+extern	u32	d_loader_bg_schDT[8*18];
+//extern	u32	d_loader_obj_schDT[8*96];
+extern	u32	d_load_obj_Huff[0x950];
+extern	u16	d_loader_bg_sclDT[80];
+extern	u16	d_loader_obj_sclDT[96];
+//extern	u8	 _binary_vs_bin_start[], _binary_vs_bin_end[];
+//extern	u32	bootparam[6];
+
+
+#define	VS_START	0x02005800	//MakefileVS のText開始アドレスと
+//m_vs.cのgame_multi_RomWait()とgame_multi_wait2()の中も同じ値にすること
+
+
+/*------------ カラーデータ転送要求ＢＩＴフラグ定義 ------------*/
+#define	BG_COL_TRANS		0x01
+#define	OBJ_COL_TRANS		0x02
+#define	COL_TRANS		0x03
+
+#define mGm_FRAME_COUNT         (game.frameCnt)
+#define mGm_FRAME_COUNTER()     (game.frameCnt++)
+
+#define mGm_SLMODE		(game.SLMODE)
+#define mGm_GMMODE		(game.GMMODE)
+#define mGm_CONT		(game.Cont)
+#define mGm_TRG			(game.Trg)
+#define mGm_V_BLKFLG		(game.V_BLKFLG)
+#define mGm_SOUNDFG		(game.SOUNDFG)
+#define mGm_H_BLKFLG		(game.H_BLKFLG)
+#define mGm_OAMIDX		(game.OamIDX)
+//#define mGm_HSCROLL		(game.HScroll)
+#define mGm_HSCROLL		Hscroll
+extern	u16	Hscroll;
+#define mGm_VSCROLL		(game.VScroll)
+#define mGm_DISPCNT		(game.dispcnt)
+//#define mGm_BLDMOD		(game.bldmod)
+//#define mGm_COLEV		(game.colev)
+//#define mGm_COLY		(game.coly)
+#define mGm_BLDMOD		Bldmod
+#define mGm_COLEV		CoLev
+#define mGm_COLY		ColY
+extern	u16	Bldmod;
+extern	u16	CoLev;
+extern	u16	ColY;
+#define mGm_VRFLG		(game.vrflg)
+#define mGm_VRAMD		(game.vramd)
+#define mGm_OTHER		(game.other)
+
+#define mGm_TIME		(game.Time)
+#define mGm_ColBufBG		(game.ColBufBG)
+#define mGm_ColBufOBJ		(game.ColBufOBJ)
+//#define mGm_ColBufBG(i,j)	(game.ColBufBG[(i)][(j)])
+//#define mGm_ColBufOBJ(i,j)	(game.ColBufOBJ[(i)][(j)])
+#define mGm_COLFLG		(game.ColFlg)
+#define mGm_FADECOL		(game.FadeCol)
+#define mGm_FADEOBJCOL		(game.FadeOBJCol)
+
+
+#define BG0ADDRESS	(BG_VRAM+0x5000)
+#define BG1ADDRESS	(BG_VRAM+0x6000)
+#define BG2ADDRESS	(BG_VRAM+0x7000)
+
+
+#endif /* __CLIENT_MAIN_H_ */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d123 1
+a123 1
+extern	u32	d_load_obj_Huff[0x910];
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

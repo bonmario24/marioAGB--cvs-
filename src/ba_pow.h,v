@@ -1,0 +1,74 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *
+ *	ＰＯＷヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __BA_POW_H_
+#define __BA_POW_H_
+
+#include "ba_player.h"
+
+#define	MAX_POW_YSPD		0x0200
+
+/*-------------------------- 構造体 --------------------------*/
+typedef struct{
+    playerDT_c		*pl;		// 持ち上げているプレイヤーのポインタ
+} powDT_c;
+
+#define	a_POWPL(p)	((p)->pl)
+
+/*------------------------ モード定義 ------------------------*/
+enum {
+    POW_UPMD,		// 地震発生(上昇中)
+    POW_DOWNMD,		// 地震発生(下降中)
+    POW_HANDSUPMD,	// 持ち上げられ中
+    POW_THROWMD,	// 投げられた
+};
+
+/*-------------------- EXTURN  -----------------------*/
+extern	void	ShrinkSet(u8);
+extern	void	MakePow(playerDT_c *, s16, s16, u8);
+extern	u16	MakeObjPow(playerDT_c *, s16, s16, u8);
+extern	void	pow_main(acterDT_c *);
+
+#endif /* __BA_POW_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

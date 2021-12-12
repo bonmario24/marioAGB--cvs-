@@ -1,0 +1,103 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ ****************************************************************
+	ＯＢＪ共通プログラムのヘッダー
+ ****************************************************************
+*/
+#ifndef __BA_COMMON_H_
+#define __BA_COMMON_H_
+
+#include "m_main.h"
+#include "ba_effect.h"
+#include "ba_player.h"
+
+/*-------------------- 構造体 -----------------------*/
+typedef struct{
+    s32	Xpos;
+    s32	Ypos;
+    u8	HFlip;
+    u8	VFlip;
+    u8	Pltt;
+    u16	chrNO;
+    u8	Pri;
+    u8	ObjMode;
+    u8	Shape;
+    u8	Size;
+} commonDT_c;
+
+/*----------- 得点インデックス ----------------------*/
+enum {
+    POINT_0,		//    0点
+    POINT_10,		//   10点
+    POINT_200,		//  200点
+    POINT_500,		//  500点
+    POINT_800,		//  800点
+    POINT_1000,		// 1000点
+    POINT_1600,		// 1600点
+    POINT_2400,		// 2400点
+    POINT_3200,		// 3200点
+    POINT_1UP,		// 1UP&3200点
+};
+
+/*-------------------- EXTURN -----------------------*/
+extern	s32	DispXCalc(s32 Xpos);
+extern	void	OamOtherSet(commonDT_c *);
+extern	void	Oam2x2LoopSet(acterDT_c *);
+extern	void	Oam2x4LoopSet(acterDT_c *);
+extern	void	Oam3x2LoopSet(acterDT_c *);
+extern	void	SobDataOamSet(OamData *, s32, s32);
+extern	void	SizeCHGRollOamSet(commonDT_c *, u8, u8);
+extern	u16	MakeEnemy(u16, s32, s32);
+extern	void	EraseEnemy(acterDT_c *);
+extern	void	AllEraseEnemy(void);
+extern	void	PerfectDeleteAllEnemy(void);
+extern	u16	MakeEffect(u16, s32, s32);
+extern	void	EraseEffect(effectDT_c *);
+extern	void	PerfectDeleteAllEffect(void);
+extern	u16	EnmySearch(u16);
+extern	u8	FootRevision(acterDT_c *, s16, s32, u8);
+extern	void	BGBF_SCR_CHG(u8, s16, s16);
+extern	void	BrosEnemyMove(acterDT_c *);
+extern	playerDT_c	*PlayerHitCHK(acterDT_c *);
+extern	void	AddScore(u8, u8);
+extern	u8	BGYuKaSearch(s16 Xpos, s16 Ypos);
+extern	u8	BGYuKaCHK(s16, s16);
+
+#endif /* __BA_ECOMMON_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

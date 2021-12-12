@@ -1,0 +1,1140 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@//------------------------------------------------------------//
+//             mks4agbLib.h ( m4aLib.h ) ver1.05              //
+//                                                            //
+//          Copyright (C) 1999-2001 NINTENDO Co.,Ltd.         //
+//------------------------------------------------------------//
+
+#ifndef _M4A_LIB_H
+#define _M4A_LIB_H
+
+#define _M4A_LIB_VER 105
+
+#include <AgbSound.h>
+
+
+//ＣＧＢ仮想チャンネルの構造
+typedef struct {
+    u8 ch1[64];
+    u8 ch2[64];
+    u8 ch3[64];
+    u8 ch4[64];
+} CgbChannels;
+
+//ミュージックプレイヤー・テーブルの構造
+typedef struct {
+    MusicPlayerArea *ma;
+    MusicPlayerTrack *ta;
+    u32 tn;
+} MPlayTable;
+
+//ソング・テーブルの構造
+typedef struct {
+    SongHeader *so;
+    u16 ms, me;
+} SongTable;
+
+
+#define CGB1_P12 ((WaveData *)0)
+#define CGB1_P25 ((WaveData *)1)
+#define CGB1_P50 ((WaveData *)2)
+#define CGB1_P75 ((WaveData *)3)
+#define CGB2_P12 CGB1_P12
+#define CGB2_P25 CGB1_P25
+#define CGB2_P50 CGB1_P50
+#define CGB2_P75 CGB1_P75
+#define CGB4_C15 ((WaveData *)0)
+#define CGB4_C07 ((WaveData *)1)
+
+
+extern const u8 __sound_mode_i[];
+#define sound_mode_i ((u32)__sound_mode_i)
+extern const u8 __total_mplay_n[];
+#define total_mplay_n ((u16)__total_mplay_n)
+extern const u8 __total_song_n[];
+#define total_song_n ((u16)__total_song_n)
+
+extern SoundArea m4a_sound;
+extern const MPlayTable mplay_table[];
+extern const SongTable song_table[];
+extern u8 m4a_memacc_area[];
+
+
+extern void m4aSoundInit(void);
+
+#define m4aSoundMode(P1) SoundMode_rev01(P1)
+extern void SoundMode_rev01(u32 mode);
+
+extern void m4aSoundMain(void);
+
+#define m4aSoundVSync() SoundVSync_rev01()
+extern void SoundVSync_rev01(void);
+
+#define m4aSoundVSyncOff() SoundVSyncOff_rev01()
+extern void SoundVSyncOff_rev01(void);
+
+#define m4aSoundVSyncOn() SoundVSyncOn_rev01()
+extern void SoundVSyncOn_rev01(void);
+
+#define m4aMPlayStart(P1,P2) MPlayStart_rev01(P1,P2)
+extern void MPlayStart_rev01(MusicPlayerArea *ma, SongHeader *so);
+
+extern void m4aSongNumStart(u16 n);
+
+extern void m4aSongNumStartOrChange(u16 n);
+
+extern void m4aSongNumStartOrContinue(u16 n);
+
+extern void m4aMPlayImmInit(MusicPlayerArea *ma);
+
+#define m4aMPlayStop(P1) MPlayStop_rev01(P1)
+extern void MPlayStop_rev01(MusicPlayerArea *ma);
+
+extern void m4aSongNumStop(u16 n);
+
+extern void m4aMPlayAllStop(void);
+
+extern void m4aMPlayContinue(MusicPlayerArea *ma);
+
+extern void m4aSongNumContinue(u16 n);
+
+extern void m4aMPlayAllContinue(void);
+
+extern void m4aMPlayFadeOut(MusicPlayerArea *ma, u16 sp);
+
+#define m4aMPlayTempoControl(P1,P2) MPlayTempoControl(P1,P2)
+extern void MPlayTempoControl(MusicPlayerArea *ma, u16 te);
+
+#define m4aMPlayVolumeControl(P1,P2,P3) MPlayVolumeControl(P1,P2,P3)
+extern void MPlayVolumeControl(MusicPlayerArea *ma, u16 tb, u16 vo);
+
+#define m4aMPlayPitchControl(P1,P2,P3) MPlayPitchControl(P1,P2,P3)
+extern void MPlayPitchControl(MusicPlayerArea *ma, u16 tb, s16 pi);
+
+#define m4aMPlayPampotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+#define m4aMPlayPanpotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+extern void MPlayPanpotControl(MusicPlayerArea *ma, u16 tb, s8 pa);
+
+#define m4aMPlayModDepthSet(P1,P2,P3) MPlayModDepthSet(P1,P2,P3)
+extern void MPlayModDepthSet(MusicPlayerArea *ma, u16 tb, u8 md);
+
+#define m4aMPlayLFOSpeedSet(P1,P2,P3) MPlayLFOSpeedSet(P1,P2,P3)
+extern void MPlayLFOSpeedSet(MusicPlayerArea *ma, u16 tb, u8 ls);
+
+
+#endif // _M4A_LIB_H
+
+// MusicPlayers
+extern MusicPlayerArea m4a_mplay000;
+extern MusicPlayerArea m4a_mplay001;
+extern MusicPlayerArea m4a_mplay002;
+extern MusicPlayerArea m4a_mplay003;
+extern MusicPlayerArea m4a_mplay004;
+extern MusicPlayerArea m4a_mplay005;
+extern MusicPlayerArea m4a_mplay006;
+extern MusicPlayerArea m4a_mplay007;
+extern MusicPlayerArea m4a_mplay008;
+extern MusicPlayerArea m4a_mplay009;
+extern MusicPlayerArea m4a_mplay010;
+extern MusicPlayerArea m4a_mplay011;
+extern MusicPlayerArea m4a_mplay012;
+extern MusicPlayerArea m4a_mplay013;
+extern MusicPlayerArea m4a_mplay014;
+extern MusicPlayerArea m4a_mplay015;
+extern MusicPlayerArea m4a_mplay016;
+extern MusicPlayerArea m4a_mplay030;
+extern MusicPlayerArea m4a_mplay031;
+
+// Song files
+extern SongHeader sn_TITLE;
+extern SongHeader sn_STAGE1;
+extern SongHeader sn_STAGE2;
+extern SongHeader sn_CLEAR;
+extern SongHeader sn_GAMEOVER;
+extern SongHeader sn_BONUS;
+extern SongHeader sn_KEKKA;
+extern SongHeader sn_PERFECT;
+extern SongHeader sn_BATTLE_DEAD;
+extern SongHeader sn_HEART;
+extern SongHeader sn_COIN5;
+extern SongHeader sn_JUMP;
+extern SongHeader sn_SLIP;
+extern SongHeader sn_WALK_C;
+extern SongHeader sn_WALK_E;
+extern SongHeader sn_WALK_G;
+extern SongHeader sn_MR_DEAD;
+extern SongHeader sn_MR_DOWN;
+extern SongHeader sn_MR_NEXT;
+extern SongHeader sn_POW;
+extern SongHeader sn_PAUSE1UP;
+extern SongHeader sn_KAME;
+extern SongHeader sn_KANI;
+extern SongHeader sn_HAE;
+extern SongHeader sn_COIN_OUT;
+extern SongHeader sn_TEKI_ATTACK;
+extern SongHeader sn_TEKI_DEAD;
+extern SongHeader sn_DOBON;
+extern SongHeader sn_COIN_GET;
+extern SongHeader sn_FREEZER;
+extern SongHeader sn_FREEZ_DEAD;
+extern SongHeader sn_FIRE;
+extern SongHeader sn_boss_bros;
+extern SongHeader sn_star_bros;
+extern SongHeader sn_KUPPA;
+extern SongHeader sn_KUPPA_DOSIN;
+extern SongHeader sn_win1;
+extern SongHeader sn_lose1;
+extern SongHeader sn_win2;
+extern SongHeader sn_lose2;
+extern SongHeader sn_battle2;
+extern SongHeader sn_battlekekka;
+extern SongHeader sn_zelda_fan;
+extern SongHeader sn_KUPPAFIRE;
+extern SongHeader sn_BAKETU;
+extern SongHeader sn_MOTI;
+extern SongHeader sn_NAGE;
+extern SongHeader sn_TAME;
+extern SongHeader sn_DAMAGE;
+extern SongHeader sn_TIBI;
+extern SongHeader sn_NORI;
+extern SongHeader sn_BUTUKARI;
+extern SongHeader sn_HEART_GET;
+extern SongHeader sn_DEKA;
+extern SongHeader sn_KAO;
+extern SongHeader sn_PUSH;
+extern SongHeader sn_KUPPA_DAMAGE;
+extern SongHeader sn_KUPPA_DEAD;
+extern SongHeader sn_SHIFT;
+extern SongHeader sn_SAVE;
+extern SongHeader sn_intro_battle;
+extern SongHeader sn_KAMEKERI1;
+extern SongHeader sn_KAMEKERI2;
+extern SongHeader sn_KAMEKERI3;
+extern SongHeader sn_KAMEKERI4;
+extern SongHeader sn_PINPON;
+extern SongHeader sn_BUU;
+extern SongHeader sn_battlekekka_intro;
+extern SongHeader sn_FIREDEAD;
+extern SongHeader sn_TURARA_DEAD;
+extern SongHeader sn_battle3;
+extern SongHeader sn_battle4;
+extern SongHeader sn_bassdrum3;
+extern SongHeader sn_intro_bonus;
+extern SongHeader sn_NOBONUS;
+extern SongHeader sn_usa_title;
+extern SongHeader sn_tijou;
+extern SongHeader sn_chika;
+extern SongHeader sn_ura;
+extern SongHeader sn_select;
+extern SongHeader sn_boss;
+extern SongHeader sn_boss_mamu;
+extern SongHeader sn_boss_clear;
+extern SongHeader sn_suishou;
+extern SongHeader sn_game_over;
+extern SongHeader sn_slot_start;
+extern SongHeader sn_usa_dead;
+extern SongHeader sn_star;
+extern SongHeader sn_warp;
+extern SongHeader sn_usa_ending;
+extern SongHeader sn_se_final;
+extern SongHeader sn_se_kettei;
+extern SongHeader sn_se_nage;
+extern SongHeader sn_se_chery;
+extern SongHeader sn_se_tekidead;
+extern SongHeader sn_se_hasigo;
+extern SongHeader sn_se_damage;
+extern SongHeader sn_se_moti1;
+extern SongHeader sn_se_moti2;
+extern SongHeader sn_se_timer;
+extern SongHeader sn_se_dooropen;
+extern SongHeader sn_se_doorclose;
+extern SongHeader sn_se_kamen;
+extern SongHeader sn_se_kujira;
+extern SongHeader sn_se_bomb;
+extern SongHeader sn_se_coin;
+extern SongHeader sn_se_tame;
+extern SongHeader sn_se_tuboin;
+extern SongHeader sn_se_tuboout;
+extern SongHeader sn_se_1up;
+extern SongHeader sn_se_pow;
+extern SongHeader sn_se_pause;
+extern SongHeader sn_se_toriopen;
+extern SongHeader sn_se_toriclose;
+extern SongHeader sn_se_kinoko;
+extern SongHeader sn_se_slotroll;
+extern SongHeader sn_se_slotkettei;
+extern SongHeader sn_se_slotdrum1;
+extern SongHeader sn_se_slotdrum2;
+extern SongHeader sn_se_bossdamage;
+extern SongHeader sn_se_bosshaku;
+extern SongHeader sn_se_rakka;
+extern SongHeader sn_se_bossdead;
+extern SongHeader sn_se_kourakie;
+extern SongHeader sn_se_jump;
+extern SongHeader sn_se_rocket;
+extern SongHeader sn_se_tibi;
+extern SongHeader sn_se_slip;
+extern SongHeader sn_se_kamekeri0;
+extern SongHeader sn_se_kamekeri1;
+extern SongHeader sn_se_kamekeri2;
+extern SongHeader sn_se_kamekeri3;
+extern SongHeader sn_se_kamekeri4;
+extern SongHeader sn_se_kamekeri5;
+extern SongHeader sn_se_kamekeri6;
+extern SongHeader sn_se_kamekeri7;
+extern SongHeader sn_se_kamekeri8;
+extern SongHeader sn_se_mamu;
+extern SongHeader sn_se_mamudead;
+extern SongHeader sn_se_fire;
+extern SongHeader sn_se_mamukemuri;
+extern SongHeader sn_se_yoshi;
+extern SongHeader sn_tubo;
+extern SongHeader sn_worldkekka;
+extern SongHeader sn_se_awa;
+extern SongHeader sn_se_big;
+extern SongHeader sn_se_tama;
+extern SongHeader sn_boss_mae;
+extern SongHeader sn_gamesel;
+extern SongHeader sn_se_jampdai;
+extern SongHeader sn_se_bossbig;
+extern SongHeader sn_se_bombfire;
+extern SongHeader sn_se_cansel;
+extern SongHeader sn_se_heart;
+extern SongHeader sn_se_biribiri;
+extern SongHeader sn_tamago;
+extern SongHeader sn_se_shift;
+extern SongHeader sn_se_start;
+extern SongHeader sn_se_save;
+extern SongHeader sn_se_kamen_okori;
+extern SongHeader sn_se_kabe;
+extern SongHeader sn_se_titlemoti;
+extern SongHeader sn_se_titledosun2;
+extern SongHeader sn_se_titledosun3;
+extern SongHeader sn_se_tamago;
+extern SongHeader sn_boss_mae_r;
+extern SongHeader sn_boss_r;
+extern SongHeader sn_se_kirakira;
+extern SongHeader sn_se_cork;
+extern SongHeader sn_v_usa_00;
+extern SongHeader sn_v_br_01;
+extern SongHeader sn_v_ma_07;
+extern SongHeader sn_v_ma_08;
+extern SongHeader sn_v_ma_09;
+extern SongHeader sn_v_ma_10;
+extern SongHeader sn_v_ma_11;
+extern SongHeader sn_v_ma_12;
+extern SongHeader sn_v_ma_14;
+extern SongHeader sn_v_ma_16;
+extern SongHeader sn_v_ma_17;
+extern SongHeader sn_v_ma_19;
+extern SongHeader sn_v_ma_20;
+extern SongHeader sn_v_ma_21;
+extern SongHeader sn_v_ma_22;
+extern SongHeader sn_v_ma_23;
+extern SongHeader sn_v_ma_24;
+extern SongHeader sn_v_ma_25;
+extern SongHeader sn_v_ma_26;
+extern SongHeader sn_v_ma_27;
+extern SongHeader sn_v_ma_29;
+extern SongHeader sn_v_ma_30;
+extern SongHeader sn_v_ma_31;
+extern SongHeader sn_v_ma_32;
+extern SongHeader sn_v_ma_33;
+extern SongHeader sn_v_ma_34;
+extern SongHeader sn_v_ma_35;
+extern SongHeader sn_v_ma_36;
+extern SongHeader sn_v_ma_37;
+extern SongHeader sn_v_ma_17ya;
+extern SongHeader sn_v_mo_01;
+extern SongHeader sn_v_mo_02;
+extern SongHeader sn_v_mo_03;
+extern SongHeader sn_v_tr_01;
+extern SongHeader sn_v_tr_02;
+extern SongHeader sn_v_tr_03;
+extern SongHeader sn_v_tr_04;
+extern SongHeader sn_v_tr_05;
+extern SongHeader sn_v_cl_01;
+extern SongHeader sn_v_cl_02;
+extern SongHeader sn_v_cl_03;
+extern SongHeader sn_v_fl_01;
+extern SongHeader sn_v_fl_02;
+extern SongHeader sn_v_fl_03;
+extern SongHeader sn_v_wa_01;
+extern SongHeader sn_v_wa_02;
+extern SongHeader sn_v_wa_03;
+extern SongHeader sn_v_wa_04;
+extern SongHeader sn_v_wa_05;
+extern SongHeader sn_v_na_01;
+extern SongHeader sn_v_na_02;
+extern SongHeader sn_v_na_04;
+extern SongHeader sn_v_na_05;
+extern SongHeader sn_v_pi_01;
+extern SongHeader sn_v_pi_02;
+extern SongHeader sn_v_pi_03;
+extern SongHeader sn_v_pi_04;
+extern SongHeader sn_v_re_01;
+extern SongHeader sn_v_re_02;
+extern SongHeader sn_v_re_03;
+extern SongHeader sn_v_re_04;
+extern SongHeader sn_v_gr_01;
+extern SongHeader sn_v_gr_02;
+extern SongHeader sn_v_gr_03;
+extern SongHeader sn_v_gr_04;
+extern SongHeader sn_v_me_01;
+extern SongHeader sn_v_me_02;
+extern SongHeader sn_v_me_03;
+extern SongHeader sn_v_me_04;
+extern SongHeader sn_v_lu_06;
+extern SongHeader sn_v_lu_08;
+extern SongHeader sn_v_lu_10;
+extern SongHeader sn_v_lu_09;
+extern SongHeader sn_v_lu_11;
+extern SongHeader sn_v_lu_12;
+extern SongHeader sn_v_lu_14;
+extern SongHeader sn_v_lu_16;
+extern SongHeader sn_v_lu_17;
+extern SongHeader sn_v_lu_19;
+extern SongHeader sn_v_lu_20;
+extern SongHeader sn_v_lu_21;
+extern SongHeader sn_v_lu_22;
+extern SongHeader sn_v_lu_23;
+extern SongHeader sn_v_lu_24;
+extern SongHeader sn_v_lu_25;
+extern SongHeader sn_v_lu_26;
+extern SongHeader sn_v_lu_27;
+extern SongHeader sn_v_lu_28;
+extern SongHeader sn_v_lu_29;
+extern SongHeader sn_v_lu_30;
+extern SongHeader sn_v_lu_31;
+extern SongHeader sn_v_lu_32;
+extern SongHeader sn_v_lu_33;
+extern SongHeader sn_v_lu_34;
+extern SongHeader sn_v_lu_35;
+extern SongHeader sn_v_lu_36;
+extern SongHeader sn_v_lu_17ya;
+extern SongHeader sn_v_pe_06;
+extern SongHeader sn_v_pe_08;
+extern SongHeader sn_v_pe_09;
+extern SongHeader sn_v_pe_10;
+extern SongHeader sn_v_pe_11;
+extern SongHeader sn_v_pe_13;
+extern SongHeader sn_v_pe_15;
+extern SongHeader sn_v_pe_16;
+extern SongHeader sn_v_pe_18;
+extern SongHeader sn_v_pe_19;
+extern SongHeader sn_v_pe_20;
+extern SongHeader sn_v_pe_21;
+extern SongHeader sn_v_pe_22;
+extern SongHeader sn_v_pe_23;
+extern SongHeader sn_v_pe_24;
+extern SongHeader sn_v_pe_25;
+extern SongHeader sn_v_pe_26;
+extern SongHeader sn_v_pe_28;
+extern SongHeader sn_v_pe_29;
+extern SongHeader sn_v_pe_30;
+extern SongHeader sn_v_pe_31;
+extern SongHeader sn_v_pe_32;
+extern SongHeader sn_v_pe_33;
+extern SongHeader sn_v_pe_34;
+extern SongHeader sn_v_pe_35;
+extern SongHeader sn_v_pe_36;
+extern SongHeader sn_v_pe_16ya;
+extern SongHeader sn_v_to_06;
+extern SongHeader sn_v_to_07;
+extern SongHeader sn_v_to_08;
+extern SongHeader sn_v_to_09;
+extern SongHeader sn_v_to_10;
+extern SongHeader sn_v_to_11;
+extern SongHeader sn_v_to_13;
+extern SongHeader sn_v_to_15;
+extern SongHeader sn_v_to_16;
+extern SongHeader sn_v_to_18;
+extern SongHeader sn_v_to_19;
+extern SongHeader sn_v_to_20;
+extern SongHeader sn_v_to_21;
+extern SongHeader sn_v_to_22;
+extern SongHeader sn_v_to_23;
+extern SongHeader sn_v_to_24;
+extern SongHeader sn_v_to_25;
+extern SongHeader sn_v_to_26;
+extern SongHeader sn_v_to_28;
+extern SongHeader sn_v_to_29;
+extern SongHeader sn_v_to_30;
+extern SongHeader sn_v_to_31;
+extern SongHeader sn_v_to_32;
+extern SongHeader sn_v_to_33;
+extern SongHeader sn_v_to_34;
+extern SongHeader sn_v_to_35;
+extern SongHeader sn_v_to_36;
+extern SongHeader sn_v_to_16ya;
+
+
+
+
+enum {
+
+
+//;================================================
+//;		マリオブラザーズ(s_b_*)
+//;================================================
+
+
+
+	s_b_TITLE,		//;s000 マリオブラザーズ「タイトル画面」
+	s_b_STAGE1,		//;s001 マリオブラザーズ「ステージ１スタート」
+	s_b_STAGE2,		//;s002 マリオブラザーズ「ステージ２スタート」
+	s_b_CLEAR,		//;s003 マリオブラザーズ「ステージクリア」
+	s_b_GAMEOVER,		//;s004 マリオブラザーズ「ゲームオーバー」
+	s_b_BONUS,		//;s005 マリオブラザーズ「ボーナス面タイムカウント」
+	s_b_KEKKA,		//;s006 マリオブラザーズ「結果コインカウント」
+	s_b_PERFECT,		//;s007 マリオブラザーズ「パーフェクト」
+                                 
+	s_b_BATTLE_DEAD,	//;マリオブラザーズ「自機@昇天音」
+	s_b_HEART,		//;マリオブラザーズ「ハートで復活音」
+	s_b_COIN5,		//;マリオブラザーズ「コイン５枚カウント音」
+                                 
+	s_b_JUMP,		//;s011 マリオブラザーズ「ジャンプ」
+	s_b_SLIP,		//;s012 マリオブラザーズ「急ブレーキ」
+	s_b_WALK_C,		//;s013 マリオブラザーズ「歩き音Ｃ」
+	s_b_WALK_E,		//;s014 マリオブラザーズ「歩き音Ｅ」
+	s_b_WALK_G,		//;s015 マリオブラザーズ「歩き音Ｇ」
+	s_b_MR_DEAD,		//;s016 マリオブラザーズ「マリオやられた」
+	s_b_MR_DOWN,		//;s017 マリオブラザーズ「マリオ落下」
+	s_b_MR_NEXT,		//;s018 マリオブラザーズ「マリオ復活」
+	s_b_POW,		//;s019 マリオブラザーズ「ＰＯＷ」
+	s_b_PAUSE1UP,		//;s020 マリオブラザーズ「ポーズ・１ＵＰ」
+                                 
+	s_b_KAME,		//;s021 マリオブラザーズ「カメ出現」
+	s_b_KANI,		//;s022 マリオブラザーズ「カニ出現」
+	s_b_HAE,		//;s023 マリオブラザーズ「ハエ出現」
+	s_b_COIN_OUT,		//;s024 マリオブラザーズ「コイン・フリーザ出現」
+	s_b_TEKI_ATTACK,	//;s025 マリオブラザーズ「敵ひっくりかえる」
+	s_b_TEKI_DEAD,		//;s026 マリオブラザーズ「敵倒す」
+	s_b_DOBON,		//;s027 マリオブラザーズ「ドボン」
+	s_b_COIN_GET,		//;s028 マリオブラザーズ「コイン取得」
+	s_b_FREEZER,		//;s029 マリオブラザーズ「フリーザ凍結」
+	s_b_FREEZ_DEAD,		//;s030 マリオブラザーズ「フリーザ倒す」
+	s_b_FIRE,		//;s031 マリオブラザーズ「火の玉移動」
+
+
+	s_b_boss_bros,		//;s032 マリオブラザーズ「ボス面（ＰＣＭなし）」
+	s_b_star_bros,		//;s033 マリオブラザーズ「無敵ＢＧＭ（ＰＣＭ１音）」
+	s_b_KUPPA,		//;s034 マリオブラザーズ「クッパ城ＢＧＭ」
+
+
+	s_b_KUPPA_DOSIN,	//;s035 マリオブラザーズ「クッパのどっすん音」
+
+
+	s_b_win1,		//;s036 マリオブラザーズ「勝ちＢＧＭ」
+	s_b_lose1,		//;s037 マリオブラザーズ「負けＢＧＭ」
+	s_b_win2,		//;s038 マリオブラザーズ「総合勝ちＢＧＭ」
+	s_b_lose2,		//;s039 マリオブラザーズ「総合負けＢＧＭ」
+
+	dammy40,		//;s040 ■未使用
+
+
+	s_b_battle,		//;s041 マリオブラザーズ「バトルＢＧＭ」
+	s_b_battlekekka,	//;s042 マリオブラザーズ「バトル結果ＢＧＭ」
+
+
+	s_b_zelda_fan,		//;s043 マリオブラザーズ「ゼルダ宝箱ファ@ンファ@ーレ」
+	s_b_KUPPAFIRE,		//;s044 マリオブラザーズ「クッパの吐く炎音」
+
+	s_b_BAKETU,		//;s045 マリオブラザーズ「バケツ叩@く音」
+	s_b_MOTI,		//;s046 マリオブラザーズ「自機@・ＰＯＷ持つ音」
+	s_b_NAGE,		//;s047 マリオブラザーズ「投げる音」
+	s_b_TAME,		//;s048 マリオブラザーズ「自機@しゃがみため音」
+	s_b_DAMAGE,		//;s049 マリオブラザーズ「自機@ダメージ音」
+	s_b_TIBI,		//;s050 マリオブラザーズ「自機@小さくなる音」
+	s_b_NORI,		//;s051 マリオブラザーズ「自機@乗っかり音」
+	s_b_BUTUKARI,		//;s052 マリオブラザーズ「自機@ぶつかり音」
+	s_b_HEART_GET,		//;s053 マリオブラザーズ「ハート取得音」
+	s_b_DEKA,		//;s054 マリオブラザーズ「自機@大きくなる音」
+	s_b_KAO,		//;s055 マリオブラザーズ「顔が大きくなる音」
+	s_b_PUSH,		//;s056 マリオブラザーズ「結果のＰＵＳＨ ＳＴＡＲＴ音」
+
+	s_b_KUPPA_DAMAGE,	//;s057 マリオブラザーズ「クッパダメージ音」
+	s_b_KUPPA_DEAD,		//;s058 マリオブラザーズ「クッパやられ音」
+	s_b_SHIFT,		//;s059 マリオブラザーズ「画面スクロール音（視点変更）」
+	s_b_SAVE,		//;s060 マリオブラザーズ「セーブ終了音」
+
+	s_b_intro_battle,	//;s061 マリオブラザーズ「バトルＢＧＭイントロ」
+
+	s_b_KAMEKERI1,		//;s062 マリオブラザーズ「カメの甲羅蹴る音１」
+	s_b_KAMEKERI2,		//;s063 マリオブラザーズ「カメの甲羅蹴る音２」
+	s_b_KAMEKERI3,		//;s064 マリオブラザーズ「カメの甲羅蹴る音３」
+	s_b_KAMEKERI4,		//;s065 マリオブラザーズ「カメの甲羅蹴る音４」
+	s_b_PINPON,		//;s066 マリオブラザーズ「ピンポーン音」
+	s_b_BUU,		//;s067 マリオブラザーズ「ブブー音」
+
+	s_b_intro_battlekekka,	//;s068 マリオブラザーズ「バトル結果ＢＧＭイントロ」
+
+
+	s_b_FIREDEAD,		//;s069 マリオブラザーズ「ファ@イア倒し音」
+	s_b_TURARA_DEAD,		//;s070 マリオブラザーズ「つらら倒し音」
+
+
+
+
+	dammy71,		//;s071 ■未使用
+	dammy72,		//;s072 ■未使用
+	dammy73,		//;s073 ■未使用
+	dammy74,		//;s074 ■未使用
+	dammy75,		//;s075 ■未使用
+	dammy76,		//;s076 ■未使用
+	dammy77,		//;s077 ■未使用
+	dammy78,		//;s078 ■未使用
+	dammy79,		//;s079 ■未使用
+
+	dammy80,		//;s080 ■未使用
+	dammy81,		//;s081 ■未使用
+	dammy82,		//;s082 ■未使用
+	dammy83,		//;s083 ■未使用
+	dammy84,		//;s084 ■未使用
+	dammy85,		//;s085 ■未使用
+	dammy86,		//;s086 ■未使用
+	dammy87,		//;s087 ■未使用
+	dammy88,		//;s088 ■未使用
+	dammy89,		//;s089 ■未使用
+
+	dammy90,		//;s090 ■未使用
+	dammy91,		//;s091 ■未使用
+	dammy92,		//;s092 ■未使用
+	dammy93,		//;s093 ■未使用
+	dammy94,		//;s094 ■未使用
+	dammy95,		//;s095 ■未使用
+	dammy96,		//;s096 ■未使用
+	dammy97,		//;s097 ■未使用
+	dammy98,		//;s098 ■未使用
+	dammy99,		//;s099 ■未使用
+
+	dammy100,		//;s100 ■未使用
+	dammy101,		//;s101 ■未使用
+	dammy102,		//;s102 ■未使用
+	dammy103,		//;s103 ■未使用
+	dammy104,		//;s104 ■未使用
+	dammy105,		//;s105 ■未使用
+	dammy106,		//;s106 ■未使用
+	dammy107,		//;s107 ■未使用
+	dammy108,		//;s108 ■未使用
+	dammy109,		//;s109 ■未使用
+
+	dammy110,		//;s110 ■未使用
+	dammy111,		//;s111 ■未使用
+	dammy112,		//;s112 ■未使用
+	dammy113,		//;s113 ■未使用
+	dammy114,		//;s114 ■未使用
+	dammy115,		//;s115 ■未使用
+	dammy116,		//;s116 ■未使用
+	dammy117,		//;s117 ■未使用
+	dammy118,		//;s118 ■未使用
+	dammy119,		//;s119 ■未使用
+
+
+
+
+//;●クラシック専用●
+
+	s_b_classic,		//;s120 マリオブラザーズ「クラシックＢＧＭ１（明るい）」
+	s_b_classic2,		//;s121 マリオブラザーズ「クラシックＢＧＭ２（地下面）」
+	s_b_classic3,		//;s122 マリオブラザーズ「クラシックＢＧＭ３（効果音重視）」
+	s_b_intro_bonus,	//;s123 マリオブラザーズ「クラシックＢＧＭ（明るいのイントロ）」
+	s_b_NOBONUS,		//;s124 マリオブラザーズ「ＮＯ ＢＯＮＵＳ音」
+
+
+	dammy125,		//;s125 ■未使用
+	dammy126,		//;s126 ■未使用
+	dammy127,		//;s127 ■未使用
+	dammy128,		//;s128 ■未使用
+	dammy129,		//;s129 ■未使用
+
+	dammy130,		//;s130 ■未使用
+	dammy131,		//;s131 ■未使用
+	dammy132,		//;s132 ■未使用
+	dammy133,		//;s133 ■未使用
+	dammy134,		//;s134 ■未使用
+	dammy135,		//;s135 ■未使用
+	dammy136,		//;s136 ■未使用
+	dammy137,		//;s137 ■未使用
+	dammy138,		//;s138 ■未使用
+	dammy139,		//;s139 ■未使用
+
+	dammy140,		//;s140 ■未使用
+	dammy141,		//;s141 ■未使用
+	dammy142,		//;s142 ■未使用
+	dammy143,		//;s143 ■未使用
+	dammy144,		//;s144 ■未使用
+	dammy145,		//;s145 ■未使用
+	dammy146,		//;s146 ■未使用
+	dammy147,		//;s147 ■未使用
+	dammy148,		//;s148 ■未使用
+	dammy149,		//;s149 ■未使用
+
+	dammy150,		//;s150 ■未使用
+	dammy151,		//;s151 ■未使用
+	dammy152,		//;s152 ■未使用
+	dammy153,		//;s153 ■未使用
+	dammy154,		//;s154 ■未使用
+	dammy155,		//;s155 ■未使用
+	dammy156,		//;s156 ■未使用
+	dammy157,		//;s157 ■未使用
+	dammy158,		//;s158 ■未使用
+	dammy159,		//;s159 ■未使用
+
+	dammy160,		//;s160 ■未使用
+	dammy161,		//;s161 ■未使用
+	dammy162,		//;s162 ■未使用
+	dammy163,		//;s163 ■未使用
+	dammy164,		//;s164 ■未使用
+	dammy165,		//;s165 ■未使用
+	dammy166,		//;s166 ■未使用
+	dammy167,		//;s167 ■未使用
+	dammy168,		//;s168 ■未使用
+	dammy169,		//;s169 ■未使用
+
+
+
+
+//;================================================
+//;		マリオＵＳＡ(s_u_*)
+//;================================================
+
+
+
+	s_u_usa_title,		//;s170 マリオＵＳＡ「タイトル画面」
+	s_u_tijou,		//;s171 マリオＵＳＡ「地上面」
+	s_u_chika,		//;s172 マリオＵＳＡ「地下面」
+	s_u_ura,		//;s173 マリオＵＳＡ「ボーナス面（裏側）」
+	s_u_select,		//;s174 マリオＵＳＡ「キャラセレクト画面」
+	s_u_boss,		//;s175 マリオＵＳＡ「ボス面（通常）」
+	s_u_boss_mamu,		//;s176 マリオＵＳＡ「ボス面（最終面）」
+
+	s_u_boss_clear,		//;s177 マリオＵＳＡ「ボス面クリア」
+	s_u_suishou,		//;s178 マリオＵＳＡ「水晶取った音、スロットで当たり」
+	s_u_game_over,		//;s179 マリオＵＳＡ「ゲームオーバー」
+	s_u_slot_start,		//;s180 マリオＵＳＡ「スロットファ@ンファ@ーレ」
+	s_u_usa_dead,		//;s181 マリオＵＳＡ「プレイヤーダウン」
+	s_u_star,		//;s182 マリオＵＳＡ「プレイヤー無敵」
+	s_u_warp,		//;s183 マリオＵＳＡ「ワープＢＧＭ」
+	s_u_usa_ending,		//;s184 マリオＵＳＡ「エンディング（一人）」
+
+	dammy185,		//;s185 ■未使用
+
+	s_u_se_final,		//;s186 マリオＵＳＡ「最後のPUSH START音」
+	s_u_se_kettei,		//;s187 マリオＵＳＡ「セレクト画面決定音」
+	s_u_se_nage,		//;s188 マリオＵＳＡ「草、敵投げ音」
+	s_u_se_chery,		//;s189 マリオＵＳＡ「チェリー取った音」
+	s_u_se_tekidead,	//;s190 マリオＵＳＡ「敵倒した音」
+	s_u_se_hasigo,		//;s191 マリオＵＳＡ「はしご登る音」
+	s_u_se_damage,		//;s192 マリオＵＳＡ「自機@ダメージ音」
+	s_u_se_moti1,		//;s193 マリオＵＳＡ「草を抜く音」
+	s_u_se_moti2,		//;s194 マリオＵＳＡ「敵を持つ音」
+	s_u_se_timer,		//;s195 マリオＵＳＡ「タイマー取った音」
+	s_u_se_dooropen,	//;s196 マリオＵＳＡ「ドア開ける音」
+	s_u_se_doorclose,	//;s197 マリオＵＳＡ「ドア閉める音」
+	s_u_se_kamen,		//;s198 マリオＵＳＡ「カメーン怒り音」
+	s_u_se_kujira,		//;s199 マリオＵＳＡ「鯨潮ふき音」
+	s_u_se_bomb,		//;s200 マリオＵＳＡ「爆発音」
+	s_u_se_coin,		//;s201 マリオＵＳＡ「コイン取った音」
+	s_u_se_tame,		//;s202 マリオＵＳＡ「しゃがみため音」
+	s_u_se_tuboin,		//;s203 マリオＵＳＡ「つぼに入る音」
+	s_u_se_tuboout,		//;s204 マリオＵＳＡ「つぼから出る音」
+	s_u_se_1up,		//;s205 マリオＵＳＡ「１ＵＰ音」
+	s_u_se_pow,		//;s206 マリオＵＳＡ「ＰＯＷ音」
+	s_u_se_pause,		//;s207 マリオＵＳＡ「ポーズ音」
+	s_u_se_toriopen,	//;s208 マリオＵＳＡ「鳥開く音」
+	s_u_se_toriclose,	//;s209 マリオＵＳＡ「鳥閉じる音」
+	s_u_se_kinoko,		//;s210 マリオＵＳＡ「自機@大きくなる音」
+	s_u_se_slotroll,	//;s211 マリオＵＳＡ「スロット回ってる音」
+	s_u_se_slotkettei,	//;s212 マリオＵＳＡ「スロット決定音」
+	s_u_se_slotdrum1,	//;s213 マリオＵＳＡ「スロットドラム音（始め）」
+	s_u_se_slotdrum2,	//;s214 マリオＵＳＡ「スロットドラム音（終わり）」
+	s_u_se_bossdamage,	//;s215 マリオＵＳＡ「ボスダメージ音」
+	s_u_se_bosshaku,	//;s216 マリオＵＳＡ「ボス攻撃音」
+	s_u_se_rakka,		//;s217 マリオＵＳＡ「自機@落下音」
+	s_u_se_bossdead,	//;s218 マリオＵＳＡ「ボスやられ音」
+	s_u_se_kourakie,	//;s219 マリオＵＳＡ「甲羅消え音」
+	s_u_se_jump,		//;s220 マリオＵＳＡ「ジャンプ音」
+	s_u_se_rocket,		//;s221 マリオＵＳＡ「ロケット音」
+	s_u_se_tibi,		//;s222 マリオＵＳＡ「自機@小さくなる音」
+	s_u_se_slip,		//;s223 マリオＵＳＡ「自機@スリップ音」
+
+	s_u_se_kamekeri0,	//;s224 マリオシリーズ「カメ蹴り音０」
+	s_u_se_kamekeri1,	//;s225 マリオシリーズ「カメ蹴り音１」
+	s_u_se_kamekeri2,	//;s226 マリオシリーズ「カメ蹴り音２」
+	s_u_se_kamekeri3,	//;s227 マリオシリーズ「カメ蹴り音３」
+	s_u_se_kamekeri4,	//;s228 マリオシリーズ「カメ蹴り音４」
+	s_u_se_kamekeri5,	//;s229 マリオシリーズ「カメ蹴り音５」
+	s_u_se_kamekeri6,	//;s230 マリオシリーズ「カメ蹴り音６」
+	s_u_se_kamekeri7,	//;s231 マリオシリーズ「カメ蹴り音７」
+	s_u_se_kamekeri8,	//;s232 マリオシリーズ「カメ蹴り音８」
+
+	s_u_se_mamu,		//;s233 マリオＵＳＡ「マムー攻撃音」
+	s_u_se_mamudead,	//;s234 マリオＵＳＡ「マムー倒し音」
+	s_u_fire,		//;s235 マリオＵＳＡ「植物の吐く炎の音」
+	s_u_se_mamukemuri,	//;s236 マリオＵＳＡ「マムーの吐く煙の音」
+	s_u_se_yoshi,		//;s237 マリオＵＳＡ「ヨッシーの鳴き声」
+	s_u_tubo,		//;s238 マリオＵＳＡ「つぼ観覧車ＢＧＭ」
+	s_u_worldkekka,		//;s239 マリオＵＳＡ「ワールド結果画面」
+	s_u_se_awa,		//;s240 マリオＵＳＡ「泡の音」
+	s_u_se_big,		//;s241 マリオＵＳＡ「カメーン巨大化の音」
+	s_u_se_tama,		//;s242 マリオＵＳＡ「赤玉・青玉出た音」
+	s_u_boss_mae,		//;s243 マリオＵＳＡ「ボス前ＢＧＭ」
+	s_u_gamesel,		//;s244 マリオＵＳＡ「ゲーム選択ＢＧＭ」
+	s_u_jampdai,		//;s245 マリオＵＳＡ「ジャンプ台音」
+	s_u_se_bossbig,		//;s246 マリオＵＳＡ「ボス巨大化音」
+	s_u_se_bombfire,	//;s247 マリオＵＳＡ「爆弾の火花音」
+	s_u_se_cansel,		//;s248 マリオＵＳＡ「キャンセル音、はねる音１回目」
+	s_u_se_heart,		//;s249 マリオＵＳＡ「ハート、スター出現音」
+	s_u_se_biribiri,	//;s250 マリオＵＳＡ「電気ビリビリ音」
+	s_u_tamago,		//;s251 マリオＵＳＡ「ヨッシー卵ファ@ンファ@ーレ」
+	s_u_se_shift,		//;s252 マリオＵＳＡ「画面スクロール音（視点変更）」
+	s_u_se_start,		//;s253 マリオＵＳＡ「総合タイトル画面決定音」
+	s_u_se_save,		//;s254 マリオＵＳＡ「セーブ終了音」
+	s_u_se_kamen_okori,	//;s255 マリオＵＳＡ「背景カメーン怒り音」
+
+	s_u_se_kabe,		//;s256 マリオＵＳＡ「甲羅が壁に当たる音」
+
+	s_u_se_titlemoti,	//;s257 マリオＵＳＡ「タイトルを引き抜く音」
+	s_u_se_titledosun2,	//;s258 マリオＵＳＡ「タイトルはねる音２回目」
+	s_u_se_titledosun3,	//;s259 マリオＵＳＡ「タイトルはねる音３回目」
+	s_u_se_tamago,		//;s260 マリオＵＳＡ「ヨッシーたまご割れる音」
+
+	s_u_boss_mae_r,		//;s261 マリオＵＳＡ「ボス前ＢＧＭリバーブ有り」
+	s_u_boss_r,		//;s262 マリオＵＳＡ「ボス面（通常）リバーブ有り」
+	s_u_se_kirakira,	//;s263 マリオＵＳＡ「クリア後の星きらきら音」
+
+	s_u_se_cork,		//;s264 マリオＵＳＡ「デカ野菜を抜く音」
+
+
+	dammy265,		//;s265 ■未使用
+	dammy266,		//;s266 ■未使用
+	dammy267,		//;s267 ■未使用
+	dammy268,		//;s268 ■未使用
+	dammy269,		//;s269 ■未使用
+
+
+
+
+
+
+
+	//;●合成ボイス●
+	s_u_smario_usa_advance,				//;s270
+	s_u_mariobros,					//;s271
+
+
+
+	//;●マリオのボイス●
+	s_u_mario_here_i_come,				//;s272
+	s_u_mario_lets_go,				//;s273
+
+
+
+	//;↓（４人共通並びはここから）
+	s_u_mario_yahoo,		//;s274 
+	s_u_mario_wah_hah,
+	s_u_mario_yah,
+	s_u_mario_hah,
+	s_u_mario_ya,
+	s_u_mario_ohmm_hmm,
+	s_u_mario_eeee_yah1,		//分離「いー」
+	s_u_mario_what_a_tasty_treat,
+	s_u_mario_ow,
+	s_u_mario_oof,
+	s_u_mario_mamma_mia,
+	s_u_mario_oh_no,
+	s_u_mario_ah_cha_cha,
+	s_u_mario_gotcha,
+	s_u_mario_thank_you,
+	s_u_mario_lacky,
+	s_u_mario_just_what_i_needed,
+	s_u_mario_here_i_go,
+	s_u_mario_duh_da_da_dum,
+	s_u_mario_ha,
+	s_u_mario_hoh,
+	s_u_mario_bravo,
+	s_u_mario_a_crystal,
+	s_u_mario_im_moving_now,
+	s_u_mario_no_problem,
+
+	s_u_mario_eeee_yah2,		//分離「やっ」
+
+
+
+
+	//;●敵のボイス●
+	s_u_mouser_have_some_bombs,     //;s300 
+	s_u_mouser_ah_da_da,            
+	s_u_mouser_no_way,              
+	s_u_tryclyde_step_right_up,     
+	s_u_tryclyde_ready_to_get,      
+	s_u_tryclyde_toasted,           
+	s_u_tryclyde_gyaoh,             
+	s_u_tryclyde_impossible,        
+	s_u_clawgrip_tasty_treat,       
+	s_u_clawgrip_ow_wow,            
+	s_u_clawgrip_you_got_me,        
+	s_u_flyguy_im_too_hot_to_touch, 
+	s_u_flyguy_woh_woh,             
+	s_u_flyguy_too_hot_to_touch,    
+	s_u_wart_im_great_wart,         
+	s_u_wart_arrbbit,               
+	s_u_wart_orrbbit,               
+	s_u_wart_bbit_tough,            
+	s_u_wart_nobbit_arrbbit,        
+
+
+
+
+	//;●ナビのボイス●
+	s_u_navi_choose_a_game,         //;s319
+	s_u_navi_choose_a_player,       //;s320
+	s_u_navi_classic,		//;s321
+	s_u_navi_battle,		//;s322
+
+
+
+	dammy323,		//;s323 ■未使用
+	dammy324,		//;s324 ■未使用
+	dammy325,		//;s325 ■未使用
+	dammy326,		//;s326 ■未使用
+	dammy327,		//;s327 ■未使用
+	dammy328,		//;s328 ■未使用
+	dammy329,		//;s329 ■未使用
+
+
+
+	//;●雌敵のボイス●
+	s_u_pinkbirdo_hello_there,      //;s330
+	s_u_pinkbirdo_you_go,           
+	s_u_pinkbirdo_no,               
+	s_u_pinkbirdo_remember_this,    
+	s_u_redbirdo_come_a_long_way,   
+	s_u_redbirdo_finish_you_off,    
+	s_u_redbirdo_aaa,               
+	s_u_redbirdo_how_could_you,     
+	s_u_greenbirdo_lot_of_nerve,    
+	s_u_greenbirdo_ready_for_you,   
+	s_u_greenbirdo_wah,             
+	s_u_greenbirdo_help,            
+
+
+	//;●雌敵のメカボイス●(vgroup=3)
+	s_u_mekabirdo_come_a_long_way,   //;s342 
+	s_u_mekabirdo_finish_you_off,    
+	s_u_mekabirdo_aaa,               
+	s_u_mekabirdo_how_could_you,     
+
+
+
+
+	dammy346,		//;s346 ■未使用
+	dammy347,		//;s347 ■未使用
+	dammy348,		//;s348 ■未使用
+
+
+
+
+
+
+
+
+	//;●ルイージのボイス●
+
+	s_u_luigi_here_we_go,   //;s349 
+	s_u_luigi_lets_go,      //;s350 
+
+
+
+
+	//;↓（４人共通並びはここから）
+	s_u_luigi_yeaa,			//;s351 
+	s_u_luigi_wah_hah,              
+	s_u_luigi_yah,                  
+	s_u_luigi_hah,                  
+	s_u_luigi_ya,                   
+	s_u_luigi_oomm_hmm,             
+	s_u_luigi_eeee_yah1,            //分離「いー」
+	s_u_luigi_thats_delicious,      
+	s_u_luigi_ow,                   
+	s_u_luigi_hyaaa,               //;vgroup3
+	s_u_luigi_mamma_mia,           
+	s_u_luigi_hyaaaoowao,          
+	s_u_luigi_gwaaa,               
+	s_u_luigi_gotcha,              
+	s_u_luigi_thank_you,           
+	s_u_luigi_lacky,               
+	s_u_luigi_just_what_i_needed,  
+	s_u_luigi_here_i_go,           
+	s_u_luigi_great,               
+	s_u_luigi_ha,                  
+	s_u_luigi_hoh,                 
+	s_u_luigi_bravo,               
+	s_u_luigi_im_moving_now,       
+	s_u_luigi_piece_of_cake,       
+	s_u_luigi_perfect,             
+
+	s_u_luigi_eeee_yah2,            //分離「やっ」
+
+
+
+
+
+
+
+	//;●ピーチのボイス●
+
+	s_u_peach_leave_it_to_me,      //;s377
+
+
+
+	//;↓（４人共通並びはここから）
+	s_u_peach_yahoo,               //;s378
+	s_u_peach_hai_yah,             
+	s_u_peach_ho_oh,               
+	s_u_peach_yippee,              
+	s_u_peach_ya,                  
+	s_u_peach_ohmm_hmm,            
+	s_u_peach_eeee_yah1,           //分離「いー」
+	s_u_peach_fresh_garden,        
+	s_u_peach_oof,                 
+	s_u_peach_kya,                 
+	s_u_peach_oh_no,               
+	s_u_peach_too_bad,             
+	s_u_peach_ahhhh,               
+	s_u_peach_gotcha,              
+	s_u_peach_thank_you,           
+	s_u_peach_lacky,               
+	s_u_peach_just_what_i_needed,  
+	s_u_peach_here_i_go,           
+	s_u_peach_duh_da_da_dum,       
+	s_u_peach_hee_ya,              
+	s_u_peach_take_that,           
+	s_u_peach_oh_yeah,             
+	s_u_peach_a_crystal,           
+	s_u_peach_i_got_it,            
+	s_u_peach_oo_hoo_hoo,          
+
+	s_u_peach_eeee_yah2,            //分離「やっ」
+
+
+
+	dammy404,		//;s404 ■未使用
+	dammy405,		//;s405 ■未使用
+	dammy406,		//;s406 ■未使用
+	dammy407,		//;s407 ■未使用
+	dammy408,		//;s408 ■未使用
+	dammy409,		//;s409 ■未使用
+	dammy410,		//;s410 ■未使用
+	dammy411,		//;s411 ■未使用
+	dammy412,		//;s412 ■未使用
+	dammy413,		//;s413 ■未使用
+
+
+
+
+
+
+	//;●トード（キノピオ）のボイス●
+
+	s_u_toad_ok,            //;s414
+	s_u_toad_hi_yah,                
+
+
+
+	dammy416,		//;s416 ■未使用
+	dammy417,		//;s417 ■未使用
+	dammy418,		//;s418 ■未使用
+	dammy419,		//;s419 ■未使用
+	dammy420,		//;s420 ■未使用
+
+
+
+	//;↓（４人共通並びはここから）
+	s_u_toad_yeaa,                  //;s421
+	s_u_toad_hai_yah,               
+	s_u_toad_ho_oh,                 
+	s_u_toad_yippee,                
+	s_u_toad_ya,                    
+	s_u_toad_ohmm_hmm,              
+	s_u_toad_eeee_yah1,             //分離「いー」
+	s_u_toad_all_vegies,            
+	s_u_toad_kya,                   
+	s_u_toad_hyaaa,                 
+	s_u_toad_hyaaa_aaa,             
+	s_u_toad_too_bad,               
+	s_u_toad_uh_wahh,               
+	s_u_toad_gotcha,                
+	s_u_toad_thank_you,             
+	s_u_toad_lacky,                 
+	s_u_toad_just_what_i_needed,    
+	s_u_toad_here_i_go,             
+	s_u_toad_great,                 
+	s_u_toad_hee_ya,                
+	s_u_toad_take_that,             
+	s_u_toad_oh_yeah,               
+	s_u_toad_i_got_it,              
+	s_u_toad_piece_of_cake,         
+	s_u_toad_yea_hay,               
+
+	s_u_toad_eeee_yah2,             //分離「やっ」
+
+
+
+
+	dammy447,		//;s447 ■未使用
+	dammy448,		//;s448 ■未使用
+	dammy449,		//;s449 ■未使用
+	dammy450,		//;s450 ■未使用
+	dammy451,		//;s451 ■未使用
+	dammy452,		//;s452 ■未使用
+	dammy453,		//;s453 ■未使用
+	dammy454,		//;s454 ■未使用
+	dammy455,		//;s455 ■未使用
+	dammy456,		//;s456 ■未使用
+
+
+
+//;================================================
+//;		共通(s_a_*)
+//;================================================
+};
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

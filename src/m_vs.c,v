@@ -1,0 +1,2349 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*****************************************************************/
+//              
+//	通信対戦開始処理
+//
+//	m_vs.c		2000/12/15
+//
+/*****************************************************************/
+//□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□
+//	対戦開始時の引数について
+//----------------------------------------------------------------
+//	対戦開始時に bootparam領域(0x020000C8 ～ 0x020000DF)を
+//	使って以下の情報を対戦用ルーチンに渡しています。
+//	(これらには親機@･子機@、ＲＯＭ対戦･マルチブート対戦の別に
+//	関係なく必要な情報が含まれています。)
+//
+//	0x020000C8	転送用対戦プログラムの先頭アドレス(4 Byte)
+//	0x020000CC	転送用対戦プログラムの終了アドレス(4 Byte)
+//	0x020000D0	ローダー開始時	：子機@の台数１～３(4 Bit)
+//			ゲーム開始時	：接続台数２～４  (4 Bit)
+//	0x020000D0	０：ＲＯＭ対戦 ／１：MultiBoot対戦(1 Bit)
+//	0x020000D0	０：Classic対戦 ／１：Battle対戦  (1 Bit)
+//	0x020000D2----┐バトルモード各種設定
+//	0x020000D3----┘　@ハンディキャップ(０～４)４人分  (3 Bit × 4)
+//			　@ゲームレベル(３段階)            (2 Bit)
+//			　@ファ@イアボールの有無            (1 Bit)
+//		0000 0000 0000 0000
+//		 ||| |||| |||| |+++--- handicap 4P
+//		 ||| |||| ||++-+------ handicap 3P
+//		 ||| |||+-++---------- handicap 2P
+//		 ||| +++-------------- handicap 1P
+//		 |++------------------ LEVEL (0:easy /1: normal /2:hard)
+//		 +-------------------- ファ@イアボール(0:なし/1:あり)
+//	0x020000D4	転送用ＯＢＪ０キャラの先頭アドレス(4 Byte)
+//	0x020000D8	転送用ＯＢＪ１キャラの先頭アドレス(4 Byte)
+//	0x020000DC	転送用ＢＧキャラの先頭アドレス    (4 Byte)
+//
+//□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□□
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_vs.h"
+#include "MultiBoot.h"
+#include "ad_cad.h"
+#include "m_game_title.h"
+#include "m_game.h"
+
+extern	void ChildMain(void);
+
+/*-------------------- グローバル 変数  ----------------------------*/
+MultiBootParam  multiboot_status;
+u8	*child_bin_start; // ダウンロードするクライアントプログラムの開始アドレス
+u32	child_bin_length; // ダウンロードするクライアントプログラムのサイズ
+
+/*-------------------- EXTERN  ----------------------------*/
+extern u8 _binary_client_bin_start[], _binary_client_bin_end[];
+extern u8 _binary_vs_bin_start[], _binary_vs_bin_end[];
+extern u8 _binary_bros_obj0_bin_start[], _binary_bros_obj0_bin_end[];
+extern u8 _binary_bros_obj1_bin_start[], _binary_bros_obj1_bin_end[];
+extern u8 _binary_bros_bg_bin_start[], _binary_bros_bg_bin_end[];
+
+extern	u32	bootparam[6];
+
+extern	u32 d_title_bros_bg_schDT[8*320];
+extern	u16 d_title_bros_bg_sclDT[256];
+extern	u16 d_title_kabe_sscDT[32*32/1];
+extern	u16 d_title_waku_sscDT[32*32/1];
+extern	u16 d_title_maruc_sscDT[32*32/1];
+//extern	u32 d_title_bros_obj_schDT[8*768];
+extern u8 d_title_bros_obj_Huff[0x2ca8];
+extern	u16 d_title_bros_obj_sclDT[256];
+extern	u16 d_demo_maruc_sscDT[32*32/1];
+
+
+#define	ROM_VS_START	0x02005800
+#define RAM_RUN		0
+
+
+/*======================================================*/
+/*	メッセージ表示					*/
+/*======================================================*/
+#if 1//英語版
+// MODIFIED BY YU TING FOR THE CHINESE VERSION
+u8	Message_0[][2] = {
+	{ 0x10, 0x46 },//
+	{ 0x18, 0x47 },//
+	{ 0x20, 0x0C },//S
+	{ 0x28, 0x0D },//T
+	{ 0x30, 0x30 },//A
+	{ 0x38, 0x09 },//R
+	{ 0x40, 0x0D },//T
+	{ 0x4C, 0x48 },//A
+	{ 0x54, 0x49 },//R
+//	{ 0x60, 0x0D },//T
+	{ 0xFF, 0x00 },
+};
+u8	Message_1[][2] = {
+	{ 0x1C, 0x4A },//C
+	{ 0x24, 0x4B },//H
+	{ 0x2C, 0x4C },//E
+/*	{ 0x34, 0x34 },//C
+	{ 0x3C, 0x35 },//K
+	{ 0x44, 0x36 },//I
+	{ 0x4C, 0x37 },//N
+	{ 0x54, 0x38 },//G
+*/	{ 0xFF, 0x00 },
+};
+u8	Message_2[][2] = {
+	{ 0x10, 0x3D },//P
+	{ 0x18, 0x3E },//L
+	{ 0x20, 0x3F },//E
+	{ 0x28, 0x40 },//A
+	{ 0x30, 0x41 },//S
+/*	{ 0x38, 0x08 },//E
+	{ 0x48, 0x31 },//W
+	{ 0x50, 0x32 },//A
+	{ 0x58, 0x33 },//I
+	{ 0x60, 0x0D },//T
+*/	{ 0xFF, 0x00 },
+};
+u8	Message_3[][2] = {
+	{ 0x6C, 0x4D },//E
+	{ 0x74, 0x4E },//R
+	{ 0x7C, 0x4F },//R
+//	{ 0x7C, 0x0A },//O
+//	{ 0x84, 0x09 },//R
+	{ 0xFF, 0x00 },
+};
+u8	Message_4[][2] = {
+	{ 0x58, 0x82 },//T
+	{ 0x60, 0x83 },//R
+	{ 0x68, 0x84 },//A
+	{ 0x70, 0x85 },//N
+	{ 0x78, 0x86 },//S
+	{ 0x80, 0x87 },//M
+/*	{ 0x67, 0x3B },//I
+	{ 0x6D, 0x0D },//T
+	{ 0x75, 0x0D },//T
+	{ 0x7D, 0x36 },//I
+	{ 0x85, 0x37 },//N
+	{ 0x8D, 0x38 },//G
+	{ 0x99, 0x3C },//D
+	{ 0xA1, 0x30 },//A
+	{ 0xA9, 0x0D },//T
+	{ 0xB1, 0x30 },//A
+*/	{ 0xFF, 0x00 },
+};
+#else//日本語版
+static  u8	Message_0[][2] = {
+	{ 0x14, 0x0B },//P
+	{ 0x1C, 0x0C },//U
+	{ 0x24, 0x0D },//S
+	{ 0x2C, 0x0E },//H
+	{ 0x3C, 0x0D },//S
+	{ 0x44, 0x0F },//T
+	{ 0x4C, 0x30 },//A
+	{ 0x54, 0x09 },//R
+	{ 0x5C, 0x0F },//T
+	{ 0xFF, 0x00 },
+};
+static u8	Message_1[][2] = {
+	{ 0x1C, 0x33 },//チ
+	{ 0x24, 0x37 },//ェ
+	{ 0x2C, 0x38 },//ッ
+	{ 0x34, 0x39 },//ク
+	{ 0x44, 0x3A },//ち
+	{ 0x4C, 0x3B },//ゅ
+	{ 0x54, 0x3C },//う
+	{ 0xFF, 0x00 },
+};
+static u8	Message_2[][2] = {
+	{ 0x10, 0x41 },//し
+	{ 0x18, 0x43 },//ば
+	{ 0x20, 0x44 },//ら
+	{ 0x28, 0x45 },//く
+	{ 0x30, 0x46 },//お
+	{ 0x38, 0x47 },//ま
+	{ 0x40, 0x3A },//ち
+	{ 0x48, 0x48 },//く
+	{ 0x50, 0x49 },//だ
+	{ 0x58, 0x4A },//さ
+	{ 0x60, 0x4B },//い
+	{ 0xFF, 0x00 },
+};
+static u8	Message_3[][2] = {
+	{ 0x64, 0x08 },//E
+	{ 0x6C, 0x09 },//R
+	{ 0x74, 0x09 },//R
+	{ 0x7C, 0x0A },//O
+	{ 0x84, 0x09 },//R
+	{ 0xFF, 0x00 },
+};
+static u8	Message_4[][2] = {
+	{ 0x48, 0x3D },//デ
+	{ 0x50, 0x3E },//ー
+	{ 0x58, 0x3F },//タ
+	{ 0x68, 0x40 },//そ
+	{ 0x70, 0x3C },//う
+	{ 0x78, 0x41 },//し
+	{ 0x80, 0x42 },//ん
+	{ 0x90, 0x3A },//ち
+	{ 0x98, 0x3B },//ゅ
+	{ 0xA0, 0x3C },//う
+	{ 0xFF, 0x00 },
+};
+#endif
+static u8 *Message_Table[5] = {
+	Message_0[0],
+	Message_1[0],
+	Message_2[0],
+	Message_3[0],
+	Message_4[0],
+};
+enum{
+    MES_START,
+    MES_CHECK,
+    MES_MULTI,
+    MES_ERROR,
+    MES_SEND,
+};
+//--- 点滅なし ---//
+static void message_write(u8 no, u8 ypos)
+{
+    OamData	*Oam;
+    u8		*messobj;
+    u8		i;
+
+    messobj = Message_Table[no];
+    i = 0;
+    while(*(messobj + i * 2) != 0xFF){
+	if(mGm_OAMIDX < 128){
+	    Oam = &OamBak[mGm_OAMIDX++];
+	    Oam->VPos = ypos;
+	    Oam->AffineMode = 0;
+	    Oam->ObjMode = 0;
+	    Oam->Mosaic = 0;
+	    Oam->ColorMode = ST_OAM_COLOR_16;
+	    Oam->Shape = 2;
+
+	    Oam->HPos = *(messobj + i * 2); 
+	    Oam->AffineParamNo_L = 0;
+	    Oam->VFlip = 0;
+	    Oam->HFlip = 0;
+	    Oam->Size = 0;
+
+	    Oam->CharNo = 0x250 + *(messobj + i * 2 + 1);
+	    Oam->Priority = 0;
+	    Oam->Pltt = 0x0B;
+	}
+	i++;
+    }
+}
+//--- 点滅あり ---//
+static void obj_write(u8 no, u8 ypos)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		frame = title->frame;
+
+//    if(mGm_FRAME_COUNT & 0x10){
+    if(frame & 0x10){
+	message_write(no, ypos);
+    }
+}
+/*======================================================*/
+/*	ゲームモード文字表示				*/
+/*======================================================*/
+const	u8 	ClassicChr[2][4] = {
+	{ 0x10, 0x11, 0x12, 0x13},//, 0x13, 0x17, 0x10, },
+	{ 0x20, 0x21, 0x22, 0x23},//, 0x23, 0x27, 0x20, },
+};
+const	u8 	BattleChr[2][4] = {
+	{ 0x17, 0x18, 0x19, 0x1A},//, 0x11, 0x1A, },
+	{ 0x27, 0x28, 0x29, 0x2A},//, 0x21, 0x2A, },
+};
+
+static	void	GameMode_Write(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		*vram;
+    u16		color;
+    u8		i;
+
+    color = 0xB000;
+    if(play_mode == PLAY_CLSS){
+	color = (0x0B + title->cursor_col) << 12;
+    }
+    vram = (u16 *)(BG_VRAM + 0xEAD8);
+    for(i=0; i<4; i++){
+	*(vram++) = ClassicChr[0][i] + color;
+    }
+    vram = (u16 *)(BG_VRAM + 0xEB18);
+    for(i=0; i<4; i++){
+	*(vram++) = ClassicChr[1][i] + color;
+    }
+
+    color = 0xB000;
+    if(play_mode == PLAY_BATL){
+	color = (0x0B + title->cursor_col) << 12;
+    }
+    vram = (u16 *)(BG_VRAM + 0xEB58);
+    for(i=0; i<4; i++){
+	*(vram++) = BattleChr[0][i] + color;
+    }
+    vram = (u16 *)(BG_VRAM + 0xEB98);
+    for(i=0; i<4; i++){
+	*(vram++) = BattleChr[1][i] + color;
+    }
+}
+static	void	GameMode_Delete(void)
+{
+    u16		*vram;
+    u8		i, j;
+
+    for(i=0; i<4; i++){
+	vram = (u16 *)(BG_VRAM + 0xEAD8 + i * 0x40);
+	for(j=0; j<7; j++){
+	    *(vram++) = 0x0000;
+	}
+    }
+}
+/*======================================================*/
+/*	カーソル表示					*/
+/*======================================================*/
+#if 0//三角カーソル
+const	u16	CursorChr[] = {
+    0x21A, 0x21B, 0x21C, 0x21D, 0x21E, 0x21D, 0x21C, 0x21B,
+};
+const	u8	CursorXps[] = {
+    0x00, 0x00, 0xFF, 0xFE, 0xFE, 0xFE, 0xFF, 0x00,
+};
+static	void	cursor_write(void)
+{
+    titleDT_c	*title;
+    OamData	*Oam;
+    u8		index;
+    u8		timer;
+
+    index = title->index;
+    timer = title->timer;
+    timer++;
+    if(timer >= 6){
+	timer = 0;
+	index++;
+	index &= 0x07;
+    }
+    title->index = index;
+    title->timer = timer;
+
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = 0x60 + play_mode * 16;
+    Oam->HPos = (0x54 + CursorXps[index]) & 0xFF;
+    Oam->CharNo = CursorChr[index];
+    Oam->Pltt = 5;
+}
+#else//ゆびカーソル
+static	void	cursor_write(void)
+{
+    OamData	*Oam;
+
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = 0x5C + play_mode * 16;
+    Oam->HPos = 0x4C;
+    Oam->Size = 1;
+    Oam->CharNo = 0x214;
+    Oam->Pltt = 2;
+}
+#endif
+/*======================================================*/
+/*	自機@ナンバー表示				*/
+/*======================================================*/
+//static	void	id_number_obj(u8 xpos, u8 ypos, u8 id)
+//{
+//    OamData	*Oam;
+//
+//    Oam = &OamBak[mGm_OAMIDX++];
+//    Oam->VPos = ypos;
+//    Oam->AffineMode = 0;
+//    Oam->ObjMode = 0;
+//    Oam->Mosaic = 0;
+//    Oam->ColorMode = ST_OAM_COLOR_16;
+//    Oam->Shape = 2;
+//    Oam->HPos = xpos;
+//    Oam->AffineParamNo_L = 0;
+//    Oam->VFlip = 0;
+//    Oam->HFlip = 0;
+//    Oam->Size = 0;
+//    Oam->CharNo = 0x0252 + id;
+//    Oam->Priority = 0;
+//    Oam->Pltt = 0x0A;
+//
+//    Oam = &OamBak[mGm_OAMIDX++];
+//    Oam->VPos = ypos;
+//    Oam->AffineMode = 0;
+//    Oam->ObjMode = 0;
+//    Oam->Mosaic = 0;
+//    Oam->ColorMode = ST_OAM_COLOR_16;
+//    Oam->Shape = 2;
+//    Oam->HPos = xpos + 8;
+//    Oam->AffineParamNo_L = 0;
+//    Oam->VFlip = 0;
+//    Oam->HFlip = 0;
+//    Oam->Size = 0;
+//    Oam->CharNo = 0x0256;
+//    Oam->Priority = 0;
+//    Oam->Pltt = 0x0A;
+//}
+
+const VSPLNum_c PLNumData[7] = {
+    { 2, 0, 0x00, 0x00, 0x02CA, },
+    { 2, 0, 0x00, 0x10, 0x02CB, },
+    { 1, 1, 0x08, 0x00, 0x02CC, },
+    { 1, 1, 0x08, 0x18, 0x02EC, },
+    { 2, 0, 0x28, 0x00, 0x02D0, },
+    { 2, 0, 0x28, 0x10, 0x02D1, },
+    { 0, 1, 0x08, 0x08, 0x02C8, },
+};
+const u8 PLNumXpos[4] = {
+    0x18, 0xA8, 0x48, 0x78,
+};
+const u8 IDColTime[2] = {
+    20, 10,
+};
+
+static	void ID_Obj_Set(void)
+{
+    u8		id = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+    titleDT_c	*title = mGm_OTHER;
+    OamData	*Oam;
+    u8		col, timer;
+    u8		i, j;
+
+    col = title->id_col;
+    timer = title->id_coltmr;
+    timer++;
+    if(timer >= IDColTime[col]){
+	timer = 0;
+	title->id_col = col ^ 0x01;
+    }
+    title->id_coltmr = timer;
+
+    for(i=0; i<ConnectAGB; i++){
+	for(j=0; j<7; j++){
+	    Oam = &OamBak[mGm_OAMIDX++];
+
+	    Oam->VPos = PLNumData[j].ypos + 0x80;
+	    Oam->AffineMode = 0;
+	    Oam->ObjMode = 0;
+	    Oam->Mosaic = 0;
+	    Oam->ColorMode = ST_OAM_COLOR_16;
+	    Oam->Shape = PLNumData[j].Shape;
+//	    Oam->HPos = PLNumData[j].xpos + 0x18 + 0x30 * i;
+	    Oam->HPos = PLNumData[j].xpos + PLNumXpos[i];
+	    Oam->AffineParamNo_L = 0;
+	    Oam->VFlip = 0;
+	    Oam->HFlip = 0;
+	    Oam->Size = PLNumData[j].Size;
+	    Oam->CharNo = PLNumData[j].chrno;
+	    Oam->Priority = 0;
+	    if((i == id) && !col){
+		Oam->Pltt = 0x0C + i;
+	    }else{
+		Oam->Pltt = 0x04;
+	    }
+	}
+
+	Oam = &OamBak[mGm_OAMIDX++];
+
+	Oam->VPos = 0x88;
+	Oam->AffineMode = 0;
+	Oam->ObjMode = 0;
+	Oam->Mosaic = 0;
+	Oam->ColorMode = ST_OAM_COLOR_16;
+	Oam->Shape = 0;
+	Oam->HPos = PLNumXpos[i] + 0x18;
+	Oam->AffineParamNo_L = 0;
+	Oam->VFlip = 0;
+	Oam->HFlip = 0;
+	Oam->Size = 1;
+	Oam->CharNo = 0x02C0 + i *2;
+	Oam->Priority = 0;
+	if((i == id) && !col){
+	    Oam->Pltt = 0x0C + i;
+	}else{
+	    Oam->Pltt = 0x04;
+	}
+    }
+}
+/*======================================================*/
+/*	自機@表示					*/
+/*======================================================*/
+const	u8 PlayerCol[4] = { 0, 1, 8, 9, };
+const	u16 PlayerXpos[4] = { 0x3000, 0xB000, 0x6000, 0x8000, };
+
+static	void	player_init(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		i;
+
+    for(i=0; i<4; i++){
+	title->player[i].xpos = PlayerXpos[i];//0x4000 + i * 0x2000;
+	title->player[i].ypos = 0x6000;
+	title->player[0].jump = OFF;
+	title->player[i].anime = 2;
+	title->player[i].timer = 0;
+	title->player[i].direc = ~(i & 1);
+	title->player[i].color = PlayerCol[i];
+    }
+}
+
+static	void	player_obj(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		id = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+    OamData	*Oam;
+    u8		anime;
+    u8		timer;
+    u8		i;
+
+    //自機@表示
+    timer = title->player[id].timer;
+    timer++;
+    title->player[id].timer = timer;
+    if( !(timer & 0x03) ){
+	anime = title->player[id].anime;
+	anime++;
+	if(anime >= 3){
+	    anime = 0;
+	}
+	title->player[id].anime = anime;
+    }
+    for(i=0; i<ConnectAGB; i++){
+	Player_ObjSet(i);
+//	Oam = &OamBak[mGm_OAMIDX++];
+//	Oam->VPos = 0x60;
+//	Oam->AffineMode = 0;
+//	Oam->ObjMode = 0;
+//	Oam->Mosaic = 0;
+//	Oam->ColorMode = ST_OAM_COLOR_16;
+//	Oam->Shape = 2;
+//	Oam->HPos = 0x40 + i * 0x20;
+//	Oam->AffineParamNo_L = 0;
+//	Oam->VFlip = 0;
+//	Oam->HFlip = 0;
+//	Oam->Size = 2;
+//
+//	if(i == id){
+//	    Oam->CharNo = 0x19E;
+//	}else{
+//	    Oam->CharNo = 0x19C;
+//	}
+//	Oam->Priority = 0;
+//	Oam->Pltt = PlayerCol[i];
+    }
+
+    //１Ｐ/２Ｐ/３Ｐ/４Ｐ表示
+////    id_number_obj(PlayerXpos[id] >> 8, 0x50, id);
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = 0x50;
+    Oam->AffineMode = 0;
+    Oam->ObjMode = 0;
+    Oam->Mosaic = 0;
+    Oam->ColorMode = ST_OAM_COLOR_16;
+    Oam->Shape = 2;
+    Oam->HPos = (PlayerXpos[id] >> 8) + 8;
+    Oam->AffineParamNo_L = 0;
+    Oam->VFlip = 0;
+    Oam->HFlip = 0;
+    Oam->Size = 0;
+    Oam->CharNo = 0x0252 + id;
+    Oam->Priority = 0;
+    Oam->Pltt = 0x0A;
+
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = 0x50;
+    Oam->AffineMode = 0;
+    Oam->ObjMode = 0;
+    Oam->Mosaic = 0;
+    Oam->ColorMode = ST_OAM_COLOR_16;
+    Oam->Shape = 2;
+    Oam->HPos = PlayerXpos[id] >> 8;
+    Oam->AffineParamNo_L = 0;
+    Oam->VFlip = 0;
+    Oam->HFlip = 0;
+    Oam->Size = 0;
+    Oam->CharNo = 0x0256;
+    Oam->Priority = 0;
+    Oam->Pltt = 0x0A;
+}
+/*======================================================*/
+/*	子機@にＲＯＭがささっていないか調べる		*/
+/*======================================================*/
+static	u8 MultiBootRomCheck(void)
+{
+    u8	check;
+    u8	 i, k;
+
+    k = 0x0e;
+    for (i=3; i != 0; i--) {
+      if (*(vu16 *)(REG_SIOMULTI0 + i * 2) != 0xffff) {
+//      if (UsrRecvBuf[i][0] != 0xffff) {
+        break;
+      }
+      k >>= 1;
+    }
+    k &= 0x0e;
+    ConnectAGB = 1 + i;
+
+    if(k == 0){
+	return 0;	//子機@が一台もつながっていない
+    }
+
+    check = 1;
+//    for (i=1; i <4; i++) {
+//	if(k & (1 << i)){
+//	    if(*(vu16 *)(REG_SIOMULTI0 + i * 2) != MULTI_SIO_ROM_SET){
+    for (i=1; i <ConnectAGB; i++) {
+//	    if(UsrRecvBuf[i][0] != MULTI_SIO_ROM_SET){
+	    if(*(vu16 *)(REG_SIOMULTI0 + i * 2) != MULTI_SIO_ROM_SET){
+ 		check = 0;	//ＲＯＭがささっていない子機@がある
+	    }
+//	}
+    }
+
+    return check;
+}
+/*======================================================*/
+/*	キャンセルしてタイトルへ行く			*/
+/*======================================================*/
+static	void	CancelBack(void)
+{
+    *(vu16 *)REG_IE &= ~SIO_INTR_FLAG;	// SIO割込不許可
+    RegisterRamReset(RESET_REG_SIO_FLAG);
+    //↑ DISPCNT がリセットされるので注意
+    BRUSFG = MAIN_mode;
+    mGm_SLMODE = 0;
+    mGm_GMMODE = 0;
+    NO_RESET = OFF;
+    NO_SLEEP = OFF;
+    VSYNC_OFF = ON;
+#if SOUND_ON
+//    m4aSoundVSyncOn();
+//    mGm_SOUNDFG = 0;
+#endif
+    if(mGm_OTHER != NULL){
+	mGm_FREE(mGm_OTHER);
+	mGm_OTHER = NULL;
+    }
+}
+/*======================================================*/
+/*	エラー画面へ行く				*/
+/*======================================================*/
+static	void	GotoError(void)
+{
+//    BLDCNT = BLD_DOWN_MODE | BLD_BG0_1ST | BLD_BG1_1ST | BLD_BG2_1ST
+//	| BLD_BD_1ST | BLD_OBJ_1ST;
+    BLDCNT = BLD_DOWN_MODE | BLD_BG2_1ST | BLD_BD_1ST;
+    BLDY = 0x0004;
+//    DmaCopy(3, d_demo_8bit4bit_sclDT + 0xE0, BG_PLTT + 0x180, 0x20, 16);
+    mGm_GMMODE = MB_ERROR;
+    NO_RESET = OFF;
+    NO_SLEEP = OFF;
+}
+/*======================================================*/
+/*	ローダーを外部ＲＡＭに転送			*/
+/*======================================================*/
+static	void	LoadClient(void)
+{
+    CpuCopy(child_bin_start, 0x02000000, child_bin_length, 32);
+    *(u32 *)0x020000C8 = (u32)_binary_vs_bin_start;
+//    *(u32 *)0x020000CC = (u32)_binary_vs_bin_end;
+    *(u32 *)0x020000CC = (u32)_binary_bros_obj0_bin_end;//_binary_vs_bin_end;
+    *(u32 *)0x020000D4 = (u32)_binary_bros_obj0_bin_start;
+    *(u32 *)0x020000D8 = (u32)_binary_bros_obj1_bin_start;
+    *(u32 *)0x020000DC = (u32)_binary_bros_bg_bin_start;
+//    *(u8 *)0x020000D1 = VS_ROM;		//MultiBoot
+//    *(u8 *)0x020000D2 = PLAY_BATL;	//Battle
+    *(u8 *)0x020000D0 = (VS_ROM << 4) | (PLAY_BATL << 5);
+}
+///*======================================================*/
+///*	Ｎｉｎｔｅｎｄｏロゴ表示			  */
+///*======================================================*/
+//const u16 MarioAdvanceC[] = {
+//    0x8060,0x8061,0x8062,	// 0220h
+//    0x8063,0x8064,0x8065,0x8066,0x8067,0x8068,0x8069,0x806a,
+//    0x806b,0x806c,0x806d,0x806e,0x806f,0x8058,0x8059,0x805a,	// 0230h
+//    0x805b,0x004f,0x004f,0x004f,0x004f,0x004f,0x004f,0x004f,
+//    0x004f,0x004f,0x004f,0x004f,0x004f,0x8070,0x8071,0x8072,	// 0240h
+//    0x8073,0x8074,0x8075,0x8076,0x8077,0x8078,0x8079,0x807a,
+//    0x807b,0x807c,0x807d,0x807e,0x807f,0x805c,0x805d,0x805e,	// 0250h
+//    0x805f,
+//};
+
+/*□□□□□□□□□□□□□□□□□□□□□□□□□□□*/
+/*		各種設定選択処理			*/
+/*□□□□□□□□□□□□□□□□□□□□□□□□□□□*/
+
+//======= イニシャル処理 =============================//
+static	void	battle_setup_init(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		i;
+
+    for(i=0; i<ConnectAGB; i++){
+	VS_HANDI(title, i) = 0;	//ハンデ
+    }
+    VS_LEVEL(title) = 0;	//レベル
+    VS_FIRE(title) = 0;		//ファ@イアーボール
+    VS_CARSOL(title) = 0;	//カーソル
+    VS_P_CARSOL(title) = 0;	//プレイヤーカーソル
+    SOUND_TIMER = 0;		//サウンドタイマー
+
+}
+/*--------------------------------------------------------------*/
+/*		レベルスクリーンセット処理			*/
+/*--------------------------------------------------------------*/
+static u16 level_screen_data[] = {
+    0x0000,0x0000,0x0100,0x0101,0x0102,//0x0103,0x0104,0x0105,
+    0x0000,0x0000,0x0110,0x0111,0x0112,//0x0113,0x0114,0x0115,
+};
+
+static u16 fire_screen_data[] = {
+    0x0000,0x0000,0x0106,0x0107,0x0108,//0x0109,0x010a,0x010b,0x010c,0x010d,
+    0x0000,0x0000,0x0116,0x0117,0x0118,//0x0119,0x011a,0x011b,0x011c,0x011d,
+};
+
+static u16 coin_screen_data[] = {
+    0x0000,0x0000,0x010e,0x010f,0x0120,0x0121,//0x0122,0x0123,0x0124,0x0125,
+    0x0000,0x0000,0x011e,0x011f,0x0130,0x0131,//0x0132,0x0133,0x0134,0x0135,
+};
+
+static u16 level_data[] = {
+    0xe127,0xe128,0xe129,
+    0xe12a,0xe12b,0xe12c,
+    0xe12d,0xe12e,0xe12f,
+};
+
+static u16 fire_data[] = {
+    0xe123,0xe124,0x0000,
+    0xe125,0xe126,0x0000,
+};
+
+/*static u16 handy_data[] = {
+    0x00fb,0x00fb,0x00fb,0x00fb,0x00fb,
+    0x00fc,0x00fb,0x00fb,0x00fb,0x00fb,
+    0x00fc,0x00fc,0x00fb,0x00fb,0x00fb,
+    0x00fc,0x00fc,0x00fc,0x00fb,0x00fb,
+    0x00fc,0x00fc,0x00fc,0x00fc,0x00fb,
+    };*/
+
+static u16 coin_carsol_adr[] = {
+    (0x10 * 0x20 + 0x0a) * 2,
+    (0x10 * 0x20 + 0x14) * 2,
+    (0x12 * 0x20 + 0x0a) * 2,
+    (0x12 * 0x20 + 0x14) * 2,
+};
+
+//======= メイン処理 =================================//
+static	void	battle_setup_main(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16 *level_adr;
+    u16 atr;
+    u16 loop_ct, play_ct, coin_ct;
+
+/*------------- 指カーソル処理 -------------*/
+    if(mGm_TRG & U_KEY || mGm_TRG & D_KEY || mGm_TRG & A_BUTTON){
+	m4aSongNumStart( s_b_HEART_GET );
+	if(mGm_TRG & U_KEY){
+	    if(VS_CARSOL(title) == 0){
+		VS_CARSOL(title) = 2;
+		VS_P_CARSOL(title) = ConnectAGB - 1;
+	    }else if(VS_CARSOL(title) == 2){
+		if(VS_P_CARSOL(title) == 0)
+		    VS_CARSOL(title)--;
+		else
+		    VS_P_CARSOL(title)--;
+	    }else
+		VS_CARSOL(title)--;
+	}
+	else{
+	    if(VS_CARSOL(title) == 2){
+		if(VS_P_CARSOL(title) == (ConnectAGB - 1))
+		    if(!(mGm_TRG & A_BUTTON))
+			VS_CARSOL(title) = 0;
+		    else
+			mGm_TRG |= START_BUTTON;
+		else
+		    VS_P_CARSOL(title)++;
+	    }else{
+		VS_CARSOL(title)++;
+		if(VS_CARSOL(title) == 2)
+		    VS_P_CARSOL(title) = 0;
+	    }
+	}
+    }
+
+/*------------- レベルチェンジ処理 -------------*/
+    else if(mGm_TRG & R_KEY || mGm_TRG & L_KEY){
+	m4aSongNumStart( s_b_KAMEKERI1 );
+	if(mGm_TRG & R_KEY){
+	    switch(VS_CARSOL(title)){
+	    case 0:
+		if(VS_LEVEL(title) == 2)
+		    VS_LEVEL(title) = 0;
+		else
+		    VS_LEVEL(title)++;
+		break;
+	    case 1:
+		VS_FIRE(title) ^= 1;
+		break;
+	    case 2:
+		if(VS_HANDI(title, VS_P_CARSOL(title)) == 4)
+		    VS_HANDI(title, VS_P_CARSOL(title)) = 0;
+		else
+		    VS_HANDI(title, VS_P_CARSOL(title))++;
+	    }
+	}else{
+	    switch(VS_CARSOL(title)){
+	    case 0:
+		if(VS_LEVEL(title) == 0)
+		    VS_LEVEL(title) = 2;
+		else
+		    VS_LEVEL(title)--;
+		break;
+	    case 1:
+		VS_FIRE(title) ^= 1;
+		break;
+	    case 2:
+		if(VS_HANDI(title, VS_P_CARSOL(title)) == 0)
+		    VS_HANDI(title, VS_P_CARSOL(title)) = 4;
+		else
+		    VS_HANDI(title, VS_P_CARSOL(title))--;
+	    }
+	}
+    }
+
+/*------------- レベルセット処理 -------------*/
+    if(VS_CARSOL(title) == 0)
+	atr = 0xe000;
+    else
+	atr = 0xf000;
+
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xb * 0x20 + 0x0) * 2 + VRAM);
+    for(loop_ct = 0; loop_ct < 5; loop_ct++){
+	*(level_adr) = level_screen_data[loop_ct] | atr;
+	*(level_adr + 0x20) = level_screen_data[loop_ct + 5] | atr;
+	*(level_adr++);
+    }
+
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xb * 0x20 + 0xb) * 2 + VRAM);
+    *(level_adr + 0x20) = 0x0438 + atr;
+    *(level_adr+=2);
+    for(loop_ct = 0; loop_ct < 3; loop_ct++){
+	*(level_adr) = level_data[VS_LEVEL(title) * 3 + loop_ct];
+	*(level_adr + 0x20) = level_data[VS_LEVEL(title) * 3 + loop_ct];
+	if (*(level_adr + 0x20)!=0)
+		*(level_adr + 0x20) +=0x10;
+	*(level_adr++);
+    }
+    *(level_adr++);
+    *(level_adr + 0x20) = 0x0038 + atr;
+
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xb * 0x20 + 0xf) * 2 + VRAM);
+/*  if(VS_LEVEL(title) == 2)
+	*(level_adr) = 0xe12f;
+    else
+    *(level_adr) = 0x00bf;*/
+
+/*------------- ファ@イアーボールセット処理 -------------*/
+    if(VS_CARSOL(title) == 1)
+	atr = 0xe000;
+    else
+	atr = 0xf000;
+
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xd * 0x20 + 0x0) * 2 + VRAM);
+    for(loop_ct = 0; loop_ct < 5; loop_ct++){
+	*(level_adr) = fire_screen_data[loop_ct] | atr;
+	*(level_adr + 0x20) = fire_screen_data[loop_ct + 5] | atr;
+	*(level_adr++);
+    }
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xd * 0x20 + 0xb) * 2 + VRAM);
+    *(level_adr+0x20) = 0x0448 + atr;
+    *(level_adr+=2);
+    for(loop_ct = 0; loop_ct < 3; loop_ct++){
+	*(level_adr) = fire_data[VS_FIRE(title) * 3 + loop_ct];
+	*(level_adr + 0x20) = fire_data[VS_FIRE(title) * 3 + loop_ct];
+	if (*(level_adr + 0x20)!=0)
+		*(level_adr + 0x20) +=0x10;
+	*(level_adr++);
+    }
+    *(level_adr++);
+    *(level_adr+0x20) = 0x0048 + atr;
+
+/*------------- ハンディセット処理 -------------*/
+    if(VS_CARSOL(title) == 2)
+	atr = 0xe000;
+    else
+	atr = 0xf000;
+
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			(0xf * 0x20 + 0x0) * 2 + VRAM);
+    for(loop_ct = 0; loop_ct < 6; loop_ct++){
+	*(level_adr) = coin_screen_data[loop_ct] | atr;
+	*(level_adr + 0x20) = coin_screen_data[loop_ct + 6] | atr;
+	*(level_adr++);
+    }
+
+    for(play_ct = 0; play_ct < ConnectAGB; play_ct++){
+	level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			    coin_carsol_adr[play_ct] + VRAM);
+	if(play_ct == VS_P_CARSOL(title)){
+	    *(level_adr) = 0x0458 | atr;
+	    *(level_adr + 9) = 0x0058 | atr;
+	}else{
+	    *(level_adr) = 0;
+	    *(level_adr + 9) = 0;
+	}
+	*(level_adr++);
+	*(level_adr) = 0x00e7;
+	*(level_adr++);
+	*(level_adr) = play_ct + 0x00ec;
+	*(level_adr+=2);
+	for(coin_ct = 0; coin_ct < 5; coin_ct++){
+	    if(coin_ct < VS_HANDI(title, play_ct))
+		*(level_adr) = 0x00fc;
+	    else
+		*(level_adr) = 0x00fb;
+	    *(level_adr++);
+	}
+    }
+
+/*------------- カーソルセット処理 -------------*/
+    level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			((VS_CARSOL(title) * 2 + 0xb) * 0x20 + 0x0) * 2 + VRAM);
+    *(level_adr + 0x00) = 0xb01c;
+    *(level_adr + 0x01) = 0xb01d;
+    *(level_adr + 0x20) = 0xb01e;
+    *(level_adr + 0x21) = 0xb01f;
+}
+
+
+/*
+ ****************************************************************
+ *     イニシャル処理
+ ****************************************************************
+ */
+static	void	game_vs_init(void)
+{
+    titleDT_c	*title;
+    u16		*vram;
+    u8		i;
+
+     /******** ＬＣＤＣ　@ＯＦＦ ********/
+    lcdc_off();
+    *(vu16 *)REG_IE = SIO_INTR_FLAG;	// SIO割込許可
+    *(vu16 *)REG_IME   = 1;
+
+    /******* サウンド停止 ******/
+//    m4aSoundVSyncOff();
+//    mGm_SOUNDFG = 1;
+//    m4aMPlayAllStop();
+////    VSync_Off();
+
+    /****** ＳＩＯレジスタリセット *****/
+//    RegisterRamReset(RESET_REG_SIO_FLAG);
+
+    /******* ＬＣＤＣ設定 ********/
+    mGm_DISPCNT = DISP_BG0_ON | DISP_BG1_ON | DISP_BG2_ON | DISP_BG3_ON
+	| DISP_MODE_0 | DISP_OBJ_ON | DISP_OBJ_CHAR_2D_MAP | DISP_LCDC_OFF;
+
+   /******* 描画設定 ********/
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_15 |
+	BG_COL_MODE_256 | BG_MOSAIC_OFF |
+	BG_CHR_BASE_1 | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_16 |
+	BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	BG_CHR_BASE_3 | BG_PRIORITY_2;
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_14 |
+	BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	BG_CHR_BASE_3 | BG_PRIORITY_3;
+    *(vu16 *)REG_BG3CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1A |
+	BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	BG_CHR_BASE_3 | BG_PRIORITY_1;
+
+    /******* キャラクタＤＭＡ転送 ********/
+    DmaArrayCopy(3, d_demo_4bit_schDT, BG_VRAM + 0xC000, 32);
+    DmaArrayCopy(3, d_demo_8bit_schDT, BG_VRAM+0x4000, 32);
+    DmaArrayCopy(3, d_title_bros_bg_schDT, BG_VRAM, 32);
+//    DmaArrayCopy(3, d_title_bros_obj_schDT, OBJ_MODE0_VRAM, 32);
+    HuffUnComp(d_title_bros_obj_Huff, (void *)OBJ_MODE0_VRAM);
+//    DmaCopy(3, d_demo_obj_schDT + 0xA00, OBJ_MODE0_VRAM + 0x5000, 0x600, 32);
+
+    /******* スクリーンＤＭＡ転送 ********/
+    DmaClear(3, 0x0000, BG_VRAM + 0xa800, 0x800, 16);
+    DmaArrayCopy(3, d_demo_map_sscDT, BG_VRAM + 0xb000, 16);
+    DmaArrayCopy(3, d_demo_usatitle_sscDT, BG_VRAM + 0xa800, 16);
+    DmaArrayCopy(3, d_demo_sky_sscDT, BG_VRAM + 0xa000, 16);
+    DmaArrayCopy(3, d_demo_maruc_sscDT, BG_VRAM + 0xd000, 16);
+
+    DmaArrayCopy(3, d_title_waku_sscDT, BG_VRAM + 0xE000, 16);
+    DmaArrayCopy(3, d_title_maruc_sscDT, BG_VRAM + 0xE800, 16);
+    DmaArrayCopy(3, d_title_kabe_sscDT, BG_VRAM + 0xF800, 16);
+
+    /******* カラーＤＭＡ転送 ********/
+    DmaArrayCopy(3, d_demo_8bit4bit_sclDT, BG_PLTT, 16);
+///    DmaCopy(3, d_demo_sky4bit_sclDT + 0x10, BG_PLTT + 0x180, 0x20, 16);
+    DmaArrayCopy(3, d_title_bros_obj_sclDT, OBJ_PLTT, 16);
+
+    /******* スクロール初期値設定 ********/
+//    m_scrollInit();
+//    mGm_HSCROLL0 = 0x000;
+//    mGm_VSCROLL0 = 0x000;
+//    scroll_set();
+    *(vu16 *)REG_BG0HOFS = mGm_HSCROLL0 = 0x000;
+    *(vu16 *)REG_BG0VOFS = mGm_VSCROLL0 = 0x000;
+    *(vu16 *)REG_BG1HOFS = mGm_HSCROLL1 = 0x110;
+    *(vu16 *)REG_BG1VOFS = mGm_VSCROLL1 = 0x000;
+    *(vu16 *)REG_BG2HOFS = mGm_HSCROLL2 = 0x000;
+    *(vu16 *)REG_BG2VOFS = mGm_VSCROLL2 = 0x000;
+    *(vu16 *)REG_BG2HOFS = mGm_HSCROLL2 = 0x000;
+    *(vu16 *)REG_BG2VOFS = mGm_VSCROLL2 = 0x000;
+
+    /******* タイトル用メモリ確保 ********/
+    if(mGm_OTHER != NULL){
+	mGm_FREE(mGm_OTHER);
+    }
+    title = (titleDT_c *)mGm_MALLOC(sizeof(titleDT_c));
+    mGm_OTHER = title;
+	//  Mario Bros Title display    // Modified by Yu Ting
+    for(i=0; i<6; i++){
+		if(i < 3)
+		    title->logo[i].xpos = 0x20 + 0x20 * i;
+		else if (i<5)
+			title->logo[i].xpos = 0x1A + 0x20 * i;
+		else
+			title->logo[i].xpos = 0x0C + 0x20 * i;
+	title->logo[i].ypos = 0x0118;
+	title->logo[i].anime = 4;
+    }
+    player_init();
+    title->frame = 0;
+    title->frame_col = 0;
+    title->cursor_col = 0;
+    title->cursor_tmr = 0;
+//    title->time_out = 0;
+    title->id_col = 0;
+    title->id_coltmr = 0;
+
+    /******* フラグ関係の初期設定 ********/
+    mGm_GMMODE++;
+    COL_FLAG = 0;
+/////    NO_RESET = ON;
+    NO_RESET = OFF;
+
+    /******* フェード関係の初期設定 ********/
+    *(vu16 *)REG_BLDCNT = BLDCNT =
+	BLD_DOWN_MODE | BLD_BG0_1ST | BLD_BG1_1ST | BLD_BG2_1ST | BLD_BG3_1ST;
+    *(vu16 *)REG_BLDY = BLDY = 0x0004;
+
+    /******* マルチブート準備 *******/
+    child_bin_start = _binary_client_bin_start;
+    child_bin_length = (u32)_binary_client_bin_end - (u32)_binary_client_bin_start;
+    play_mode = PLAY_CLSS;
+//    CpuCopy(child_bin_start, 0x02000000, child_bin_length, 32);
+//    *(u32 *)0x020000C8 = (u32)_binary_vs_bin_start;
+//    *(u32 *)0x020000CC = (u32)_binary_vs_bin_end;
+    multiboot_status.masterp = child_bin_start;
+    multiboot_status.server_type = MULTIBOOT_SERVER_TYPE_NORMAL;
+    MultiBootInit(&multiboot_status);               // マルチプレイブート初期化
+//    for(i=0; i<4; i++){
+//	UsrRecvBuf[i][0] = 0;
+//    }
+    SioModeFlg = 0;
+//    *(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+
+//#if SOUND_ON
+//    m4aSoundVSyncOn();
+//    mGm_SOUNDFG = 0;
+//#endif
+
+    /******* Ｖブランク割込許可フラグのセット ********/
+    *(vu16 *)REG_IE   = V_BLANK_INTR_FLAG;
+    *(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+    *(vu16 *)REG_IE |= CASSETTE_INTR_FLAG;	// カートリッジ割込許可
+    *(vu16 *)REG_STAT  = STAT_V_BLANK_IF_ENABLE;
+///    NMI_NO = nmi_title;//nmi_bros;
+
+    /******* ＩＭＥセット ******/
+//    *(vu16 *)REG_IME   = 1;
+
+    V_blank_wait();
+#if SOUND_ON
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    mGm_SOUNDFG = 0;
+#endif
+
+    /******* ＬＣＤＣ　@ＯＮ ********/
+//    *(vu16 *)REG_DISPCNT &= ~DISP_LCDC_OFF;
+    mGm_DISPCNT &= ~DISP_LCDC_OFF;
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;
+}
+/*
+ ****************************************************************
+ *	ケーブル接続チェック
+ ****************************************************************
+ */
+static	void	game_vs_cable(void)
+{
+////    titleDT_c	*title = mGm_OTHER;
+//////    static u8	timer;
+    u8		i, connect;
+
+    obj_write(MES_CHECK, 0x14);//CHECKING
+
+    if(!((SioMultiCnt *)REG_SIOCNT)->SD){
+	//ケーブルがつながっている → 対戦へ
+//	mGm_DISPCNT &= ~DISP_LCDC_OFF;
+	mGm_GMMODE = MB_CHECK;	//親子不明
+//	return;
+    }else{
+	if(((RCnt *)REG_RCNT)->SC){
+	    if(!((SioMultiCnt *)REG_SIOCNT)->SI){
+		//ケーブルがつながっている → 対戦へ
+//		*(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+//		*(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+//		mGm_DISPCNT &= ~DISP_LCDC_OFF;
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_SYNC_DATA;
+		*(vu16 *)REG_SIOCNT |= SIO_START;
+		mGm_GMMODE = MB_BOOTWAIT;	//親機@
+		SOUND_TIMER = 0x0130;
+//		NO_RESET = ON;
+//		return;
+	    }else{
+//		*(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_SET;
+/////		if(*(vu64 *)REG_SIOMULTI0 != 0){
+		*(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+		*(vu16 *)REG_IE |= SIO_INTR_FLAG;// SIO割込許可
+		connect = 0;
+		for(i=0; i<4; i++){
+		    if(UsrRecvBuf[i][0] != 0){
+			connect = 1;
+		    }
+		}
+//		if(UsrRecvBuf[0][0] != 0){
+		if(connect){
+		    //ケーブルがつながっている → 対戦へ
+/////		    *(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+/////		    *(vu16 *)REG_IE |= SIO_INTR_FLAG;// SIO割込許可
+//		    mGm_DISPCNT &= ~DISP_LCDC_OFF;
+		    mGm_GMMODE = MB_CHILD;	//子機@
+		    //NO_RESET = ON;
+		    return;
+		}
+	    }
+	}
+    }
+
+//////	timer++;
+//////	if(timer > 16){
+//////    title->time_out++;
+//////    if(title->time_out > 16){
+////    if(title->frame > 16){
+////	//ケーブルがつながっていない → タイトルへ
+////	CancelBack();
+////    }
+    /*** Ｂボタンでタイトルに戻る ***/
+    if(mGm_TRG & B_BUTTON){
+	CancelBack();
+	return;
+    }
+}
+/*
+ ****************************************************************
+ *	親/子 認識
+ ****************************************************************
+ */
+static	void	game_vs_check(void)
+{
+//    titleDT_c	*title = mGm_OTHER;
+
+    obj_write(MES_CHECK, 0x14);//CHECKING
+
+    /*** Ｂボタンでタイトルに戻る ***/
+    if(mGm_TRG & B_BUTTON){
+	CancelBack();
+	return;
+    }
+    if(((SioMultiCnt *)REG_SIOCNT)->SD){
+	if(((RCnt *)REG_RCNT)->SC){
+	    if (!((SioMultiCnt *)REG_SIOCNT)->SI) {
+//		*(vu16 *)REG_SIOCNT |= SIO_START;
+//		*(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+//		*(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_SYNC_DATA;
+		*(vu16 *)REG_SIOCNT |= SIO_START;
+		mGm_GMMODE = MB_BOOTWAIT;	//親機@
+		SOUND_TIMER = 0x0130;
+//		NO_RESET = ON;
+//		return;
+	    }else{
+		//ＲＯＭあり信号送信
+		*(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+		*(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+//		*(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_SET;
+		mGm_GMMODE = MB_CHILD;	//子機@
+		//NO_RESET = ON;
+		return;
+	    }
+	}
+    }
+}
+/*
+ ****************************************************************
+ *	子機@ブートウエイト処理
+ ****************************************************************
+ */
+static	void	game_vs_bootwait(void)
+{
+    u8	i;
+
+    obj_write(MES_CHECK, 0x14);//CHECKING
+
+    /*** Ｂボタンでタイトルに戻る ***/
+    if(mGm_TRG & B_BUTTON){
+	CancelBack();
+	return;
+    }
+#if 0
+    if(SOUND_TIMER < 0x0100){
+	if(MultiBootRomCheck()){
+	    //ＲＯＭ内登録データチェック開始
+	    for(i=3; i!=0; i--){
+		if (*(vu16 *)(REG_SIOMULTI0 + i * 2) != 0xffff) {
+//		if (UsrRecvBuf[i][0] != 0xffff) {
+		    break;
+		}
+	    }//↑念のためもう一度接続台数を確認
+	    ConnectAGB = 1 + i;
+	    *(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+//	    *(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_CHECK;
+//	    *(vu16 *)REG_SIOCNT |= SIO_START;
+	    mGm_GMMODE = MB_CHKWAIT;
+	    //NO_RESET = ON;
+	    SOUND_TIMER = 60;
+	    return;
+	}
+    }
+#endif
+//2001/2/13    SOUND_TIMER--;
+//2001/2/13    if(SOUND_TIMER == 0){
+	SOUND_TIMER = 0;
+	mGm_GMMODE = MB_CONNECT;
+//2001/2/13    }
+
+    *(u16 *)REG_SIODATA8 = MULTI_SIO_SYNC_DATA;
+    *(vu16 *)REG_SIOCNT |= SIO_START;
+}
+/*
+ ****************************************************************
+ *     接続確認処理
+ ****************************************************************
+ */
+static	void	game_vs_connect(void)
+{
+    int	frame_retval;
+    u8	i, n;
+
+    obj_write(MES_CHECK, 0x14);//CHECKING
+
+    /*** Ｂボタンでタイトルに戻る ***/
+    if(mGm_TRG & B_BUTTON){
+	CancelBack();
+	return;
+    }
+
+    /*** 子機@にＲＯＭがささっているかチェック ***/
+    if(MultiBootRomCheck()){
+//	for(i=3; i!=0; i--){
+//	    if (*(vu16 *)(REG_SIOMULTI0 + i * 2) != 0xffff) {
+////	    if (UsrRecvBuf[i][0] != 0xffff) {
+//		break;
+//	    }
+//	}//↑念のためもう一度接続台数を確認
+//	ConnectAGB = 1 + i;
+	*(u16 *)REG_SIOCNT |= SIO_IF_ENABLE;
+//	*(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_CHECK;
+//	*(vu16 *)REG_SIOCNT |= SIO_START;
+	mGm_GMMODE = MB_CHKWAIT;
+	//NO_RESET = ON;
+	SOUND_TIMER = 60;
+	return;
+    }
+
+    /*** ダウンロードＯＫかチェック ***/
+    if((multiboot_status.client_bit & 0xe) &&
+       (multiboot_status.probe_count == 0)){
+	LoadClient();
+	BLDCNT = BLD_NORMAL_MODE;
+	BLDY = 0x0010;
+///////	DmaCopy(3, d_demo_8bit4bit_sclDT + 0xC0, BG_PLTT + 0x180, 0x20, 16);
+	mGm_GMMODE = MB_KEY;
+#if SOUND_ON
+	m4aSongNumStart(28);
+#endif
+	n = 0;
+	for(i=1; i<4; i++){
+	    if(multiboot_status.client_bit & (1 << i)){
+		n++;
+	    }
+	}
+	*(u8 *)0x020000D0 |= n & 0x0F;//子機@の台数
+	ConnectAGB = n + 1;
+	NO_RESET = ON;
+	NO_SLEEP = ON;
+	*(u16 *)REG_SIOCNT &= ~SIO_IF_ENABLE;
+	*(vu16 *)REG_IE &= ~SIO_INTR_FLAG;	// SIO割込不許可
+    }
+
+    frame_retval = MultiBootMain(&multiboot_status);// マルチプレイブート・メイン
+}
+
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	マルチブート処理
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+/*
+ ****************************************************************
+ *	ローダー転送開始キー入力待ち
+ ****************************************************************
+ */
+static	void	game_vs_key(void)
+{
+    int		frame_retval;
+    u16		*vram;
+    u8		i,n;
+
+    frame_retval = MultiBootMain(&multiboot_status);// マルチプレイブート・メイン
+    if(((multiboot_status.client_bit & 0xe) == 0) ||
+       (multiboot_status.probe_count != 0) ||
+       (frame_retval != 0)){
+	BLDCNT = BLD_DOWN_MODE | BLD_BG0_1ST | BLD_BG1_1ST
+	    | BLD_BG2_1ST | BLD_BG3_1ST;
+	BLDY = 0x0004;
+//////	DmaCopy(3, d_demo_8bit4bit_sclDT + 0xE0, BG_PLTT + 0x180, 0x20, 16);
+	mGm_GMMODE = MB_CONNECT;
+	NO_RESET = OFF;
+	NO_SLEEP = OFF;
+	*(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+	return;
+    }
+
+    if((mGm_TRG & START_BUTTON) || (mGm_TRG & A_BUTTON)){
+	*(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1C |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_0;
+	*(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_1;
+	*(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_2;
+	mGm_HSCROLL1 = 0x000;
+	mGm_DISPCNT &= ~(DISP_BG3_ON | DISP_BG2_ON | DISP_BG1_ON);
+	CpuArrayCopy(d_title_bros_bg_sclDT, BG_PLTT, 16);
+//	SobDataOamSet(PlateData[PLAY_BATL], 0x098, 0x030);
+//	TitleLogo_Set();
+//	message_write(MES_SEND, 0x60);
+	battle_setup_init();
+	mGm_GMMODE++;
+#if SOUND_ON
+//	m4aMPlayAllStop(); 
+	m4aSongNumStart(s_u_se_final);
+#endif
+	return;
+    }
+
+    obj_write(MES_START, 0x14);//PUSH START
+    ID_Obj_Set();
+
+#if DEBUG
+    if(mGm_TRG & B_BUTTON){
+	CancelBack();
+	return;
+    }
+#endif
+}
+/*
+ ****************************************************************
+ *	マルチブートバトル各種設定
+ ****************************************************************
+ */
+static	void	game_vs_setup(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		frame_retval;
+    u16		*level_adr;
+    u16		tmp;
+    u8		i;
+
+    frame_retval = MultiBootMain(&multiboot_status);// マルチプレイブート・メイン
+    if(((multiboot_status.client_bit & 0xe) == 0) ||
+       (multiboot_status.probe_count != 0) ||
+       (frame_retval != 0)){
+
+	level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			    (0xb * 0x20 + 0x0) * 2 + VRAM);
+	CpuClear(0x0000, level_adr, 0x200, 16);
+	*(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_15 |
+	    BG_COL_MODE_256 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_1 | BG_PRIORITY_0;
+	*(vu16 *)REG_BG1CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_16 |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_3 | BG_PRIORITY_2;
+	*(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_14 |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_3 | BG_PRIORITY_3;
+	mGm_HSCROLL1 = 0x110;
+	mGm_DISPCNT |= (DISP_BG3_ON | DISP_BG2_ON | DISP_BG1_ON);
+	CpuArrayCopy(d_demo_8bit4bit_sclDT, BG_PLTT, 16);
+
+	BLDCNT = BLD_DOWN_MODE | BLD_BG0_1ST | BLD_BG1_1ST
+	    | BLD_BG2_1ST | BLD_BG3_1ST;
+	BLDY = 0x0004;
+	mGm_GMMODE = MB_CONNECT;
+	NO_RESET = OFF;
+	NO_SLEEP = OFF;
+	*(vu16 *)REG_IE |= SIO_INTR_FLAG;	// SIO割込許可
+	return;
+    }
+
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[PLAY_BATL], 0x098, 0x030);
+
+    if(SOUND_TIMER == 0){
+	battle_setup_main();	//各種設定選択
+	if(mGm_TRG & START_BUTTON){
+	    SOUND_TIMER = 60 * 1;
+	    m4aSongNumStart( s_b_COIN_GET );
+	}
+//    }
+//    if(mGm_TRG & START_BUTTON && SOUND_TIMER == 0){
+//	SOUND_TIMER = 60 * 1;
+//	m4aSongNumStart( s_b_COIN_GET );
+    }else{
+//	if(SOUND_TIMER != 0){
+	    SOUND_TIMER--;
+	    if(SOUND_TIMER == 0){
+		tmp = 0;
+		for(i=0; i<4; i++){
+		    tmp = tmp << 3;
+		    if(i < ConnectAGB){
+			tmp |= VS_HANDI(title, i);
+		    }
+		}
+		tmp |= VS_LEVEL(title) << 12;
+		tmp |= VS_FIRE(title) << 14;
+		*(u16 *)0x020000D2 = tmp;	//設定保存
+		level_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+				    (0xb * 0x20 + 0x0) * 2 + VRAM);
+///		DmaClear(3, 0x0000, level_adr, 0x200, 16);
+		CpuClear(0x0000, level_adr, 0x200, 16);
+		mGm_DISPCNT |= (DISP_BG2_ON | DISP_BG1_ON);
+		message_write(MES_SEND, 0x60);
+		mGm_GMMODE++;
+#if SOUND_ON
+		m4aMPlayAllStop(); 
+		VSYNC_OFF = ON;
+#endif
+		return;
+	    }
+//	}
+    }
+
+//    PushStart_Write(0x84);
+}
+/*
+ ****************************************************************
+ *	サウンド停止
+ ****************************************************************
+ */
+static	void	game_vs_soundstop(void)
+{
+    int	frame_retval;
+//    OamData	*oam;
+
+//    oam = PlateData[PLAY_BATL];
+//    SobDataOamSet(oam, 0x098, 0x030);
+//    CpuFastArrayCopy(OamBak, OAM);
+
+    MultiBootStartMaster(&multiboot_status,     // マルチプレイブート転送開始
+			 (u8 *)(0x02000000 + MULTIBOOT_HEADER_SIZE),
+			 child_bin_length - MULTIBOOT_HEADER_SIZE,
+			 4, 1);
+    frame_retval = MultiBootMain(&multiboot_status);// マルチプレイブート・メイン
+
+#if SOUND_ON
+//    m4aSoundVSyncOff();
+    mGm_SOUNDFG = 1;
+#endif
+    mGm_GMMODE++;
+//    NO_RESET = ON;
+//    NO_SLEEP = ON;
+}
+/*
+ ****************************************************************
+ *	ローダー転送処理
+ ****************************************************************
+ */
+static	void	game_vs_load(void)
+{
+    int	frame_retval;
+    u16	*vram;
+    u8	i,n;
+    u32	(*GameMain)(void) = (u32 (*)(void))0x020002A0;
+
+    frame_retval = MultiBootMain(&multiboot_status);// マルチプレイブート・メイン
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;//???
+//    if((frame_retval == MULTIBOOT_ERROR_BOOT_FAILURE)
+//       || (frame_retval == MULTIBOOT_ERROR_HANDSHAKE_FAILURE)){
+    if(frame_retval != 0){
+	SOUND_TIMER = 1;
+	play_mode = PLAY_BATL;
+	GotoError();	//エラー
+	return;
+    }
+
+    if (MultiBootCheckComplete(&multiboot_status)){// マルチプレイブート転送完了ﾁｪｯｸ
+	//ローダー転送終了
+	*(vu16 *)REG_IME = 0;                           // IME リセット
+	*(vu16 *)REG_IF  = 0xffff;                      // IF  リセット
+	RegisterRamReset(RESET_REG_SIO_FLAG);
+	if(mGm_OTHER != NULL){
+	    mGm_FREE(mGm_OTHER);
+	    mGm_OTHER = NULL;
+	}
+	GameMain();					// プログラム起動
+    }
+}
+
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	ＲＯＭ対戦開始 親機@側処理
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+/*
+ ****************************************************************
+ *	ＲＯＭチェック開始ウエイト処理１
+ ****************************************************************
+ */
+static	void	game_vs_wait(void)
+{
+    u8	i;
+
+    obj_write(MES_CHECK, 0x14);//CHECKING
+
+//安全のため子機@の準備が確実に出来るまで待つ
+    SOUND_TIMER--;
+    if(SOUND_TIMER == 0){
+	//念のためもう一度接続台数を確認
+	for(i=3; i!=0; i--){
+//	    if (*(vu16 *)(REG_SIOMULTI0 + i * 2) != 0xffff) {
+	    if (UsrRecvBuf[i][0] != 0xffff) {
+		break;
+	    }
+	}
+	if(i == 0){//一人も認識できていない
+//	    SOUND_TIMER = 0;
+//	    GotoError();	//エラー
+	    mGm_GMMODE = MB_CONNECT;
+	    return;
+	}
+	ConnectAGB = 1 + i;
+	*(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_CHECK;
+	*(vu16 *)REG_SIOCNT |= SIO_START;
+	mGm_GMMODE++;
+    }
+}
+/*
+ ****************************************************************
+ *	ＲＯＭチェック開始ウエイト処理２
+ ****************************************************************
+ */
+static	void	game_vs_StartWait(void)
+{
+//子機@側の送信レジスタにデータがセットされるのを待つ(１フレーム)
+//(子機@は親機@からMULTI_SIO_ROM_CHECKを受け取ってからデータをセットする)
+    *(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_CHECK + 1;
+    *(vu16 *)REG_SIOCNT |= SIO_START;
+
+//    SOUND_TIMER--;
+//    if(SOUND_TIMER == 0){
+	SOUND_TIMER = 0;
+	mGm_GMMODE++;
+//    }
+}
+/*
+ ****************************************************************
+ *	ＲＯＭチェック親機@側処理
+ ****************************************************************
+ */
+static	void	game_vs_RomCheck(void)
+{
+    u16	recv = SOUND_TIMER;
+    u16	check;
+    u8	i;
+
+    /* ＲＯＭ内登録データチェック */
+    for(i=1; i<ConnectAGB; i++){
+//	check = *(vu16 *)(REG_SIOMULTI0 + i *2);
+	check = UsrRecvBuf[i][0];
+	if((check != 0xFFFF) && (check != *(u16 *)(0x080000AC + recv * 2))){
+//	    //エラー
+	    SOUND_TIMER = 0;
+	    GotoError();
+	    return;
+	}
+    }
+    recv++;
+
+    if(recv < 2){
+	SOUND_TIMER = recv;
+	*(u16 *)REG_SIODATA8 = 0xFFFE;	//ダミーデータ
+    }else{
+	//チェックＯＫ！
+	BLDCNT = BLD_NORMAL_MODE;
+	BLDY = 0x0010;
+///////	DmaCopy(3, d_demo_8bit4bit_sclDT + 0xC0, BG_PLTT + 0x180, 0x20, 16);
+	mGm_GMMODE = MB_START;
+	NO_RESET = ON;
+	NO_SLEEP = ON;
+#if SOUND_ON
+	m4aSongNumStart(28);
+#endif
+	*(u16 *)REG_SIODATA8 = ConnectAGB;//プレイ人数送信
+    }
+    *(vu16 *)REG_SIOCNT |= SIO_START;
+}
+/*
+ ****************************************************************
+ *	開始キー入力待ち
+ ****************************************************************
+ */
+static	void	game_vs_start(void)
+{
+    titleDT_c	*title;
+    u8		i;
+
+    obj_write(MES_START, 0x14);//PUSH START
+////    id_number_obj(0xC8, 0x10, 0);
+    ID_Obj_Set();
+
+//#if DEBUG
+//    if(mGm_TRG & B_BUTTON){
+//	CancelBack();
+//	return;
+//    }
+//#endif
+
+    if((mGm_TRG & START_BUTTON) || (mGm_TRG & A_BUTTON)){
+	play_mode = PLAY_CLSS;
+	*(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1C |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_0;
+	*(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_1;
+	*(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_2;
+	mGm_HSCROLL1 = 0;//0x100;
+	mGm_DISPCNT &= ~DISP_BG3_ON;
+	GameMode_Write();
+	CpuArrayCopy(d_title_bros_bg_sclDT, BG_PLTT, 16);
+	title = mGm_OTHER;
+	title->frame = 0;
+	mGm_GMMODE = MB_SELECT;
+#if SOUND_ON
+	m4aSongNumStart(s_u_se_final);
+#endif
+	SOUND_TIMER = 0;
+    }
+}
+/*
+ ****************************************************************
+ *	ゲームモード選択画面
+ ****************************************************************
+ */
+static	void	game_vs_select(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		tmp;
+
+    TitleLogo_Set();
+    cursor_write();
+    tmp = title->cursor_tmr;
+    tmp++;
+    title->cursor_tmr = tmp;
+    if(tmp >= 10){
+	title->cursor_tmr = 0;
+	tmp = title->cursor_col;
+	title->cursor_col = tmp ^ 0x01;
+    }
+    GameMode_Write();
+
+    if(SOUND_TIMER == 0){
+	if((mGm_TRG & A_BUTTON) || (mGm_TRG & START_BUTTON)){
+#if SOUND_ON
+	    if(play_mode == PLAY_CLSS){
+		m4aSongNumStart(s_u_navi_classic);
+	    }else{
+		m4aSongNumStart(s_u_navi_battle);
+	    }
+#endif
+	    SOUND_TIMER = 75;
+	    return;
+	}
+	if((mGm_TRG & U_KEY) || (mGm_TRG & D_KEY) || (mGm_TRG & SELECT_BUTTON)){
+	    play_mode ^= 0x01;
+	    title->cursor_col = 0;
+	    title->cursor_tmr = 0;
+#if SOUND_ON
+	    m4aSongNumStart(s_u_se_kamekeri8);
+#endif
+	}
+    }else{
+	SOUND_TIMER--;
+	if(SOUND_TIMER == 0){
+//	play_mode &= 0x01;
+	    GameMode_Delete();
+//	mGm_DISPCNT &= ~DISP_BG2_ON;
+//	*(vu16 *)REG_SIODATA8 = MULTI_SIO_MODE_SEL | play_mode;
+//	*(vu16 *)REG_SIOCNT |= SIO_START;
+	    if(play_mode == PLAY_CLSS){
+		mGm_DISPCNT &= ~DISP_BG2_ON;
+	    }else{
+		mGm_DISPCNT &= ~(DISP_BG2_ON | DISP_BG1_ON);
+	    }
+	    battle_setup_init();
+	    mGm_GMMODE++;
+	}
+    }
+}
+/*
+ ****************************************************************
+ *	ＲＯＭバトル各種設定
+ ****************************************************************
+ */
+static	void	game_vs_battle(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		*vram;
+
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+//    PushStart_Write(0x84);
+
+    if(SOUND_TIMER == 0){
+	if(mGm_TRG & B_BUTTON){
+	    vram = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			   (0xb * 0x20 + 0x0) * 2 + VRAM);
+	    CpuClear(0x0000, vram, 0x200, 16);
+	    GameMode_Write();
+	    mGm_DISPCNT |= (DISP_BG2_ON | DISP_BG1_ON);
+	    title->frame = 0;
+	    mGm_GMMODE = MB_SELECT;
+#if SOUND_ON
+	    m4aSongNumStart(s_u_se_final);
+#endif
+	    return;
+	}
+	if(play_mode == PLAY_CLSS){
+	    PushStart_Write(0x7C);//(0x68);
+	}else{
+	    battle_setup_main();	//各種設定選択
+	}
+//	if((play_mode == PLAY_CLSS) || (mGm_TRG & START_BUTTON)){
+	if((mGm_TRG & START_BUTTON) ||
+	   ((mGm_TRG & A_BUTTON) && (play_mode == PLAY_CLSS))){
+	    SOUND_TIMER = 60 * 1;
+	    m4aSongNumStart( s_b_COIN_GET );
+	}
+    }else{
+	SOUND_TIMER--;
+	if(SOUND_TIMER == 0){
+	    //ゲームモード送信
+	    play_mode &= 0x01;
+	    *(vu16 *)REG_SIODATA8 = MULTI_SIO_MODE_SEL | play_mode;
+	    *(vu16 *)REG_SIOCNT |= SIO_START;
+	    mGm_GMMODE++;
+	    if(play_mode == PLAY_BATL){
+		vram = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+			       (0xb * 0x20 + 0x0) * 2 + VRAM);
+		CpuClear(0x0000, vram, 0x200, 16);
+		mGm_DISPCNT |= DISP_BG1_ON;
+	    }
+#if SOUND_ON
+	    m4aSongNumStart(s_u_se_final);
+#endif
+	}
+    }
+}
+/*
+ ****************************************************************
+ *	各種設定送信処理
+ ****************************************************************
+ */
+static	void	game_vs_ParamSend(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		tmp;
+    u8		i;
+
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+
+    /*** 設定保存 ***/
+    tmp = 0;
+    for(i=0; i<4; i++){
+	tmp = tmp << 3;
+	if(i < ConnectAGB){
+	    tmp |= VS_HANDI(title, i);
+	}
+    }
+    tmp |= VS_LEVEL(title) << 12;
+    tmp |= VS_FIRE(title) << 14;
+    *(u16 *)0x020000D2 = tmp;
+
+//    mGm_DISPCNT &= ~DISP_BG2_ON;
+    *(vu16 *)REG_SIODATA8 = tmp;
+    *(vu16 *)REG_SIOCNT |= SIO_START;
+    mGm_GMMODE++;
+}
+/*
+ ****************************************************************
+ *	ＲＯＭ対戦自機@確認画面
+ ****************************************************************
+ */
+static	void	game_vs_player(void)
+{
+    u16	trg, tmp;
+    u8	i;
+
+    player_obj();
+    PushStart_Write(0x7C);
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+
+    trg = 0;
+    for(i=1; i<ConnectAGB; i++){
+//	tmp = *(vu16 *)(REG_SIOMULTI0 + i *2);
+	tmp = UsrRecvBuf[i][0];
+	if(!(tmp & 0x1000) || tmp == 0xFFFF){
+	    SOUND_TIMER = 1;
+	    GotoError();
+	    return;
+	}
+	if((tmp & 0xFC00) == 0x1000){
+	    trg |= (tmp & 0x03FF);
+	}
+    }
+    trg |= mGm_TRG;
+//    if(mGm_TRG & START_BUTTON){
+    if((trg & START_BUTTON) || (trg & A_BUTTON)){
+	*(u16 *)REG_SIODATA8 = MULTI_SIO_ROM_BOOT;
+	SOUND_TIMER = 35;
+	mGm_GMMODE = MB_WAIT;
+#if SOUND_ON
+	m4aSongNumStart(s_u_se_final);
+//	m4aMPlayAllStop(); 
+#endif
+    }
+    *(vu16 *)REG_SIOCNT |= SIO_START;
+}
+/*
+ ****************************************************************
+ *	ウエイト＆ＲＯＭ対戦起動処理
+ ****************************************************************
+ */
+static	void	game_vs_wait2(void)
+{
+    u32	(*GameMain)(void) = (u32 (*)(void))ROM_VS_START;
+
+    player_obj();
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+
+    SOUND_TIMER--;
+    if(SOUND_TIMER == 0){
+	*(u32 *)0x020000D4 = (u32)_binary_bros_obj0_bin_start;
+	*(u32 *)0x020000D8 = (u32)_binary_bros_obj1_bin_start;
+	*(u32 *)0x020000DC = (u32)_binary_bros_bg_bin_start;
+//	*(u8 *)0x020000D0 = ConnectAGB;
+//	*(u8 *)0x020000D1 = VS_ROM;
+//	*(u8 *)0x020000D2 = play_mode;
+	*(u8 *)0x020000D0 = ConnectAGB | (VS_ROM << 4) | (play_mode << 5);
+	//設定保存
+#if SOUND_ON
+//	m4aMPlayAllStop(); 
+	m4aSoundVSyncOff();
+	mGm_SOUNDFG = 1;
+#endif
+	*(vu16 *)REG_IME = 0;                           // IME リセット
+	*(vu16 *)REG_IF  = 0xffff;                      // IF  リセット
+	if(mGm_OTHER != NULL){
+	    mGm_FREE(mGm_OTHER);
+	    mGm_OTHER = NULL;
+	}
+	RegisterRamReset(RESET_REG_SIO_FLAG);
+#if RAM_RUN
+	child_bin_start = _binary_vs_bin_start;
+	child_bin_length = (u32)_binary_vs_bin_end - (u32)_binary_vs_bin_start;
+	CpuCopy(child_bin_start, GameMain, child_bin_length, 32);
+	GameMain();		// プログラム起動
+#else
+	ChildMain();
+#endif
+    }
+}
+
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	ＲＯＭ対戦開始 子機@側処理
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+/*
+ ****************************************************************
+ *	子機@ＲＯＭチェック待ち
+ ****************************************************************
+ */
+static	void	game_vs_child(void)
+{
+//    u8	i;
+
+    obj_write(MES_MULTI, 0x14);//MULTI PLAY
+
+//    if(SioModeFlg > 2){
+    if(SioModeFlg == 9){
+	//送信終了
+//	for (i=3; i != 0; i--) {
+////	    if (*(vu16 *)(REG_SIOMULTI0 + i * 2) != 0xffff) {
+//	    if (UsrRecvBuf[i][0] != 0xffff) {
+//		break;
+//	    }
+//	}
+//	ConnectAGB = 1 + i;//接続台数確認
+	BLDCNT = BLD_NORMAL_MODE;
+	BLDY = 0x0010;
+	mGm_GMMODE = MB_MODE;
+    }else if(SioModeFlg == 0){
+	if(mGm_TRG & B_BUTTON){
+	    CancelBack();
+	}
+    }
+}
+/*
+ ****************************************************************
+ *	ゲームモード選択待ち
+ ****************************************************************
+ */
+static	void	game_vs_mode(void)
+{
+    titleDT_c	*title;
+//    u8		id = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+
+//    obj_write(MES_MULTI, 0x14);//MULTI PLAY
+////    id_number_obj(0xC8, 0x10, id);
+    ID_Obj_Set();
+
+    if(SioModeFlg == 5){
+	*(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1C |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_0;
+	*(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D |
+	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+	    BG_CHR_BASE_0 | BG_PRIORITY_1;
+//	*(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F |
+//	    BG_COL_MODE_16 | BG_MOSAIC_OFF |
+//	    BG_CHR_BASE_0 | BG_PRIORITY_2;
+	mGm_HSCROLL1 = 0x000;
+	mGm_DISPCNT &= ~DISP_BG2_ON;
+	mGm_DISPCNT &= ~DISP_BG3_ON;
+//	BLDCNT = BLD_NORMAL_MODE;
+//	BLDY = 0x0010;
+	CpuArrayCopy(d_title_bros_bg_sclDT, BG_PLTT, 16);
+	title = mGm_OTHER;
+	title->frame = 0;
+	mGm_GMMODE++;
+#if SOUND_ON
+	m4aSongNumStart(s_u_se_final);
+#endif
+    }
+}
+/*
+ ****************************************************************
+ *	自機@確認＆ＲＯＭ対戦起動信号待ち
+ ****************************************************************
+ */
+static	void	game_vs_RomWait(void)
+{
+    player_obj();
+    PushStart_Write(0x7C);
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+
+//    *(u16 *)REG_SIODATA8 = (mGm_TRG & 0x03FF) | 0x1000;
+
+//    if(*(vu16 *)REG_SIOMULTI0 == MULTI_SIO_ROM_BOOT){
+    if(UsrRecvBuf[0][0] == MULTI_SIO_ROM_BOOT){
+	SOUND_TIMER = 32;
+	mGm_GMMODE++;
+#if SOUND_ON
+	m4aSongNumStart(s_u_se_final);
+//	m4aMPlayAllStop(); 
+#endif
+    }
+}
+/*
+ ****************************************************************
+ *	サウンドウエイト
+ ****************************************************************
+ */
+static	void	game_vs_SoundWait(void)
+{
+    u32	(*GameMain)(void) = (u32 (*)(void))ROM_VS_START;
+
+    player_obj();
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+
+    SOUND_TIMER--;
+    if(SOUND_TIMER == 0){
+	*(u32 *)0x020000D4 = (u32)_binary_bros_obj0_bin_start;
+	*(u32 *)0x020000D8 = (u32)_binary_bros_obj1_bin_start;
+	*(u32 *)0x020000DC = (u32)_binary_bros_bg_bin_start;
+//	*(u8 *)0x020000D0 = ConnectAGB;
+//	*(u8 *)0x020000D1 = VS_ROM;
+//	*(u8 *)0x020000D2 = play_mode;
+	*(u8 *)0x020000D0 = ConnectAGB | (VS_ROM << 4) | (play_mode << 5);
+#if SOUND_ON
+//	m4aMPlayAllStop(); 
+	m4aSoundVSyncOff();
+	mGm_SOUNDFG = 1;
+#endif
+	*(vu16 *)REG_IME = 0;                           // IME リセット
+	*(vu16 *)REG_IF  = 0xffff;                      // IF  リセット
+	if(mGm_OTHER != NULL){
+	    mGm_FREE(mGm_OTHER);
+	    mGm_OTHER = NULL;
+	}
+	RegisterRamReset(RESET_REG_SIO_FLAG);
+#if RAM_RUN
+	child_bin_start = _binary_vs_bin_start;
+	child_bin_length = (u32)_binary_vs_bin_end - (u32)_binary_vs_bin_start;
+	CpuCopy(child_bin_start, GameMain, child_bin_length, 32);
+	GameMain();		// プログラム起動
+#else
+	ChildMain();
+#endif
+    }
+}
+/*
+ ****************************************************************
+ *	エラー表示画面
+ ****************************************************************
+ */
+static	void	game_vs_error(void)
+{
+    obj_write(MES_ERROR, 0x64);
+    if(SOUND_TIMER){
+	TitleLogo_Set();
+//	SobDataOamSet(PlateData[PLAY_BATL], 0x098, 0x030);
+	SobDataOamSet(PlateData[play_mode], 0x098, 0x030);
+    }
+}
+/*
+ ****************************************************************
+ *     メニュー配列
+ ****************************************************************
+ */
+static	mfunc game_vs_menu[] = {
+    game_vs_init,		// イニシャル処理
+    game_vs_cable,		// ケーブル接続チェック
+    game_vs_check,		// 親/子 認識
+    game_vs_bootwait,		// 子機@ブートウエイト処理
+    game_vs_connect,		// 接続確認処理
+
+//------- マルチブート処理 --------------------------------------//
+
+    game_vs_key,		// ローダー転送開始キー入力待ち
+    game_vs_setup,		// 各種設定
+    game_vs_soundstop,		// サウンド停止
+    game_vs_load,		// ローダー転送処理
+
+//------- ＲＯＭ対戦開始 親機@側処理 -----------------------------//
+
+    game_vs_wait,		// ＲＯＭチェック開始ウエイト処理
+    game_vs_StartWait,		// ＲＯＭチェック開始ウエイト処理
+    game_vs_RomCheck,		// ＲＯＭチェック親機@側処理
+    game_vs_start,		// 開始キー入力待ち
+    game_vs_select,		// ゲームモード選択画面
+    game_vs_battle,		// 各種設定
+    game_vs_ParamSend,		// 設定送信
+    game_vs_player,		// ＲＯＭ対戦自機@確認画面
+    game_vs_wait2,		// ウエイト＆ＲＯＭ対戦起動処理
+
+//------- ＲＯＭ対戦開始 子機@側処理 -----------------------------//
+
+    game_vs_child,		// 子機@ＲＯＭチェック待ち
+    game_vs_mode,		// ゲームモード選択待ち
+    game_vs_RomWait,		// 自機@確認＆ＲＯＭ対戦起動信号待ち
+    game_vs_SoundWait,		// サウンドウエイト
+
+//------- 共通エラー表示処理 ------------------------------------//
+
+    game_vs_error,		// エラー表示画面
+};
+/*
+ ****************************************************************
+ *     モードセレクト
+ ****************************************************************
+ */
+void vs_game(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+
+    if((mGm_GMMODE < MB_SNDSTP) || (mGm_GMMODE > MB_LOAD)){
+	ObjVanishAll();	//ＯＡＭ全クリアー
+    }
+
+    game_vs_menu[mGm_GMMODE]();
+
+    if((mGm_GMMODE == MB_SETMLT) ||
+       ((mGm_GMMODE >= MB_SELECT) && (mGm_GMMODE <= MB_WAIT)) ||
+       ((mGm_GMMODE >= MB_ROMWAIT) && (mGm_GMMODE <= MB_SNDWAIT))){
+	Frame_ColChang();
+    }
+    title->frame++;
+}
+
+
+
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d68 1
+a68 1
+extern u8 d_title_bros_obj_Huff[0x2f78];
+d81 1
+d83 10
+a92 10
+	{ 0x10, 0x0B },//P
+	{ 0x18, 0x09 },//R
+	{ 0x20, 0x08 },//E
+	{ 0x28, 0x0C },//S
+	{ 0x30, 0x0C },//S
+	{ 0x40, 0x0C },//S
+	{ 0x48, 0x0D },//T
+	{ 0x50, 0x30 },//A
+	{ 0x58, 0x09 },//R
+	{ 0x60, 0x0D },//T
+d96 4
+a99 4
+	{ 0x1C, 0x34 },//C
+	{ 0x24, 0x0E },//H
+	{ 0x2C, 0x08 },//E
+	{ 0x34, 0x34 },//C
+d104 1
+a104 1
+	{ 0xFF, 0x00 },
+d107 6
+a112 6
+	{ 0x10, 0x0B },//P
+	{ 0x18, 0x0F },//L
+	{ 0x20, 0x08 },//E
+	{ 0x28, 0x30 },//A
+	{ 0x30, 0x0C },//S
+	{ 0x38, 0x08 },//E
+d117 1
+a117 1
+	{ 0xFF, 0x00 },
+d120 5
+a124 5
+	{ 0x64, 0x08 },//E
+	{ 0x6C, 0x09 },//R
+	{ 0x74, 0x09 },//R
+	{ 0x7C, 0x0A },//O
+	{ 0x84, 0x09 },//R
+d128 7
+a134 7
+	{ 0x37, 0x0D },//T
+	{ 0x3F, 0x09 },//R
+	{ 0x47, 0x30 },//A
+	{ 0x4F, 0x39 },//N
+	{ 0x57, 0x0C },//S
+	{ 0x5F, 0x3A },//M
+	{ 0x67, 0x3B },//I
+d144 1
+a144 1
+	{ 0xFF, 0x00 },
+d265 7
+a271 7
+const	u8 	ClassicChr[2][7] = {
+    { 0x10, 0x11, 0x12, 0x13, 0x13, 0x17, 0x10, },
+    { 0x20, 0x21, 0x22, 0x23, 0x23, 0x27, 0x20, },
+};
+const	u8 	BattleChr[2][6] = {
+    { 0x18, 0x12, 0x19, 0x19, 0x11, 0x1A, },
+    { 0x28, 0x22, 0x29, 0x29, 0x21, 0x2A, },
+d286 1
+a286 1
+    for(i=0; i<7; i++){
+d290 1
+a290 1
+    for(i=0; i<7; i++){
+d299 1
+a299 1
+    for(i=0; i<6; i++){
+d303 1
+a303 1
+    for(i=0; i<6; i++){
+d715 2
+a716 2
+    0x00bf,0x00bf,0x0100,0x0101,0x0102,0x0103,0x0104,0x0105,
+    0x00bf,0x00bf,0x0110,0x0111,0x0112,0x0113,0x0114,0x0115,
+d720 2
+a721 2
+    0x00bf,0x00bf,0x0106,0x0107,0x0108,0x0109,0x010a,0x010b,0x010c,0x010d,
+    0x00bf,0x00bf,0x0116,0x0117,0x0118,0x0119,0x011a,0x011b,0x011c,0x011d,
+d725 2
+a726 2
+    0x00bf,0x00bf,0x010e,0x010f,0x0120,0x0121,0x0122,0x0123,0x0124,0x0125,
+    0x00bf,0x00bf,0x011e,0x011f,0x0130,0x0131,0x0132,0x0133,0x0134,0x0135,
+d730 3
+a732 3
+    0xe126,0xe127,0xe128,0xe129,0x00bf,0x00bf,
+    0xe12a,0xe12b,0xe12c,0xe12d,0xe12e,0xe12f,
+    0xe137,0xe127,0xe12c,0xe138,0x00bf,0x00bf,
+d736 2
+a737 2
+    0xe12a,0xe12b,0x00bf,
+    0xe129,0xe126,0xe128,
+d843 1
+a843 1
+    for(loop_ct = 0; loop_ct < 8; loop_ct++){
+d845 1
+a845 1
+	*(level_adr + 0x20) = level_screen_data[loop_ct + 8] | atr;
+d850 2
+a851 2
+			(0xc * 0x20 + 0x9) * 2 + VRAM);
+    *(level_adr) = 0x0438 + atr;
+d853 5
+a857 2
+    for(loop_ct = 0; loop_ct < 6; loop_ct++){
+	*(level_adr) = level_data[VS_LEVEL(title) * 6 + loop_ct];
+d861 1
+a861 1
+    *(level_adr) = 0x0038 + atr;
+d878 1
+a878 1
+    for(loop_ct = 0; loop_ct < 10; loop_ct++){
+d880 1
+a880 1
+	*(level_adr + 0x20) = fire_screen_data[loop_ct + 10] | atr;
+d884 2
+a885 2
+			(0xe * 0x20 + 0xb) * 2 + VRAM);
+    *(level_adr) = 0x0448 + atr;
+d889 3
+d895 1
+a895 1
+    *(level_adr) = 0x0048 + atr;
+d905 1
+a905 1
+    for(loop_ct = 0; loop_ct < 10; loop_ct++){
+d907 1
+a907 1
+	*(level_adr + 0x20) = coin_screen_data[loop_ct + 10] | atr;
+d918 2
+a919 2
+	    *(level_adr) = 0x00bf;
+	    *(level_adr + 9) = 0x00bf;
+d1032 1
+d1034 6
+a1039 6
+//	title->logo[i].xpos = 0x18 + 0x20 * i;
+	if(i < 3){
+	    title->logo[i].xpos = 0x20 + 0x20 * i;
+	}else{
+	    title->logo[i].xpos = 0x10 + 0x20 * i;
+	}
+d1773 1
+a1773 1
+	    PushStart_Write(0x84);//(0x68);
+d1845 1
+a1845 1
+    PushStart_Write(0x84);
+d2000 1
+a2000 1
+    PushStart_Write(0x84);
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,76 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *
+ *	スパークヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __BA_SPARK_H_
+#define __BA_SPARK_H_
+
+/*------------------------- 定数定義 -------------------------*/
+#define	MAX_SPARK		0x04		// 小さい星の最大数
+
+/*--------------------- 構造体 ------------------------*/
+typedef struct{
+    u8		cnt;			// 表示する個数
+    s32		Xpos[MAX_SPARK];	// オフセットＸポジション
+    s32		Ypos[MAX_SPARK];	// オフセットＹポジション
+    s32		Xspd[MAX_SPARK];
+    s32		Yspd[MAX_SPARK];
+} sparkDT_c;
+
+#define	aE_Spark(p)	((sparkDT_c *)(p)->other)
+#define	aE_SPKCnt(p)	((p)->cnt)
+#define	aE_SPKXpos(p,i)	((p)->Xpos[(i)]);
+#define	aE_SPKYpos(p,i)	((p)->Ypos[(i)]);
+#define	aE_SPKXspd(p,i)	((p)->Xspd[(i)]);
+#define	aE_SPKYspd(p,i)	((p)->Yspd[(i)]);
+#define	aE_SPKXpos_p(p)	((p)->Xpos);
+#define	aE_SPKYpos_p(p)	((p)->Ypos);
+#define	aE_SPKXspd_p(p)	((p)->Xspd);
+#define	aE_SPKYspd_p(p)	((p)->Yspd);
+
+/*--------------------- EXTURN ------------------------*/
+extern	void	MakeSpark(s32, s32, s32, s32);
+extern	void	spark_main(effectDT_c *);
+
+#endif /* __BA_SPARK_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

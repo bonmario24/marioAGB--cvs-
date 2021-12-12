@@ -1,0 +1,123 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*	マリオＵＳＡ　@セレクト画面用サブプログラムのヘッダー	*/
+/****************************************************************/
+#ifndef __UM_SELECT_SUB_H_
+#define __UM_SELECT_SUB_H_
+
+#define SLBG_BASE0 (BG_VRAM+0xf800)
+#define SLBG_BASE1 (BG_VRAM+0xf000)
+#define SLBG_BASE2 (BG_VRAM+0xe800)
+#define SLBG_BASE3 (BG_VRAM+0xe000)
+#define DIVIDE_INC 8
+#define BLANK      0x00bd
+#define BLANK2     0x01bd
+#define NUKI       0x00bf
+#define CURSOL     0x30ac
+#define NORMSTAGE  0x7FB7 // 昼の画面用抜きカラー
+#define NIGHTSTAGE 0x4924 // 夜の画面用抜きカラー
+#define ICESTAGE   0x7FFA // 氷の画面用抜きカラー
+
+#define STOP_sl   0
+#define ROTATE_sl 1
+
+typedef struct {
+    u16 xpos;
+    u16 ypos;
+    s16 hsize;
+    s16 vsize;
+    u8  patrn;
+} Pl_Sel_c;
+
+typedef struct {
+    Pl_Sel_c Pl_Sel[4];	// オブジェセット用構造体
+    u8 mode;		// 動作フラグ
+    u8 plchr;		// プレイヤーキャラ
+    u16 angle;		// 回転角
+    s16 angle_rate;	// 回転量
+    u32	score_data;	// スコア表示用変数(4bit毎に各桁が入る)
+    u8 ipt;		// OAMナンバー
+
+// 下の二つは後で外す
+    u8 course;		// 現在選択中のコース(コースセレクトで使う)
+    u8 keyonfg;		// 別のコースを選ぼうとしたかフラグ
+}aAll_PlSel_c;
+
+extern aAll_PlSel_c	*p_sel;
+extern OamData Oamclr;
+
+#define PSBASE 		(p_sel->Pl_Sel)
+#define PLSEL_MODE	(p_sel->mode)
+#define PLSEL_PLCHR	(p_sel->plchr)
+#define PLSEL_ANGLE	(p_sel->angle)
+#define PLSEL_RATE	(p_sel->angle_rate)
+#define	PLSEL_SCRDT	(p_sel->score_data)
+#define PLSEL_IPT	(p_sel->ipt)
+
+#define PLSEL_COURSE	(p_sel->course)
+#define PLSEL_KONFG	(p_sel->keyonfg)
+
+#define PLSEL_XPOS(pt)  (((Pl_Sel_c *)(pt)) -> xpos)
+#define PLSEL_YPOS(pt)  (((Pl_Sel_c *)(pt)) -> ypos)
+#define PLSEL_HSIZE(pt) (((Pl_Sel_c *)(pt)) -> hsize)
+#define PLSEL_VSIZE(pt) (((Pl_Sel_c *)(pt)) -> vsize)
+#define PLSEL_PTRN(pt)  (((Pl_Sel_c *)(pt)) -> patrn)
+
+extern void Drw_Number(u8 i_No, u32 i_Base, 
+		       u16 i_Drw_pnt, u16 i_Chr_pnt, u16 i_blank);
+extern void Drw_Life( u8 i_No, u16 i_Base, u16 i_Drw_pnt, u16 i_Chr_pnt, u16 i_blank );
+extern u16 Get_Drw_pnt( u16 i_chpt, u16 i_course );
+extern void TENKAI( u16 *i_data, u16 *o_data );
+extern void player_sel_obj_init( void );
+extern void player_sel_obj_move( void );
+extern void player_sel_obj_oamset( void );
+extern void player_sel_obj_sort( void );
+extern void param_oam_set( u8 SEL_CHR );
+extern void ObjVanishTemp( void ); // ua_sort.c
+extern void act_clear( void );
+extern void score_ssc_set( u32 i_No, u32 i_Base, u16 i_Drw_pnt,
+			   u16 i_Chr_pnt, u16 i_blank );
+extern void ObjVanishTemp( void );
+extern void hajimari_oam_set( void );
+extern void hajimari_course_set( void );
+extern void Color_Change(void);
+extern void mGm_MALLOC_p_sel(void);
+extern void mGm_FREE_p_sel(void);
+#endif /* __UM_SELECT_SUB_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

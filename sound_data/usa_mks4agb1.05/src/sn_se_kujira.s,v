@@ -1,0 +1,92 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_se_kujira_grp, voicegroup000
+	.equ	sn_se_kujira_pri, 50
+	.equ	sn_se_kujira_rev, 0
+	.equ	sn_se_kujira_mvl, 50
+	.equ	sn_se_kujira_key, 0
+	.equ	sn_se_kujira_tbs, 1
+	.equ	sn_se_kujira_exg, 0
+	.equ	sn_se_kujira_cmp, 1
+
+	.section .rodata
+	.global	sn_se_kujira
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_se_kujira_1:
+	.byte	KEYSH , sn_se_kujira_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_se_kujira_tbs/2
+	.byte		VOICE , 3
+	.byte		VOL   , 70*sn_se_kujira_mvl/mxv
+	.byte		N04   , An3 , v112
+	.byte	W04
+	.byte		VOL   , 60*sn_se_kujira_mvl/mxv
+	.byte		TIE   , Dn4 , v100
+	.byte	W44
+	.byte		VOL   , 50*sn_se_kujira_mvl/mxv
+	.byte	W24
+	.byte		        40*sn_se_kujira_mvl/mxv
+	.byte	W24
+@@ 001   ----------------------------------------
+	.byte		        30*sn_se_kujira_mvl/mxv
+	.byte	W24
+	.byte		        20*sn_se_kujira_mvl/mxv
+	.byte	W12
+	.byte		EOT   
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_se_kujira:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_se_kujira_pri	@@ Priority
+	.byte	sn_se_kujira_rev	@@ Reverb.
+
+	.word	sn_se_kujira_grp
+
+	.word	sn_se_kujira_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

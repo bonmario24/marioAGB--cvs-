@@ -1,0 +1,389 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@ワーププログラム			*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_color.h"
+#include "ua_char_set.h"
+#include "uca_acters.h"
+#include "ua_score.h"
+#include "ua_stareffect.h"
+
+#include "ud_cad.h"
+#include "ua_game.h"
+
+#include "ua_warp.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void wave_move(void);
+static void ura_wave(void);
+static void warp_init(void);
+static void warp_wave(void);
+static void warp_move(void);
+static void warp_fade_out(void);
+
+/*--------------------------------------------------------------*/
+/*		H-DMA warp data					*/
+/*--------------------------------------------------------------*/
+static u16 WPCOS[] = {			// cos data
+    0x0100,0x00FF,0x00FF,0x00FF,0x00FE,0x00FE,0x00FD,0x00FC,
+    0x00FB,0x00F9,0x00F8,0x00F6,0x00F4,0x00F3,0x00F1,0x00EE,
+    0x00EC,0x00EA,0x00E7,0x00E4,0x00E1,0x00DE,0x00DB,0x00D8,
+    0x00D4,0x00D1,0x00CD,0x00C9,0x00C5,0x00C1,0x00BD,0x00B9,
+    0x00B5,0x00B0,0x00AB,0x00A7,0x00A2,0x009D,0x0098,0x0093,
+    0x008E,0x0088,0x0083,0x007E,0x0078,0x0073,0x006D,0x0067,
+    0x0061,0x005C,0x0056,0x0050,0x004A,0x0044,0x003E,0x0038,
+    0x0031,0x002B,0x0025,0x001F,0x0019,0x0012,0x000C,0x0006,
+};
+
+static u16 WPSIN[] = {			// sin data
+    0x0000,0xFFFA,0xFFF4,0xFFEE,0xFFE7,0xFFE1,0xFFDB,0xFFD5,
+    0xFFCF,0xFFC8,0xFFC2,0xFFBC,0xFFB6,0xFFB0,0xFFAA,0xFFA4,
+    0xFF9F,0xFF99,0xFF93,0xFF8D,0xFF88,0xFF82,0xFF7D,0xFF78,
+    0xFF72,0xFF6D,0xFF68,0xFF63,0xFF5E,0xFF59,0xFF55,0xFF50,
+    0xFF4B,0xFF47,0xFF43,0xFF3F,0xFF3B,0xFF37,0xFF33,0xFF2F,
+    0xFF2C,0xFF28,0xFF25,0xFF22,0xFF1F,0xFF1C,0xFF19,0xFF16,
+    0xFF14,0xFF12,0xFF0F,0xFF0D,0xFF0C,0xFF0A,0xFF08,0xFF07,
+    0xFF05,0xFF04,0xFF03,0xFF02,0xFF02,0xFF01,0xFF01,0xFF01,
+    0xFF01,0xFF01,0xFF01,0xFF01,0xFF02,0xFF02,0xFF03,0xFF04,
+    0xFF05,0xFF07,0xFF08,0xFF0A,0xFF0C,0xFF0D,0xFF0F,0xFF12,
+    0xFF14,0xFF16,0xFF19,0xFF1C,0xFF1F,0xFF22,0xFF25,0xFF28,
+    0xFF2C,0xFF2F,0xFF33,0xFF37,0xFF3B,0xFF3F,0xFF43,0xFF47,
+    0xFF4B,0xFF50,0xFF55,0xFF59,0xFF5E,0xFF63,0xFF68,0xFF6D,
+    0xFF72,0xFF78,0xFF7D,0xFF82,0xFF88,0xFF8D,0xFF93,0xFF99,
+    0xFF9F,0xFFA4,0xFFAA,0xFFB0,0xFFB6,0xFFBC,0xFFC2,0xFFC8,
+    0xFFCF,0xFFD5,0xFFDB,0xFFE1,0xFFE7,0xFFEE,0xFFF4,0xFFFA,
+    0x0000,0x0006,0x000C,0x0012,0x0019,0x001F,0x0025,0x002B,
+    0x0031,0x0038,0x003E,0x0044,0x004A,0x0050,0x0056,0x005C,
+    0x0061,0x0067,0x006D,0x0073,0x0078,0x007E,0x0083,0x0088,
+    0x008E,0x0093,0x0098,0x009D,0x00A2,0x00A7,0x00AB,0x00B0,
+    0x00B5,0x00B9,0x00BD,0x00C1,0x00C5,0x00C9,0x00CD,0x00D1,
+    0x00D4,0x00D8,0x00DB,0x00DE,0x00E1,0x00E4,0x00E7,0x00EA,
+    0x00EC,0x00EE,0x00F1,0x00F3,0x00F4,0x00F6,0x00F8,0x00F9,
+    0x00FB,0x00FC,0x00FD,0x00FE,0x00FE,0x00FF,0x00FF,0x00FF,
+    0x00FF,0x00FF,0x00FF,0x00FF,0x00FE,0x00FE,0x00FD,0x00FC,
+    0x00FB,0x00F9,0x00F8,0x00F6,0x00F4,0x00F3,0x00F1,0x00EE,
+    0x00EC,0x00EA,0x00E7,0x00E4,0x00E1,0x00DE,0x00DB,0x00D8,
+    0x00D4,0x00D1,0x00CD,0x00C9,0x00C5,0x00C1,0x00BD,0x00B9,
+    0x00B5,0x00B0,0x00AB,0x00A7,0x00A2,0x009D,0x0098,0x0093,
+    0x008E,0x0088,0x0083,0x007E,0x0078,0x0073,0x006D,0x0067,
+    0x0061,0x005C,0x0056,0x0050,0x004A,0x0044,0x003E,0x0038,
+    0x0031,0x002B,0x0025,0x001F,0x0019,0x0012,0x000C,0x0006,
+};
+
+/*--------------------------------------------------------------*/
+/*		ワープ先データ					*/
+/*--------------------------------------------------------------*/
+const u8 WARPDT[7] = {
+    3,1,4,5,6,5,6,
+};
+
+const u16 warp_BG_data[3*4] = {
+    0x20ee,0x20fe,0x20fc,
+    0x20ef,0x20ff,0x20fd,
+    0x2069,0x206a,0x20fd,
+    0x206b,0x206c,0x206d,
+};
+
+/*--------------------------------------------------------------*/
+/*		ラスターイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void wave_init(void)
+{
+    WAPHBA = 8;
+    WNHK10 = 0;
+    WNHNKI = 0;
+    WNSTA1 = 4;
+    WNSTAT = 1;
+    WARPCT = 0;
+//    BLDY = 0;
+//    BLDCNT = 0x00b7;
+//    BLDALPHA = 0x0000;
+    DmaClear(3, game.scch1, HDMABF4, 0xa0 * 2, 16);
+//    DISPCNT |= H_BLANK_INTR_FLAG;
+    DISPCNT &= 0xefff;
+    *(vu16 *)REG_STAT |= STAT_H_BLANK_IF_ENABLE;
+    m4aSongNumStart( s_u_warp );
+}
+
+/*--------------------------------------------------------------*/
+/*		ラスター処理					*/
+/*--------------------------------------------------------------*/
+void wave_move(void)
+{
+    u16 wave_loop;
+    u16 w_r;
+    u16 w_y = 0;
+    u16 wave_line;
+    u16 WK0WRK,WK2WRK,WK4WRK;
+
+    w_r = WNHK10;
+    for(wave_loop = 0; wave_loop < 0xa0; wave_loop++){
+	wave_line = (WPSIN[w_r] * WNHNKI) >> 8;
+	if(wave_line >= 0x80)
+	    wave_line |= 0xff00;
+
+	HDMABF4[wave_loop] = wave_line + game.scch1;
+
+	w_r = (w_r + WAPHBA) & 0xff;
+    }
+
+    if((WNSTA1 & 0xff) >= 0x80)
+	WNHK10 = ((WNSTA1 | 0xff00) + WNHK10) & 0xff;
+    else
+	WNHK10 = ((WNSTA1 & 0xff) + WNHK10) & 0xff;
+
+    if((WNSTAT & 0xff) >=0x80)
+	WARPCT = (WNSTAT | 0xff00) + WARPCT;
+    else
+	WARPCT = (WNSTAT & 0xff) + WARPCT;
+
+    WK0WRK = WNHNKI;
+    if(WARPCT < 0x80){
+//	w_y = 0;
+	WK2WRK = 7;
+    }
+    else if(WARPCT < 0xa0){
+	WK2WRK = 3;
+    }
+    else if(WARPCT < 0xc0){
+	WK2WRK = 1;
+    }
+    else{
+	WK2WRK = 0;
+	if(WARPCT >= 0xf8){
+	    w_y = 1;
+	}
+    }
+    WK4WRK = WARPCT;
+
+    if((WK4WRK & WK2WRK) == 0){
+	if((WNSTAT & 0xff) >= 0x80)
+	    WK0WRK = (WNSTAT | 0xff00) + WK0WRK;
+	else
+	    WK0WRK = (WNSTAT & 0xff) + WK0WRK;
+
+    }
+
+    WNHNKI = WK0WRK;
+
+    if((w_y == 1) && ((WK4WRK & 1) == 1)){
+	w_r = (WNSTAT + BLDY) & 0xff;
+	if((w_r < 0x11) && (w_r != 0x10)){
+	    BLDY = w_r;
+	}
+//	else{
+//	    *(vu16 *)REG_STAT &= 0xffef;
+//
+//	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		裏画面のラスター処理				*/
+/*--------------------------------------------------------------*/
+void ura_wave(void)
+{
+    wave_move();
+    if(WNHNKI >= 0x80){
+	*(vu16 *)REG_STAT &= 0xffef;
+	VSYNC_OFF = 1;
+	mGm_GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ワープイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void warp_init(void)
+{
+    u8 byte_no,bit_no;
+    u16 bit_data;
+
+    lcdc_off();			//強制ブランキング処理
+
+//    m4aSoundVSyncOff();
+//    m4aMPlayAllStop();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+
+    byte_no = (WORDNO * 5) / 8;
+    bit_no = (WORDNO * 5) % 8;
+    bit_data = REDCOIN << bit_no;
+    RED_COIN[byte_no] = RED_COIN[byte_no] | (bit_data & 0xff);
+    RED_COIN[byte_no + 1] = RED_COIN[byte_no + 1] | (bit_data >> 8);
+    
+    CHAPTN = WARPDT[CHAPTN];
+    WORDNO = CHAPTN * 3;
+    COSUNO = 0;
+    SORTFG = 0;
+
+/*-------------	ＢＧキャラクターセット -------------*/
+    m_warp_char_set();
+
+/*------------- ＢＧカラーセット -------------*/
+    game_over_col_set();
+
+/*-------------	スクリーンセット -------------*/
+    DmaArrayCopy(3, d_warp_sscDT, BG_VRAM + 0xf800, 16);
+    DmaArrayCopy(3, ud_slot_BG2_sscDT, BG_VRAM + 0xf000, 16);
+    *(u16 *)(BG_VRAM + 0xfa5e) = *(u16 *)(warp_BG_data + ((CHAPTN - 3) * 3) + 0);
+    *(u16 *)(BG_VRAM + 0xfa9e) = *(u16 *)(warp_BG_data + ((CHAPTN - 3) * 3) + 1);
+    *(u16 *)(BG_VRAM + 0xfade) = *(u16 *)(warp_BG_data + ((CHAPTN - 3) * 3) + 2);
+
+/*------------- 初期値セット -------------*/
+//    fade_in_parameter_set();
+
+    WARPTM = 5 * 60;
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    game.scch2 = 0;
+    game.sccv2 = 0;
+    BGBGM = 0xffff;
+
+    WAPHBA = 8;
+    WNHK10 = 0xc0;
+    WNHNKI = 0x60;
+    WNSTA1 = 0xfc;
+    WNSTAT = 0xff;
+    WARPCT = 0x118;
+    BLDY = 0x10;
+    BLDCNT = 0x00b7;
+    BLDALPHA = 0x0000;
+    DmaClear(3, game.scch1, HDMABF4, 0xa0 * 2, 16);
+    save_push();
+//    DISPCNT |= H_BLANK_INTR_FLAG;
+//    *(vu16 *)REG_IF = H_BLANK_INTR_FLAG;
+
+    NMI_NO = nmi_title;
+    game.GMMODE++;
+
+    DISPCNT = 0;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | H_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE | STAT_H_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    m4aSongNumStart(s_u_slot_start);
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_OBJ_ON;
+//    *(vu16 *)REG_DISPCNT = DISP_MODE_1 | DISP_BG0_ON | DISP_OBJ_ON;
+
+}
+
+/*--------------------------------------------------------------*/
+/*		ワープ画面ラスター処理				*/
+/*--------------------------------------------------------------*/
+void warp_wave(void)
+{
+    wave_move();
+    if(WNHNKI >= 0xf0){
+	*(vu16 *)REG_STAT &= 0xffef;
+	mGm_GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ワープ画面表示処理				*/
+/*--------------------------------------------------------------*/
+void warp_move(void)
+{
+    WARPTM--;
+
+    if((WARPTM == 0) || ((mGm_TRG & 0xf) != 0)){
+	mGm_FREE_p_act();	// 敵フリー
+	mGm_FREE_p_scr();	// スコアフリー
+	mGm_FREE_p_eff();	// スター＆コインエフェクトフリー
+	mGm_GC();
+	REDCOIN = 0;
+	FLGCLEAR();
+	FLAGCLR();
+	fade_out_parameter_set();
+	game.GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ワープ画面フェードアウト処理			*/
+/*--------------------------------------------------------------*/
+void warp_fade_out(void)
+{
+    fade_out();
+    if(game.fade_flag == 0){
+	VSYNC_OFF = 1;
+	game.SLMODE = select_mode;
+	game.GMMODE = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ワープ処理テーブル				*/
+/*--------------------------------------------------------------*/
+mfunc warp_table[] = {
+    ura_wave,
+    warp_init,
+    warp_wave,
+    warp_move,
+    warp_fade_out,
+};
+
+/*--------------------------------------------------------------*/
+/*		ワープメイン処理				*/
+/*--------------------------------------------------------------*/
+void M_game_warp(void)
+{
+    warp_table[game.GMMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

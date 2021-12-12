@@ -1,0 +1,67 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		縦スクロール処理				*/
+/****************************************************************/
+#ifndef __UM_TSCR_H_
+#define __UM_TSCR_H_
+
+/*------------- スクロールモード切り替え -----------------------*/
+#define	SFC_VSCROLL	1	// １：ＳＦＣ版スクロール
+				// ０：フリースクロール
+
+/*------------- スクロールフラグセット -------------------------*/
+						// ■■ ＳＦＣの値 ■■
+//#define	SCNT_VALUE	0x12		// スクロール幅（実際はｘ８）
+//#define	SCRHIGH		0x10		// スクロール開始位置（上）
+//#define	SCRLOW		0xb4		// 　@　@　@　@”　@　@　@　@（下）
+//#define	SCCV_ADD_VALEUE	0x04		// スクロール加算値
+
+#define	SCNT_VALUE_UP	0x0b		// スクロール幅（上）
+#define	SCNT_VALUE_DOWN	SCNT_VALUE_UP	// 　@　@”　@　@　@（下）
+#define	SCRHIGH		(0x20-1-8)	// スクロール開始位置（上）▼さらに８ドット上へ(1-08)
+#define	SCRLOW		((0xb4-0x40)-8)	// 　@　@　@　@”　@　@　@　@（下）▼さらに８ドット上へ(1-08)
+#define	SCCV_ADD_VALEUE	0x02		// スクロール加算値
+
+/*------------- ＥＸＴＥＲＮ -----------------------------------*/
+extern	void KEY11(void);
+extern  void V_scroll_auto_TATE(void);
+extern	void H_scroll_auto_TATE(void);
+
+#endif /* __UM_TSCR_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

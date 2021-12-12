@@ -1,0 +1,76 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ÉwÉbÉ_Å[ÉtÉ@@ÉCÉã				*/
+/****************************************************************/
+#ifndef __UM_RAM_H_
+#define __UM_RAM_H_
+
+/*------------- äOïîÇqÇ`Çl -------------------------------------*/
+#define BG1_UNIT_BUFFER		0x02000000
+#define BG2_UNIT_BUFFER		(BG1_UNIT_BUFFER + (0xb00 * 2))
+#define BG3_UNIT_BUFFER		(BG2_UNIT_BUFFER + 0xb00)
+//#define BG1_CHAR_BUFFER_H	(BG3_UNIT_BUFFER + 0x600)
+//#define BG1_CHAR_BUFFER_V	(BG1_CHAR_BUFFER_H + (32 * 2 * 2))
+//#define BG1_VRAM_ADDRESS_H	(BG1_CHAR_BUFFER_V + (32 * 2 * 2))
+//#define BG1_VRAM_ADDRESS_V	(BG1_VRAM_ADDRESS_H + 2)
+//#define BG2_CHAR_BUFFER_H	(BG1_VRAM_ADDRESS_V + 2)
+//#define BG2_CHAR_BUFFER_V	(BG2_CHAR_BUFFER_H + (32 * 2 * 2))
+//#define BG2_VRAM_ADDRESS_H	(BG2_CHAR_BUFFER_V + (32 * 2 * 2))
+//#define BG2_VRAM_ADDRESS_V	(BG2_VRAM_ADDRESS_H + 2)
+//#define BG3_CHAR_BUFFER_H	(BG2_VRAM_ADDRESS_V + 2)
+//#define BG3_CHAR_BUFFER_V	(BG3_CHAR_BUFFER_H + (32 * 2 * 2))
+//#define BG3_VRAM_ADDRESS_H	(BG3_CHAR_BUFFER_V + (32 * 2 * 2))
+//#define BG3_VRAM_ADDRESS_V	(BG3_VRAM_ADDRESS_H + 2)
+//#define COL_BUF			(BG3_VRAM_ADDRESS_V + 2)
+#define COL_BUF			(BG3_UNIT_BUFFER + 0x600)
+#define V_CONT_BUF		(COL_BUF + 0x400)
+#define GRADA_BUF		(V_CONT_BUF + 0x20)
+#define V_point			(GRADA_BUF + 0x20)
+#define V_diff			(V_point + 2)
+#define DMA_INDEX		(V_diff + 4)
+#define DMA_BUF			(DMA_INDEX + 2)
+#define PLAYER_COL_BUF		(DMA_BUF + 0x100)
+#define HI_SCORE_BAK		(PLAYER_COL_BUF + 0x20)
+#define SAVE_AREA_BAK		(HI_SCORE_BAK + 4)
+#define TENKAI_RAM		(SAVE_AREA_BAK + 40)
+
+#define END_RAM			(TENKAI_RAM + 0x800)
+
+#endif /* __UM_RAM_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

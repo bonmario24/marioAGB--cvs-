@@ -1,0 +1,153 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#### アセンブラ・ローダ・コンパイラ・変換ツール定義
+AGBLIB = $(AGBDIR)/lib/
+
+AS = as
+LD = ld
+CC = gcc
+OBJCOPY = objcopy
+
+#### ソースファ@イル定義
+.SFILES  = crt0_child.s
+
+.CFILES += ba_effect.c
+.CFILES += ba_player.c
+.CFILES += ba_reach.c
+.CFILES += cm_game.c
+.CFILES += cm_main.c
+.CFILES += m_game_sub.c
+.CFILES += m_battle_mult_play.c
+
+#### オブジェクトファ@イル定義
+VS_OFILES  =
+VS_OFILES += cm_game_title.o
+VS_OFILES += m_sub.o
+VS_OFILES += m_scroll.o
+VS_OFILES += m_bgcheck.o
+VS_OFILES += m_MultiSio.o
+
+VS_OFILES += ba_act.o
+VS_OFILES += ba_bgYuKa.o
+VS_OFILES += ba_bucket.o
+VS_OFILES += ba_Coin.o
+VS_OFILES += ba_common.o
+VS_OFILES += ba_egg.o
+VS_OFILES += ba_enFly.o
+VS_OFILES += ba_enKani.o
+VS_OFILES += ba_enmy.o
+VS_OFILES += ba_enNoko.o
+VS_OFILES += ba_enToge.o
+VS_OFILES += ba_fire.o
+VS_OFILES += ba_fishBone.o
+VS_OFILES += ba_heart.o
+VS_OFILES += ba_ice.o
+VS_OFILES += ba_koura.o
+VS_OFILES += ba_kuppa.o
+VS_OFILES += ba_mutekiStar.o
+VS_OFILES += ba_PipeWave.o
+VS_OFILES += ba_point.o
+VS_OFILES += ba_pow.o
+VS_OFILES += ba_smoke.o
+VS_OFILES += ba_spark.o
+VS_OFILES += ba_splash.o
+VS_OFILES += ba_star.o
+VS_OFILES += ba_icicle.o
+VS_OFILES += ba_powsmk.o
+
+VS_OFILES += m_mini_malloc.o
+
+VS_OFILES += d_bros_BG_scl.o
+VS_OFILES += d_Bros_obj_scl.o
+
+VS_OFILES += d_Bros_obj_winner_scl.o
+
+VS_OFILES += d_playerA_sob.o
+VS_OFILES += d_playerB_sob.o
+
+VS_OFILES += course_data.o
+
+.OFILES	= $(.SFILES:.s=.o) $(.CFILES:.c=.o)
+
+#### サウンドファ@イル定義
+SOUND_DIR = Sound/bros_senyou/
+include $(SOUND_DIR)Soundfiles
+
+#### 各フラグ定義
+ASFLAGS = -I c:/agb/Include -mthumb-interwork
+CFLAGS  = -g -I c:/agb/Include -mthumb-interwork -nostdlib
+CFLAGS += -D_LANGUAGE_C=1 -DOPTIMUM_MALLOC
+
+CFLAGS  += -W -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wformat -Wchar-subscripts
+CFLAGS  += -Wpointer-arith -Wmissing-declarations -Wmissing-prototypes
+
+LDFLAGS += -Map vs.map -nostartfiles -Ttext 0x02005800 -Tbss 0x03000000 \
+	   -L$(AGBLIB) -lagbsyscall -lisagbprn
+
+DEPENDFILE =   MakedependVS
+MAPFILE    =   vs.map
+TARGET_ELF =   vs.elf
+TARGET_BIN =   vs.bin
+
+#### 各ファ@イル構造定義
+default:
+	@@$(MAKE) -f MakefileVS $(TARGET_BIN)
+
+$(TARGET_BIN): $(TARGET_ELF)
+	$(OBJCOPY) -v -O binary $< $@@
+
+$(TARGET_ELF): $(.OFILES) $(SOUND_FILES) $(VS_OFILES) Makefile $(DEPENDFILE)
+	@@echo > $(MAPFILE)
+	$(CC) -g -o $@@ $(.OFILES) $(VS_OFILES) $(SOUND_FILES) -Wl,$(LDFLAGS)
+
+
+.PHONY: all clean depend
+
+
+all:    clean $(TARGET_BIN)
+
+clean:
+	-rm -f $(.OFILES) $(DEPENDFILE) $(TARGET_ELF) $(TARGET_BIN)
+
+depend:
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+$(DEPENDFILE): 
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+include $(DEPENDFILE)@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

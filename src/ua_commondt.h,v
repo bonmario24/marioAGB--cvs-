@@ -1,0 +1,59 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*      	ÇnÇaÇiã§í ÉfÅ[É^íËã`				*/
+/****************************************************************/
+#ifndef __UA_COMMONDT_H_
+#define __UA_COMMONDT_H_
+
+#include "m_main.h"
+#include "uca_acters.h"
+#include "ua_act.h"
+#include "ua_score.h"
+
+/*------------- ÇdÇwÇsÇdÇqÇm -----------------------------------*/
+extern	aAC_base_c abase_clear;
+
+/* OamSetDataTable */
+extern u16 *act_oamset_tbl[];
+extern u16 *act_enmodoam_tbl[];
+extern u16 *scr_oamset_tbl[];
+
+
+#endif /* __UA_COMMONDT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

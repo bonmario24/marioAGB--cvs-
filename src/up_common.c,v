@@ -1,0 +1,2769 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*								*/
+/*      	プレイヤー共通プログラム			*/
+/*								*/
+/****************************************************************/
+#include "m_main.h"
+#include "uca_acters.h"
+#include "up_player.h"
+#include "up_commondt.h"
+#include "up_common.h"
+#include "ud_cad.h"
+#include "ua_endat0b.h"
+#include "ua_act.h"
+#include "ua_score.h"
+#include "um_mosaic.h"
+#include "ua_color.h"
+#include "up_exst.h"
+
+#include "m_game.h"
+
+
+/*==============================================================*/
+/*		ＥＸＴＥＲＮ					*/
+/*==============================================================*/
+extern void SBTEN_SET(aAC_base_c *abs_pt, u8 index);
+extern void RIBONSET(void);
+extern void BIGCOIN_GET(aAC_base_c *abs_pt, u8 index);
+extern void unit_change(void);
+extern void AKADAMA_BOUND(aAC_base_c *abs_pt);
+
+/*==============================================================*/
+/*		関数のプロトタイプ宣言				*/
+/*==============================================================*/
+static	void player_STRTPOS(void);
+static	void player_DOORPOS(void);
+static	void player_TSBOPOS(void);
+static	void player_TSRUPOS(void);
+static	void player_ODORPOS(void);
+static	void player_ROKTPOS(void);
+static	void player_PLX78(void);
+static	void player_PLFAILST(void);
+static	void player_CROSSET(aAC_base_c *abs_pt,u8 index);
+static	void player_ENVS(aAC_base_c *abs_pt,u8 index);
+static	void player_FRVS(aAC_base_c *abs_pt,u8 index);
+static	void player_ABVS(aAC_base_c *abs_pt,u8 index);
+static	void player_CVS(aAC_base_c *abs_pt,u8 index);
+static	void player_DRVS(aAC_base_c *abs_pt,u8 index);
+static	void player_CHVS(aAC_base_c *abs_pt,u8 index);
+static  void player_OBJXYST(void);
+static  void player_YCONCHG(void);
+static  void player_fade_on(void);
+static  void player_fade_color_set(void);
+static  void no_katsugi_set(void);
+static	void PLGVIN1(aAC_base_c *abs_pt,u8 index);
+static	void ENKTCK(aAC_base_c *abs_pt,u8 index);
+static	void ENM190_BIG(aAC_base_c *abs_pt,u8 index);
+
+static	u8 OBJFGST(aAC_base_c *abs_pt,u8 index);
+static	u8 SANDCK(aAC_base_c *abs_pt,u8 index,u8 hit_result);
+static	u8 EPXCHK(aAC_base_c *abs_pt);
+
+
+/****************************************************************/
+/*		共通アフィンパラメータセット処理		*/
+/****************************************************************/
+//void a_affinset(u8 affinpt)
+//{
+//    ObjAffineSet(&Sraffp,
+//		 &Deaffp,
+//		 1,2);
+//    OamBak[affinpt+0].AffineParam = Deaffp.H_DiffX;
+//    OamBak[affinpt+1].AffineParam = (Deaffp.V_DiffX ^ 0xFFFF) + 1;
+//    OamBak[affinpt+2].AffineParam = Deaffp.H_DiffY;
+//    OamBak[affinpt+3].AffineParam = Deaffp.V_DiffY;
+//}
+//
+/****************************************************************/
+/*		プレイヤーＸ移動処理				*/
+/****************************************************************/
+void player_XCALC(aPL_base_c *p_ply)
+{
+    u8 ENOJSZ;
+    u16 x_sabun;
+    aAC_base_c	*abs_pt;
+
+    if( PLAY_XSPCLR == 0 ){
+
+	PLAY_PLXPOSL = 
+	    PLAY_PLXPOSL + ((PLAY_PLXSPED + PLAY_PLMVXSP) >> 4);
+#if 1	// By KAWAI
+	if( mGm_SCRCTL == V_SCROLL ){
+	    if( PLAY_OBJONFG != 0 ){	// 敵に乗ってる？
+		ENOJSZ = ENTY_ENBASE(p_act)[PLAY_ONENMY].a_enojsz;
+		if( ENOJSZ == OSZBIG || ENOJSZ == OSZBIGBR ){
+		    // サイズがBIGの時
+		    if( PLAY_PLXPOSL < -0x200000 ){ // 左OFF
+			PLAY_PLXPOSL += 0x1100000;
+		    }
+		    else if( PLAY_PLXPOSL > 0x1000000 ){ // 右OFF
+			// 苦肉の策
+			x_sabun = PLAY_PLXPOSH -
+			    ENTY_ENBASE(p_act)[PLAY_ONENMY].a_xposh;
+			if( x_sabun <= 6 ){
+			    PLAY_PLXPOSL -=
+				(0x1100000-((8-x_sabun)<<16));
+			}
+			else{
+			    PLAY_PLXPOSL -= 0x1100000;
+			}
+		    }
+		}
+		else{
+		    // サイズBIG以外
+		    if( (PLAY_PLXPOSL < -0x00100000) || 
+			(PLAY_PLXPOSL > 0x01000000) )
+			PLAY_PLXPOSL = PLAY_PLXPOSL & 0x00ffffff;
+		}
+	    }
+	    else{	// 敵に乗ってない
+		if( (PLAY_PLXPOSL < -0x00100000) &&
+		    (PLAY_PLXPOSL > -0x200000) ){
+		    // BIGサイズの敵に乗ってた時用
+		    PLAY_PLXPOSL += 0x1100000;
+		}
+		else if( (PLAY_PLXPOSL < -0x00100000) || 
+			 (PLAY_PLXPOSL > 0x01000000) )
+		    // 通常
+		    PLAY_PLXPOSL = PLAY_PLXPOSL & 0x00ffffff;
+	    }    
+	}
+#else
+	if( mGm_SCRCTL == V_SCROLL ){
+	    if( (PLAY_PLXPOSL < -0x00100000) || 
+		(PLAY_PLXPOSL > 0x01000000) ){
+
+//TEST----------------------------------------------------------------
+
+		if( PLAY_OBJONFG != 0 ){	// 敵に乗ってる？
+//		    ENOJSZ = ENTY_ENBASE(p_act)[PLAY_ONENMY].a_enojsz;
+		    ENOJSZ = ENTY_ENBASE(p_act)[PLAY_OBJONIX].a_enojsz;
+		    if( ENOJSZ == OSZBIG || ENOJSZ == OSZBIGBR ){	// でかい敵？
+			abs_pt = &(p_act->a_base[PLAY_OBJONIX]);	// ＹＥＳ
+
+			ABASE_XPOS(abs_pt) = (PLAY_PLXPOSL & 0x00ffffff) + (ABASE_XPOS(abs_pt) - PLAY_PLXPOSL);
+
+//			if( PLAY_PLXPOSL < -0x00100000)		// 左消え
+//			    ABASE_XPOS(abs_pt) = (ABASE_XPOS(abs_pt) & 0x000fffff) + 0x00f000000;
+//			else					// 右消え
+//			    ABASE_XPOS(abs_pt) = ABASE_XPOS(abs_pt) | 0xff000000;
+		    }
+		}
+
+//TEST----------------------------------------------------------------
+
+		PLAY_PLXPOSL = PLAY_PLXPOSL & 0x00ffffff;
+	    }
+	}
+#endif
+
+	PLAY_PLXPOSH = PLAY_PLXPOSL >> 16;
+    }
+    
+    PLAY_PLMVXSP_SV = PLAY_PLMVXSP;
+    PLAY_PLMVXSP = 0;
+    PLAY_XSPCLR = 0;
+}
+
+/****************************************************************/
+/*		プレイヤーＹ移動処理				*/
+/****************************************************************/
+void player_YCALC(aPL_base_c *p_ply)
+{
+    PLAY_PLYPOSL = PLAY_PLYPOSL + ((PLAY_PLYSPED + PLAY_PLMVYSP) >> 4);
+    PLAY_PLYPOSH = PLAY_PLYPOSL >> 16;
+
+    PLAY_PLMVYSP_SV = PLAY_PLMVYSP;
+    PLAY_PLMVYSP = 0;
+}
+
+/****************************************************************/
+/*		プレイヤーＺ移動処理				*/
+/****************************************************************/
+//void player_ZCALC(aPL_base_c *p_ply)
+//{
+//    PLAY_PLZPOSL = PLAY_PLZPOSL + (PLAY_PLZSPED >> 4);
+//    PLAY_PLZPOSH = PLAY_PLZPOSL >> 16;
+//}
+//
+/****************************************************************/
+/*		敵ＶＳ敵衝突判定処理				*/
+/*		return		当たりなし :: 0			*/
+/*				当たり	   :: index + 1		*/
+/****************************************************************/
+//int p_enmyhit(aAC_base_c *abs_pt,u8 my_index)
+//{
+//    u8  hit_flg;
+//    u8  i;
+//    s16 my_ct_xps,my_ct_yps,my_hn_xps,my_hn_yps;
+//    s16 you_ct_xps,you_ct_yps,you_hn_xps,you_hn_yps;
+//    s16 chk_hankei,chk_center;
+//    u32 chkdt_pt;
+//    aAC_base_c *vs_pt;
+//
+//
+///*  ＭＹ　@中心半径セット */
+//    chkdt_pt = enmy_info0[(ENTY_NAME(p_act)[my_index] - 1)] << 2;
+//    my_ct_xps = ABASE_XPOSH(abs_pt) + enmy_hit_data[chkdt_pt + 0];
+//    my_ct_yps = ABASE_YPOSH(abs_pt) + enmy_hit_data[chkdt_pt + 2];
+//    my_hn_xps = enmy_hit_data[chkdt_pt + 1];
+//    my_hn_yps = enmy_hit_data[chkdt_pt + 3];
+//
+//    for (i = 0;i < A_ENMY_NO;i++){
+//	if (ENTY_TBL(p_act)[i] != 0){		/* 敵存在してる？ */
+//	    hit_flg = 0;
+//	    vs_pt = &(p_act->a_base[i]);    
+//	    chkdt_pt = enmy_info0[(ENTY_NAME(p_act)[i] - 1)] << 2;
+//
+///*  ＹＯＵ　@中心半径セット */
+//	    you_ct_xps = ABASE_XPOSH(vs_pt) + 
+//		enmy_hit_data[chkdt_pt + 0];
+//	    you_ct_yps = ABASE_YPOSH(vs_pt) + 
+//		enmy_hit_data[chkdt_pt + 2];
+//	    you_hn_xps = enmy_hit_data[chkdt_pt + 1];
+//	    you_hn_yps = enmy_hit_data[chkdt_pt + 3];
+//
+///*  Ｘ方向範囲チェック	*/
+//	    chk_hankei = my_hn_xps + you_hn_xps;
+//	    chk_center = you_ct_xps - my_ct_xps;
+//	    if (chk_center & 0x8000)
+//		chk_center = (chk_center ^ 0xFFFF) + 1;
+//	    if (chk_center <= chk_hankei) hit_flg++;
+//
+///*  Ｙ方向範囲チェック	*/
+//	    if (hit_flg != 0){
+//		chk_hankei = my_hn_yps + you_hn_yps;
+//		chk_center = you_ct_yps - my_ct_yps;
+//		if (chk_center & 0x8000)
+//		    chk_center = (chk_center ^ 0xFFFF) + 1;
+//		if (chk_center <= chk_hankei) return i + 1;
+//	    }
+//	}
+//    }
+//    return 0;
+//}
+//
+/****************************************************************/
+/*		共通ＯＡＭセット処理				*/
+/****************************************************************/
+const u8  PLFLDT[] = { 01, 01, 01, 02, 02, 04, 04, 04 };
+
+void player_oamset(aPL_base_c *p_ply)
+{
+    u8	ipt,affinpt,work;
+    s16	work0,work1;
+    s16	base_xps,base_yps;
+    u16	work2,work3;
+    u32	loop_ct,i;
+    u16	*enmy_pt;
+    OamData *p_oam;
+    aAC_base_c	*abs_pt;
+    u8	plclor;			// ＢＧ優先
+
+
+    if( mGm_SLMODE != ending_mode )
+	act_LifeSet();		// ライフメータセット
+
+    EX_EXCONT = 0;		// プレイヤー使用ＯＡＭカウンタ
+    ex_move_main();		// 効果セット
+
+    if( RKETFG != 0 )		// ロケット乗ってる？
+	return;			// ＹＥＳ
+
+/*------------- カラーチェンジ ---------------------------------*/
+    if( PLAY_PLCMOD != PLDRIN &&
+	PLAY_PLCMOD != PLDROUT ){
+
+	if( (PLAY_PLCMOD == PLCH) || (PLAY_KENSHIRO != 0) ){
+	    PLAY_STCLCG = 0;
+	    KSRCGST();		// 無敵カラー
+	}
+	else{
+	    if( PLAY_PLSAFT != 0 ){		// 点滅？
+		if( ((PLAY_PLSAFT & PLFLDT[PLAY_PLSAFT>>4]) == 0) &&
+		    (BOSS_DEMOFG != 1) &&	// ボスデモ中は必ず表示
+		    (BOSS_DEMOTIM == 0) )	// ”
+		    return;
+	    }
+	    STCGST();		// しゃがみカラー
+	}
+    }
+
+/*------------- ＢＧ優先セット ---------------------------------*/
+//    if( PLAY_PLSAND != 0 )
+//	plclor = 0x01;
+//    else
+//	plclor = 0;
+//
+/*------------- キャラパターンセット ---------------------------*/
+    if( PLAY_BJUMP == 0 ){		// バック転ジャンプ？
+	enmy_pt = player_OAM_data;	// ＮＯ
+	loop_ct = 2;
+
+#if 0
+	if( PLAY_PLCHRNO == JUMP ){	// ジャンプパターン？
+	    work = WALK11;		// ＹＥＳ
+	}
+//	else if( PLAY_FRONTTM != 0 ){	// ドアＯＵＴ？
+////	    PLAY_FRONTTM--;		// ＹＥＳ
+//	    work = DROUT;
+//	}
+	else{
+	    work = PLAY_PLCHRNO;
+	}
+
+	if( PLAY_PLSMAL == 1 )		// プレイヤー小？
+	    work = work + 0x10;		// ＹＥＳ
+
+	if( (PLAY_PLKATSG != 0) && (mGm_SLMODE != ending_mode) ){// かつぎ中？
+	    abs_pt = &(p_act->a_base[PLAY_ONENMY]);		// ＹＥＳ
+	    if( ABASE_ONPTRN(abs_pt) < 2 ){
+		if( (PLAY_PLSIT == 0) && (PLAY_PLCHRNO != SIT) )// 座ってる？
+		    work = work + 3;				// ＹＥＳ
+		else
+		    work = work + 1;
+	    }
+	}
+#else
+//	if( PLAY_PLCHRNO == JUMP ){	// ジャンプパターン？
+//	    work = WALK11;		// ＹＥＳ
+//	    work = 0x10;		// ＹＥＳ
+//	}
+//	else if( PLAY_FRONTTM != 0 ){	// ドアＯＵＴ？
+////	    PLAY_FRONTTM--;		// ＹＥＳ
+//	    work = DROUT;
+//	}
+//	else{
+	    work = PLAY_PLCHRNO;
+//	}
+
+	if( (PLAY_PLKATSG != 0) && (mGm_SLMODE != ending_mode) ){// かつぎ中？
+	    abs_pt = &(p_act->a_base[PLAY_ONENMY]);		 // ＹＥＳ
+	    if( ABASE_ONPTRN(abs_pt) < 2 ){
+		if( (PLAY_PLSIT == 0) && (PLAY_PLCHRNO != SIT) ){// 座ってる？
+		    if( work == JUMP )				 // ＮＯ
+			work = 0x04;
+		    else
+			work = work + 3;
+		}
+		else
+		    work = work + 1;
+	    }
+	}
+
+	if( PLAY_PLSMAL == 1 )		// プレイヤー小？
+//	    work = work + 0x10;		// ＹＥＳ
+	    work = work + 0x11;		// ＹＥＳ
+#endif
+
+	enmy_pt = (work * (loop_ct << 2)) + enmy_pt;
+    }
+    else{
+	if( PLAY_PLSMAL == 0 ){		// プレイヤー大？
+	    enmy_pt = player_OAM_data_Bjump_Big[PLAY_BJUMP-1];
+	    loop_ct = player_OAM_count_Bjump_Big[PLAY_BJUMP-1];
+	}
+	else{
+	    enmy_pt = player_OAM_data_Bjump_Small[PLAY_BJUMP-1];
+	    loop_ct = player_OAM_count_Bjump_Small[PLAY_BJUMP-1];
+	}
+    }
+
+    base_xps = PLAY_PLXPOSH - mGm_SCCH1;
+    if( PLAY_PLCHRNO <= WALK31 &&		// 歩きモード？
+	PLAY_PLCHRNO != JUMP &&			// ジャンプ中じゃない？
+	PLAY_PLSYNO != PEACH )			// ピーチ以外？
+	base_yps = PLAY_PLYPOSH - mGm_SCCV1 - PLAY_PLWALK;
+    else
+	base_yps = PLAY_PLYPOSH - mGm_SCCV1;
+
+    if ( PLAY_PLTILT ){				// ボス地震フラグＯＮ
+	PLAY_PLTILT--;
+	base_yps -= TILTDT[(PLAY_PLTILT & 0x2) >> 1];
+    }
+
+/*------------- ＯＡＭセット -----------------------------------*/
+    ipt = ENTY_OAMPT(p_act);
+    affinpt = ENTY_AFBPT(p_act);
+
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *enmy_pt;
+	enmy_pt++;
+	work1 = base_yps + *enmy_pt;
+	enmy_pt++;
+	work2 = *enmy_pt;
+	enmy_pt++;
+	work3 = *enmy_pt;
+	enmy_pt++;
+
+	if (work0 < 0x0130 && work1 < 0xd0 && work1 > -0x30){
+	    p_oam = &(OamBak[ipt]);
+
+	    p_oam->HPos = work0;		// Ｘ座標
+	    p_oam->VPos = work1;		// Ｙ座標
+	    p_oam->CharNo = work2;		// キャラクタＮｏ
+	    p_oam->Shape = work3 >> 14;		// ＯＢＪ形状（１６ｘ１６）
+	    p_oam->Size = (work3 >> 9) & 0x03;	// ＯＢＪサイズ
+	    p_oam->Priority = (work3 >> 5) & 0x03 | PLAY_PLCLOR + 1	;// 表示優先
+	    if( PLAY_BJUMP == 0 )		// バック転ジャンプ？
+		p_oam->HFlip = PLAY_PLCMKI;		// Ｈフリップ
+	    else
+		p_oam->HFlip = (work3 >> 7) & 0x01;	// Ｈフリップ
+
+/*	カラー関係ＯＡＭセット	*/
+	    if (work3 & 0x2000)
+		p_oam->ColorMode = 1;
+	    else
+		p_oam->Pltt = work3 & 0x000F;
+
+/*	回転拡縮関係ＯＡＭセット	*/
+	    if (((work3 >> 11) & 0x01) == 0){
+		p_oam->AffineParamNo_L = 
+		    (work3 >> 4) & 0x0018;
+	    }
+	    else{
+		p_oam->AffineMode = (work3 >> 11) & 0x03;
+//		p_oam->AffineMode = 1;
+		p_oam->HFlip = affinpt >> 6;
+		p_oam->VFlip = affinpt >> 5;
+		p_oam->AffineParamNo_L = affinpt >> 2;
+		Sraffp.RatioX = PLAY_HSIZE;
+		Sraffp.RatioY = PLAY_VSIZE;
+		Sraffp.Theta = 
+		    ((PLAY_ANGL ^ 0xFF) + 1) << 8;
+		a_affinset(affinpt);
+		affinpt += 0x04;
+	    }
+	    ipt++;
+	    EX_EXCONT++;
+	}
+    }
+    ENTY_OAMPT(p_act) = ipt;
+    ENTY_AFBPT(p_act) = affinpt;
+}
+
+
+#if 0	//■■　@旧バージョン　@■■■■■■■■■■■■■■■■■■
+void player_oamset(aPL_base_c *p_ply)
+{
+    u8	ipt,affinpt;
+    s16	work0,work1;
+    s16	base_xps,base_yps;
+    u16	work2,work3;
+    u32	loop_ct,i;
+    u16	*enmy_pt;
+
+    enmy_pt = player_oamset_tbl[PLAY_PLSYNO];
+    loop_ct = *enmy_pt;
+    enmy_pt = (PLAY_PTRN * (loop_ct << 2)) + enmy_pt + 1;
+
+    base_xps = PLAY_PLXPOSH - mGm_HSCROLL2;
+    base_yps = PLAY_PLYPOSH - mGm_VSCROLL2; 
+    ipt = ENTY_OAMPT(p_act);
+    affinpt = ENTY_AFBPT(p_act);
+
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *enmy_pt;
+	enmy_pt++;
+	work1 = base_yps + *enmy_pt;
+	enmy_pt++;
+	work2 = *enmy_pt;
+	enmy_pt++;
+	work3 = *enmy_pt;
+	enmy_pt++;
+
+	if (work0 < 0x0130 && work1 < 0xd0){
+	    OamBak[ipt].HPos = work0;			// Ｘ座標
+	    OamBak[ipt].VPos = work1;			// Ｙ座標
+	    OamBak[ipt].CharNo = work2;			// キャラクタＮｏ
+	    OamBak[ipt].Shape = work3 >> 14;		// ＯＢＪ形状（１６ｘ１６）
+	    OamBak[ipt].Size = (work3 >> 9) & 0x03;	// ＯＢＪサイズ
+	    OamBak[ipt].Priority = (work3 >> 5) & 0x03;	// 表示優先
+	    OamBak[ipt].HFlip = PLAY_PLCMKI;		// Ｈフリップ
+
+/*	カラー関係ＯＡＭセット	*/
+	    if (work3 & 0x2000)
+		OamBak[ipt].ColorMode = 1;
+	    else
+		OamBak[ipt].Pltt = work3 & 0x000F;
+
+/*	回転拡縮関係ＯＡＭセット	*/
+	    if (((work3 >> 11) & 0x01) == 0){
+		OamBak[ipt].AffineParamNo_L = 
+		    (work3 >> 4) & 0x0018;
+	    }
+	    else{
+		OamBak[ipt].AffineMode = (work3 >> 11) & 0x03;
+		OamBak[ipt].AffineParamNo_L = affinpt >> 2;
+//		Sraffp.RatioX = PLAY_HSIZE;
+//		Sraffp.RatioY = PLAY_VSIZE;
+//		Sraffp.Theta = 
+//		    ((PLAY_ANGL ^ 0xFF) + 1) << 8;
+		a_affinset(affinpt);
+		affinpt += 0x04;
+	    }
+	    ipt++;
+	}
+    }
+    ENTY_OAMPT(p_act) = ipt;
+    ENTY_AFBPT(p_act) = affinpt;
+}
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+
+/****************************************************************/
+/*		プレイヤーセレクトデータセット			*/
+/****************************************************************/
+void player_SLPLSET(void)
+{
+    s8	*speed_ptr, speed;
+
+    p_select = (aPL_select_c *)play_seldata_tbl[PLAY_PLSYNO];
+
+/*---------------------------------------------------------*/
+#if 0
+    sprintf(string,"PLAY_KTTMDT   : %x %x %x %x %x %x\n",
+	    PLAY_KTTMDT[0],PLAY_KTTMDT[1],PLAY_KTTMDT[2],
+	    PLAY_KTTMDT[3],PLAY_KTTMDT[4],PLAY_KTTMDT[5]);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLYSPDT  : %x\n",PLAY_PLYSPDT);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLKTYSP  : %x\n",PLAY_PLKTYSP);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLPOWYSP : %x\n",PLAY_PLPOWYSP);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLPWKTYS : %x\n",PLAY_PLPWKTYS);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLXSPYSP : %x\n",PLAY_PLXSPYSP);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLXSKTYS : %x\n",PLAY_PLXSKTYS);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLSNDYSP : %x\n",PLAY_PLSNDYSP);
+    AGBPrint(string);
+    sprintf(string,"PLAY_FLYTIMER : %x\n",PLAY_FLYTIMER);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLGPOWDT : %x\n",PLAY_PLGPOWDT);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLBIGGDT : %x\n",PLAY_PLBIGGDT);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLSNDGDT : %x\n",PLAY_PLSNDGDT);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLXSPMAX : %x\n",PLAY_PLXSPMAX);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLKTXMAX : %x\n",PLAY_PLKTXMAX);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLSNDXMX : %x\n",PLAY_PLSNDXMX);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLXSPMIN : %x\n",PLAY_PLXSPMIN);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLKTXMIN : %x\n",PLAY_PLKTXMIN);
+    AGBPrint(string);
+    sprintf(string,"PLAY_PLSNDXMN : %x\n",PLAY_PLSNDXMN);
+    AGBPrint(string);
+#endif
+/*---------------------------------------------------------*/
+}
+
+/****************************************************************/
+/*		プレイヤーライフイニシャルセット		*/
+/****************************************************************/
+void player_LIFEIT(void)
+{
+    PLAY_PLLIFE = LFITDT[PLAY_PLLIFEB];
+}
+
+/****************************************************************/
+/*		プレイヤーポジションイニシャルセット		*/
+/****************************************************************/
+void player_PLPOSINT(void)
+{
+    s8	A_reg, Y_reg;			/* ＳＦＣ対応レジスタ */
+
+    if( (PLDSPNO == TBPS) && (TSBOFG == 0) ){	// 可変つぼＯＵＴ？
+	player_PLPOSPOP();			// ＹＥＳ
+    }
+    else{
+	A_reg = INTGANO;
+	Y_reg = 0;
+	if( mGm_SCRCTL == V_SCROLL ){
+	    if( TSBOFG != 0 )
+		PLAY_PLXPOSH = (A_reg << 8) | (PLAY_PLXPOSH & 0x00ff);
+	    else
+		PLAY_PLXPOSH = (Y_reg << 8) | (PLAY_PLXPOSH & 0x00ff);
+	    PLAY_PLYPOSH = (A_reg << 8) | (PLAY_PLYPOSH & 0x00ff);
+	}
+	else{
+	    PLAY_PLXPOSH = (A_reg << 8) | (PLAY_PLXPOSH & 0x00ff);
+	    PLAY_PLYPOSH = (Y_reg << 8) | (PLAY_PLYPOSH & 0x00ff);
+	}
+//下へ	PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+//下へ	PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+	player_OBJXYST();
+	player_YCONCHG();
+
+	PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+	PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+
+//	PLAY_PLOBJX = PLAY_PLXPOSH - mGm_SCCH1;
+//	PLAY_PLOBJYL = PLAY_PLYPOSH - mGm_SCCV1;
+//	PLAY_PLOBJYH = (PLAY_PLYPOSH - mGm_SCCV1) >> 8;
+	player_PLOBJ_set();		// ＯＢＪ表示位置セット
+
+	if( PLDSPNO == ODPS ){		// ＯＢＪドア？
+	    player_WDORSET( 0 );	// ＹＥＳ
+	    PLAY_DRMODE = 0;
+	}
+
+//----------------------------------------------------
+//	追加テスト(2000-12-19) 修正(2001-01-31)
+//----------------------------------------------------
+//(2001-01-31)	if( PLAY_PLCMOD == PLTA ){			// つる自動移動？
+//(2001-01-31)	    if( INTGANO != 0 && mGm_SCRCTL == V_SCROLL )// ＹＥＳ
+//(2001-01-31)		PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+//(2001-01-31)	}
+
+	if( PLAY_PLCMOD == PLTA ){		// つる自動移動？
+	    if( mGm_SCRCTL == V_SCROLL ){	// 縦画面
+		if( INTGANO != 0 )
+		    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+	    }
+	    else{				// 横画面
+		if( PLAY_PLYSPED >= 0 ){	// 下方向移動？
+		    PLAY_PLYPOSH = 0xffe0;
+		}
+		else{				// 上方向移動？
+		    PLAY_PLYPOSH = 0x00f0;
+		}
+		PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+	    }
+	}
+//----------------------------------------------------
+    }
+
+//TEST    SCRMVX = PLAY_PLXPOSH - 0x78;		// (SFC)
+    SCRMVX = PLAY_PLXPOSH - SCCH_Center;	// ８ドット左へ（中心0x70）
+    SCRMVY = PLAY_PLYPOSH - 0x40;
+
+    SCRMVY2 = PLAY_PLYPOSH - 0x30;
+}
+
+/****************************************************************/
+/*		プレイヤースタート位置セット			*/
+/****************************************************************/
+void (*player_OBJXYST_menu[])() = {
+    player_STRTPOS,		/* (0) スタート位置 */
+    player_DOORPOS,		/* (1) ドア         */
+    player_TSBOPOS,		/* (2) つぼ         */
+    player_TSRUPOS,		/* (3) つる         */
+    player_ODORPOS,		/* (4) ＯＢＪドア   */
+    player_ROKTPOS,		/* (5) ロケット     */
+};
+/*--------------------------------------------------------------*/
+
+void player_OBJXYST(void)
+{
+    player_OBJXYST_menu[PLDSPNO]();
+
+    PLAY_PLWALK = 0;
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（スタート位置）		*/
+/****************************************************************/
+void player_STRTPOS(void)
+{
+    u8	i;
+
+    PLAY_PLCMKI = PLCMKI_RIGHT;		// 向き
+    player_PLX78();
+
+    PLAY_PLYPOSH = 0xd0;		// Ｙ位置チェックイニシャル
+    BG_Xpos = PLAY_PLXPOSH;
+    BG_Ypos = PLAY_PLYPOSH;
+
+    for( i=0; i<0x0c; i++ ){
+	unit_read();		// ユニットＲＥＡＤ
+
+	if( unit_No == HNO1 )
+	    break;
+	else
+	    BG_Ypos = BG_Ypos - 0x10;
+    }
+
+#if 0
+    if( (WORDNO == 0) && (COSUNO == 0) )
+	PLAY_PLYPOSH = BG_Ypos - 0x10 - 0x40;	// Ｗ１－１
+    else
+	PLAY_PLYPOSH = BG_Ypos - 0x10;
+#else
+	PLAY_PLYPOSH = BG_Ypos - 0x10;
+#endif
+
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（ドア）			*/
+/****************************************************************/
+void player_DOORPOS(void)
+{
+    u8	i, j;
+
+    PLAY_PLXPOSH = ((PLAY_PLXPOSH + 8) & 0xfff0) ^ 0x00f0;
+    PLAY_PLYPOSH = (PLAY_PLYPOSH & 0xff00) | 0xe0;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+    BG_Xpos = PLAY_PLXPOSH;
+    BG_Ypos = PLAY_PLYPOSH;
+
+//    for( j=0; j<14-1; j++ ){
+    for( j=0; j<14-2; j++ ){
+	unit_read();		// ユニットＲＥＡＤ
+	for( i=0; i<8; i++ ){
+	    if( unit_No == DORCKDT[i] ){	// ドアユニット？
+		if( unit_No == DOA5 ){		// 光のドア？
+		    player_fade_on();		// フェードフラグＯＮ！
+		    PLAY_FADESL = 0;
+		    player_fade_color_set();
+
+// プレイヤー真っ白--------------------------------
+#if 0
+		    for( i=0; i<0x10; i++ )
+			*(u16 *)(COL_BUF+0x0200+i*2) = 0x7fff;
+#else
+		    DmaClear(3, 0x7fff, COL_BUF+0x0200, 0x0020, 16);
+#endif
+		    COL_FLAG = 1;
+// ------------------------------------------------
+		}
+		else if( unit_No == DOA4 ){	// 黒いドア？
+		    player_fade_on();		// フェードフラグＯＮ！
+		    PLAY_FADESL = 1;
+		    player_fade_color_set();
+
+// プレイヤー真っ黒--------------------------------
+		    DmaClear(3, 0, COL_BUF+0x0200, 0x0020, 16);
+		    COL_FLAG = 1;
+// ------------------------------------------------
+
+		}
+		goto DOP020;
+	    }
+	}
+	BG_Ypos = BG_Ypos - 0x10;
+    }
+
+    player_PLX78();
+
+DOP020:
+    PLAY_PLYPOSH = BG_Ypos - 0x10;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+    PLAY_PLSTFG = 0;
+
+    if( j != 14-2 ){			// ドアから出現？
+//いらんのか？	if( PLAY_PLKATSG == 0 ||	// ＹＥＳ
+//いらんのか？	    ((PLAY_PLKATSG != 0) && (KEY0FG != 0)) )
+	door_out_timer_set();	// ドアＯＵＴタイマーセット
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（つぼ）			*/
+/****************************************************************/
+void player_TSBOPOS(void)
+{
+    PLAY_PLYPOSH = 0;
+    PLAY_PLYPOSL = 0;
+
+    player_PLX78();
+}
+
+/****************************************************************/
+/*								*/
+/****************************************************************/
+void player_PLX78(void)
+{
+    PLAY_PLJUMP = 1;		/* ジャンプフラグ */
+//    PLAY_PLXPOSH = 0x78;
+    PLAY_PLXPOSH =  (PLAY_PLXPOSH & 0xff00) | 0x78;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（つる）			*/
+/****************************************************************/
+void player_TSRUPOS(void)
+{
+    PLAY_PLXPOSH = ((PLAY_PLXPOSH + 8) & 0xfff0) ^ 0x00f0;
+//    PLAY_PLYPOSH = ((PLAY_PLOBJYL + 8) & 0xfff0) ^ 0x0010;
+    PLAY_PLYPOSH = ((PLAY_PLYPOSH + 8) & 0xfff0) ^ 0x0010;
+
+//    if( PLAY_PLYPOSH == 0xf0 ){
+    if( (PLAY_PLYPOSH & 0x00f0) == 0xf0 ){
+//	PLAY_PLYPOSH = PLAY_PLYPOSH - 0x40;		// 下から出現
+    }
+    else{
+//	PLAY_PLYPOSH = PLAY_PLYPOSH - 0x0100 + 0x40;	// 上から出現
+	PLAY_PLYPOSH = PLAY_PLYPOSH - 0x0100;// + 0x40;	// 上から出現
+    }
+
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+    PLAY_PLCHRNO = TSRU;
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（ＯＢＪドア）		*/
+/****************************************************************/
+void player_ODORPOS(void)
+{
+    if( mGm_SCRCTL == V_SCROLL ){		// 縦スクロール
+	PLAY_PLXPOSH = (((PLAY_PLXPOSH ^ 0xffff) + (1 - 0x10)) & 0x00ff);
+    }
+    else{					// 横スクロール
+	PLAY_PLXPOSH = (PLAY_PLXPOSH & 0xff00) |
+	    ((((PLAY_PLOBJX - SCRMVX) ^ 0x00ff) + (1 - 0x10)) & 0x00ff);
+
+	if( (TSBIN == 2) && ((mGm_SCCH1 - 0x08) >= (MAX_disp << 8)) )
+	    PLAY_PLXPOSH = PLAY_PLXPOSH - 0x0010;
+    }
+
+//    PLAY_PLYPOSH = PLAY_PLOBJYL;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+//    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+    if( mGm_SCRCTL == V_SCROLL ){			// 縦画面？
+	PLAY_PLYPOSH = (PLAY_PLOBJYL + 0x0960) & 0xfff0;// ＹＥＳ
+	PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+
+
+#if 0
+	if( mGm_SCCH1 > 0 ){		// スクロール＆プレイヤー位置補正
+	    mGm_SCCH1 = 0;
+//	    PLAY_PLXPOSH -= 0x0010;
+//	    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+	}
+	else if( PLAY_PLXPOSH < 0x30 ){
+	    mGm_SCCH1 = 0;
+	}
+	else if( PLAY_PLXPOSH >= 0xc0 ){
+	    mGm_SCCH1 = 0x10;
+	}
+#else
+
+//	if( (mGm_SCCH1 + 0x0008) < 0x0010 ){
+	if( mGm_SCCH1 < 0x0010 ){
+	    if( PLAY_PLXPOSH >= 0xc0 )
+		mGm_SCCH1 = 0x0010;
+	    else
+		mGm_SCCH1 = 0;
+	}
+	else{
+//	    PLAY_PLXPOSH -= 0x0010;
+//	    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+	    if( PLAY_PLXPOSH < 0x0030 )
+		mGm_SCCH1 = 0;
+	}
+#endif
+
+
+    }
+
+//(2001-02-05:安全の為)    PLAY_PLSTFG--;
+    PLAY_PLSTFG = 0;
+    PLAY_DRCLTM = 0x60;
+    if( PLAY_PLKATSG == 0 ){
+	door_out_timer_set();		// ドアＯＵＴタイマーセット
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーポジション（ロケット）		*/
+/****************************************************************/
+void player_ROKTPOS()
+{
+    player_PLX78();
+
+    PLAY_PLYPOSH = 0x0060;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+}
+
+/****************************************************************/
+/*		コンティニューＹ位置セット			*/
+/****************************************************************/
+void player_YCONCHG(void)
+{
+
+#if 0
+
+    if( PLAY_PLYPOSH >= 0 )
+	PLAY_PLYPOSH = PLAY_PLYPOSH - ((PLAY_PLYPOSH & 0xff00) >> 4);
+
+#else
+
+    if( mGm_SCRCTL == V_SCROLL && TSBIN == 2 ){		// 縦＆裏画面？
+	return;
+    }
+    else{
+	if( PLAY_PLYPOSH >= 0 )
+	    PLAY_PLYPOSH = PLAY_PLYPOSH - ((PLAY_PLYPOSH & 0xff00) >> 4);
+    }
+
+#endif
+
+}
+
+/****************************************************************/
+/*		Ｘスピードクリア				*/
+/****************************************************************/
+#if 0
+s8  XSPCKDT[] = { 0x80, 0x00 };
+
+void player_XSPCLR(void)
+{
+    s8	A_reg;				/* ＳＦＣ対応レジスタ */
+
+    A_reg = (PLAY_PLXSPED >> 16) ^ XSPCKDT[PLAY_PLMMKI-1];
+    if( A_reg < 0 )
+	PLAY_PLXSPED = 0;
+
+    A_reg = PLAY_PLMVXSP ^ XSPCKDT[PLAY_PLMMKI-1];
+    if( A_reg < 0 )
+	PLAY_PLMVXSP = 0;
+}
+
+#else
+
+s32  XSPCKDT[] = { 0x80000000, 0x00000000 };
+
+void player_XSPCLR(void)
+{
+    s32	A_reg;				/* ＳＦＣ対応レジスタ */
+
+    A_reg = PLAY_PLXSPED ^ XSPCKDT[PLAY_PLMMKI-1];
+    if( A_reg < 0 ){
+	PLAY_PLXSPED = 0;
+	PLAY_XSPCLR = 1;	// Ｘスピードクリアフラグ
+    }
+
+    A_reg = PLAY_PLMVXSP ^ XSPCKDT[PLAY_PLMMKI-1];
+    if( A_reg < 0 )
+	PLAY_PLMVXSP = 0;
+}
+#endif
+
+/****************************************************************/
+/*		プレイヤー位置チェック				*/
+/****************************************************************/
+void player_PLPOSCK(void)
+{
+    s8	fail_VposH;
+    u16	max_sccv;
+
+//    PLAY_PLOBJX = PLAY_PLXPOSH - mGm_SCCH1;
+//    PLAY_PLOBJYL = PLAY_PLYPOSH - mGm_SCCV1;
+//    PLAY_PLOBJYH = (PLAY_PLYPOSH - mGm_SCCV1) >> 8;
+    player_PLOBJ_set();			// ＯＢＪ表示位置セット
+
+    if( PLAY_PLCMOD >= PLSTMV )		// モードチェック
+	return;
+
+    if( mGm_SCRCTL == H_SCROLL )
+	fail_VposH = (PLAY_PLYPOSH - mGm_SCCV1 + 0x40) >> 8;
+    else
+	fail_VposH = PLAY_PLOBJYH;
+
+    if( PLAY_PLOBJYH != 0 ){
+	if( PLAY_PLOBJYH > 0 ){
+	    PLAY_PLWKTIM = 0;
+	    player_PLFAILST();		// 死亡セット
+	    EGGMODE = 2;
+	    return;
+	}
+	else if( PLAY_PLYPOSH < 0 ){
+	    if( TSBOFG == 0 )		// つぼＩＮ？
+		goto PPC030;		// ＮＯ
+	    if( (PLAY_PLYPOSH & 0xff) < 0xf0 ){
+		PLAY_PLSIT = 0;
+		PLAY_PLXSPED = 0;
+		PLAY_PLYSPED = 0;
+		if( TSBOFG == 2 ){
+		    BGCHGFG = 2;
+		}
+		else{
+		    STTSBIN = TSBIN;
+		    TSBIN = 0;
+		}
+	    }
+	}
+PPC025:
+	return;
+    }
+
+/*------------- つる自動移動開始チェック -----------------------*/
+PPC030:
+    if( PLAY_PLCMOD == PLTR && SKFLG == 0 ){	// つる移動モード？
+	if( TSBIN != 2 ){			// ＹＥＳ
+	    if( PLAY_PLYPOSH < 0 ){
+
+// TEST 追加(01-10)==============
+//		if( mGm_SCCV1 != 0 )
+//		    return;
+// こっちに修正(01-31)
+//		if( mGm_SCCV1 >= 0x10 )
+//		    return;
+// ここまで======================
+
+		if( U_KEY_ON_C == 0 )
+		    return;
+		PLAY_PLYSPED = TSRYSP[1] << 16;		// 上方向
+	    }
+	    else{
+		max_sccv = (MAX_disp << 8) - (MAX_disp << 4) + 0x40;
+		if( (PLAY_PLOBJYL < TSRLOW) ||
+// TEST 追加		    ((mGm_SCRCTL == H_SCROLL) && (mGm_SCCV1 != 0x40)) ){
+		    ((mGm_SCRCTL == H_SCROLL) && (mGm_SCCV1 != 0x40)) ||
+		    ((mGm_SCRCTL == V_SCROLL) && (mGm_SCCV1 != max_sccv)) ){
+		    return;
+		}
+		else{
+		    if( D_KEY_ON_C == 0 )
+			return;
+		    PLAY_PLYSPED = TSRYSP[2] << 16;	// 下方向
+		    PLAY_PLYPOSH = PLAY_PLYPOSH | 0x01;
+		    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+		}
+	    }
+	    PLAY_PLCMOD = PLTA;		// つる自動移動モード
+	}
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーＯＢＪ表示位置セット			*/
+/****************************************************************/
+void player_PLOBJ_set(void)
+{
+    PLAY_PLOBJX = PLAY_PLXPOSH - mGm_SCCH1;
+    PLAY_PLOBJYL = PLAY_PLYPOSH - mGm_SCCV1;
+    PLAY_PLOBJYH = (PLAY_PLYPOSH - mGm_SCCV1) >> 8;
+}
+
+/****************************************************************/
+/*		プレイヤー死亡セット				*/
+/****************************************************************/
+void player_PLFAILST(void)
+{
+    aAC_base_c	*abs_pt;
+
+    PLAY_RUNFLG   = 0;
+    PLAY_PLCMOD   = PLFL;
+    PLAY_PLLIFE   = 0;
+    PLAY_PLPWJPTM = 0;
+    PLAY_KENSHIRO = 0;
+    PLAY_DRINFG   = 0;
+    PLAY_PLCHRNO  = GIVE;
+    PLAY_BJUMP = 0;		// バック転フラグクリア
+    PLAY_PLTILT = 0;
+
+    if( PLAY_PLKATSG != 0 ){
+	PLAY_PLKATSG--;
+	abs_pt = &(p_act->a_base[PLAY_ONENMY]);
+	ABASE_PLSHOT(abs_pt) = 1;
+	ABASE_ONPTRN(abs_pt) = 0;
+	ABASE_XSPD(abs_pt) = 0;
+	if( ENTY_ENCMOD(p_act)[PLAY_ONENMY] != SNA )
+	    ABASE_YSPD(abs_pt) = GVNAGYSP << 12;
+    }
+//    BGBGM = s_u_usa_dead;
+//    m4aSongNumStart( BGBGM );			// [S] やられ（ＢＧＭ）
+    m4aSongNumStart( s_u_usa_dead );		// [S] やられ（ＢＧＭ）
+    voice_change( s_u_mario_mamma_mia );	// [S] やられ（声）
+
+    if( PLAY_WATCHTM != 0 )
+	m4aSongNumStop( s_u_se_timer );		// [S]タイマーサウンドクリア
+
+    PLAY_FAILTM = 60*3;
+}
+
+/****************************************************************/
+/*		ＯＢＪドアセット				*/
+/*--------------------------------------------------------------*/
+/*		< ENTRY >					*/
+/*		  door_select  ：ドア種類			*/
+/****************************************************************/
+void player_WDORSET(u8 door_select)
+{
+    u8	enemy_index, t_i;
+    aAC_base_c	*abs_pt;
+
+/*------------- 空きエリアサーチ -------------------------------*/
+    if( (enemy_index = act_enemy_search()) == 0xff )
+	enemy_index = A_ENMY_NO - 1;	// 強制セット
+
+    PLAY_DORPTN = 0;
+    PLAY_DORTIM = 0;
+
+/*------------- ＯＢＪセット -----------------------------------*/
+    abs_pt = &(p_act->a_base[enemy_index]);
+    ENTY_ENSYNO(p_act)[enemy_index] = ENEMY_DOOR;
+    ENTY_ENCMOD(p_act)[enemy_index] = ENM;
+    ABASE_SORTDT(abs_pt) = SORTDT[ENEMY_DOOR];
+    ENINT01(abs_pt,enemy_index);
+    ABASE_XPOSH(abs_pt) = (PLAY_PLXPOSH + 8) & 0xfff0;
+    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+    if( PLDSPNO == DRPS )
+	ABASE_YPOSH(abs_pt) = PLAY_PLYPOSH;
+    else
+	ABASE_YPOSH(abs_pt) = PLAY_PLYPOSH + 1;
+    ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+    ABASE_WORK2(abs_pt) = door_select;
+
+// 裏から戻ったときにドアを煙にする
+    if( TSBIN != 2 ){ // 表の画面?
+	BG_Xpos = ABASE_XPOSH(abs_pt);
+	BG_Ypos = ABASE_YPOSH(abs_pt);
+	unit_read();
+	if( unit_No < DOA1 ||
+	    unit_No > DOAA &&
+	    unit_No != ODR1 &&
+	    unit_No != ODR2 ){ // 後ろのBGが扉じゃない?
+//	    ENTY_ENSYNO(p_act)[enemy_index] = ENEMY_SMOK2;
+//	    ABASE_ENMODE(abs_pt) = ENMDDT[ENEMY_SMOK2];
+	    SMOKST2(abs_pt, enemy_index);
+	}
+    }
+// 他にドアがセットされているときそちらを消す
+    for( t_i = 0; t_i < A_ENMY_NO; t_i++ ){
+	if( ENTY_ENSYNO(p_act)[t_i] == ENEMY_DOOR &&
+	    t_i != enemy_index ){
+	    abs_pt = &(p_act->a_base[t_i]);
+	    BG_Xpos = ABASE_XPOSH(abs_pt)+8;
+	    BG_Ypos = ABASE_YPOSH(abs_pt)+8;
+	    unit_read();
+	    if( (unit_No >= DOA1) &&
+		(unit_No <= DOAA) ){
+		continue;
+	    }
+	    ENTY_ENSYNO(p_act)[t_i] = ENEMY_SMOK2;
+	    ABASE_ENTIM(abs_pt) = 0x20;
+	    ABASE_XSPD(abs_pt) = 0;
+	    ABASE_HMUKI(abs_pt) = 0;
+	    ABASE_MVFG(abs_pt) = 1; 
+//	    SMOKST2(abs_pt, t_i);
+	}
+	else if( ENTY_ENSYNO(p_act)[t_i] == ENEMY_LMP0 ){
+	    abs_pt = &(p_act->a_base[t_i]);
+	    SMOKST(abs_pt, t_i);
+	}
+    }
+
+// ドア種類 ABASE_ENWRK0(abs_pt) = door_select;
+}
+
+/****************************************************************/
+/*		プレイヤースタートデータＳＡＶＥ		*/
+/****************************************************************/
+void player_PLSTDTSV(void)
+{
+    if( BGCHGFG != 2 ){
+	STWRDNO = WORDNO;
+	STCOSNO = COSUNO;
+	STINGNO = INTGANO;
+	PLSTDSN = PLDSPNO;
+
+	PLAY_PLSTX   = PLAY_PLXPOSH;
+	PLAY_PLSTY   = PLAY_PLYPOSH;
+	PLAY_PLSTOX  = PLAY_PLOBJX;
+	PLAY_PLSTOY  = PLAY_PLOBJYL;
+	PLAY_PLSTYSP = PLAY_PLYSPED;
+	PLAY_PLSTCMD = PLAY_PLCMOD;
+    }
+}
+
+/****************************************************************/
+/*		プレイヤースタートデータＬＯＡＤ		*/
+/****************************************************************/
+void player_PLSTDTLD(void)
+{
+    WORDNO  = STWRDNO; 
+    COSUNO  = STCOSNO;
+    INTGANO = STINGNO;
+    PLDSPNO = PLSTDSN;
+
+    PLAY_PLXPOSH = PLAY_PLSTX;
+    PLAY_PLYPOSH = PLAY_PLSTY;
+    PLAY_PLOBJX  = PLAY_PLSTOX;
+    PLAY_PLOBJYL = PLAY_PLSTOY;
+    PLAY_PLYSPED = PLAY_PLSTYSP;
+    PLAY_PLCMOD  = PLAY_PLSTCMD;
+
+    TSBIN = 0;
+    TSBOFG = 0;
+    PLAY_PLJUMP = 0;
+    PLAY_PLSAFT = 0;
+
+//    player_LIFEIT();
+    PLAY_PLLIFE = 0x0f;		// ライフは最初は１個（ちび）から
+}
+
+/****************************************************************/
+/*		プレイヤー位置ＬＯＡＤ（ＯＢＪドア）		*/
+/****************************************************************/
+void player_PLPOSPOP(void)
+{
+    PLAY_PLXPOSH = PLAY_MVPLXP;
+    PLAY_PLYPOSH = PLAY_MVPLYP;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+    VGAMEN_POS   = VGAMEN_POS_SV;
+
+    player_PLOBJ_set();		// ＯＢＪ表示位置セット
+
+    if( PLDSPNO == ODPS ){
+	PLAY_PLCMOD = 0;
+	PLAY_PLSTFG = 0;
+	PLAY_DRCLTM = 0;
+	player_WDORSET( 0 );	// ＯＢＪドアセット
+	PLAY_DRMODE = 0;
+//とりあえず	PLAY_DORTIM = 0x0a;
+
+	if( PLAY_PLJUMP == 0 && PLAY_PLSIT == 0 && PLAY_PLCHRNO != NAGE )
+	    PLAY_PLCHRNO = WALK21;
+    }
+}
+
+/****************************************************************/
+/*		プレイヤー位置ＳＡＶＥ（ＯＢＪドア）		*/
+/****************************************************************/
+void player_PLPOSPSH(void)
+{
+    if( TSBIN == 0 ){
+	PLAY_MVPLXP = PLAY_PLXPOSH;
+	PLAY_MVPLYP = PLAY_PLYPOSH;
+	VGAMEN_POS_SV = VGAMEN_POS;
+    }
+}
+
+
+#if 0	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+/****************************************************************/
+/*		敵ＶＳプレイヤー　@当り				*/
+/****************************************************************/
+player_ENCROS(aAC_base_c *abs_pt,u8 index)
+{
+    s8	Y_reg;				/* ＳＦＣ対応レジスタ */
+    s16	work0,work5,work9;
+
+    ABASE_MVXSP(abs_pt) = 0;
+    ABASE_CRFG(abs_pt) = ABASE_CRFG(abs_pt) & 0x0f;
+
+    if( ENTY_ENCMOD(p_act)[index] == BRN ){	// 爆発？
+	Y_reg = 6;
+	goto ENC012;
+    }
+
+    if( ENTY_ENCMOD(p_act)[index] == SNA ){
+	goto ENC003;
+    }
+    else{
+	if( ENTY_ENSYNO(p_act)[index] == BALL1 )
+	    goto ENC003;
+	else if( ENTY_ENSYNO(p_act)[index] == SBTEN )
+	    goto ENC023;
+	else if( ABASE_PLSHOT(abs_pt) != 0 )
+	    goto ENC003;
+    }
+
+ENC023:
+    if( ENTY_ENCMOD(p_act)[index] != BRN )
+	return;
+ENC003:
+    if( ABASE_ONPTRN(abs_pt) != 0 )
+	return;
+
+ENC010:
+    Y_reg = ABASE_ENOJSZ(abs_pt);
+
+
+    work9 = ABASE_XCHKW(Y_reg);
+    work = 0;
+    if( ABASE_XOFFSET < 0 )
+	work--;
+
+    player_CROJCK(*abs_pt,index);	// 当りチェック
+}
+
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+
+/****************************************************************/
+/*		プレイヤーＶＳ敵 衝突判定処理			*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  0 ： 当りなし					*/
+/*		  1 ： 当りあり					*/
+/****************************************************************/
+s8  play_xoffset[] = {  2,  2 };
+s8  play_yoffset[] = { 11, 16 };
+s8  play_xwidth[]  = { 11, 11 };
+s8  play_ywidth[]  = { 22, 17 };
+
+s8  play_xoffset_Bjump[] = {  2,  2,  2,  2 };
+s8  play_yoffset_Bjump[] = {  6,  1,  0,  6 };
+s8  play_xwidth_Bjump[]  = { 11, 11, 11, 11 };
+s8  play_ywidth_Bjump[]  = { 22, 20, 14, 22 };
+
+
+void player_CROJCK(aAC_base_c *abs_pt,u8 index)
+{
+    s16	pl_xpos, pl_ypos, pl_xwid, pl_ywid;
+    s16	en_xpos, en_ypos, en_xwid, en_ywid;
+    s16 cr_xwid1, cr_xwid2, cr_ywid1, cr_ywid2;
+//    u8 *hitdt;
+    s8 *hitdt;
+    u8 player_hit_size;		// 当りサイズ
+
+
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//■		デバッグモード(FUFUFU)
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#if MARIO_USA_DEBUG
+
+    if( HEHEHE == 1 )
+	return;
+
+#endif
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+    ABASE_MVXSPD(abs_pt) = 0;
+    ABASE_CRFG(abs_pt) = ABASE_CRFG(abs_pt) & 0x0f;
+    ABASE_PLHIT(abs_pt) = 0;
+
+/*------------- プレイヤー・敵モードチェック -------------------*/
+    if( (ABASE_ONPTRN(abs_pt) != 0) || 	// プレイヤーかつがれ中？
+	((PLAY_PLCMOD >= PLSTMV) && (PLAY_PLCMOD < PLCH+1)) ||
+	((PLAY_PLCMOD >= PLDRIN) && (PLAY_PLCMOD < PLDROUT+1)) ||
+	((ABASE_PLSHOT(abs_pt) > 0) && (ABASE_PLSHOT(abs_pt) < 0x20)) ||
+	((RKETFG | PLAY_PLSTFG) != 0) ||
+	((ENTY_ENSYNO(p_act)[index] == ENEMY_XTAL) && (ABASE_ENMODE(abs_pt) & 0x01) != 0) ||	// （キャサリンが持っている時）クリスタルは当らない
+	((ENTY_ENCMOD(p_act)[index] == BRN) && (ABASE_MVFG(abs_pt) == 0xFF)) ||
+	((ENTY_ENSYNO(p_act)[index] == ENEMY_ONEUP) && (ABASE_WORK0(abs_pt) == 1)) ||
+//	((ABASE_ENMODE(abs_pt) & 0x08) && (ABASE_ENFLSH(abs_pt) != 0)) ||	// ボス点滅？
+	((ENTY_ENSYNO(p_act)[index] == ENEMY_BIGPW) && (JUTANFG != 0)) ||
+	(ENTY_ENCMOD(p_act)[index] == EF0) ||
+	(BGCHGFG != 0) )
+	return;
+
+/*------------- 位置チェック -----------------------------------*/
+/*  プレイヤー 衝突位置セット */
+    if( PLAY_BJUMP ){			// バック転？
+	pl_xpos = PLAY_PLXPOSH + play_xoffset_Bjump[PLAY_BJUMP-1];
+	pl_ypos = PLAY_PLYPOSH + play_yoffset_Bjump[PLAY_BJUMP-1];
+	pl_xwid = play_xwidth_Bjump[PLAY_BJUMP-1];
+	pl_ywid = play_ywidth_Bjump[PLAY_BJUMP-1];
+    }
+    else{
+//（テスト:2001-02-06)	if( PLAY_PLSMAL )		// サイズ小？
+	if( PLAY_PLSMAL && JUTANFG == 0 )	// サイズ小＆絨毯乗ってない？
+	    player_hit_size = 1;		// 座った時と同じサイズ
+	else
+	    player_hit_size = PLAY_PLSIT;
+
+//	pl_xpos = PLAY_PLXPOSH + play_xoffset[PLAY_PLSIT];
+//	pl_ypos = PLAY_PLYPOSH + play_yoffset[PLAY_PLSIT];
+//	pl_xwid = play_xwidth[PLAY_PLSIT];
+//	pl_ywid = play_ywidth[PLAY_PLSIT];
+
+	pl_xpos = PLAY_PLXPOSH + play_xoffset[player_hit_size];
+	pl_ypos = PLAY_PLYPOSH + play_yoffset[player_hit_size];
+	pl_xwid = play_xwidth[player_hit_size];
+	pl_ywid = play_ywidth[player_hit_size];
+    }
+
+/*  敵 衝突位置セット */
+    if( ENTY_ENCMOD(p_act)[index] == BRN ){		// 爆発？
+	hitdt = act_hit_tbl[OSZBOMB];			// ＹＥＳ
+	en_xpos = ABASE_XPOSH(abs_pt) + (s16)*hitdt;		// XOFFSET
+	en_ypos = ABASE_YPOSH(abs_pt) + (s16)*(hitdt + 1);	// YOFFSET
+	en_xwid = (s16)*(hitdt + 2);
+	en_ywid = (s16)*(hitdt + 3);
+    }
+    else if(ABASE_ENOJSZ(abs_pt) != 0xff){
+	hitdt = act_hit_tbl[ABASE_ENOJSZ(abs_pt)];
+//	hitdt = act_hit_tbl[OBJSIZE[ENTY_ENSYNO(p_act)[index]]];	// こちらに変更
+	en_xpos = ABASE_XPOSH(abs_pt) + (s16)*hitdt;		// XOFFSET
+	en_ypos = ABASE_YPOSH(abs_pt) + (s16)*(hitdt + 1);	// YOFFSET
+	en_xwid = (s16)*(hitdt + 2);
+	en_ywid = (s16)*(hitdt + 3);
+    }
+    else{
+	en_xpos = ABASE_XPOSH(abs_pt) + ABASE_HIT_XOFF(abs_pt);	// XOFFSET
+	en_ypos = ABASE_YPOSH(abs_pt) + ABASE_HIT_YOFF(abs_pt);	// YOFFSET
+	en_xwid = (s16)ABASE_HIT_XSIZ(abs_pt);
+	en_ywid = (s16)ABASE_HIT_YSIZ(abs_pt);
+    }
+
+    if( mGm_SCRCTL == H_SCROLL ){
+	cr_xwid1 = en_xpos - pl_xpos;			// 横画面
+	cr_xwid2 = pl_xpos - en_xpos;
+    }
+    else{
+	cr_xwid1 = (en_xpos - pl_xpos)&0x00ff;	// 縦画面
+	cr_xwid2 = (pl_xpos - en_xpos)&0x00ff;
+    }
+//    cr_xwid1 = en_xpos - pl_xpos;
+//    cr_xwid2 = pl_xpos - en_xpos;
+    cr_ywid1 = en_ypos - pl_ypos;
+    cr_ywid2 = pl_ypos - en_ypos;
+
+
+#if 1	//■■■■■■■■■■■■■
+    if( ((cr_xwid1 >= 0) && (cr_xwid1 < pl_xwid)) ||
+	((cr_xwid2 >= 0) && (cr_xwid2 < en_xwid)) ){
+
+	if( (cr_xwid1 >= 0) && (cr_xwid1 < pl_xwid) )
+	    PLAY_CROSSX = cr_xwid1 - pl_xwid;
+	else
+	    PLAY_CROSSX = cr_xwid2 - en_xwid;
+
+	if( ((cr_ywid1 >= 0) && (cr_ywid1 < pl_ywid)) ||
+	    ((cr_ywid2 >= 0) && (cr_ywid2 < en_ywid)) ){
+
+	    if( (cr_ywid1 >= 0) && (cr_ywid1 < pl_ywid) )
+		PLAY_CROSSY = cr_ywid1 - pl_ywid;
+	    else
+		PLAY_CROSSY = cr_ywid2 - en_ywid;
+#else	//■■■■■■■■■■■■■
+    if( ((cr_xwid1 >= 0) && (cr_xwid1 <= pl_xwid)) ||
+	((cr_xwid2 >= 0) && (cr_xwid2 <= en_xwid)) ){
+
+	if( (cr_xwid1 >= 0) && (cr_xwid1 <= pl_xwid) )
+	    PLAY_CROSSX = cr_xwid1 - pl_xwid;
+	else
+	    PLAY_CROSSX = cr_xwid2 - en_xwid;
+
+	if( ((cr_ywid1 >= 0) && (cr_ywid1 <= pl_ywid)) ||
+	    ((cr_ywid2 >= 0) && (cr_ywid2 <= en_ywid)) ){
+
+	    if( (cr_ywid1 >= 0) && (cr_ywid1 <= pl_ywid) )
+		PLAY_CROSSY = cr_ywid1 - pl_ywid;
+	    else
+		PLAY_CROSSY = cr_ywid2 - en_ywid;
+#endif	//■■■■■■■■■■■■■
+
+	    player_CROSSET(abs_pt,index);	// 結果セット
+	}
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーＶＳ敵 衝突結果処理			*/
+/****************************************************************/
+void (*player_CROSSET_menu[])(aAC_base_c *,u8) = {
+    player_ENVS,		/* (0) ＶＳ 敵             */
+    player_FRVS,		/* (1) ＶＳ マムー         */
+    player_ABVS,		/* (2) ＶＳ 持てるブロック */
+    player_CVS,			/* (3) ＶＳ ＰＯＷブロック */
+    player_DRVS,		/* (4) ＶＳ ＯＢＪドア     */
+    player_CHVS,		/* (5) ＶＳ チェリー       */
+};
+/*--------------------------------------------------------------*/
+
+void player_CROSSET(aAC_base_c *abs_pt,u8 index)
+{
+
+//    sprintf(string,"index  : %x\n",index);
+//    AGBPrint(string);
+//    sprintf(string,"ENSYNO : %x\n",ENTY_ENSYNO(p_act)[index]);
+//    AGBPrint(string);
+//    sprintf(string,"CROSMD : %x\n",CROSMD[ENTY_ENSYNO(p_act)[index]]);
+//    AGBPrint(string);
+//    sprintf(string,"-------------------------------\n");
+//    AGBPrint(string);
+
+
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_BGKAO &&
+	EXCONT != 0 &&
+	ABASE_WORK2(abs_pt) < 2 )
+	player_CROSSET_menu[CRS0](abs_pt,index);
+    else
+	player_CROSSET_menu[CROSMD[ENTY_ENSYNO(p_act)[index]]](abs_pt,index);
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ 敵				*/
+/****************************************************************/
+s8  EVPSDT[] = { 0xF8, 0x08 };
+
+void player_ENVS(aAC_base_c *abs_pt,u8 index)	// (SFC) ENVSPL
+{
+    u8	hit_result;
+
+    if( PLAY_PLCMOD == PLTI )
+	return;
+
+#if 0
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_FAIRY ){	// ハート？
+	if( ABASE_WORK2(abs_pt) == 0 ){
+	    ABASE_WORK2(abs_pt) = 1;
+	    if( PLAY_PLLIFE != 0x0f )			// プレイヤー大？
+		voice_change( s_u_mario_thank_you );	// [S]ハートＧＥＴ（声）
+	    m4aSongNumStart( s_u_se_chery );	// [S]ハートＧＥＴ
+
+	    PLAY_PLLIFE = PLAY_PLLIFE + 0x10;
+	    if( PLAY_PLLIFE >= LFITDT[PLAY_PLLIFEB] )
+		player_LIFEIT();		// ライフイニシャル
+	    POINT100_SET(ABASE_XPOSH(abs_pt),ABASE_YPOSH(abs_pt));
+	    return;
+	}
+	return;
+    }
+#endif
+//EVP00:
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_MASK0 ){		// マスク
+	if( (MSMODE != 0) ||
+	    (ABASE_WORKF(abs_pt) == 0) )
+	    return;
+    }
+
+//EVP01:
+    else if( ENTY_ENSYNO(p_act)[index] == ENEMY_STAR ){		// スター
+	if( PLAY_KENSHIRO == 0 )		// 無敵中？
+	    HITCNT = 0;				// ＹＥＳ
+//	PLAY_KENSHIRO = 0x3f;
+//	PLAY_KENSHIRO = 0x5f;			// タイマー１．５倍
+	PLAY_KENSHIRO = 0x4f;			// タイマー１．２５倍
+	m4aSongNumStart( s_u_star );		// [S] 無敵
+	voice_change( s_u_mario_here_i_go );	// [S] 無敵（声）
+	ENCLER(abs_pt,index);
+	POINT100_SET(ABASE_XPOSH(abs_pt),ABASE_YPOSH(abs_pt));
+	return;
+    }
+
+//EVP50:
+    else if( ENTY_ENSYNO(p_act)[index] == ENEMY_FNSUI ){	// 噴水
+	if( ABASE_ENSTAT(abs_pt) < 0xdc ){
+	    if( PLAY_KENSHIRO == 0 ){
+		goto EVP005;
+	    }
+	    else{
+		ABASE_ENSTAT(abs_pt) = 0xdc;
+		ABASE_YSPD(abs_pt) = 0;
+	    }
+	}
+	return;
+    }
+
+//EVP060:
+    else if( ENTY_ENSYNO(p_act)[index] == ENEMY_MAMUU ){	// マムー
+	if( ABASE_ENCHMD(abs_pt) != 0 )
+	    return;
+    }
+
+EVP061:
+/*------------- プレイヤー無敵 ---------------------------------*/
+    if( PLAY_KENSHIRO != 0 ){		// プレイヤー無敵？
+	if( ENTY_ENCMOD(p_act)[index] == BRN )		// 爆発？
+	    return;					// ＹＥＳ
+
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_DANGN ||
+	    ENTY_ENSYNO(p_act)[index] == ENEMY_FIRE1 ){
+	    ENTY_ENCMOD(p_act)[index] = 0;
+	    m4aSongNumStart( s_u_se_kourakie );	// [S]甲羅消え
+	    SMOKST(abs_pt,index);	// 煙セット
+	    return;
+	}
+	else if( ENTY_ENSYNO(p_act)[index] == ENEMY_MIKEY ||
+		 ENTY_ENSYNO(p_act)[index] == ENEMY_BKANI ||
+		 ENTY_ENSYNO(p_act)[index] == ENEMY_SNAKE ||
+		 ENTY_ENSYNO(p_act)[index] == ENEMY_FIREB ||
+		 ENTY_ENSYNO(p_act)[index] == ENEMY_MAMUU ){
+	    return;
+	}
+	else{
+	    if( ENTY_ENSYNO(p_act)[index] == ENEMY_SBTEN )	// サボテン？
+		SBTEN_SET(abs_pt,index);
+	    ABASE_XSPD(abs_pt) = EVPSDT[EPXCHK(abs_pt)] << 12;
+	    ABASE_YSPD(abs_pt) = 0xffffffe0 << 12;
+	    ABASE_CRFG(abs_pt) |= 0x10;
+	    if( ENTY_ENSYNO(p_act)[index] != ENEMY_MUSI0 )	// てんとう虫？
+		ABASE_VMUKI(abs_pt) = 1;
+	    ENTY_ENCMOD(p_act)[index] = EF0;	// FAIL DOWN
+	    PL_EFFECT_SET(index);		// 衝突時エフェクトセット
+	    m4aSongNumStart( s_u_se_tekidead );	// [S]敵やっつけ
+	    voice_change( s_u_mario_ha + (HITCNT&0x01) );	// [S]敵やっつけ（声）
+
+	    if( ENTY_ENSYNO(p_act)[index] == ENEMY_BOSS0 )	// キャサリン？
+		BOSS_FAILVOICE(abs_pt,index);			// [S]敵やっつけ（声）
+	}
+    }
+/*------------- プレイヤーノーマル -----------------------------*/
+    else{
+
+EVP005:
+	if( ENTY_ENCMOD(p_act)[index] == BRN ){		// 爆発？
+	    goto ENVP005;
+	}
+	else if( (ENTY_ENSYNO(p_act)[index] >= ENEMY_WHATS) &&	// スパック
+		 (ENTY_ENSYNO(p_act)[index] <= ENEMY_WHAT3) &&
+		 (PLAY_PLSAFT == 0) ){
+	    mosaic_set();			// モザイクセット
+	    m4aSongNumStart(s_u_se_biribiri );	// [S]電気ビリビリ
+	}
+
+	if( (ABASE_ENMODE(abs_pt) & 0x01) != 0 )// プレイヤー乗れる？
+	    goto ENVP005;			// ＮＯ
+
+	hit_result = OBJFGST(abs_pt,index);	// 衝突フラグセット
+	ABASE_PLHIT(abs_pt) = hit_result;
+
+	if( hit_result == 0 ){
+	    return;
+	}
+	else if( (hit_result & (LEFTCR|RIGHTCR|HEDCR)) != 0 ){
+	    if( (ABASE_ENMODE(abs_pt) & 0x08) && ABASE_ENFLSH(abs_pt) ){	// ボス点滅中？
+		return;								// ＹＥＳ
+	    }
+ENVP005:
+	    PLGVIN1(abs_pt,index);		// プレイヤーダメージ
+	}
+	else{
+	    ENKTCK(abs_pt,index);		// 敵かつぎチェック
+	}
+    }
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ マムー				*/
+/****************************************************************/
+void player_FRVS(aAC_base_c *abs_pt,u8 index)
+{
+    u8	hit_result;
+
+    if( ENTY_ENCMOD(p_act)[index] == BRN ){
+	if( PLAY_KENSHIRO == 0 )
+	    PLGVIN1(abs_pt,index);		// プレイヤーダメージ
+    }
+    else{
+	hit_result = OBJFGST(abs_pt,index);	// 衝突フラグセット
+	ABASE_PLHIT(abs_pt) = hit_result;
+
+	if( (hit_result & HEDCR)  != 0 ){
+	    if( (PLAY_PLKATSG == 0) &&
+		(PLAY_PLCMOD == PLMV) ){
+		PLAY_ONENMY = index;		// かつぎ敵インデックス
+		ABASE_ONPTRN(abs_pt) = 0x01;	// かつぎパターン
+		PLAY_PLKATSG++;
+		ABASE_ENHTCT(abs_pt) = 0;	// ＨＩＴカウントクリア
+	    }
+	}
+	else if( (hit_result & FOOTCR) != 0 )
+	    if( ENTY_ENSYNO(p_act)[index] == ENEMY_BKDN ){	// バクダン？
+		if( (PLAY_PLYSPED + PLAY_PLMVYSP) > 0x003e0000 )// リミットチェック！
+		    PLAY_PLMVYSP = 0x002e0000;
+	    }
+
+	    ENKTCK(abs_pt,index);		// 敵かつぎチェック
+    }
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ 持てるブロック、かぎ、顔入口	*/
+/****************************************************************/
+u8  PLHFCKDT[] = { HEDCR, FOOTCR };
+
+void player_ABVS(aAC_base_c *abs_pt,u8 index)	// (SFC) ABVSPL
+{
+    u8	hit_result, sand_result;
+
+
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_CAPSULE ){	// カプセル
+	if( ABASE_WORK0(abs_pt) == 0 ||		// 壁の中
+	    ABASE_WORK0(abs_pt) >= 5 )		// 割った後
+	    return;
+    }
+
+    ABASE_CRFG(abs_pt) = ABASE_CRFG(abs_pt) | 0x40;
+
+    hit_result = OBJFGST(abs_pt,index);		// 衝突フラグセット
+    ABASE_PLHIT(abs_pt) = hit_result;
+
+#if 0
+    if( (hit_result & PLAY_PLMMKI)  != 0 )
+	player_XSPCLR();		// Ｘスピードクリアチェック
+#else
+    if( (hit_result & PLAY_PLMMKI)  != 0 ){
+	if( !(ENTY_ENSYNO(p_act)[index] == ENEMY_EXITR &&
+	      EXCONT == 0x30) ){	// 出口
+	    player_XSPCLR();		// Ｘスピードクリアチェック
+	}
+    }
+#endif
+
+    if( (hit_result & FOOTCR)  != 0 )
+	ENKTCK(abs_pt,index);		// 敵かつぎチェック
+
+    sand_result = SANDCK(abs_pt,index,hit_result);	// ＢＧ砂チェック
+
+    if( sand_result == 1 ){
+	if( ABASE_YSPD(abs_pt) != 0 ){
+	    if( (hit_result & PLHFCKDT[(ABASE_YSPD(abs_pt)>>31)&0x01]) != 0 ){
+		if( ENTY_ENSYNO(p_act)[index] == ENEMY_AKADAMA )	// 赤だま？
+		    AKADAMA_BOUND(abs_pt);
+		else
+		    ABASE_YSPD(abs_pt) = (ABASE_YSPD(abs_pt) ^ 0xffffffff) + 1;
+		PLAY_PLSIT = 1;
+		PLAY_RUNFLG = 0;
+		PLAY_PLCHRNO = SIT;
+		PLAY_PLWKTIM = CRTIMER;
+	    }
+	}
+    }
+}
+
+/****************************************************************/
+/*		敵当り ＆ ＢＧ砂チェック			*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  0 ： no sand					*/
+/*		  1 ： head-foot				*/
+/*		  2 ： side					*/
+/****************************************************************/
+u8 SANDCK(aAC_base_c *abs_pt,u8 index,u8 hit_result)
+{
+    if( ((PLAY_PLCRFG | hit_result) & (HEDCR|FOOTCR)) != (HEDCR|FOOTCR) ){
+	if( ((PLAY_PLCRFG | hit_result) & (LEFTCR|RIGHTCR)) == (LEFTCR|RIGHTCR) )
+	    return( 2 );
+	else
+	    return( 0 );
+    }
+    return( 1 );
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ ＰＯＷブロック			*/
+/****************************************************************/
+void player_CVS(aAC_base_c *abs_pt,u8 index)
+{
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ ＯＢＪドア			*/
+/****************************************************************/
+void player_DRVS(aAC_base_c *abs_pt,u8 index)
+{
+    if( U_KEY_ON_T ){			// 上キーＯＮ？
+	if( (PLAY_PLCRFG & FOOTCR) != 0 &&
+	    !(mGm_SCRCTL == V_SCROLL && PLAY_PLOBJYL > 0x70) ){		// Ｙ位置もチェック
+	    if( PLAY_CROSSX < -6 ){
+		if( (PLAY_DORPTN | PLAY_DORTIM) == 0 ){
+		    if( PLAY_PLKATSG != 0 ){
+			if( ENTY_ENSYNO(p_act)[PLAY_ONENMY] != ENEMY_KEY0 )
+			    return;
+		    }
+		    if( BGCHGFG == 0 ){
+			PLAY_PLXPOSH = ABASE_XPOSH(abs_pt);
+			PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+			player_PLPOSPSH();
+			PLDSPNO = ODPS;
+			if( TSBIN == 0 ){		// 裏から？
+			    PLAY_WATMWK = PLAY_WATCHTM;	// ＮＯ
+			    PLAY_WATCHTM = PLAY_ENSTOP = 0x80;
+			}
+			DRSONDST();		// サウンドセット
+			if( PLAY_PLKATSG == 0 )
+			    PLAY_PLCHRNO = DRIN;	// ドアＩＮキャラセット
+			if( TSBIN == 0 )		// 裏へ行く？
+			    voice_change( s_u_mario_im_moving_now );	// [S]ドアＩＮ
+		    }
+#if 0
+//■■■■ 本来は　@DOORMV　@で計算 ■■■■■
+	STTSBIN = TSBIN;
+	TSBIN = TSBIN ^ 2;	// とりあえず裏画面へ
+				// ほんとはドアの処理「DOORMV」の最後で行なう
+	if( TSBIN == 0 ){
+	    ENDTSV();			// 敵データＳＡＶＥ
+	}
+//■■■■■■■■■■■■■■■■■■■■■
+#endif
+		}
+	    }
+	}
+    }
+}
+
+/****************************************************************/
+/*		プレイヤー ＶＳ チェリー			*/
+/****************************************************************/
+void player_CHVS(aAC_base_c *abs_pt,u8 index)
+{
+    if( ABASE_WORK0(abs_pt) == 0 )
+	ABASE_WORK0(abs_pt) = 1;
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_FAIRY &&
+	ABASE_WORK2(abs_pt) == 2 ){
+	if( ENTY_SCRDTNO(p_act)[index] < EN_ITEM )
+	    ENMY_SETFG(p_act)[ENTY_SCRDTNO(p_act)[index]] = 2;
+    }
+
+    if( ENCLDT[ENTY_ENSYNO(p_act)[index]] & 0x08 )	// でかコイン？
+	BIGCOIN_GET(abs_pt,index);
+}
+
+/****************************************************************/
+/*		ＯＢＪ衝突フラグセット				*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  work15 ： 衝突フラグ（方向）			*/
+/****************************************************************/
+#define ABS(x)   ((x<0)?-(x):x)
+//#define	TAMABOUND 0x00180000
+s32  TAMABOUND[] = { 0x00180000, -0x00180000 };
+s16  HDFTCMP[] = { 12, 17 };
+
+
+u8 OBJFGST(aAC_base_c *abs_pt,u8 index)
+{
+    s8	Y_reg;				/* ＳＦＣ対応レジスタ */
+    u8	work15=0;			// 衝突フラグ
+    s16	enyposh;
+
+    if( PLAY_CROSSY < 0-12 ){		// Ｘ方向衝突？
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_AKADAMA ||	// 赤だま
+	    ENTY_ENSYNO(p_act)[index] == ENEMY_AODAMA ){	// 青だま
+	    TAMA_BENTIT(abs_pt,index);
+	    PLAY_PLXSPED = (PLAY_PLXSPED ^ 0xffffffff) + 1;
+
+//	    if( ABS(PLAY_PLXSPED) < TAMABOUND )
+	    if( ABS(PLAY_PLXSPED) < TAMABOUND[0] )
+//		PLAY_PLXSPED = TAMABOUND | (PLAY_PLXSPED & 0x80000000);
+		PLAY_PLXSPED = TAMABOUND[(PLAY_PLXSPED>>31)&0x01];
+	}
+
+	if( ABASE_XPOSH(abs_pt) < PLAY_PLXPOSH )
+	    work15 = LEFTCR;
+	else
+	    work15 = RIGHTCR;
+	if( (work15 & PLAY_PLMMKI) != 0 ){
+	    if( ABASE_ENMVFG(abs_pt) == 0 )
+		PLAY_PLMVXSP = ABASE_XSPD(abs_pt) << 4;
+	}
+
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_GONDOLA ){	// ゴンドラ
+	    PLAY_PLXSPED = TAMABOUND[work15&0x01];
+	}
+    }
+
+    else{
+OBF030:
+	enyposh = ABASE_YPOSH(abs_pt) + (s16)*(act_hit_tbl[ABASE_ENOJSZ(abs_pt)]+1);
+
+//TEST	if( (ABASE_YPOSH(abs_pt) - HDFTCMP[PLAY_PLSIT]) >= PLAY_PLYPOSH ){
+	if( (enyposh - HDFTCMP[PLAY_PLSIT]) >= PLAY_PLYPOSH ){
+	    if( PLAY_PLYSPED < 0 ){		// プレイヤージャンプ？
+		if( ABASE_YSPD(abs_pt) < 0 )	// 敵ジャンプ？
+		    goto OBJ036;
+		else
+		    return( work15 );
+	    }
+//----------------------------------------------------------------
+//	PLMVXSPセット
+//----------------------------------------------------------------
+	if( ABASE_ENMVFG(abs_pt) == 0 )
+	    PLAY_PLMVXSP = ABASE_XSPD(abs_pt) << 4;
+
+OBJ036:
+	    PLAY_CROSSY = PLAY_CROSSY + 1;
+
+#if 1
+	    PLAY_PLYPOSH = PLAY_PLYPOSH + (s16)PLAY_CROSSY;
+	    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+#else
+	    PLAY_PLYPOSL = PLAY_PLYPOSL + ((s32)PLAY_CROSSY << 16);
+	    PLAY_PLYPOSH = PLAY_PLYPOSL >> 16;
+#endif    
+
+//----------------------------------------------------------------
+//	敵乗りフラグセット
+//----------------------------------------------------------------
+	    if( ABASE_YSPD(abs_pt) < 0 )
+		PLAY_OBJONFG = 1;
+	    else
+		PLAY_OBJONFG = 2;
+
+	    PLAY_OBJONNO = ENTY_ENSYNO(p_act)[index];	// ＯＢＪ乗り敵ＮＯ．
+	    PLAY_OBJONIX = index;			// ＯＢＪ乗り敵インデックス
+
+	    if( PLAY_PLYSPED < 0 ){
+		return( work15 );
+	    }
+	    else{
+		Y_reg = FOOTCR;		// 足元衝突
+		PLAY_BJUMP = 0;		// バック転フラグクリア
+		if( ENTY_ENSYNO(p_act)[index] == ENEMY_AKADAMA ||	// 赤だま
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_AODAMA ){	// 青だま
+		    TAMA_RIDEIT(abs_pt,index);
+//（やっぱやめ）	    PLAY_PLYSPED = -0x40 << 16;		// プレイヤージャンプ
+//（やっぱやめ）	    return( Y_reg );
+
+//******* (ＮＥＳ版：2001/03/23) *********************************
+//
+//	赤だまに乗りながら、頭ＢＧチェックを行なうようにした
+//
+		    if( ENTY_ENSYNO(p_act)[index] == ENEMY_AKADAMA ){
+			player_BGCHECK( BGCK_HEAD );
+			if( PLAY_PLCRFG != 0 )
+			    AKADAMA_BOUND(abs_pt);
+		    }
+
+//****************************************************************
+
+		}
+		else if( ENTY_ENSYNO(p_act)[index] == ENEMY_BIGWALK ||	// 赤でかヘイホー
+			 ENTY_ENSYNO(p_act)[index] == ENEMY_BIGWALK1 ||	// 青でかヘイホー
+			 ENTY_ENSYNO(p_act)[index] == ENEMY_BIGNINJI ){	// でかハックン
+		    WALK_RIDECK(abs_pt);
+		}
+		else if( ENTY_ENSYNO(p_act)[index] == ENEMY_BIGKABU ){	// ＢＩＧかぶ
+		    return( Y_reg );					// PLMVYSPセットしない
+		}
+		goto OBF050;
+	    }
+	}
+
+OBF040:
+	if( PLAY_PLYSPED == 0 )
+	    goto OBF045;
+	if( PLAY_PLYSPED > 0 )
+	    return( work15 );
+	else if( ENTY_ENSYNO(p_act)[index] == ENEMY_COIN )
+	    return( work15 );
+OBF045:
+
+/*------------- 頭チェックしない敵の種類 -----------------------*/
+	if( (ENTY_ENSYNO(p_act)[index] == ENEMY_XTAL) ||	// クリスタル
+	    (ENTY_ENSYNO(p_act)[index] == ENEMY_BRKA) ||	// 持てるブロック
+	    (ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT) ||	// リフト
+	    (ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT2)||	// リフト２
+	    (ENTY_ENSYNO(p_act)[index] == ENEMY_BKDN && PLAY_PLCMOD == PLTR) )	// バクダン
+	    return( work15 );
+	else
+	    Y_reg = HEDCR;
+
+OBF050:
+	work15 = Y_reg;
+//----------------------------------------------------------------
+//	PLMVYSPセット
+//----------------------------------------------------------------
+	if( ABASE_ENMVFG(abs_pt) == 0 )
+	    PLAY_PLMVYSP = ABASE_YSPD(abs_pt) << 4;
+
+OBF55:
+	PLAY_PLYSPED = 0x10 << 16;
+	PLAY_PLYPOSL = PLAY_PLYPOSL & 0xffff0000;
+    }
+
+    return( work15 );		// 衝突フラグ
+}
+
+/****************************************************************/
+/*		プレイヤーダメージ＆死亡イニシャル		*/
+/****************************************************************/
+void PLGVIN1(aAC_base_c *abs_pt,u8 index)
+{
+//▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+//    return;		// <koko> ダメージなし
+//▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+
+
+    if( PLAY_PLSAFT != 0 )
+	return;
+
+    if( (PLAY_PLLIFE - 0x10) >= 0 ){
+/*------------- プレーヤーダメージ -----------------------------*/
+	PLAY_PLLIFE = PLAY_PLLIFE - 0x10;
+	PLAY_PLSAFT = 0x7f;
+	PLAY_PLYSPED = 0;
+	PLAY_PLXSPED = 0;
+	if( PLAY_PLLIFE >= 0x10 ){
+/*------------- 大マリオダメージ（小さくならない）--------------*/
+// TEST	    PLAY_PLXSPED = (PLAY_PLXPOSH - ABASE_XSPD(abs_pt)) << 2;
+	    PLAY_PLXSPED = (PLAY_PLXPOSH - ABASE_XPOSH(abs_pt)) << (2+16);
+	    PLAY_PLYSPED = -0x40 << 16;
+	}
+	if( PLAY_PLLIFE >= 0x10 ){
+	    if( ENTY_ENCMOD(p_act)[index] == BRN ||
+		ENTY_ENSYNO(p_act)[index] == ENEMY_FIRE1 ||	// フラワー玉
+		ENTY_ENSYNO(p_act)[index] == ENEMY_FIREB ||	// ヒーボーボー（大）
+		ENTY_ENSYNO(p_act)[index] == ENEMY_FIRES ){	// ヒーボーボー（小）
+		voice_change( s_u_mario_ah_cha_cha );		// [S]あちゃちゃ！
+	    }
+	    else{
+		m4aSongNumStart( s_u_se_damage );		// [S]ダメージサウンド
+		voice_change( s_u_mario_ow+(FRCNT&0x01) );	// [S]ダメージサウンド（声）
+	    }
+	}
+    }
+    else{
+/*------------- プレーヤー死亡 ---------------------------------*/
+// 敵ターン処理
+
+	 PLAY_PLYSPED = GIVEYSP << 16;
+	 PLAY_PLWKTIM = GIVETIME;
+	 EGGMODE = 1;
+
+	 player_PLFAILST();		// 死亡セット
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーダメージ＆死亡イニシャル（針）	*/
+/****************************************************************/
+void PLGVINT(void)
+{
+    if( PLAY_PLSAFT != 0 )
+	return;
+
+    if( (PLAY_PLLIFE - 0x10) >= 0 ){
+/*------------- プレーヤーダメージ -----------------------------*/
+	PLAY_PLLIFE = PLAY_PLLIFE - 0x10;
+	PLAY_PLSAFT = 0x7f;
+	PLAY_PLXSPED = 0;
+	if( PLAY_PLYSPED >= 0 )
+	    PLAY_PLYSPED = -0x40 << 16;
+	else
+	    PLAY_PLYSPED = 0;
+
+	if( PLAY_PLLIFE >= 0x10 ){
+	    m4aSongNumStart( s_u_se_damage );		// [S]ダメージサウンド
+	    voice_change( s_u_mario_ah_cha_cha );	// [S]ダメージサウンド（声）
+	}
+    }
+    else{
+/*------------- プレーヤー死亡 ---------------------------------*/
+// 敵ターン処理
+
+	 PLAY_PLYSPED = GIVEYSP << 16;
+	 PLAY_PLWKTIM = GIVETIME;
+	 EGGMODE = 1;
+
+	 player_PLFAILST();		// 死亡セット
+    }
+}
+
+
+#if 0	// ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+
+/****************************************************************/
+/*		敵かつぎチェック				*/
+/****************************************************************/
+void ENKTCK(aAC_base_c *abs_pt,u8 index)
+{
+    PLAY_PLJUMP = 0;			// ジャンプフラグクリア
+    ABASE_CRFG(abs_pt) = ABASE_CRFG(abs_pt) | 0x20;
+
+
+    if( (PLAY_PLKATSG | PLAY_PLSIT) != 0 )
+	return;
+
+    if( ENTY_ENSYNO(p_act)[index] != ENEMY_BOSS0 ){	// キャサリン以外？
+	if( (ABASE_ENMODE(abs_pt) & 0x02) != 0 ){	// かつぎＯＫ敵？
+// こっから追加！(2000-12-13)-----------------------------
+	    if( B_BUTTON_ON_T ){		// ＢボタンＯＮ？
+		if( ENTY_ENSYNO(p_act)[index] == ENEMY_WOOD ||	// 丸太？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_GONDOLA ||// ゴンドラ？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT ||	// リフト？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT2 ||	// リフト２？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_EXITL ||	// 顔入り口（左）？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_EXITR ||	// 顔入り口（右）？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_TBO00 ||	// つぼヘイホー？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_TBO01 ||	// つぼＢＯＭ兵？
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_CRPET ||	// じゅうたん？
+		    (ENTY_ENSYNO(p_act)[index] >= ENEMY_BIRD0 &&  // 鳥？
+		     ENTY_ENSYNO(p_act)[index] <= ENEMY_BIRD2) ||
+		    ENTY_ENSYNO(p_act)[index] == ENEMY_FNSUI )	// 噴水？
+		    return;
+
+		no_katsugi_set();
+//		PLAY_PLCMOD = PLNOKT;		// ＹＥＳ
+//		PLAY_PLCHRNO = HIKU;
+//		PLAY_PLXSPED = 0;
+//		PLAY_NOKTTM = *no_katsugi_time;
+	    }
+// ここまで ----------------------------------------------
+	    return;
+	}
+    }
+    else if( ABASE_WORK0(abs_pt) == 1 ){// リボンもう取った？
+	if( B_BUTTON_ON_T ){		// ＢボタンＯＮ？
+	    no_katsugi_set();		// ＹＥＳ
+	    return;
+	}
+    }
+
+    if( B_BUTTON_ON_T == 0 )		// ＢボタンＯＮ？
+	return;
+//上に移動    if( (PLAY_PLKATSG | PLAY_PLSIT) != 0 )
+//上に移動	return;
+    else
+	ABASE_CRFG(abs_pt) = 0;
+
+//    if( (ABASE_ENOJSZ(abs_pt) == OSZBIG ||
+//	 ABASE_ENOJSZ(abs_pt) == OSZBIGBR) &&
+//	PLAY_PLSMAL != 0 ){		// でかい敵＆プレイヤー小？
+//	    PLAY_PLCMOD = PLNOKT;
+//	    PLAY_PLCHRNO = HIKU;
+//	    PLAY_PLXSPED = 0;
+//	    PLAY_NOKTTM = *no_katsugi_time;
+//    }
+//    else if( ENTY_ENSYNO(p_act)[index] == ENEMY_BOSS0 ){ // キャサリン？
+//	if( ABASE_WORK0(abs_pt) == 0 ){
+//	    ABASE_WORK0(abs_pt) = 1;
+//	    RIBONSET();			// リボンセット
+//	}
+//    }
+
+    ABASE_ENHTCT(abs_pt) = 0;
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_BOSS0 &&
+	ABASE_MVFG(abs_pt) != 0 &&
+	ABASE_WORK0(abs_pt) == 0 ){ // キャサリン？
+	    ABASE_WORK0(abs_pt) = 1;
+	    RIBONSET();			// リボンセット
+    }
+    else{
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_BIGPW ){	// ＢＩＧＰＯＷ？
+	    if( ABASE_WORKC(abs_pt) == 0 ){
+		ABASE_WORKC(abs_pt) = 1;
+		BG_Xpos = ABASE_XPOSH(abs_pt);
+		BG_Ypos = ABASE_YPOSH(abs_pt);
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt)+0x10;
+		BG_Ypos = ABASE_YPOSH(abs_pt);
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt);
+		BG_Ypos = ABASE_YPOSH(abs_pt)+0x10;
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt)+0x10;
+		BG_Ypos = ABASE_YPOSH(abs_pt)+0x10;
+		unit_No = SPA0;
+		unit_change();
+	    }
+	}
+
+	PLAY_ONENMY = index;		// かつぎ敵インデックス
+	ABASE_ONPTRN(abs_pt) = 0x07;	// かつぎパターン
+
+	PLKTINT2(abs_pt);		// かつぎイニシャル
+
+	if( ENOZSZ_Dt[ABASE_ENOJSZ(abs_pt)] )		// でかいもの？
+	    voice_change( s_u_mario_eeee_yah1 );	// [S]ＯＢＪかつぎ（声）
+	else if( ENTY_ENSYNO(p_act)[index] == ENEMY_XTAL )	// クリスタル？
+	    voice_change( s_u_mario_a_crystal );	// [S]ＯＢＪかつぎ（声）
+	else if( ENTY_ENSYNO(p_act)[index] != ENEMY_HEART )	//　@きのこじゃない？
+	    voice_change( s_u_mario_yah );		// [S]ＯＢＪかつぎ（声）
+
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_PIGMO )
+	    CPTSET(abs_pt,index);	// カーペットセット
+
+	ABASE_ANGL(abs_pt) = 0;
+	ABASE_PLSHOT(abs_pt) = 0;
+    }
+}
+
+#else	// ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+
+/****************************************************************/
+/*		敵かつぎチェック				*/
+/****************************************************************/
+void ENKTCK(aAC_base_c *abs_pt,u8 index)
+{
+    PLAY_PLJUMP = 0;			// ジャンプフラグクリア
+    ABASE_CRFG(abs_pt) = ABASE_CRFG(abs_pt) | 0x20;
+
+    if( (PLAY_PLKATSG | PLAY_PLSIT) ||
+	B_BUTTON_ON_T == 0 )		// ＢボタンＯＮ？
+	return;				// ＮＯ
+
+    if( ENTY_ENSYNO(p_act)[index] != ENEMY_BOSS0 ){	// キャサリン以外？
+	if( (ABASE_ENMODE(abs_pt) & 0x02) != 0 ){	// かつぎＯＫ敵？
+	    if( ENTY_ENSYNO(p_act)[index] == ENEMY_WOOD ||	// 丸太？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_GONDOLA ||	// ゴンドラ？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT ||	// リフト？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_LIFT2 ||	// リフト２？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_EXITL ||	// 顔入り口（左）？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_EXITR ||	// 顔入り口（右）？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_TBO00 ||	// つぼヘイホー？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_TBO01 ||	// つぼＢＯＭ兵？
+		ENTY_ENSYNO(p_act)[index] == ENEMY_CRPET ||	// じゅうたん？
+		(ENTY_ENSYNO(p_act)[index] >= ENEMY_BIRD0 &&	// 鳥？
+		 ENTY_ENSYNO(p_act)[index] <= ENEMY_BIRD2) ||
+		ENTY_ENSYNO(p_act)[index] == ENEMY_FNSUI )	// 噴水？
+		return;
+
+	    no_katsugi_set();
+	    return;
+	}
+    }
+    else if( ABASE_WORK0(abs_pt) == 1 ||	// リボンもう取った？
+	     ABASE_MVFG(abs_pt) == 0 ){		// ピンク？
+	no_katsugi_set();			// ＹＥＳ
+	return;
+    }
+
+    ABASE_CRFG(abs_pt) = 0;
+    ABASE_ENHTCT(abs_pt) = 0;
+
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_BOSS0 &&
+	ABASE_WORK0(abs_pt) == 0 ){	// キャサリン？
+	ABASE_WORK0(abs_pt) = 1;
+	RIBONSET();			// リボンセット
+    }
+    else{
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_BIGPW ){	// ＢＩＧＰＯＷ？
+	    if( ABASE_WORKC(abs_pt) == 0 ){
+		ABASE_WORKC(abs_pt) = 1;
+		BG_Xpos = ABASE_XPOSH(abs_pt);
+		BG_Ypos = ABASE_YPOSH(abs_pt);
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt)+0x10;
+		BG_Ypos = ABASE_YPOSH(abs_pt);
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt);
+		BG_Ypos = ABASE_YPOSH(abs_pt)+0x10;
+		unit_No = SPA0;
+		unit_change();
+		BG_Xpos = ABASE_XPOSH(abs_pt)+0x10;
+		BG_Ypos = ABASE_YPOSH(abs_pt)+0x10;
+		unit_No = SPA0;
+		unit_change();
+	    }
+	}
+
+	PLAY_ONENMY = index;		// かつぎ敵インデックス
+	ABASE_ONPTRN(abs_pt) = 0x07;	// かつぎパターン
+
+	PLKTINT2(abs_pt);		// かつぎイニシャル
+
+	if( ENOZSZ_Dt[ABASE_ENOJSZ(abs_pt)] )		// でかいもの？
+	    voice_change( s_u_mario_eeee_yah1 );	// [S]ＯＢＪかつぎ（声）
+	else if( ENTY_ENSYNO(p_act)[index] == ENEMY_XTAL )	// クリスタル？
+	    voice_change( s_u_mario_a_crystal );	// [S]ＯＢＪかつぎ（声）
+	else if( ENTY_ENSYNO(p_act)[index] != ENEMY_HEART )	//　@きのこじゃない？
+	    voice_change( s_u_mario_yah );		// [S]ＯＢＪかつぎ（声）
+
+	if( ENTY_ENSYNO(p_act)[index] == ENEMY_PIGMO )
+	    CPTSET(abs_pt,index);	// カーペットセット
+
+	ABASE_ANGL(abs_pt) = 0;
+	ABASE_PLSHOT(abs_pt) = 0;
+    }
+}
+
+#endif 	// ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+
+/****************************************************************/
+/*		かつぎＲＡＭセット				*/
+/****************************************************************/
+void no_katsugi_set(void)
+{
+    PLAY_PLCMOD = PLNOKT;		// ＹＥＳ
+    PLAY_PLCHRNO = HIKU;
+    PLAY_PLXSPED = 0;
+    PLAY_NOKTTM = *no_katsugi_time;
+}
+
+/****************************************************************/
+/*		かつぎＲＡＭセット				*/
+/****************************************************************/
+void PLKTINT2(aAC_base_c *abs_pt)
+{
+    PLAY_PLCMOD = PLKT;
+//    PLAY_PLWKTIM = 6;
+
+    if( ENOZSZ_Dt[ABASE_ENOJSZ(abs_pt)] )	// でかいもの？
+	PLAY_PLWKTIM = 30;
+    else
+	PLAY_PLWKTIM = 6;
+
+    PLAY_PLCHRNO = HIKU;
+    PLAY_PLKATSG++;
+    PLAY_RUNFLG = 0;
+}
+
+/****************************************************************/
+/*		敵かつがれチェック（敵から）			*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  0 ： かつがれＯＦＦ				*/
+/*		  1 ： かつがれＯＮ				*/
+/****************************************************************/
+u8 ONPLCK(aAC_base_c *abs_pt,u8 index)
+{
+    if( ABASE_ONPTRN(abs_pt) == 0 ){
+	return( 0 );
+    }
+    else{
+	if( ENOZSZ_Dt[ABASE_ENOJSZ(abs_pt)] )	// でかいやつ？
+	    ENM190_BIG(abs_pt,index);		// ＹＥＳ
+	else
+	    ENM190(abs_pt,index);
+
+	if( ENTY_ENSYNO(p_act)[index] != ENEMY_BISHI ){
+	    if( ENTY_ENSYNO(p_act)[index] < ENEMY_HAPPA ){
+		if( ABASE_ENPSFG(abs_pt) != 0 )
+		    ABASE_ENCONT(abs_pt)++;
+		ABASE_VMUKI(abs_pt) = 1;
+	    }
+	}
+
+/*------------- プレイヤーの歩きによる補正 ---------------------*/
+	if( PLAY_PLSYNO != PEACH ){		// ピーチ以外？
+	    if( PLAY_RUNFLG == 2 ){
+		if( PLAY_PLWALK == 1 )
+		    ABASE_YPOSH(abs_pt)--;
+	    }
+	}
+
+	ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	return( 1 );
+    }
+}
+
+/****************************************************************/
+/*		敵かつがれ移動					*/
+/****************************************************************/
+s16  KTSTYD[] = { 0x000A, 0x000E, 0x000A, 0x000D,
+		  0x0004, 0x0007, 0x0004, 0x0006 };
+
+void ENM190(aAC_base_c *abs_pt,u8 index)
+{
+    s8	A_reg, Y_reg;			/* ＳＦＣ対応レジスタ */
+    s16	work;
+
+    ABASE_ENMMKI(abs_pt) = (PLAY_PLCMKI ^ 1) + 1;
+    ABASE_XPOSH(abs_pt) = PLAY_PLXPOSH;
+    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+
+/*------------- プレイヤーが座ってるかによる補正 ---------------*/
+    work = PLAY_PLYPOSH;
+    if( (ABASE_ENOJSZ(abs_pt) != OSZB) && (ABASE_ENOJSZ(abs_pt) != OSZ0) )
+	work = work - 0x0e;
+
+    if( PLAY_PLCHRNO == SIT ){
+	if( PLAY_PLSMAL < 1 )
+	    work = work + KTSTYD[PLAY_PLSYNO];
+	else
+	    work = work + KTSTYD[PLAY_PLSYNO+4];
+    }
+
+/*------------- プレイヤーのパターンによる補正 -----------------*/
+    if( PLAY_PLSMAL == 0 )
+	ABASE_YPOSH(abs_pt) = work + PLAY_WKATYAD[ABASE_ONPTRN(abs_pt)-1];
+    else
+	ABASE_YPOSH(abs_pt) = work + PLAY_WKATYAD[ABASE_ONPTRN(abs_pt)+7-1];
+}
+
+/****************************************************************/
+/*		敵かつがれ移動（でかいやつ）			*/
+/****************************************************************/
+s16  PLAY_WKATYAD_BIG[] = {
+#if 0
+//	 1      2      3      4      5      6      7	// ＜大＞
+    0xfff9,0xffff,0x0000,0x0000,0x000c,0x0018,0x001a,	// マリオ
+    0xfff9,0xffff,0x0000,0x0000,0x000c,0x0018,0x001a,	// ピーチ
+    0xfff9,0xffff,0x0000,0x0000,0x000c,0x0018,0x001a,	// キノピオ
+    0xfff9,0xffff,0x0000,0x0000,0x000c,0x0018,0x001a,	// ルイージ
+//	 1      2      3      4      5      6      7	// ＜小＞
+    0x0001,0x0006,0x000a,0x000c,0x0018,0x001a,0x001c,	// マリオ
+    0x0001,0x0006,0x000a,0x000c,0x0018,0x001a,0x001c,	// ピーチ
+    0x0001,0x0006,0x000a,0x000c,0x0018,0x001a,0x001c,	// キノピオ
+    0x0001,0x0006,0x000a,0x000c,0x0018,0x001a,0x001c,	// ルイージ
+#endif
+
+//	   1           2      3      4      5      6      7	// ＜大＞
+    0xfff9  ,0x0012-0x0a,0x001e,0x0024,0x0026,0x0028,0x002a,	// マリオ
+    0xfff9-6,0x0012-0x0e,0x001e,0x0024,0x0026,0x0028,0x002a,	// ピーチ
+    0xfff9  ,0x0012-0x0a,0x001e,0x0024,0x0026,0x0028,0x002a,	// キノピオ
+    0xfff9-4,0x0012-0x0d,0x001e,0x0024,0x0026,0x0028,0x002a,	// ルイージ
+//	   1        2      3      4      5      6      7	// ＜小＞
+    0x0001-2,0x0012-4,0x001e,0x0024,0x0026,0x0028,0x002a,	// マリオ
+    0x0001-5,0x0012-7,0x001e,0x0024,0x0026,0x0028,0x002a,	// ピーチ
+    0x0001  ,0x0012-4,0x001e,0x0024,0x0026,0x0028,0x002a,	// キノピオ
+    0x0001-6,0x0012-6,0x001e,0x0024,0x0026,0x0028,0x002a,	// ルイージ
+};
+
+
+void ENM190_BIG(aAC_base_c *abs_pt,u8 index)
+{
+    u8	ix;
+    s8	A_reg, Y_reg;			/* ＳＦＣ対応レジスタ */
+    s16	work;
+
+    ABASE_ENMMKI(abs_pt) = (PLAY_PLCMKI ^ 1) + 1;
+    ABASE_XPOSH(abs_pt) = PLAY_PLXPOSH - 0x08;
+    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+
+/*------------- プレイヤーが座ってるかによる補正 ---------------*/
+    work = PLAY_PLYPOSH;
+    if( (ABASE_ENOJSZ(abs_pt) != OSZB) && (ABASE_ENOJSZ(abs_pt) != OSZ0) )
+	work = work - 0x0e;
+
+    if( ABASE_ONPTRN(abs_pt) == 0x01 ){		// かつぎ終了？
+						// ＹＥＳ
+	if( PLAY_PLCHRNO == SIT ){
+	    if( PLAY_PLSMAL < 1 )
+		work = work + KTSTYD[PLAY_PLSYNO];
+	    else
+		work = work + KTSTYD[PLAY_PLSYNO+4];
+	}
+    }
+
+/*------------- プレイヤーのパターンによる補正 -----------------*/
+    ix = PLAY_PLSMAL*4*7 + PLAY_PLSYNO*7 + ABASE_ONPTRN(abs_pt)-1;
+
+    if( ENTY_ENSYNO(p_act)[index] == ENEMY_FACE &&	// こうら？
+	ABASE_ONPTRN(abs_pt) >= 0x03 ){			// ＹＥＳ
+	ABASE_YPOSH(abs_pt) = work + PLAY_WKATYAD_BIG[ix] - 0x10;
+    }
+    else{
+	ABASE_YPOSH(abs_pt) = work + PLAY_WKATYAD_BIG[ix];
+    }
+}
+
+/****************************************************************/
+/*		流砂チェック					*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  0     ： 流砂ＯＵＴ				*/
+/*		  0以外 ： 流砂ＩＮ				*/
+/****************************************************************/
+u8 SNDCHK(void)
+{
+    s8	Y_reg;				/* ＳＦＣ対応レジスタ */
+
+    if( unit_No == SNA1 )
+	PLAY_PLYSPED = SNDYSP1 << 16;
+    else if( unit_No == SNA2 )
+	PLAY_PLYSPED = SNDYSP2 << 16;
+    else
+	return( 0 );
+
+    if( PLAY_PLSAND == 0 )
+	PLAY_SNDFG = PLAY_PLYPOSH & 0x10;
+
+    Y_reg = PLAY_PLYPOSH & 0x0f;
+
+    if( ((PLAY_SNDFG ^ PLAY_PLYPOSH) & 0x10) != 0 ){
+	if( Y_reg >= 12 ){
+	    PLAY_PLWKTIM = 0;
+	    EGGMODE = 2;
+	    player_PLFAILST();		// 死亡セット
+	}
+//	Y_reg = 4;
+	return( 4 );
+    }
+
+    if( Y_reg < 4 )
+	Y_reg = 1;
+
+    return( Y_reg );
+}
+
+/****************************************************************/
+/*		敵ＶＳプレイヤー 位置チェック			*/
+/*--------------------------------------------------------------*/
+/*		< RETURN >					*/
+/*		  0 ： 敵 ＝＜　@プレイヤー			*/
+/*		  1 ： 敵 ＞    プレイヤー			*/
+/****************************************************************/
+u8 EPXCHK(aAC_base_c *abs_pt)
+{
+    if( ABASE_XPOS(abs_pt) <= PLAY_PLXPOSL )
+	return( 0 );
+    else
+	return( 1 );
+}
+
+/****************************************************************/
+/*		ドアＩＮタイマーセット（光のドアのみ）		*/
+/****************************************************************/
+#define	Front_Timer		30	// 後ろ＆正面向きタイマー
+#define	Front_Timer_BOSS	120	// 　@　@　@　@　@”　@　@　@　@　@（ボス）
+
+void door_in_timer_set(void)
+{
+    if( PLAY_FADESL == 2 )
+	PLAY_FRONTTM = Front_Timer_BOSS;
+    else
+	PLAY_FRONTTM = Front_Timer;
+
+    PLAY_PLCMOD = PLDRIN;		// ドアＩＮモード
+
+    if( PLAY_PLKATSG == 0 )		// かつぎ中？
+	PLAY_PLCHRNO = DRIN;		// 後ろ向きキャラ
+
+    player_fade_on();			// フェードフラグＯＮ
+
+    PLAY_PLMVXSP = 0;
+}
+
+/****************************************************************/
+/*		ドアＯＵＴタイマーセット			*/
+/****************************************************************/
+void door_out_timer_set(void)
+{
+    PLAY_FRONTTM = Front_Timer;		// プレイヤー正面向きタイマー
+
+    if( PLAY_URADOOR != 0 ){		// ドアを使って裏から戻る？
+//(2001-02-06)	PLAY_WATCHTM += PLAY_FRONTTM / 2;// ストップウォッチタイマー
+	PLAY_PLSAFT  += PLAY_FRONTTM;	// セーフタイマー
+	PLAY_URADOOR = 0;
+    }
+//(2001-01-31)    else{
+//(2001-01-31)	PLAY_WATMWK += PLAY_FRONTTM / 2;// ストップウォッチ保存タイマー
+//(2001-01-31)	PLAY_ENSTOP = 0x80;		// WATMWKをWATCHTMに入れるため
+//(2001-01-31)    }
+
+    PLAY_PLCMOD = PLDROUT;		// ドアＯＵＴモード
+
+    if( PLAY_PLKATSG == 0 )		// かつぎ中？
+	PLAY_PLCHRNO = DROUT;		// 正面向きキャラ
+}
+
+/****************************************************************/
+/*		フェードフラグＯＮ				*/
+/****************************************************************/
+void player_fade_on(void)
+{
+    PLAY_FADEFG = 1;			// フェードフラグＯＮ
+    PLAY_FADECT = 0x10-1;		// フェードカウンタ
+}
+
+/****************************************************************/
+/*		プレイヤーカラー加算値セット			*/
+/****************************************************************/
+void player_fade_color_set(void)
+{
+    u8	i;
+    u16	RGB_data, *color_ptr;
+
+    color_ptr = player_col_table[PLAY_PLSYNO];
+    for( i=0; i<0x10; i++ ){
+	if( PLAY_FADESL == 0 ){
+/*------------- プレイヤーが白からフェードイン -----------------*/
+	    RGB_data =  (0x7c00-(*color_ptr&0x7c00)) >> 4 & 0x0c00;	// Ｂ
+	    RGB_data |= (0x03e0-(*color_ptr&0x03e0)) >> 4 & 0x0060;	// Ｇ
+	    RGB_data |= (0x001f-(*color_ptr&0x001f)) >> 4 & 0x0003;	// Ｒ
+	}
+	else{
+/*------------- プレイヤーが黒からフェードイン -----------------*/
+	    RGB_data =  (*color_ptr&0x7c00) >> 4 & 0x0c00;	// Ｂ
+	    RGB_data |= (*color_ptr&0x03e0) >> 4 & 0x0060;	// Ｇ
+	    RGB_data |= (*color_ptr&0x001f) >> 4 & 0x0003;	// Ｒ
+	}
+	*(u16 *)(PLAYER_COL_BUF+i*2) = RGB_data;
+	color_ptr++;
+    }
+}
+
+/****************************************************************/
+/*		プレイヤーカラー加算（ドアＩＮ）		*/
+/****************************************************************/
+void player_color_add(void)
+{
+    u8	i;
+    u16 B_data, G_data, R_data;
+
+    if( PLAY_FADEFG ){
+	for( i=0; i<0x10; i++ ){
+	    if( (PLAY_FADESL&0x01) == 0 ){
+/*------------- プレイヤーを白くフェードアウト -----------------*/
+		B_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x7c00) + (0x0400 * 2);
+		if( B_data > 0x7c00 )
+		    B_data = 0x7c00;
+		G_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x03e0) + (0x0020 * 2);
+		if( G_data > 0x03e0 )
+		    G_data = 0x03e0;
+		R_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x001f) + (0x0001 * 2);
+		if( R_data > 0x001f )
+		    R_data = 0x001f;
+		*(u16 *)(COL_BUF+0x0200+i*2) = (B_data | G_data | R_data);
+	    }
+	    else{
+/*------------- プレイヤーを黒くフェードアウト -----------------*/
+		B_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x7c00) - (0x0400 * 2);
+		if( B_data >= 0x8000 )
+		    B_data = 0;
+		G_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x03e0) - (0x0020 * 2);
+		if( G_data >= 0x8000 )
+		    G_data = 0;
+		R_data = (*(u16 *)(COL_BUF+0x0200+i*2) & 0x001f) - (0x0001 * 2);
+		if( R_data >= 0x8000 )
+		    R_data = 0;
+		*(u16 *)(COL_BUF+0x0200+i*2) = (B_data | G_data | R_data);
+	    }
+	}
+	if( PLAY_FADECT == 0 )
+	    PLAY_FADEFG = 0;
+	else
+	    PLAY_FADECT--;
+	COL_FLAG = 1;
+    }
+}
+
+/****************************************************************/
+/*		フェードＩＮカラー減算（ドアＯＵＴ）		*/
+/****************************************************************/
+void player_color_sub(void)
+{
+    u8	i;
+
+    if( PLAY_FADEFG ){
+	if( PLAY_FADECT == 0 ){
+	    DmaCopy(3, player_col_table[PLAY_PLSYNO], COL_BUF+0x200, 0x20, 16);
+	    PLAY_FADEFG = 0;
+	}
+	else{
+	    for( i=0; i<0x10; i++ ){
+		if( PLAY_FADESL == 0 )
+/*------------- プレイヤーが白からフェードイン -----------------*/
+		    *(u16 *)(COL_BUF+0x0200+i*2) -= *(u16 *)(PLAYER_COL_BUF+i*2);
+		else
+/*------------- プレイヤーが黒からフェードイン -----------------*/
+		    *(u16 *)(COL_BUF+0x0200+i*2) += *(u16 *)(PLAYER_COL_BUF+i*2);
+	    }
+	    PLAY_FADECT--;
+	}
+	COL_FLAG = 1;
+    }
+}
+
+/****************************************************************/
+/*		各プレイヤーボイス変換				*/
+/****************************************************************/
+u16 Voice_Index[] = {
+    0x0000,				// (0) マリオ
+    s_u_peach_yahoo-s_u_mario_yahoo,	// (1) ピーチ
+    s_u_toad_yeaa-s_u_mario_yahoo,	// (2) キノピオ
+    s_u_luigi_yeaa-s_u_mario_yahoo,	// (3) ルイージ
+};
+
+void voice_change(u16 voice)
+{
+    m4aSongNumStart( voice + Voice_Index[PLAY_PLSYNO] );
+}
+
+/****************************************************************/
+/*		プレイヤ－別 コースクリア回数加算		*/
+/****************************************************************/
+void contributor_inc(void)
+{
+    if( PLDOWN[PLAY_PLSYNO] < 99 )
+	PLDOWN[PLAY_PLSYNO]++;
+}
+
+/****************************************************************/
+/*		縦画面スクロール開始位置セット			*/
+/****************************************************************/
+#define	GAMEN_MAX	10	// 最大画面数
+
+
+void vscr_updown_set(void)
+{
+    u8	plobjyl, vscr_stop;
+    u16	vscr_add;
+    u16	max_sccv;
+
+
+    if( mGm_SCRCTL == V_SCROLL ){
+	if( INTGANO == 0 ){		// 一番上の画面？
+	    VGAMEN_POS = SHITA_MODE;	// 下モードセット
+	}
+	else if( INTGANO == MAX_disp ){	// 一番下の画面？
+	    VGAMEN_POS = UE_MODE;	// 上モードセット
+	}
+	else {
+	    if( (WORDNO == 0x0b && COSUNO == 3 && INTGANO == 3) ||	// ４Ｗ－３－３
+		(WORDNO == 0x0e && COSUNO == 3 && INTGANO == 3) ||	// ５Ｗ－３－３
+		(WORDNO == 0x13 && COSUNO == 6 && INTGANO == 6) ){	// ７Ｗ－２－６
+		VGAMEN_POS = SHITA_MODE;	// 下モードセット
+		vscr_stop = VScroll_Stop_High[VGAMEN_POS];
+	    }
+	    else{
+		VGAMEN_POS = UE_MODE;		// 上モードセット
+		vscr_stop = VScroll_Stop_Low[VGAMEN_POS];
+	    }
+
+	    mGm_SCCV1 -= (u16)(vscr_stop - (PLAY_PLYPOSH - mGm_SCCV1));
+
+	    max_sccv = (MAX_disp << 8) - (MAX_disp << 4) + 0x40;
+	    if( mGm_SCCV1 > 0x8000 )
+		mGm_SCCH1 = 0;
+	    else if( mGm_SCCH1 > max_sccv )
+		mGm_SCCV1 = max_sccv;
+	}
+    }
+}
+
+
+/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+/*								*/
+/*	player_XCALC		Ｘ移動				*/
+/*	player_YCALC		Ｙ移動				*/
+/*	player_ZCALC		Ｚ移動				*/
+/*	player_oamset		ＯＡＭセット			*/
+/*	player_SLPLSET		セレクトデータセット		*/
+/*	player_PLPOSINT		イニシャル位置セット		*/
+/*	player_XSPCLR		Ｘスピードクリア		*/
+/*	player_PLPOSCK		プレイヤー位置チェック		*/
+/*	player_PLFAILST		プレイヤー死亡セット		*/
+/*								*/
+/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

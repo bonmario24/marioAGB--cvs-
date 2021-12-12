@@ -1,0 +1,209 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UCA_ACT_H_
+#define __UCA_ACT_H_
+
+/*-------------------- アクター基本構造体  -----------------*/
+typedef struct {
+	s8 x_offset;	
+	s8 y_offset;	
+	s8 x_size;	
+	s8 y_size;	
+}hitsize_Dt;
+
+typedef struct{
+    s32 a_xpos;		/* Ｘ位置	*/
+    s32 a_ypos;		/* Ｙ位置	*/
+    s32 a_xspd;		/* Ｘスピード	*/
+    s32 a_yspd;		/* Ｙスピード	*/
+    s32 a_work32[8];	/* 32ビット用ワークラム	*/
+    s16 a_xposh;	/* Ｘ位置（Ｈ）	*/
+    s16 a_yposh;	/* Ｙ位置（Ｈ）	*/
+    s16	a_hsize;	/* Ｈサイズ	*/
+    s16	a_vsize;	/* Ｖサイズ	*/
+    u16	a_angle;	/* アングル	*/
+    u16	a_angle2;	/* アングル２つ目　@*/
+    s16	a_angspd;	/* アングル変化量　@*/
+    u8	a_patrn;	/* パターン	*/
+    u8	a_ptcont;	/* パターンカウント */
+    u8	a_hmuki;	/* H向き 左右	*/
+    u8	a_vmuki;	/* V向き 上下	*/
+    u8	a_mode;		/* 処理内容	*/
+    u8  a_crfg;         /* 衝突フラグ   */
+    u8  a_work[3];	/* ワークラム */
+    u8  a_entim;        /* 敵用タイマー */
+    u8  a_mvfg;         /* 敵動作フラグ */
+    u8  a_stpfg;        /* ストップフラグ */
+    u8  a_plshot;	/* 投げられフラグ */
+    u8  a_onptrn;	/* かつぎパターン */
+    u8  a_enlife;	/* ライフ */
+    u8	a_flshfg;	/* フラッシングフラグ */
+    s32 a_mvxspd;	/* 他からの力によるＸスピード	*/
+    s32 a_mvyspd;	/* 他からの力によるＹスピード	*/
+    u8	a_enojsz;	/* ＯＢＪ衝突サイズ */
+#if 0
+    s16	a_xoffset;	/* Ｘ衝突オフセット値 */
+    s16	a_yoffset;	/* Ｙ衝突オフセット値 */
+    u16	a_xchkw;	/* Ｘ衝突幅 */
+    u16	a_ychkw;	/* Ｙ衝突幅 */
+#endif
+    u8  a_enmode;	/* 状態（ENMDDT) */
+    u8  a_enmvfg;	/* 動作フラグ */
+    u8  a_enstat;	/* brock data */
+    u8  a_encont;	/* enemy counter */
+    u8  a_enchmd;	/* character mode */
+    u8  a_entwfg;	/* player on 2 times flag */
+    u8  a_endtid;	/* 敵データインデックス */
+    u8  a_enhtct;	/* ＨＩＴカウント？ */
+    u8  a_entim2;	/* 敵用タイマー２ */
+    u8  a_enmmki;	/* 移動方向 */
+    u8  a_enpsfg;	/* ストップフラグ */
+    u8  a_enclor;	/* ＢＧに対する優先指定 */
+    u8  a_enfmsd;	/* 敵画面内フラグ */
+    u8  a_sortdt;	/* ソート用データ */
+    u8  a_lifton;	/* ゴンドラ乗りフラグ */
+    u8  a_plhit;	/* プレイヤーとの当たり判定結果 */
+    u8  a_fairyset;	/* ハートセットフラグ */
+    u8  a_bigfairy;	/* デカ敵ハートセットフラグ */
+    
+    hitsize_Dt  a_hitsize;	/* プレイヤーとの当たり判定サイズをラムで持つ時の値 */
+}aAC_base_c;
+
+
+
+/*-------------------- a_crfg ---------------------------*/
+/*       a_crfg ( 0000 0000 )                            */
+/*                        |----------right               */
+/*                       |-----------left                */
+/*                      |------------bottom              */
+/*                     |-------------top                 */
+/*                   |---------------fail?               */
+/*                  |----------------プレイヤー乗ってる？*/
+/*                 |-----------------プレイヤー当ってる？*/
+/*                |------------------デカパウに乗ってる  */
+/*   当ってる---1　@　@当ってない---0                      */
+/*-------------------------------------------------------*/
+/*-------------------- a_sortdt -------------------------*/
+/*       a_crfg ( 0000 0000 )                            */
+/*                        |----------雑魚敵              */
+/*                       |-----------アイテム            */
+/*                      |------------弾丸等              */
+/*                     |-------------ドア                */
+/*                   |---------------ボス敵              */
+/*                |||----------------未使用              */
+/*-------------------------------------------------------*/
+
+/*-------------------- マクロ定義  ----------------------*/
+#define ABASE_XPOS(pt)	(((aAC_base_c *)(pt)) -> a_xpos)
+#define ABASE_YPOS(pt)  (((aAC_base_c *)(pt)) -> a_ypos)
+#define ABASE_ZPOS(pt)  (((aAC_base_c *)(pt)) -> a_zpos)
+#define ABASE_XSPD(pt)  (((aAC_base_c *)(pt)) -> a_xspd)
+#define ABASE_YSPD(pt)  (((aAC_base_c *)(pt)) -> a_yspd)
+#define ABASE_ZSPD(pt)  (((aAC_base_c *)(pt)) -> a_zspd)
+#define ABASE_XPOSH(pt)	(((aAC_base_c *)(pt)) -> a_xposh)
+#define ABASE_YPOSH(pt) (((aAC_base_c *)(pt)) -> a_yposh)
+#define ABASE_ZPOSH(pt) (((aAC_base_c *)(pt)) -> a_zposh)
+#define ABASE_WORK(pt)  (((aAC_base_c *)(pt)) -> a_work32[0])
+#define ABASE_WORKA(pt) (((aAC_base_c *)(pt)) -> a_work32[0])
+#define ABASE_WORKB(pt) (((aAC_base_c *)(pt)) -> a_work32[1])
+#define ABASE_WORKC(pt) (((aAC_base_c *)(pt)) -> a_work32[2])
+#define ABASE_WORKD(pt) (((aAC_base_c *)(pt)) -> a_work32[3])
+#define ABASE_WORKE(pt) (((aAC_base_c *)(pt)) -> a_work32[4])
+#define ABASE_WORKF(pt) (((aAC_base_c *)(pt)) -> a_work32[5])
+#define ABASE_WORKG(pt) (((aAC_base_c *)(pt)) -> a_work32[6])
+#define ABASE_WORKH(pt) (((aAC_base_c *)(pt)) -> a_work32[7])
+#define ABASE_HSIZE(pt) (((aAC_base_c *)(pt)) -> a_hsize)
+#define ABASE_VSIZE(pt) (((aAC_base_c *)(pt)) -> a_vsize)
+#define ABASE_ANGL(pt)  (((aAC_base_c *)(pt)) -> a_angle)
+#define ABASE_ANGL2(pt)  (((aAC_base_c *)(pt)) -> a_angle2)
+#define ABASE_ANGSPD(pt)  (((aAC_base_c *)(pt)) -> a_angspd)
+#define ABASE_PTRN(pt)  (((aAC_base_c *)(pt)) -> a_patrn)
+#define ABASE_PCOT(pt)  (((aAC_base_c *)(pt)) -> a_ptcont)
+#define ABASE_HMUKI(pt) (((aAC_base_c *)(pt)) -> a_hmuki)
+#define ABASE_VMUKI(pt) (((aAC_base_c *)(pt)) -> a_vmuki)
+#define ABASE_MODE(pt)  (((aAC_base_c *)(pt)) -> a_mode)
+#define ABASE_CRFG(pt)  (((aAC_base_c *)(pt)) -> a_crfg)
+#define ABASE_WORK0(pt) (((aAC_base_c *)(pt)) -> a_work[0x0])
+#define ABASE_WORK1(pt) (((aAC_base_c *)(pt)) -> a_work[0x1])
+#define ABASE_WORK2(pt) (((aAC_base_c *)(pt)) -> a_work[0x2])
+#define ABASE_ENTIM(pt) (((aAC_base_c *)(pt)) -> a_entim)
+#define ABASE_MVFG(pt)  (((aAC_base_c *)(pt)) -> a_mvfg)
+#define ABASE_STPFG(pt)  (((aAC_base_c *)(pt)) -> a_stpfg)
+#define ABASE_PLSHOT(pt)  (((aAC_base_c *)(pt)) -> a_plshot)
+#define ABASE_ONPTRN(pt)  (((aAC_base_c *)(pt)) -> a_onptrn)
+#define ABASE_ENLIFE(pt)  (((aAC_base_c *)(pt)) -> a_enlife)
+#define ABASE_ENFLSH(pt)  (((aAC_base_c *)(pt)) -> a_flshfg)
+#define ABASE_MVXSPD(pt)  (((aAC_base_c *)(pt)) -> a_mvxspd)
+#define ABASE_MVYSPD(pt)  (((aAC_base_c *)(pt)) -> a_mvyspd)
+#define ABASE_ENOJSZ(pt)  (((aAC_base_c *)(pt)) -> a_enojsz)
+
+#if 0
+#define ABASE_XOFFSET(pt)  (((aAC_base_c *)(pt)) -> a_xoffset)
+#define ABASE_YOFFSET(pt)  (((aAC_base_c *)(pt)) -> a_yoffset)
+#define ABASE_XCHKW(pt)  (((aAC_base_c *)(pt)) -> a_xchkw)
+#define ABASE_YCHKW(pt)  (((aAC_base_c *)(pt)) -> a_ychkw)
+#endif
+
+#define ABASE_ENMODE(pt)  (((aAC_base_c *)(pt)) -> a_enmode)
+#define ABASE_ENMVFG(pt)  (((aAC_base_c *)(pt)) -> a_enmvfg)
+#define ABASE_ENSTAT(pt)  (((aAC_base_c *)(pt)) -> a_enstat)
+#define ABASE_ENCONT(pt)  (((aAC_base_c *)(pt)) -> a_encont)
+#define ABASE_ENCHMD(pt)  (((aAC_base_c *)(pt)) -> a_enchmd)
+#define ABASE_ENTWFG(pt)  (((aAC_base_c *)(pt)) -> a_entwfg)
+#define ABASE_ENDTID(pt)  (((aAC_base_c *)(pt)) -> a_endtid)
+#define ABASE_ENHTCT(pt)  (((aAC_base_c *)(pt)) -> a_enhtct)
+#define ABASE_ENTIM2(pt) (((aAC_base_c *)(pt)) -> a_entim2)
+#define ABASE_ENMMKI(pt) (((aAC_base_c *)(pt)) -> a_enmmki)
+#define ABASE_ENPSFG(pt) (((aAC_base_c *)(pt)) -> a_enpsfg)
+#define ABASE_ENCLOR(pt) (((aAC_base_c *)(pt)) -> a_enclor)
+#define ABASE_ENFMSD(pt) (((aAC_base_c *)(pt)) -> a_enfmsd)
+#define ABASE_SORTDT(pt) (((aAC_base_c *)(pt)) -> a_sortdt)
+#define ABASE_LIFTON(pt) (((aAC_base_c *)(pt)) -> a_lifton)
+#define ABASE_PLHIT(pt) (((aAC_base_c *)(pt)) -> a_plhit)
+#define ABASE_FAIRYST(pt) (((aAC_base_c *)(pt)) -> a_fairyset)
+#define ABASE_BIGFAIRY(pt) (((aAC_base_c *)(pt)) -> a_bigfairy)
+
+#define ABASE_HIT_XOFF(pt) (((aAC_base_c *)(pt)) -> a_hitsize.x_offset)
+#define ABASE_HIT_YOFF(pt) (((aAC_base_c *)(pt)) -> a_hitsize.y_offset)
+#define ABASE_HIT_XSIZ(pt) (((aAC_base_c *)(pt)) -> a_hitsize.x_size)
+#define ABASE_HIT_YSIZ(pt) (((aAC_base_c *)(pt)) -> a_hitsize.y_size)
+
+#define	ENEMY_NUM_MAX	0x10		// 敵最大数（１６匹）
+
+#endif /* __UCA_ACT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

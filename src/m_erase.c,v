@@ -1,0 +1,598 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@ＥＥＰＲＯＭ全消去プログラム	*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_save.h"
+
+#include "ud_cad.h"
+
+#include "m_erase.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void erase_time(void);
+static void erase_init(void);
+static void erase_select(void);
+static void erase_disp(void);
+static void error_init(void);
+static void error_disp(void);
+static void erase_msg_set(u8 No);
+static void err_msg_set1(void);
+static void err_msg_set2(void);
+static void err_msg_set3(void);
+
+/*--------------------------------------------------------------*/
+/*		メッセージデータ				*/
+/*--------------------------------------------------------------*/
+u16 eeprom_msg1[] = {		// カートリッジを初期化しました。
+    (8 * 0x20 + 0x8) * 2,0x000a,
+    0x0018,0x0000,0x000e,0x0003,0x0002,0x002f,0x0002,0x0000,0x000c,0x0000,
+
+    (0xa * 0x20 + 0x8) * 2, 0x0010,
+    0x0004,0x0000,0x000b,0x002f,0x0001,0x0003,0x0003,0x0007,0x002f,0x0003,
+    0x000a,0x0000,0x000b,0x0003,0x0002,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg2[] = {		// バックアップデータに異常がありました。
+    (2 * 0x20 + 0x9) * 2,0x000e,
+    0x0019,0x0004,0x0003,0x002f,0x000b,0x0000,0x000e,0x0003,0x0002,0x002f,
+    0x0002,0x0000,0x000c,0x0000,
+
+    (4 * 0x20 + 0x9) * 2,0x000b,
+    0x0005,0x000b,0x002f,0x000f,0x0008,0x000a,0x000a,0x000d,0x0009,0x000c,0x001b,
+
+    (7 * 0x20 + 0x9) * 2,0x0008,
+    0x0015,0x0005,0x0006,0x0003,0x0010,0x001a,0x0017,0x0016,
+
+    (0xa * 0x20 + 0x9) * 2,0x0008,
+    0x0015,0x0005,0x0006,0x0003,0x0011,0x001a,0x0017,0x0016,
+
+    (0xd * 0x20 + 0x9) * 2,0x0008,
+    0x0015,0x0005,0x0006,0x0003,0x0012,0x001a,0x0017,0x0016,
+
+    (0x10 * 0x20 + 0x9) * 2,0x0008,
+    0x0018,0x000f,0x0008,0x000a,0x0003,0x001a,0x0017,0x0016,
+
+    0xffff,
+};
+
+u16 eeprom_msg3[] = {		// バックアップメモリに異常があります。
+    (8 * 0x20 + 0x9) * 2,0x000e,
+    0x0019,0x0004,0x0003,0x002f,0x000b,0x0000,0x000e,0x0003,0x0002,0x002f,
+    0x0002,0x0000,0x000c,0x0000,
+
+    (0xa * 0x20 + 0x9) * 2,0x000b,
+    0x0005,0x000b,0x002f,0x000f,0x0008,0x000a,0x000a,0x000d,0x0009,0x000c,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg4[] = {		// ファ@イルＡにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0009,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0010,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg5[] = {		// ファ@イルＢにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0009,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0011,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg6[] = {		// ファ@イルＣにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0009,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0012,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg7[] = {		// トップスコアにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x000d,
+    0x000c,0x0008,0x002f,0x0019,0x0008,0x0009,0x002f,0x0018,0x000f,0x0008,
+    0x000a,0x0003,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg8[] = {		// ファ@イルＡ，トップスコアにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0016,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0010,0x002f,0x0008,
+    0x000a,0x002f,0x0019,0x0008,0x0009,0x002f,0x0018,0x000f,0x0008,0x000a,
+    0x0003,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg9[] = {		// ファ@イルＢ，トップスコアにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0016,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0011,0x002f,0x0008,
+    0x000a,0x002f,0x0019,0x0008,0x0009,0x002f,0x0018,0x000f,0x0008,0x000a,
+    0x0003,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg10[] = {		// ファ@イルＣ，トップスコアにセーブできませんでした。
+    (0xc * 0x20 + 0x3) * 2,0x0017,
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,0x0006,0x0002,
+    0x002f,0x0007,0x0008,0x000c,0x002f,0x0001,0x0003,0x002f,0x000b,0x0000,
+    0x000e,0x0003,0x0002,
+
+    (0xd * 0x20 + 0x3) * 2,0x0016,
+    0x000c,0x0008,0x002f,0x0015,0x0005,0x0006,0x0003,0x0012,0x002f,0x0008,
+    0x000a,0x002f,0x0019,0x0008,0x0009,0x002f,0x0018,0x000f,0x0008,0x000a,
+    0x0003,0x001b,
+
+    0xffff,
+};
+
+u16 eeprom_msg11[] = {
+    (0x4 * 0x20 + 0x4) * 2,0x0015,
+    0x0014,0x000a,0x0000,0x000b,0x0003,0x002f,0x0000,0x0006,
+    0x0006,0x002f,0x000b,0x0000,0x000e,0x0003,0x0002,0x002f,
+    0x0002,0x0000,0x000c,0x0000,0x001c,
+
+    (0x9 * 0x20 + 0xc) * 2,0x0003,
+    0x001f,0x001e,0x0017,
+
+    (0xb * 0x20 + 0xd) * 2,0x0003,
+    0x001d,0x0014,0x0018,
+
+    0xffff,
+};
+
+u16 *eeprom_msg_table[] = {
+    eeprom_msg1,
+    eeprom_msg2,
+    eeprom_msg3,
+    eeprom_msg4,
+    eeprom_msg5,
+    eeprom_msg6,
+    eeprom_msg7,
+    eeprom_msg8,
+    eeprom_msg9,
+    eeprom_msg10,
+    eeprom_msg11,
+};
+
+/*--------------------------------------------------------------*/
+/*		消去キーチェック				*/
+/*--------------------------------------------------------------*/
+void erase_time(void)
+{
+    if((mGm_CONT & 0x3ff) == (A_BUTTON | B_BUTTON |
+			      START_BUTTON | SELECT_BUTTON |
+			      L_BUTTON | R_BUTTON)){
+	ERASE_TIMER++;
+	if(ERASE_TIMER == 60 * 3 - 1){
+	    VSYNC_OFF = 1;
+	}
+	else if(ERASE_TIMER == 60 * 3){
+	    mGm_SLMODE++;
+	    ERASE_TIMER = 0;
+	}
+    }
+    else{
+	VSYNC_OFF = 1;
+	BRUSFG = MAIN_mode;		// タイトルモードセット
+	mGm_SLMODE = 0;
+	mGm_GMMODE = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		消去画面イニシャル処理				*/
+/*--------------------------------------------------------------*/
+void erase_init(void)
+{
+    lcdc_off();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+	| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+/*------------- キャラクターセット -------------*/
+    DmaArrayCopy(3, ud_back_up_schDT, VRAM, 32);
+
+/*------------- カラーセット -------------*/
+    DmaArrayCopy(3, ud_back_up_sclDT, BG_PLTT, 16);
+
+/*------------- スクリーンセット -------------*/
+    DmaClear(3, 0x002f, VRAM + 0xf800, 0x800, 16);
+    erase_msg_set( 10 );
+
+/*------------- 初期値セット -------------*/
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    ERASE_POINT = 0;
+    SAVE_ON = 0;
+
+    NMI_NO = nmi_title;
+    IRQ_NO = irq_dummy;
+    mGm_SLMODE++;
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+
+    m4aSoundVSyncOn();			//サウンドスタート
+    m4aSongNumStart( s_u_se_save );
+}
+
+/*--------------------------------------------------------------*/
+/*		消去選択画面表示処理				*/
+/*--------------------------------------------------------------*/
+void erase_select(void)
+{
+    switch(SAVE_ON){
+    case 0:
+	if((mGm_CONT & 0x03ff) == 0)
+	    SAVE_ON++;
+	break;
+    case 1:
+	if((mGm_TRG & U_KEY) || (mGm_TRG & D_KEY) || (mGm_TRG & SELECT_BUTTON)){
+	    m4aSongNumStart( s_u_se_coin );
+	    ERASE_POINT ^= 1;
+	    if(ERASE_POINT == 0){
+		*(u16 *)(VRAM + 0xf800 + ((0x9 * 0x20 + 0xc) * 2)) = 0x001f;
+		*(u16 *)(VRAM + 0xf800 + ((0xb * 0x20 + 0xc) * 2)) = 0x002f;
+	    }
+	    else{
+		*(u16 *)(VRAM + 0xf800 + ((0x9 * 0x20 + 0xc) * 2)) = 0x002f;
+		*(u16 *)(VRAM + 0xf800 + ((0xb * 0x20 + 0xc) * 2)) = 0x001f;
+	    }
+	}
+	else if((mGm_TRG & START_BUTTON) || (mGm_TRG & A_BUTTON)){
+	    if(ERASE_POINT == 0){
+		BRUSFG = MAIN_mode;
+		mGm_SLMODE = 0;
+		SAVE_ON = 0;
+	    }
+	    else{
+		SAVE_ON++;
+	    }
+	    VSYNC_OFF = 1;
+	}
+	break;
+    case 2:
+	*(vu16 *)REG_IME = 0;
+	all_clear();
+	*(vu16 *)REG_IME = 1;
+	V_blank_wait();
+	m4aSoundVSyncOn();
+	if(ERROR_NO != 0)
+	    return;
+	DmaClear(3, 0x002f, VRAM + 0xf900, 0x300, 16);
+	erase_msg_set( 0 );
+	mGm_SLMODE++;
+	ERASE_TIMER = 0;
+	m4aSongNumStart( s_u_se_save );
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		消去画面表示処理				*/
+/*--------------------------------------------------------------*/
+void erase_disp(void)
+{
+    
+    ERASE_TIMER++;
+    if((ERASE_TIMER == 60 * 5) ||
+       ((mGm_TRG & (A_BUTTON | START_BUTTON)) && (!(mGm_TRG & 0x306)))){
+	BRUSFG = MAIN_mode;
+	mGm_SLMODE = 0;
+	SAVE_ON = 0;
+	VSYNC_OFF = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エラーメッセージセット処理テーブル		*/
+/*--------------------------------------------------------------*/
+mfunc error_set[] = {
+    err_msg_set1,	// 永久ループエラー
+    err_msg_set2,	// ＥＥＰＲＯＭチェック初期書き込みエラー
+    err_msg_set3,	// ＥＥＰＲＯＭチェックエラー
+};
+
+/*--------------------------------------------------------------*/
+/*		エラーイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void error_init(void)
+{
+    lcdc_off();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+	| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+/*------------- キャラクターセット -------------*/
+    DmaArrayCopy(3, ud_back_up_schDT, VRAM, 32);
+
+/*------------- カラーセット -------------*/
+    DmaArrayCopy(3, ud_back_up_sclDT, BG_PLTT, 16);
+
+/*------------- スクリーンセット -------------*/
+    DmaClear(3, 0x002f, VRAM + 0xf800, 0x800, 16);
+    error_set[ERROR_NO - 1]();
+
+/*------------- 初期値セット -------------*/
+    ERASE_TIMER = 0;
+
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    NO_RESET = 1;
+
+    NMI_NO = nmi_title;
+    IRQ_NO = irq_dummy;
+    mGm_SLMODE++;
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+
+    m4aSoundVSyncOn();			//サウンドスタート
+}
+
+/*--------------------------------------------------------------*/
+/*		エラー表示処理					*/
+/*--------------------------------------------------------------*/
+void error_disp(void)
+{
+    if(ERROR_NO != 1){
+	ERASE_TIMER++;
+	if((ERASE_TIMER == 60 * 5) ||
+	   (mGm_TRG & (A_BUTTON | START_BUTTON))){
+	    BRUSFG = MAIN_mode;
+	    mGm_SLMODE = 0;
+	    ERROR_FLAG = 0;
+	    ERROR_NO = 0;
+	    VSYNC_OFF = 1;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＥＥＰＲＯＭ全消去処理テーブル			*/
+/*--------------------------------------------------------------*/
+mfunc erase_menu[] = {
+    erase_time,
+    erase_init,
+    erase_select,
+    erase_disp,
+
+    error_init,
+    error_disp,
+};
+
+/*--------------------------------------------------------------*/
+/*		ＥＥＰＲＯＭ全消去処理				*/
+/*--------------------------------------------------------------*/
+void erase_check(void)
+{
+    erase_menu[mGm_SLMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*		メッセージセット処理				*/
+/*--------------------------------------------------------------*/
+void erase_msg_set(u8 No)
+{
+    u16 *meg_adr;
+    u16 *vram_address;
+    u16 msg_loop;
+    u16 max;
+
+    meg_adr = eeprom_msg_table[No];
+    while(*(meg_adr) != 0xffff){
+	vram_address = (u16 *)(*meg_adr + VRAM + 0xf800);
+	*(meg_adr++);
+	max = *(meg_adr);
+	*(meg_adr++);
+	for(msg_loop = 0; msg_loop < max; msg_loop++){
+	    *(vram_address) = *(meg_adr);
+	    *(meg_adr++);
+	    *(vram_address++);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		永久ループエラー				*/
+/*--------------------------------------------------------------*/
+void err_msg_set1(void)
+{
+    erase_msg_set(2);
+}
+
+/*--------------------------------------------------------------*/
+/*		ＥＥＰＲＯＭチェック初期書き込みエラー		*/
+/*--------------------------------------------------------------*/
+u16 msg2_adr_table[] = {
+    0xf800 + (0x7 * 0x20 + 0x0f) * 2,
+    0xf800 + (0xa * 0x20 + 0x0f) * 2,
+    0xf800 + (0xd * 0x20 + 0x0f) * 2,
+    0xf800 + (0x10 * 0x20 + 0x0f) * 2,
+};
+
+u16 msg2_data1[6] = {
+    0x0014,0x000a,0x0000,0x000b,0x0003,0x0002,
+};
+
+u16 msg2_data2[14] = {
+    0x0013,0x0000,0x000c,0x0000,0x002f,0x000f,0x0008,0x000d,
+    0x0006,0x0002,0x002f,0x0007,0x0008,0x000c,
+};
+
+u16 msg2_data3[10] = {
+    0x0001,0x0003,0x002f,0x0003,0x000a,0x0000,0x000b,0x0003,
+    0x0002,0x001b,
+};
+
+void err_msg_set2(void)
+{
+    u8 No;
+
+    erase_msg_set(1);
+    No = ERROR_FLAG & 3;
+    switch(No){
+    case 0:
+	break;
+    case 1:
+	DmaArrayCopy(3, msg2_data1, VRAM + msg2_adr_table[3], 16);
+	break;
+    case 2:
+	DmaArrayCopy(3, msg2_data2, VRAM + msg2_adr_table[3], 16);
+	DmaArrayCopy(3, msg2_data3, VRAM + msg2_adr_table[3] + 0x40, 16);
+	break;
+    }
+
+    No = (ERROR_FLAG >> 2) & 3;
+    switch(No){
+    case 0:
+	break;
+    case 1:
+	DmaArrayCopy(3, msg2_data1, VRAM + msg2_adr_table[0], 16);
+	break;
+    case 2:
+	DmaArrayCopy(3, msg2_data2, VRAM + msg2_adr_table[0], 16);
+	DmaArrayCopy(3, msg2_data3, VRAM + msg2_adr_table[0] + 0x40, 16);
+	break;
+    }
+
+    No = (ERROR_FLAG >> 4) & 3;
+    switch(No){
+    case 0:
+	break;
+    case 1:
+	DmaArrayCopy(3, msg2_data1, VRAM + msg2_adr_table[1], 16);
+	break;
+    case 2:
+	DmaArrayCopy(3, msg2_data2, VRAM + msg2_adr_table[1], 16);
+	DmaArrayCopy(3, msg2_data3, VRAM + msg2_adr_table[1] + 0x40, 16);
+	break;
+    }
+
+    No = (ERROR_FLAG >> 6) & 3;
+    switch(No){
+    case 0:
+	break;
+    case 1:
+	DmaArrayCopy(3, msg2_data1, VRAM + msg2_adr_table[2], 16);
+	break;
+    case 2:
+	DmaArrayCopy(3, msg2_data2, VRAM + msg2_adr_table[2], 16);
+	DmaArrayCopy(3, msg2_data3, VRAM + msg2_adr_table[2] + 0x40, 16);
+	break;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＥＥＰＲＯＭチェックエラー			*/
+/*--------------------------------------------------------------*/
+void err_msg_set3(void)
+{
+    erase_msg_set(2);
+    if(ERROR_FLAG & 2){
+	if(ERROR_FLAG & 4)
+	    erase_msg_set(7);
+	else if(ERROR_FLAG & 8)
+	    erase_msg_set(8);
+	else if(ERROR_FLAG & 0x10)
+	    erase_msg_set(9);
+	else
+	    erase_msg_set(6);
+    }
+    else{
+	if(ERROR_FLAG & 4)
+	    erase_msg_set(3);
+	else if(ERROR_FLAG & 8)
+	    erase_msg_set(4);
+	else if(ERROR_FLAG & 0x10)
+	    erase_msg_set(5);
+	else
+	    erase_msg_set(6);
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

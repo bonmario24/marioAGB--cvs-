@@ -1,0 +1,123 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_se_mamu_grp, voicegroup000
+	.equ	sn_se_mamu_pri, 100
+	.equ	sn_se_mamu_rev, 0
+	.equ	sn_se_mamu_mvl, 50
+	.equ	sn_se_mamu_key, 0
+	.equ	sn_se_mamu_tbs, 1
+	.equ	sn_se_mamu_exg, 0
+	.equ	sn_se_mamu_cmp, 1
+
+	.section .rodata
+	.global	sn_se_mamu
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_se_mamu_1:
+	.byte	KEYSH , sn_se_mamu_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_se_mamu_tbs/2
+	.byte		VOICE , 112
+	.byte		VOL   , 127*sn_se_mamu_mvl/mxv
+	.byte		N02   , Cs4 , v127
+	.byte	W02
+	.byte		        Gs3 , v116
+	.byte	W02
+	.byte		        Ds4 , v112
+	.byte	W02
+	.byte		        Fs4 , v104
+	.byte	W02
+	.byte		        Fn4 , v100
+	.byte	W02
+	.byte		        En4 , v092
+	.byte	W02
+	.byte		        Ds4 , v084
+	.byte	W02
+	.byte		        Dn4 , v076
+	.byte	W02
+	.byte		        Cs4 , v072
+	.byte	W02
+	.byte		        Fn4 , v076
+	.byte	W02
+	.byte		        En4 
+	.byte	W02
+	.byte		        Ds4 
+	.byte	W02
+	.byte		        Dn4 
+	.byte	W02
+	.byte		        Cs4 
+	.byte	W02
+	.byte		        En4 , v092
+	.byte	W02
+	.byte		        Ds4 , v084
+	.byte	W02
+	.byte		        Dn4 , v076
+	.byte	W02
+	.byte		        Cs4 , v072
+	.byte	W02
+	.byte		        Fn4 , v076
+	.byte	W02
+	.byte		        En4 , v068
+	.byte	W02
+	.byte		        Ds4 , v052
+	.byte	W02
+	.byte		        Dn4 , v040
+	.byte	W02
+	.byte		        Cs4 , v028
+	.byte	W02
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_se_mamu:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_se_mamu_pri	@@ Priority
+	.byte	sn_se_mamu_rev	@@ Reverb.
+
+	.word	sn_se_mamu_grp
+
+	.word	sn_se_mamu_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

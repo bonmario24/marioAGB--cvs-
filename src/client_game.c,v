@@ -1,0 +1,523 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*************************************************************/
+//
+//		client_game.c
+//      	マルチブート ローダー画面 プログラム
+//		作成開始日 2000/10/10
+//
+/*************************************************************/
+#include "client_main.h"
+#include "client_sub.h"
+#include "client_multisio.h"
+#include "client_game.h"
+#include "client_player.h"
+#include "client_sky.h"
+
+#define INITIAL_CODE    (*(vu32 *)"AMAC")   // イニシャルコード
+
+
+/****************************************************************/
+/*		転送中画面イニシャル処理			*/
+/****************************************************************/
+static void trans_init(void)
+{
+    u32 vs, end, obj0, obj1, bg;
+    u16	*vram;
+    u16	bgchar;
+    u8	i, j;
+
+    /******** ＬＣＤＣ　@ＯＦＦ ********/
+    m_lcdcoff();
+#if SOUND_ON
+    m4aSoundVSyncOff();
+#endif
+    /******* ＬＣＤＣ設定 ********/
+    mGm_DISPCNT = DISP_BG0_ON | DISP_BG1_ON | DISP_MODE_0 |// DISP_BG2_ON | 
+	 DISP_OBJ_ON | DISP_OBJ_CHAR_1D_MAP;
+
+    /******* 描画設定 ********/
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT | DISP_LCDC_OFF;
+    *(vu16 *)REG_BG0CNT = BG_SCREEN_SIZE_1 | (10 << BG_SCREEN_BASE_SHIFT) |
+	 (1 << BG_CHAR_BASE_SHIFT) | BG_COLOR_16 | BG_MOS_OFF | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCREEN_SIZE_0 | (12 << BG_SCREEN_BASE_SHIFT) |
+	 (1 << BG_CHAR_BASE_SHIFT) | BG_COLOR_16 | BG_MOS_OFF | BG_PRIORITY_1;
+
+    /******* キャラクタＤＭＡ転送 ********/
+    DmaArrayCopy(3, d_loader_bg_schDT, (BG_VRAM+0x4000), 32);
+//    DmaArrayCopy(3, d_loader_obj_schDT, OBJ_MODE1_VRAM, 32);
+    HuffUnComp(d_load_obj_Huff, (void *)OBJ_MODE1_VRAM);
+    vram = (u16 *)(BG_VRAM+0x4600);
+    bgchar = 0x0000;
+    for(i=0; i<0x10; i++){
+	for(j=0; j<0x10; j++){
+	    *(vram++) = bgchar;
+	}
+	bgchar += 0x1111;
+    }
+
+    /******* スクリーンＤＭＡ転送 ********/
+    DmaClear(3, 0x0000, BG0ADDRESS, 0x800, 16);
+    vram = (u16 *)(BG0ADDRESS + 0x0400);
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0001;
+	*(vram++) = 0x0003;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x000C;
+	*(vram++) = 0x0002;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0004;
+	*(vram++) = 0x0005;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0007;
+	*(vram++) = 0x0006;
+    }
+    vram = (u16 *)(BG0ADDRESS + 0x0C00);
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0001;
+	*(vram++) = 0x0003;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x000C;
+	*(vram++) = 0x0002;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0004;
+	*(vram++) = 0x0005;
+    }
+    for(j=0; j<16; j++){
+	*(vram++) = 0x0007;
+	*(vram++) = 0x0006;
+    }
+    vram = (u16 *)BG1ADDRESS;
+    for(i=0; i<15; i++){
+	for(j=0; j<32; j++){
+	    *(vram++) = (1 + i) + 0x2030;
+	}
+    }
+    for(i=0; i<5; i++){
+	for(j=0; j<32; j++){
+	    *(vram++) = 0x203F;
+	}
+    }
+
+    /******* カラーＤＭＡ転送 ********/
+    DmaArrayCopy(3, d_loader_bg_sclDT, BG_PLTT, 16);
+    DmaArrayCopy(3, d_loader_bg_sclDT, mGm_ColBufBG, 16);
+    DmaArrayCopy(3, d_loader_obj_sclDT, OBJ_PLTT, 16);
+    DmaArrayCopy(3, d_loader_obj_sclDT, mGm_ColBufOBJ, 16);
+#if SKYFADE
+    CpuCopy(&d_loader_bg_sclDT[0x20], mGm_FADECOL, 32, 16);
+    CpuCopy(&d_loader_obj_sclDT[0x40], mGm_FADEOBJCOL, 32, 16);
+#endif
+
+    /******* スクロール初期値設定 ********/
+    *(vu16 *)REG_BG0HOFS = mGm_HSCROLL = 0x0000;
+    *(vu16 *)REG_BG0VOFS = mGm_VSCROLL = 0x0000;
+    *(vu16 *)REG_BG1HOFS = 0x0000;
+    *(vu16 *)REG_BG1VOFS = 0x0000;
+
+    /******* カラー特殊処理の初期設定 ********/
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = BLD_UP_MODE | BLD_1ST_ALL;    //輝度変更
+    *(vu16 *)REG_BLDALPHA = mGm_COLEV = 0x0010;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x0010;	//ホワイトイン
+    ColMoveFlg = 1;
+
+    /******* フラグ関係の初期設定 ********/
+    mGm_GMMODE++;
+    mGm_V_BLKFLG = 1;
+    mGm_TIME = 0;
+
+    /******* ＢＧＭオン ********/
+//#if SOUND_ON
+//    m4aSoundVSyncOn();
+//    m4aSongNumStart(0);
+//#endif
+
+    /******* 自機@ＯＢＪ表示イニシャル ********/
+//    PlayNum = *(u8 *)0x020000D0;//子機@の台数
+    PlayNum = *(u8 *)0x020000D0 & 0x0F;//子機@の台数
+    player_init();
+    sky_init();
+
+    /******* Ｖブランク割込許可フラグのセット ********/
+    *(vu16 *)REG_IE   = V_BLANK_INTR_FLAG;
+    // カートリッジ挿入チェック
+    if(*(vu8  *)(ROM_BANK0+0xb2) == 0x96 &&
+       *(vu32 *)(ROM_BANK0+0xac) == INITIAL_CODE){
+        *(vu16 *)REG_IE |= CASSETTE_INTR_FLAG;	// カートリッジ割込許可
+    }
+    *(vu16 *)REG_STAT  = STAT_V_BLANK_IF_ENABLE;
+
+    /******* ＩＭＥセット ******/
+    *(vu16 *)REG_IME   = 1;
+
+    while(1) {
+	if (game.IntrCheck & V_BLANK_INTR_FLAG)
+	    break;
+    }
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    /******* ＢＧＭオン ********/
+#if SOUND_ON
+    m4aSoundVSyncOn();
+    m4aSongNumStart(0);
+#endif
+
+    /******* ＬＣＤＣ　@ＯＮ ********/
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;
+
+    /******* マルチプレイ通信準備 ********/
+    vs = *(u32 *)0x020000C8;
+    end = *(u32 *)0x020000CC;
+    obj0 = *(u32 *)0x020000D4;
+    obj1 = *(u32 *)0x020000D8;
+    bg = *(u32 *)0x020000DC;
+
+    TransCount = 0;
+#if 0
+    SrcTable[0] = (u32 *)bg;
+    SrcTable[1] = (u32 *)vs;
+//    SrcTable[2] = (u32 *)end;
+    DesTable[0] = (u32 *)VS_START;
+    DesTable[1] = (u32 *)VS_START;
+//    DesTable[2] = (u32 *)(VS_START + (end - bg));
+    EndTable[0] = (u32 *)(VS_START + (vs - bg));
+    EndTable[1] = (u32 *)(VS_START + (end - vs));
+//    EndTable[2] = (u32 *)end;
+#else
+    SrcTable[0] = (u32 *)bg;
+    SrcTable[1] = (u32 *)obj1;
+    SrcTable[2] = (u32 *)vs;
+    SrcTable[3] = (u32 *)obj0;
+//    SrcTable[4] = (u32 *)end;
+    DesTable[0] = (u32 *)VS_START;
+    DesTable[1] = (u32 *)VS_START;
+    DesTable[2] = (u32 *)VS_START;
+    DesTable[3] = (u32 *)(VS_START + (obj0 - vs));
+//    DesTable[4] = (u32 *)(VS_START + (end - vs));
+    EndTable[0] = (u32 *)(VS_START + (obj1 - bg));
+    EndTable[1] = (u32 *)(VS_START + (vs - obj1));
+    EndTable[2] = (u32 *)(VS_START + (obj0 - vs));
+    EndTable[3] = (u32 *)(VS_START + (end - vs));
+//    EndTable[0] = (u32 *)end;
+#endif
+    TransSize = end - bg;
+    ReceiveSize = 0;
+    SioFlags = 1;
+    SioModeFlg = 0;
+//    Type = *(u8 *)0x020000D3;
+#if DEBUG
+    SioCount = 0;
+#endif
+}
+
+/****************************************************************/
+/*		フェードイン処理				*/
+/****************************************************************/
+static void white_in(void)
+{
+    u8	end;
+
+    sky_main();
+
+    end = WhiteIn();
+    if(end){
+	mGm_BLDMOD = BLD_A_BLEND_MODE | BLD_BG1_2ND;
+	mGm_COLEV = 0x0010;
+	mGm_COLY = 0x0000;
+	mGm_GMMODE++;
+    }
+    ColMoveFlg = ON;
+}
+
+/****************************************************************/
+/*		転送中画面メイン処理				*/
+/****************************************************************/
+static void trans_main(void)
+{
+    static	u32	*AddressCheck = NULL;
+    static	u8	frame_counter = 1;
+
+    switch(SioModeFlg){
+    case NotConnect://マルチプレイ通信初期化
+	MultiSioInit();
+	SioModeFlg++;
+	break;
+    case MultiSync://マルチプレイ通信(同期)
+	if(((SioMultiCnt *)REG_SIOCNT)->SD){
+	    if (!((SioMultiCnt *)REG_SIOCNT)->SI) {
+		*(vu16 *)REG_IE &= ~SIO_INTR_FLAG;	// SIO割込不許可
+		*(vu16 *)REG_IE |= MULTI_SIO_TIMER_INTR_FLAG;// タイマー割込許可
+		*(vu32 *)REG_MULTI_SIO_TIMER &= ~TMR_ENABLE;//タイマーストップ
+		*(vu16 *)REG_IF  =  SIO_INTR_FLAG	// IF リセット
+		    |  MULTI_SIO_TIMER_INTR_FLAG;
+		*(vu32 *)REG_MULTI_SIO_TIMER	// タイマー スタート
+		    = (0x10000 - MULTI_SIO_TIMER_COUNT1)
+		    | TMR_PRESCALER_1CK
+		    | TMR_IF_ENABLE | TMR_ENABLE;
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_SYNC_DATA;
+		*(vu16 *)REG_SIOCNT |= SIO_ENABLE;
+	    }else{
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_SYNC_DATA;
+	    }
+	}
+	break;
+    case Sio32WaitC1://子機@の切り替え
+	SioModeFlg = Sio32Init;
+//	Sio32Init_1();
+	break;
+    case Sio32WaitC0://親機@の切り替えウエイト
+    case Sio32WaitP0://子機@の切り替えを先行させるためのウエイト
+    case Sio32WaitP1:
+    case Sio32WaitP2:
+    case Sio32WaitP3:
+    case Sio32WaitP4:
+	SioModeFlg++;
+	break;
+    case Sio32Init://32ﾋﾞｯﾄシリアル通信初期化
+	SioModeFlg++;
+	Sio32Init_2();
+	break;
+    case Sio32Trance://32ﾋﾞｯﾄシリアル通信(転送中)
+	break;
+    case MultiWaitP0://子機@の切り替えを先行させるためのウエイト
+    case MultiWaitP1://子機@の切り替えを先行させるためのウエイト
+	SioModeFlg++;
+	break;
+    case MultiInitP://親機@マルチプレイ通信切り替え
+	*(vu16 *)REG_RCNT  = R_SIO_MASTER_MODE;
+	*(vu16 *)REG_SIOCNT  = SIO_MULTI_MODE |
+	    SIO_IF_ENABLE | MULTI_SIO_BAUD_RATE;
+	SioModeFlg++;
+	break;
+    case MultiCheck://マルチプレイ通信(チェックサム確認)
+	if(((SioMultiCnt *)REG_SIOCNT)->SD){
+	    if (!((SioMultiCnt *)REG_SIOCNT)->SI) {
+		*(vu32 *)REG_MULTI_SIO_TIMER &= ~TMR_ENABLE;//タイマーストップ
+		*(vu16 *)REG_IF  =  SIO_INTR_FLAG	// IF リセット
+		    |  MULTI_SIO_TIMER_INTR_FLAG;
+		*(vu32 *)REG_MULTI_SIO_TIMER	// タイマー スタート
+		    = (0x10000 - MULTI_SIO_TIMER_COUNT1)
+		    | TMR_PRESCALER_1CK
+		    | TMR_IF_ENABLE | TMR_ENABLE;
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_END_DATA;
+		*(vu16 *)REG_SIOCNT |= SIO_ENABLE;
+	    }else{
+		*(u16 *)REG_SIODATA8 = MULTI_SIO_END_DATA;
+	    }
+	}
+	break;
+    case VramTrance:
+	TransCount++;
+	if(TransCount > 3){
+	    SioSuccess = ON;  //転送終了
+	}else{
+	    switch(TransCount){
+	    case 1:CpuCopy(DesTable[0], BG_VRAM, 0x2800, 16);break;
+	    case 2:CpuCopy(DesTable[1], OBJ_MODE0_VRAM+0xD00, 0x7300, 16);break;
+	    default:break;
+	    }
+	    SioModeFlg = 0;
+	}
+    default:
+	break;
+    }
+
+    /** 通信エラーチェック処理 ***/
+    if(!(frame_counter & 0x7F)){
+	if((!SioSuccess) && (AddressCheck == RecvAddress)){
+	    SioFlags = 0;    //接続エラー
+#if DEBUG
+	    ErrorNo = 2;
+#endif
+	}else{
+	    AddressCheck = RecvAddress;
+	}
+    }
+
+    /** 通信エラー処理 ***/
+    if(!SioFlags){
+	*(vu16 *)REG_IE &= ~SIO_INTR_FLAG;	// SIO割込不許可
+	*(vu16 *)REG_IE &= ~MULTI_SIO_TIMER_INTR_FLAG;// タイマー割込不許可
+	*(vu64 *)REG_SIOMLT_RECV = 0;
+	*(vu32 *)REG_SIOCNT = 0;
+	mGm_GMMODE = LD_ERROR;
+	aP_MODE(pl) = LDPL_ERROR;
+	aP_CHRNO(pl) = PLCHR_MISS;
+	aP_YSPD(pl) = - 0x0400;
+	aP_PRIORITY(pl) = 0;
+	CpuCopy(&d_loader_bg_sclDT[0x40], mGm_FADECOL, 32, 16);
+#if DEBUG
+	*(vu16 *)(BG_VRAM + 0x60A0) = ErrorNo + 0x1010;
+#endif
+    }
+
+    /** メーター(自機@)表示 **/
+    player_main();
+    sky_main();
+
+    frame_counter++;
+
+#if DEBUG
+	*(vu16 *)(BG_VRAM + 0x639E) = numchange(((u32)RecvAddress & 0xF0000)>>16);
+	*(vu16 *)(BG_VRAM + 0x63A0) = numchange(((u32)RecvAddress & 0x0F000)>>12);
+	*(vu16 *)(BG_VRAM + 0x63A2) = numchange(((u32)RecvAddress & 0x00F00)>>8);
+	*(vu16 *)(BG_VRAM + 0x63A4) = numchange(((u32)RecvAddress & 0x000F0)>>4);
+	*(vu16 *)(BG_VRAM + 0x63A6) = numchange(((u32)RecvAddress & 0x0000F));
+	*(vu16 *)(BG_VRAM + 0x63E0) = numchange((CheckSumRecv & 0x0F000)>>12);
+	*(vu16 *)(BG_VRAM + 0x63E2) = numchange((CheckSumRecv & 0x00F00)>>8);
+	*(vu16 *)(BG_VRAM + 0x63E4) = numchange((CheckSumRecv & 0x000F0)>>4);
+	*(vu16 *)(BG_VRAM + 0x63E6) = numchange((CheckSumRecv & 0x0000F));
+	*(vu16 *)(BG_VRAM + 0x63AC) = numchange((SioModeFlg & 0x0F));
+	*(vu16 *)(BG_VRAM + 0x6320) = numchange((*(u16 *)(VS_START) & 0x0F000)>>12);
+	*(vu16 *)(BG_VRAM + 0x6322) = numchange((*(u16 *)(VS_START) & 0x00F00)>>8);
+	*(vu16 *)(BG_VRAM + 0x6324) = numchange((*(u16 *)(VS_START) & 0x000F0)>>4);
+	*(vu16 *)(BG_VRAM + 0x6326) = numchange((*(u16 *)(VS_START) & 0x0000F));
+//	*(vu16 *)(BG_VRAM + 0x6360) = numchange((*(u16 *)(VS_START+2) & 0x0F000)>>12);
+//	*(vu16 *)(BG_VRAM + 0x6362) = numchange((*(u16 *)(VS_START+2) & 0x00F00)>>8);
+//	*(vu16 *)(BG_VRAM + 0x6364) = numchange((*(u16 *)(VS_START+2) & 0x000F0)>>4);
+//	*(vu16 *)(BG_VRAM + 0x6366) = numchange((*(u16 *)(VS_START+2) & 0x0000F));
+//	*(vu16 *)(BG_VRAM + 0x63A0) = numchange((*(u16 *)(VS_START+4) & 0x0F000)>>12);
+//	*(vu16 *)(BG_VRAM + 0x63A2) = numchange((*(u16 *)(VS_START+4) & 0x00F00)>>8);
+//	*(vu16 *)(BG_VRAM + 0x63A4) = numchange((*(u16 *)(VS_START+4) & 0x000F0)>>4);
+//	*(vu16 *)(BG_VRAM + 0x63A6) = numchange((*(u16 *)(VS_START+4) & 0x0000F));
+//	*(vu16 *)(BG_VRAM + 0x63E0) = numchange((*(u16 *)(VS_START+8) & 0x0F000)>>12);
+//	*(vu16 *)(BG_VRAM + 0x63E2) = numchange((*(u16 *)(VS_START+8) & 0x00F00)>>8);
+//	*(vu16 *)(BG_VRAM + 0x63E4) = numchange((*(u16 *)(VS_START+8) & 0x000F0)>>4);
+//	*(vu16 *)(BG_VRAM + 0x63E6) = numchange((*(u16 *)(VS_START+8) & 0x0000F));
+#endif
+}
+
+/****************************************************************/
+/*		転送終了後待機@					*/
+/****************************************************************/
+static void trans_end(void)
+{
+    sky_main();
+
+    mGm_TIME--;
+    if(!mGm_TIME){
+	mGm_BLDMOD = BLD_UP_MODE | BLD_1ST_ALL;    //輝度変更
+	mGm_COLEV = 0x0010;
+	mGm_COLY = 0x0000;	//ホワイトアウト
+	mGm_GMMODE++;
+    }
+}
+
+/****************************************************************/
+/*		フェードアウト処理				*/
+/****************************************************************/
+static void white_out(void)
+{
+    u32	(*GameMain)(void) = (u32 (*)(void))VS_START;
+    u8	end, data;
+
+    sky_main();
+
+    end = WhiteOut();
+    if(end){
+//	*(u8 *)0x020000D0 = PlayNum + 1;
+	data = *(u8 *)0x020000D0 & 0xF0;
+	*(u8 *)0x020000D0 = data | PlayNum + 1;
+//	*(vu16 *)REG_BLDCNT = mGm_BLDMOD = 0x0000;
+#if SOUND_ON
+	m4aSoundVSyncOff();
+#endif
+	CpuCopy(DesTable[3], OBJ_MODE0_VRAM, 0xD00, 16);
+
+	*(vu16 *)REG_IME = 0;                      // IME リセット
+	*(vu16 *)REG_IF  = 0xffff;                 // IF  リセット
+	*(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;
+	*(vu16 *)REG_BLDCNT = mGm_BLDMOD = 0x0000;
+	RegisterRamReset(RESET_REG_SIO_FLAG);
+	GameMain();		// プログラム起動
+    }
+    ColMoveFlg = ON;
+}
+
+/****************************************************************/
+/*		転送エラー画面					*/
+/****************************************************************/
+static void trans_error(void)
+{
+    player_main();
+    sky_main();
+}
+
+/*
+ ****************************************************************
+ *		転送中画面メニュー配列
+ ****************************************************************
+ */
+mfunc main_menu[] = {
+    trans_init,
+    white_in,
+    trans_main,
+    trans_end,
+    white_out,
+    trans_error,
+};
+
+/****************************************************************/
+/*		転送中画面メイン				*/
+/****************************************************************/
+void loader_main(void)
+{
+    main_menu[mGm_GMMODE]();
+}
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d15 1
+a15 1
+#define INITIAL_CODE    (*(vu32 *)"AMAE")   // イニシャルコード
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

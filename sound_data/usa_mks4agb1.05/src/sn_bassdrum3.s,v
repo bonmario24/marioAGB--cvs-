@@ -1,0 +1,851 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_bassdrum3_grp, voicegroup000
+	.equ	sn_bassdrum3_pri, 10
+	.equ	sn_bassdrum3_rev, 0
+	.equ	sn_bassdrum3_mvl, 100
+	.equ	sn_bassdrum3_key, 0
+	.equ	sn_bassdrum3_tbs, 1
+	.equ	sn_bassdrum3_exg, 0
+	.equ	sn_bassdrum3_cmp, 1
+
+	.section .rodata
+	.global	sn_bassdrum3
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_bassdrum3_1:
+	.byte	KEYSH , sn_bassdrum3_key+0
+sn_bassdrum3_1_B1:
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_bassdrum3_tbs/2
+	.byte		VOICE , 30
+	.byte		VOL   , 90*sn_bassdrum3_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		LFODL , 12
+	.byte		LFOS  , 28
+	.byte		MOD   , 6
+	.byte	W24
+	.byte		N06   , Cn5 , v064
+	.byte	W48
+	.byte		N06   
+	.byte	W24
+@@ 001   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W48
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W12
+@@ 002   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W48
+	.byte		N06   
+	.byte	W24
+@@ 003   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W12
+	.byte		N60   , Bn4 
+	.byte	W60
+@@ 004   ----------------------------------------
+	.byte	W96
+@@ 005   ----------------------------------------
+sn_bassdrum3_1_005:
+	.byte	W24
+	.byte		N12   , Fs4 , v064
+	.byte	W12
+	.byte		N06   , Gn4 
+	.byte	W12
+	.byte		N12   , Fs5 
+	.byte	W12
+	.byte		N06   , Gn5 
+	.byte	W36
+	.byte	PEND
+@@ 006   ----------------------------------------
+	.byte	W96
+@@ 007   ----------------------------------------
+sn_bassdrum3_1_007:
+	.byte		N01   , As3 , v008
+	.byte	W04
+	.byte		        As3 , v012
+	.byte	W04
+	.byte		        As3 , v016
+	.byte	W04
+	.byte		        As3 , v020
+	.byte	W04
+	.byte		        As3 , v028
+	.byte	W04
+	.byte		        As3 , v032
+	.byte	W04
+	.byte		        As3 , v036
+	.byte	W04
+	.byte		        As3 , v040
+	.byte	W04
+	.byte		        As3 , v048
+	.byte	W04
+	.byte		        As3 , v052
+	.byte	W04
+	.byte		        As3 , v056
+	.byte	W04
+	.byte		        As3 , v060
+	.byte	W04
+	.byte		        As3 , v064
+	.byte	W12
+	.byte		N06   , Gn4 
+	.byte	W06
+	.byte		        An4 
+	.byte	W06
+	.byte		N12   , As4 
+	.byte	W24
+	.byte	PEND
+@@ 008   ----------------------------------------
+	.byte	W96
+@@ 009   ----------------------------------------
+	.byte	W96
+@@ 010   ----------------------------------------
+	.byte	W96
+@@ 011   ----------------------------------------
+	.byte	W96
+@@ 012   ----------------------------------------
+	.byte	W96
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_1_005
+@@ 014   ----------------------------------------
+	.byte	W96
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_1_007
+@@ 016   ----------------------------------------
+	.byte	W96
+@@ 017   ----------------------------------------
+	.byte	W96
+@@ 018   ----------------------------------------
+	.byte	W96
+@@ 019   ----------------------------------------
+	.byte	W12
+	.byte		N06   , Gn5 , v064
+	.byte	W06
+	.byte		        Fs5 
+	.byte	W06
+	.byte		        Gn5 
+	.byte	W06
+	.byte		        Fs5 
+	.byte	W06
+	.byte		        Gn5 
+	.byte	W06
+	.byte		        Fs5 
+	.byte	W06
+	.byte		        Gn5 
+	.byte	W48
+	.byte	GOTO
+	 .word	sn_bassdrum3_1_B1
+sn_bassdrum3_1_B2:
+@@ 020   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_bassdrum3_2:
+	.byte	KEYSH , sn_bassdrum3_key+0
+sn_bassdrum3_2_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 24
+	.byte		VOL   , 90*sn_bassdrum3_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		LFODL , 12
+	.byte		LFOS  , 28
+	.byte		MOD   , 6
+	.byte	W24
+	.byte		N06   , Gn4 , v064
+	.byte	W48
+	.byte		N06   
+	.byte	W24
+@@ 001   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W48
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W12
+@@ 002   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W48
+	.byte		N06   
+	.byte	W24
+@@ 003   ----------------------------------------
+	.byte	W24
+	.byte		N06   
+	.byte	W12
+	.byte		N60   
+	.byte	W60
+@@ 004   ----------------------------------------
+	.byte	W96
+@@ 005   ----------------------------------------
+sn_bassdrum3_2_005:
+	.byte	W24
+	.byte		N12   , Cs4 , v064
+	.byte	W12
+	.byte		N06   , Dn4 
+	.byte	W12
+	.byte		N12   , Cs5 
+	.byte	W12
+	.byte		N06   , Dn5 
+	.byte	W36
+	.byte	PEND
+@@ 006   ----------------------------------------
+	.byte	W96
+@@ 007   ----------------------------------------
+sn_bassdrum3_2_007:
+	.byte	W02
+	.byte		N01   , Gn3 , v008
+	.byte	W04
+	.byte		        Gn3 , v012
+	.byte	W04
+	.byte		        Gn3 , v016
+	.byte	W04
+	.byte		        Gn3 , v020
+	.byte	W04
+	.byte		        Gn3 , v028
+	.byte	W04
+	.byte		        Gn3 , v032
+	.byte	W04
+	.byte		        Gn3 , v036
+	.byte	W04
+	.byte		        Gn3 , v040
+	.byte	W04
+	.byte		        Gn3 , v048
+	.byte	W04
+	.byte		        Gn3 , v052
+	.byte	W04
+	.byte		        Gn3 , v056
+	.byte	W04
+	.byte		        Gn3 , v060
+	.byte	W04
+	.byte		        Gn3 , v064
+	.byte	W10
+	.byte		N06   , En4 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Gn4 
+	.byte	W24
+	.byte	PEND
+@@ 008   ----------------------------------------
+	.byte	W96
+@@ 009   ----------------------------------------
+	.byte	W96
+@@ 010   ----------------------------------------
+	.byte	W96
+@@ 011   ----------------------------------------
+	.byte	W96
+@@ 012   ----------------------------------------
+	.byte	W96
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_2_005
+@@ 014   ----------------------------------------
+	.byte	W96
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_2_007
+@@ 016   ----------------------------------------
+	.byte	W96
+@@ 017   ----------------------------------------
+	.byte	W96
+@@ 018   ----------------------------------------
+	.byte	W96
+@@ 019   ----------------------------------------
+	.byte	W12
+	.byte		N06   , Dn5 , v064
+	.byte	W06
+	.byte		        Cs5 
+	.byte	W06
+	.byte		        Dn5 
+	.byte	W06
+	.byte		        Cs5 
+	.byte	W06
+	.byte		        Dn5 
+	.byte	W06
+	.byte		        Cs5 
+	.byte	W06
+	.byte		        Dn5 
+	.byte	W48
+	.byte	GOTO
+	 .word	sn_bassdrum3_2_B1
+sn_bassdrum3_2_B2:
+@@ 020   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_bassdrum3_3:
+	.byte	KEYSH , sn_bassdrum3_key+0
+sn_bassdrum3_3_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 11
+	.byte		PAN   , c_v+0
+	.byte		VOL   , 127*sn_bassdrum3_mvl/mxv
+	.byte		N12   , Cn3 , v112
+	.byte	W12
+	.byte		N06   
+	.byte	W72
+	.byte		N12   , Gn2 
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W24
+	.byte		N18   , Gn2 
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , An2 
+	.byte	W12
+	.byte		N06   , As2 
+	.byte	W12
+	.byte		N12   , Gn2 
+	.byte	W12
+@@ 002   ----------------------------------------
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W72
+	.byte		N12   , Gn2 
+	.byte	W12
+@@ 003   ----------------------------------------
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W24
+	.byte		N24   , Gn2 
+	.byte	W24
+	.byte		N06   , Gn1 
+	.byte	W06
+	.byte		        Gn2 
+	.byte	W06
+	.byte		        An1 
+	.byte	W06
+	.byte		        An2 
+	.byte	W06
+	.byte		        Bn1 
+	.byte	W06
+	.byte		        Bn2 
+	.byte	W06
+@@ 004   ----------------------------------------
+sn_bassdrum3_3_004:
+	.byte		N18   , Cn2 , v112
+	.byte	W18
+	.byte		N06   , En2 
+	.byte	W06
+	.byte		        Gn2 
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N12   , En3 
+	.byte	W12
+	.byte		N06   , Gn2 
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N12   , Gn3 
+	.byte	W12
+	.byte	PEND
+@@ 005   ----------------------------------------
+sn_bassdrum3_3_005:
+	.byte		N12   , Fs3 , v112
+	.byte	W12
+	.byte		N06   , Gn3 
+	.byte	W36
+	.byte		        En3 
+	.byte	W12
+	.byte		N12   , Gn2 
+	.byte	W12
+	.byte		        An2 
+	.byte	W12
+	.byte		        Gn2 
+	.byte	W12
+	.byte	PEND
+@@ 006   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_004
+@@ 007   ----------------------------------------
+sn_bassdrum3_3_007:
+	.byte		N12   , Fs3 , v112
+	.byte	W12
+	.byte		N06   , Gn3 
+	.byte	W12
+	.byte		        En3 
+	.byte	W12
+	.byte		        Gn2 
+	.byte	W12
+	.byte		N36   , As2 
+	.byte	W36
+	.byte		N12   , Gn2 
+	.byte	W12
+	.byte	PEND
+@@ 008   ----------------------------------------
+sn_bassdrum3_3_008:
+	.byte		N12   , Fn2 , v112
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte		        An2 
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W12
+	.byte		        Ds3 
+	.byte	W12
+	.byte		N24   , Dn3 
+	.byte	W24
+	.byte		N12   , Cn3 
+	.byte	W12
+	.byte	PEND
+@@ 009   ----------------------------------------
+sn_bassdrum3_3_009:
+	.byte		N12   , Fn2 , v112
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte		        An2 
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W12
+	.byte		        Ds2 
+	.byte	W12
+	.byte		        En2 
+	.byte	W12
+	.byte		N12   , Fn2 
+	.byte	W24
+	.byte	PEND
+@@ 010   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_008
+@@ 011   ----------------------------------------
+	.byte		N12   , Gn2 , v112
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte		        Bn2 
+	.byte	W12
+	.byte		N12   , Dn3 
+	.byte	W12
+	.byte		N06   , Gn3 
+	.byte	W36
+	.byte		N12   , Gn2 
+	.byte	W12
+@@ 012   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_004
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_005
+@@ 014   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_004
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_007
+@@ 016   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_008
+@@ 017   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_009
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_3_008
+@@ 019   ----------------------------------------
+	.byte		N12   , Gn2 , v112
+	.byte	W12
+	.byte		N06   , Gn3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W36
+	.byte		N12   , Gn2 
+	.byte	W12
+	.byte	GOTO
+	 .word	sn_bassdrum3_3_B1
+sn_bassdrum3_3_B2:
+@@ 020   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 4 (Midi-Chn.4) ****************@@
+
+sn_bassdrum3_4:
+	.byte	KEYSH , sn_bassdrum3_key+0
+sn_bassdrum3_4_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 127
+	.byte		VOL   , 127*sn_bassdrum3_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+@@ 001   ----------------------------------------
+sn_bassdrum3_4_001:
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		N12   , Dn1 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 002   ----------------------------------------
+sn_bassdrum3_4_002:
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte	PEND
+@@ 003   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_001
+@@ 004   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 005   ----------------------------------------
+sn_bassdrum3_4_005:
+	.byte		N12   , Dn1 , v100
+	.byte	W12
+	.byte		N12   
+	.byte	W12
+	.byte		N24   , Cn1 
+	.byte	W24
+	.byte		N12   
+	.byte	W12
+	.byte		        Dn1 
+	.byte	W12
+	.byte		N06   , Cs1 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 006   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 007   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_001
+@@ 008   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 009   ----------------------------------------
+sn_bassdrum3_4_009:
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		N12   
+	.byte	W12
+	.byte		N12   
+	.byte	W12
+	.byte		N12   
+	.byte	W12
+	.byte		        Cn1 
+	.byte	W12
+	.byte	PEND
+@@ 010   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 011   ----------------------------------------
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		N24   
+	.byte	W36
+	.byte		N12   , Cn1 
+	.byte	W12
+@@ 012   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_005
+@@ 014   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_001
+@@ 016   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 017   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_009
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_4_002
+@@ 019   ----------------------------------------
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		N24   
+	.byte	W24
+	.byte		N24   
+	.byte	W24
+	.byte		N06   , Dn1 , v080
+	.byte	W06
+	.byte		        Dn1 , v092
+	.byte	W06
+	.byte		        Dn1 , v100
+	.byte	W06
+	.byte		        Dn1 , v112
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_bassdrum3_4_B1
+sn_bassdrum3_4_B2:
+@@ 020   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 5 (Midi-Chn.5) ****************@@
+
+sn_bassdrum3_5:
+	.byte	KEYSH , sn_bassdrum3_key+0
+sn_bassdrum3_5_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 3
+	.byte		VOL   , 60*sn_bassdrum3_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N01   , An3 , v064
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+@@ 001   ----------------------------------------
+sn_bassdrum3_5_001:
+	.byte		N01   , An3 , v064
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte	PEND
+@@ 002   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 003   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 004   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 005   ----------------------------------------
+sn_bassdrum3_5_005:
+	.byte		N01   , An3 , v064
+	.byte	W24
+	.byte		N01   
+	.byte	W24
+	.byte		N01   
+	.byte	W24
+	.byte		N01   
+	.byte	W24
+	.byte	PEND
+@@ 006   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 007   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 008   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 009   ----------------------------------------
+sn_bassdrum3_5_009:
+	.byte		N01   , An3 , v064
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte	PEND
+@@ 010   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 011   ----------------------------------------
+	.byte		N01   , An3 , v064
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W36
+	.byte		N01   
+	.byte	W12
+@@ 012   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_005
+@@ 014   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 016   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 017   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_009
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_bassdrum3_5_001
+@@ 019   ----------------------------------------
+	.byte		N01   , An3 , v064
+	.byte	W24
+	.byte		N01   
+	.byte	W24
+	.byte		N01   
+	.byte	W24
+	.byte		        An3 , v040
+	.byte	W06
+	.byte		        An3 , v052
+	.byte	W06
+	.byte		        An3 , v060
+	.byte	W06
+	.byte		        An3 , v072
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_bassdrum3_5_B1
+sn_bassdrum3_5_B2:
+@@ 020   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_bassdrum3:
+	.byte	5	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_bassdrum3_pri	@@ Priority
+	.byte	sn_bassdrum3_rev	@@ Reverb.
+
+	.word	sn_bassdrum3_grp
+
+	.word	sn_bassdrum3_1
+	.word	sn_bassdrum3_2
+	.word	sn_bassdrum3_3
+	.word	sn_bassdrum3_4
+	.word	sn_bassdrum3_5
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

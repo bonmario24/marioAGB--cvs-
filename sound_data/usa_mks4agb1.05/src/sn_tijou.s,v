@@ -1,0 +1,2254 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_tijou_grp, voicegroup000
+	.equ	sn_tijou_pri, 10
+	.equ	sn_tijou_rev, reverb_set+0
+	.equ	sn_tijou_mvl, 80
+	.equ	sn_tijou_key, 0
+	.equ	sn_tijou_tbs, 1
+	.equ	sn_tijou_exg, 0
+	.equ	sn_tijou_cmp, 1
+
+	.section .rodata
+	.global	sn_tijou
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_tijou_1:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 180*sn_tijou_tbs/2
+	.byte		VOICE , 104
+	.byte		VOL   , 120*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte		MOD   , 0
+	.byte	W16
+	.byte		N08   , Gn4 , v064
+	.byte	W08
+	.byte		        Fs4 
+	.byte	W16
+	.byte		        Fn4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        An3 
+	.byte	W16
+	.byte		        Gs3 
+	.byte	W08
+@@ 001   ----------------------------------------
+	.byte		N24   , Gn3 
+	.byte	W24
+	.byte		        Gn4 
+	.byte	W24
+	.byte		        Gn3 
+	.byte	W48
+sn_tijou_1_B1:
+@@ 002   ----------------------------------------
+	.byte		VOICE , 105
+	.byte		LFODL , 20
+	.byte		LFOS  , 24
+	.byte		MOD   , 5
+	.byte		N08   , Gn4 , v064
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		N24   , Gn4 
+	.byte	W24
+	.byte		N08   , Cn4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+@@ 003   ----------------------------------------
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        Ds4 
+	.byte	W08
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        Bn4 
+	.byte	W16
+	.byte		N56   , An4 
+	.byte	W56
+@@ 004   ----------------------------------------
+	.byte		N08   , Gn4 
+	.byte	W16
+	.byte		        As3 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		N24   , Gn4 
+	.byte	W24
+	.byte		N08   , As3 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+@@ 005   ----------------------------------------
+	.byte		        Cs4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W08
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        Bn4 
+	.byte	W16
+	.byte		N40   , An4 
+	.byte	W48
+	.byte		N08   , Bn4 
+	.byte	W08
+@@ 006   ----------------------------------------
+	.byte		        Cn5 
+	.byte	W16
+	.byte		        Bn4 
+	.byte	W08
+	.byte		        Cn5 
+	.byte	W16
+	.byte		N16   , An4 
+	.byte	W24
+	.byte		N08   , Cn5 
+	.byte	W08
+	.byte		        Bn4 
+	.byte	W16
+	.byte		        An4 
+	.byte	W08
+@@ 007   ----------------------------------------
+	.byte		        Gn4 
+	.byte	W16
+	.byte		        Fs4 
+	.byte	W08
+	.byte		        Gn4 
+	.byte	W16
+	.byte		N24   , En4 
+	.byte	W24
+	.byte		N08   , Cs4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+@@ 008   ----------------------------------------
+	.byte		        Fn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Fn4 
+	.byte	W16
+	.byte		N24   , Bn3 
+	.byte	W24
+	.byte		N08   , En4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		N56   , Cn4 
+	.byte	W08
+@@ 009   ----------------------------------------
+	.byte	W96
+@@ 010   ----------------------------------------
+	.byte		VOICE , 106
+	.byte		MOD   , 0
+	.byte	W16
+	.byte		N32   , En4 
+	.byte	W32
+	.byte		N08   , Gn4 
+	.byte	W24
+	.byte		        An4 
+	.byte	W16
+	.byte		N56   , Cn5 
+	.byte	W08
+@@ 011   ----------------------------------------
+sn_tijou_1_011:
+	.byte	W48
+	.byte		N08   , An4 , v064
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte	PEND
+@@ 012   ----------------------------------------
+sn_tijou_1_012:
+	.byte		N08   , Dn4 , v064
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        An3 
+	.byte	W24
+	.byte		N14   , Dn4 
+	.byte	W08
+	.byte	PEND
+@@ 013   ----------------------------------------
+sn_tijou_1_013:
+	.byte	W12
+	.byte		N04   , An3 , v036
+	.byte	W06
+	.byte		        Dn4 , v040
+	.byte	W06
+	.byte		        An3 , v044
+	.byte	W06
+	.byte		        Dn4 , v052
+	.byte	W06
+	.byte		        An3 , v056
+	.byte	W06
+	.byte		        Dn4 , v060
+	.byte	W06
+	.byte		        An3 , v064
+	.byte	W06
+	.byte		        Dn4 , v068
+	.byte	W06
+	.byte		        An3 , v072
+	.byte	W06
+	.byte		        Dn4 , v076
+	.byte	W06
+	.byte		        An3 , v080
+	.byte	W06
+	.byte		        Dn4 , v088
+	.byte	W06
+	.byte		        An3 , v092
+	.byte	W06
+	.byte		        Dn4 , v096
+	.byte	W06
+	.byte	PEND
+@@ 014   ----------------------------------------
+sn_tijou_1_014:
+	.byte		N08   , Dn4 , v064
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W24
+	.byte		N24   , An4 
+	.byte	W08
+	.byte	PEND
+@@ 015   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Gn4 
+	.byte	W08
+	.byte		        An4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		        Dn4 
+	.byte	W08
+	.byte		        Cn4 
+	.byte	W16
+	.byte		N32   , En4 
+	.byte	W08
+@@ 016   ----------------------------------------
+	.byte	W24
+	.byte		N04   , Gn3 , v036
+	.byte	W06
+	.byte		        En4 , v040
+	.byte	W06
+	.byte		        Gn3 , v044
+	.byte	W06
+	.byte		        En4 , v052
+	.byte	W06
+	.byte		        Gn3 , v056
+	.byte	W06
+	.byte		        En4 , v060
+	.byte	W06
+	.byte		        Gn3 , v064
+	.byte	W06
+	.byte		        En4 , v068
+	.byte	W06
+	.byte		        Gn3 , v072
+	.byte	W06
+	.byte		        En4 , v076
+	.byte	W06
+	.byte		        Gn3 , v080
+	.byte	W06
+	.byte		        En4 , v088
+	.byte	W06
+@@ 017   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Gn4 , v064
+	.byte	W16
+	.byte		        Ds4 
+	.byte	W16
+	.byte		        Bn3 
+	.byte	W16
+	.byte		        An3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W16
+@@ 018   ----------------------------------------
+	.byte	W16
+	.byte		N32   , En4 
+	.byte	W32
+	.byte		N08   , Gn4 
+	.byte	W24
+	.byte		        An4 
+	.byte	W16
+	.byte		N56   , Cn5 
+	.byte	W08
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_1_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_1_012
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_1_013
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_1_014
+@@ 023   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Gn4 , v064
+	.byte	W08
+	.byte		        An4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        An4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		N40   , Cn4 
+	.byte	W08
+@@ 024   ----------------------------------------
+	.byte	W40
+	.byte		N08   , Fs3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        Gs3 
+	.byte	W08
+	.byte		        An3 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+@@ 025   ----------------------------------------
+	.byte	W40
+	.byte		N08   
+	.byte	W48
+	.byte		        En4 
+	.byte	W08
+@@ 026   ----------------------------------------
+	.byte	W16
+	.byte		        Fn4 
+	.byte	W08
+	.byte		        Ds4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+	.byte		        Fn4 
+	.byte	W16
+	.byte		        Ds4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		N32   , Bn4 
+	.byte	W08
+@@ 027   ----------------------------------------
+	.byte	W24
+	.byte		N24   , Gs4 
+	.byte	W24
+	.byte		        Fn4 
+	.byte	W24
+	.byte		        En4 
+	.byte	W24
+@@ 028   ----------------------------------------
+	.byte		N08   , Dn4 
+	.byte	W08
+	.byte		N05   , En4 
+	.byte	W05
+	.byte		        Dn4 
+	.byte	W05
+	.byte		N06   , Cn4 
+	.byte	W06
+	.byte		N08   , Bn3 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		N32   , Cn4 
+	.byte	W08
+@@ 029   ----------------------------------------
+	.byte	W40
+	.byte		N08   
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W24
+	.byte		N24   , Cn4 
+	.byte	W24
+@@ 030   ----------------------------------------
+	.byte	W16
+	.byte		N32   , Dn4 
+	.byte	W32
+	.byte		N08   , Cs4 
+	.byte	W24
+	.byte		        Dn4 
+	.byte	W16
+	.byte		N32   , An4 
+	.byte	W08
+@@ 031   ----------------------------------------
+	.byte	W24
+	.byte		N24   , Fs4 
+	.byte	W24
+	.byte		        Gn4 
+	.byte	W24
+	.byte		        An4 
+	.byte	W24
+@@ 032   ----------------------------------------
+	.byte		        Bn4 
+	.byte	W48
+	.byte		        An4 
+	.byte	W48
+@@ 033   ----------------------------------------
+	.byte		        Gs4 
+	.byte	W48
+	.byte		N08   , Gn4 
+	.byte	W16
+	.byte		        Dn4 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte	GOTO
+	 .word	sn_tijou_1_B1
+sn_tijou_1_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_tijou_2:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 103
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		BENDR , 12
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte	W96
+@@ 001   ----------------------------------------
+	.byte	W72
+	.byte		BEND  , c_v+0
+	.byte		N19   , Gn1 , v100
+	.byte	W12
+	.byte		BEND  , c_v-2
+	.byte	W01
+	.byte		        c_v-3
+	.byte	W01
+	.byte		        c_v-4
+	.byte	W01
+	.byte		        c_v-6
+	.byte	W01
+	.byte		        c_v-7
+	.byte	W01
+	.byte		        c_v-8
+	.byte	W01
+	.byte		        c_v-10
+	.byte	W01
+	.byte		        c_v-11
+	.byte	W01
+	.byte		        c_v-12
+	.byte	W01
+	.byte		        c_v-14
+	.byte	W01
+	.byte		        c_v-15
+	.byte	W01
+	.byte		        c_v-16
+	.byte	W01
+sn_tijou_2_B1:
+@@ 002   ----------------------------------------
+	.byte		VOICE , 102
+	.byte		BEND  , c_v+0
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 003   ----------------------------------------
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 004   ----------------------------------------
+	.byte		        As0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        As0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 005   ----------------------------------------
+	.byte		        An0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 006   ----------------------------------------
+	.byte		        Fn0 
+	.byte	W24
+	.byte		        Fn1 
+	.byte	W24
+	.byte		        Fs0 
+	.byte	W24
+	.byte		        Fs1 
+	.byte	W24
+@@ 007   ----------------------------------------
+	.byte		        Gn0 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        An1 
+	.byte	W24
+@@ 008   ----------------------------------------
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Fn1 
+	.byte	W24
+	.byte		        Gn0 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+@@ 009   ----------------------------------------
+	.byte		        Cn1 
+	.byte	W24
+	.byte		VOICE , 103
+	.byte		BEND  , c_v-27
+	.byte		N32   
+	.byte	W01
+	.byte		BEND  , c_v-26
+	.byte	W01
+	.byte		        c_v-25
+	.byte	W01
+	.byte		        c_v-24
+	.byte	W01
+	.byte		        c_v-23
+	.byte	W01
+	.byte		        c_v-22
+	.byte	W01
+	.byte		        c_v-20
+	.byte	W01
+	.byte		        c_v-19
+	.byte	W01
+	.byte		        c_v-18
+	.byte	W01
+	.byte		        c_v-17
+	.byte	W01
+	.byte		        c_v-16
+	.byte	W01
+	.byte		        c_v-15
+	.byte	W01
+	.byte		        c_v-14
+	.byte	W01
+	.byte		        c_v-13
+	.byte	W01
+	.byte		        c_v-11
+	.byte	W01
+	.byte		        c_v-10
+	.byte	W01
+	.byte		        c_v-9
+	.byte	W01
+	.byte		        c_v-8
+	.byte	W01
+	.byte		        c_v-7
+	.byte	W01
+	.byte		        c_v-6
+	.byte	W01
+	.byte		        c_v-5
+	.byte	W01
+	.byte		        c_v-4
+	.byte	W01
+	.byte		        c_v-3
+	.byte	W01
+	.byte		        c_v-2
+	.byte	W01
+	.byte		        c_v+0
+	.byte	W48
+@@ 010   ----------------------------------------
+	.byte		VOICE , 102
+	.byte		N24   
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        En1 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 011   ----------------------------------------
+sn_tijou_2_011:
+	.byte		N24   , An1 , v100
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        En1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte	PEND
+@@ 012   ----------------------------------------
+sn_tijou_2_012:
+	.byte		N24   , Dn1 , v100
+	.byte	W24
+	.byte		        En1 
+	.byte	W24
+	.byte		        Fs1 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte	PEND
+@@ 013   ----------------------------------------
+sn_tijou_2_013:
+	.byte		N08   , Dn1 , v100
+	.byte	W16
+	.byte		        En1 
+	.byte	W08
+	.byte		N24   , Cn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte	PEND
+@@ 014   ----------------------------------------
+sn_tijou_2_014:
+	.byte		N24   , Gn0 , v100
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        Fn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte	PEND
+@@ 015   ----------------------------------------
+sn_tijou_2_015:
+	.byte		N24   , Bn0 , v100
+	.byte	W24
+	.byte		        Gn0 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte	PEND
+@@ 016   ----------------------------------------
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Cs1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Ds1 
+	.byte	W24
+@@ 017   ----------------------------------------
+	.byte		N08   , En1 
+	.byte	W16
+	.byte		        Bn0 
+	.byte	W08
+	.byte		N24   , An0 
+	.byte	W24
+	.byte		        Gn0 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+@@ 018   ----------------------------------------
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        En1 
+	.byte	W24
+	.byte		        Gn1 
+	.byte	W24
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_2_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_2_012
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_2_013
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_2_014
+@@ 023   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_2_015
+@@ 024   ----------------------------------------
+	.byte		N24   , Cn1 , v100
+	.byte	W24
+	.byte		        Gn0 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+@@ 025   ----------------------------------------
+	.byte		        Cn1 
+	.byte	W40
+	.byte		N08   
+	.byte	W56
+@@ 026   ----------------------------------------
+	.byte		N24   , En1 
+	.byte	W24
+	.byte		        Bn1 
+	.byte	W24
+	.byte		        Gs1 
+	.byte	W24
+	.byte		        Fn1 
+	.byte	W24
+@@ 027   ----------------------------------------
+	.byte		        En1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        Gs0 
+	.byte	W24
+@@ 028   ----------------------------------------
+	.byte		        An0 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+@@ 029   ----------------------------------------
+	.byte		        En1 
+	.byte	W24
+	.byte		        Cn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+@@ 030   ----------------------------------------
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        En1 
+	.byte	W24
+	.byte		        Fs1 
+	.byte	W24
+	.byte		        An1 
+	.byte	W24
+@@ 031   ----------------------------------------
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Fs1 
+	.byte	W24
+@@ 032   ----------------------------------------
+	.byte		        Gn1 
+	.byte	W24
+	.byte		        Fn1 
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+@@ 033   ----------------------------------------
+	.byte		        Dn1 
+	.byte	W24
+	.byte		        Bn0 
+	.byte	W24
+	.byte		        An0 
+	.byte	W24
+	.byte		        Gn0 
+	.byte	W24
+	.byte	GOTO
+	 .word	sn_tijou_2_B1
+sn_tijou_2_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_tijou_3:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 104
+	.byte		VOL   , 120*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte		MOD   , 0
+	.byte	W16
+	.byte		N08   , Dn4 , v080
+	.byte	W08
+	.byte		        Cs4 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        En3 
+	.byte	W08
+@@ 001   ----------------------------------------
+	.byte		N24   , Dn3 
+	.byte	W24
+	.byte		        Dn4 
+	.byte	W24
+	.byte		        Dn3 
+	.byte	W48
+sn_tijou_3_B1:
+@@ 002   ----------------------------------------
+	.byte		VOICE , 105
+	.byte		LFODL , 20
+	.byte		LFOS  , 24
+	.byte		MOD   , 5
+	.byte		N08   , Cn4 , v064
+	.byte	W16
+	.byte		        En3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		N24   , Cn4 
+	.byte	W24
+	.byte		N08   , En3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+@@ 003   ----------------------------------------
+	.byte		        Ds3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        Ds4 
+	.byte	W16
+	.byte		N56   , Bn3 
+	.byte	W56
+@@ 004   ----------------------------------------
+	.byte		N08   , As3 
+	.byte	W16
+	.byte		        Dn3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		N24   , As3 
+	.byte	W24
+	.byte		N08   , Dn3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        As3 
+	.byte	W08
+@@ 005   ----------------------------------------
+	.byte		        En3 
+	.byte	W08
+	.byte		        An3 
+	.byte	W08
+	.byte		        Cs4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		N40   , Cs4 
+	.byte	W48
+	.byte		N08   , En4 
+	.byte	W08
+@@ 006   ----------------------------------------
+	.byte		        An4 
+	.byte	W16
+	.byte		        Gn4 
+	.byte	W08
+	.byte		        An4 
+	.byte	W16
+	.byte		N16   , Fn4 
+	.byte	W24
+	.byte		N08   , An4 
+	.byte	W08
+	.byte		        Gn4 
+	.byte	W16
+	.byte		        Fs4 
+	.byte	W08
+@@ 007   ----------------------------------------
+	.byte		        En4 
+	.byte	W16
+	.byte		        Ds4 
+	.byte	W08
+	.byte		        En4 
+	.byte	W16
+	.byte		N24   , Cn4 
+	.byte	W24
+	.byte		N08   , An3 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		        Cs4 
+	.byte	W08
+@@ 008   ----------------------------------------
+	.byte		        Dn4 
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        Dn4 
+	.byte	W16
+	.byte		N24   , Gn3 
+	.byte	W24
+	.byte		N08   , Cn4 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		N56   , Gn3 
+	.byte	W08
+@@ 009   ----------------------------------------
+	.byte	W96
+@@ 010   ----------------------------------------
+	.byte		VOICE , 106
+	.byte		MOD   , 0
+	.byte	W16
+	.byte		N32   
+	.byte	W32
+	.byte		N08   , Cn4 
+	.byte	W24
+	.byte		        En4 
+	.byte	W16
+	.byte		N56   , Gn4 
+	.byte	W08
+@@ 011   ----------------------------------------
+sn_tijou_3_011:
+	.byte	W48
+	.byte		N08   , En4 , v064
+	.byte	W16
+	.byte		        Cn4 
+	.byte	W08
+	.byte		        An3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte	PEND
+@@ 012   ----------------------------------------
+sn_tijou_3_012:
+	.byte		N08   , Fs3 , v064
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Fs3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Fs3 
+	.byte	W16
+	.byte		        Dn3 
+	.byte	W24
+	.byte		N14   , Fs3 
+	.byte	W08
+	.byte	PEND
+@@ 013   ----------------------------------------
+sn_tijou_3_013:
+	.byte	W12
+	.byte		N04   , Dn3 , v036
+	.byte	W06
+	.byte		        Fs3 , v040
+	.byte	W06
+	.byte		        Dn3 , v044
+	.byte	W06
+	.byte		        Fs3 , v052
+	.byte	W06
+	.byte		        Dn3 , v056
+	.byte	W06
+	.byte		        Fs3 , v060
+	.byte	W06
+	.byte		        Dn3 , v064
+	.byte	W06
+	.byte		        Fs3 , v068
+	.byte	W06
+	.byte		        Dn3 , v072
+	.byte	W06
+	.byte		        Fs3 , v076
+	.byte	W06
+	.byte		        Dn3 , v080
+	.byte	W06
+	.byte		        Fs3 , v088
+	.byte	W06
+	.byte		        Dn3 , v092
+	.byte	W06
+	.byte		        Fs3 , v096
+	.byte	W06
+	.byte	PEND
+@@ 014   ----------------------------------------
+sn_tijou_3_014:
+	.byte		N08   , Fn3 , v064
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W24
+	.byte		N24   , Cn4 
+	.byte	W08
+	.byte	PEND
+@@ 015   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Bn3 
+	.byte	W08
+	.byte		        Cn4 
+	.byte	W16
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        Fn3 
+	.byte	W08
+	.byte		        En3 
+	.byte	W16
+	.byte		N32   , Cn4 
+	.byte	W08
+@@ 016   ----------------------------------------
+	.byte	W24
+	.byte		N04   , En3 , v036
+	.byte	W06
+	.byte		        Cn4 , v040
+	.byte	W06
+	.byte		        En3 , v044
+	.byte	W06
+	.byte		        Cn4 , v052
+	.byte	W06
+	.byte		        En3 , v056
+	.byte	W06
+	.byte		        Cn4 , v060
+	.byte	W06
+	.byte		        En3 , v064
+	.byte	W06
+	.byte		        Cn4 , v068
+	.byte	W06
+	.byte		        En3 , v072
+	.byte	W06
+	.byte		        Cn4 , v076
+	.byte	W06
+	.byte		        En3 , v080
+	.byte	W06
+	.byte		        Cn4 , v088
+	.byte	W06
+@@ 017   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Bn3 , v064
+	.byte	W16
+	.byte		        An3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Ds3 
+	.byte	W16
+@@ 018   ----------------------------------------
+	.byte	W16
+	.byte		N32   , Gn3 
+	.byte	W32
+	.byte		N08   , Cn4 
+	.byte	W24
+	.byte		        En4 
+	.byte	W16
+	.byte		N56   , Gn4 
+	.byte	W08
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_3_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_3_012
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_3_013
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_3_014
+@@ 023   ----------------------------------------
+	.byte	W16
+	.byte		N08   , Bn3 , v064
+	.byte	W08
+	.byte		        Cn4 
+	.byte	W16
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        Cn4 
+	.byte	W16
+	.byte		        Bn3 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		N80   , En3 
+	.byte	W08
+@@ 024   ----------------------------------------
+	.byte	W72
+	.byte		N08   , Fn4 
+	.byte	W16
+	.byte		        En4 
+	.byte	W08
+@@ 025   ----------------------------------------
+	.byte	W40
+	.byte		N08   
+	.byte	W48
+	.byte		        En3 
+	.byte	W08
+@@ 026   ----------------------------------------
+	.byte	W16
+	.byte		        Fn3 
+	.byte	W08
+	.byte		        Ds3 
+	.byte	W16
+	.byte		        En3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Ds3 
+	.byte	W08
+	.byte		        En3 
+	.byte	W16
+	.byte		N32   , Bn3 
+	.byte	W08
+@@ 027   ----------------------------------------
+	.byte	W24
+	.byte		N24   , Gs3 
+	.byte	W24
+	.byte		        Fn3 
+	.byte	W24
+	.byte		        En3 
+	.byte	W24
+@@ 028   ----------------------------------------
+	.byte		N08   , Dn3 
+	.byte	W08
+	.byte		N05   , En3 
+	.byte	W05
+	.byte		        Dn3 
+	.byte	W05
+	.byte		N06   , Cn3 
+	.byte	W06
+	.byte		N08   , Bn2 
+	.byte	W16
+	.byte		        Cn3 
+	.byte	W08
+	.byte		        Dn3 
+	.byte	W16
+	.byte		        Cn3 
+	.byte	W08
+	.byte		        Bn2 
+	.byte	W16
+	.byte		N32   , Cn3 
+	.byte	W08
+@@ 029   ----------------------------------------
+	.byte	W40
+	.byte		N08   
+	.byte	W08
+	.byte		        Bn2 
+	.byte	W24
+	.byte		N24   , Cn3 
+	.byte	W24
+@@ 030   ----------------------------------------
+	.byte	W16
+	.byte		N32   , Dn3 
+	.byte	W32
+	.byte		N08   , Cs3 
+	.byte	W24
+	.byte		        Dn3 
+	.byte	W16
+	.byte		N32   , An3 
+	.byte	W08
+@@ 031   ----------------------------------------
+	.byte	W24
+	.byte		N24   , Fs3 
+	.byte	W24
+	.byte		        Gn3 
+	.byte	W24
+	.byte		        An3 
+	.byte	W24
+@@ 032   ----------------------------------------
+	.byte		N08   , Bn3 
+	.byte	W16
+	.byte		        As3 
+	.byte	W08
+	.byte		        Bn3 
+	.byte	W16
+	.byte		        Bn4 
+	.byte	W08
+	.byte		        An3 
+	.byte	W16
+	.byte		        Gs3 
+	.byte	W08
+	.byte		        An3 
+	.byte	W16
+	.byte		        An4 
+	.byte	W08
+@@ 033   ----------------------------------------
+	.byte		        Gs3 
+	.byte	W16
+	.byte		        Gn3 
+	.byte	W08
+	.byte		        Gs3 
+	.byte	W16
+	.byte		        Gs4 
+	.byte	W08
+	.byte		        Gn3 
+	.byte	W16
+	.byte		        Dn3 
+	.byte	W08
+	.byte		        Bn2 
+	.byte	W16
+	.byte		        Gn2 
+	.byte	W08
+	.byte	GOTO
+	 .word	sn_tijou_3_B1
+sn_tijou_3_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 4 (Midi-Chn.4) ****************@@
+
+sn_tijou_4:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte	W16
+	.byte		N08   , Bn3 , v064
+	.byte	W08
+	.byte		        As3 
+	.byte	W16
+	.byte		        An3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Dn3 
+	.byte	W08
+	.byte		        Cn3 
+	.byte	W16
+	.byte		        Bn2 
+	.byte	W08
+@@ 001   ----------------------------------------
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N24   , Cn3 
+	.byte	W24
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W08
+	.byte		N08   
+	.byte	W08
+sn_tijou_4_B1:
+@@ 002   ----------------------------------------
+sn_tijou_4_002:
+	.byte		VOICE , 127
+	.byte		PAN   , c_v+0
+	.byte		N08   , Cn1 , v064
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W16
+	.byte		        Cn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte	PEND
+@@ 003   ----------------------------------------
+sn_tijou_4_003:
+	.byte		N08   , Cn1 , v064
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W16
+	.byte		        Cn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W16
+	.byte		        Dn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W24
+	.byte	PEND
+@@ 004   ----------------------------------------
+sn_tijou_4_004:
+	.byte		N08   , Cn1 , v064
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W16
+	.byte		        Cn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+	.byte	PEND
+@@ 005   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_003
+@@ 006   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 007   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_003
+@@ 008   ----------------------------------------
+	.byte		N08   , Cn1 , v064
+	.byte	W24
+	.byte		N08   
+	.byte	W24
+	.byte		N08   
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W16
+	.byte		        Cn1 
+	.byte	W08
+@@ 009   ----------------------------------------
+	.byte		N08   
+	.byte	W24
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N08   
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W24
+@@ 010   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 011   ----------------------------------------
+sn_tijou_4_011:
+	.byte		N08   , Cn1 , v064
+	.byte	W24
+	.byte		        Dn1 
+	.byte	W16
+	.byte		        Cn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W16
+	.byte		        Dn1 
+	.byte	W08
+	.byte		N08   
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W08
+	.byte	PEND
+@@ 012   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_002
+@@ 013   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_011
+@@ 014   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_002
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 016   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_003
+@@ 017   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_002
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_011
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_002
+@@ 023   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 024   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_003
+@@ 025   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_004
+@@ 026   ----------------------------------------
+	.byte		VOICE , 126
+	.byte		PAN   , c_v-32
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		        Cn3 
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		        Cn3 
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+@@ 027   ----------------------------------------
+sn_tijou_4_027:
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		        Cn3 
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		        Cn3 
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+	.byte	PEND
+@@ 028   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+@@ 029   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+@@ 030   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+@@ 031   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+@@ 032   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+@@ 033   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_4_027
+	.byte	GOTO
+	 .word	sn_tijou_4_B1
+sn_tijou_4_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 5 (Midi-Chn.5) ****************@@
+
+sn_tijou_5:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte	W16
+	.byte		N08   , Gn5 , v064
+	.byte	W08
+	.byte		        Fs5 
+	.byte	W16
+	.byte		        Fn5 
+	.byte	W08
+	.byte		        Dn5 
+	.byte	W16
+	.byte		        Bn4 
+	.byte	W08
+	.byte		        An4 
+	.byte	W16
+	.byte		        Gs4 
+	.byte	W08
+@@ 001   ----------------------------------------
+	.byte		N16   , Gn4 
+	.byte	W24
+	.byte		        Gn5 
+	.byte	W24
+	.byte		        Gn4 
+	.byte	W48
+sn_tijou_5_B1:
+@@ 002   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		LFODL , 12
+	.byte		LFOS  , 24
+	.byte		MOD   , 2
+	.byte		BENDR , 7
+	.byte		N96   , En4 , v064
+	.byte	W96
+@@ 003   ----------------------------------------
+	.byte		        Ds4 
+	.byte	W96
+@@ 004   ----------------------------------------
+	.byte		        Dn4 
+	.byte	W96
+@@ 005   ----------------------------------------
+	.byte		        Cs4 
+	.byte	W96
+@@ 006   ----------------------------------------
+	.byte		N48   , Fn4 
+	.byte	W48
+	.byte		        Fs4 
+	.byte	W48
+@@ 007   ----------------------------------------
+	.byte		        Gn4 
+	.byte	W48
+	.byte		BEND  , c_v+0
+	.byte		N36   , An4 
+	.byte	W36
+	.byte		BEND  , c_v-6
+	.byte	W01
+	.byte		        c_v-11
+	.byte	W01
+	.byte		        c_v-16
+	.byte	W01
+	.byte		        c_v-22
+	.byte	W01
+	.byte		        c_v-27
+	.byte	W01
+	.byte		        c_v-32
+	.byte	W01
+	.byte		        c_v-38
+	.byte	W01
+	.byte		        c_v-43
+	.byte	W01
+	.byte		        c_v-48
+	.byte	W01
+	.byte		        c_v-54
+	.byte	W01
+	.byte		        c_v-59
+	.byte	W01
+	.byte		        c_v-64
+	.byte	W01
+@@ 008   ----------------------------------------
+	.byte	W96
+@@ 009   ----------------------------------------
+	.byte	W96
+@@ 010   ----------------------------------------
+	.byte		VOICE , 108
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		MOD   , 0
+	.byte		BEND  , c_v+0
+	.byte	W24
+	.byte		N24   , En4 , v100
+	.byte	W48
+	.byte		N24   
+	.byte	W24
+@@ 011   ----------------------------------------
+sn_tijou_5_011:
+	.byte	W24
+	.byte		N24   , En4 , v100
+	.byte	W48
+	.byte		N18   
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 012   ----------------------------------------
+sn_tijou_5_012:
+	.byte	W24
+	.byte		N24   , Fs4 , v100
+	.byte	W48
+	.byte		N24   
+	.byte	W24
+	.byte	PEND
+@@ 013   ----------------------------------------
+sn_tijou_5_013:
+	.byte	W24
+	.byte		N24   , Fs4 , v100
+	.byte	W48
+	.byte		N18   
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 014   ----------------------------------------
+sn_tijou_5_014:
+	.byte	W24
+	.byte		N24   , Fn4 , v100
+	.byte	W48
+	.byte		N24   
+	.byte	W24
+	.byte	PEND
+@@ 015   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_014
+@@ 016   ----------------------------------------
+sn_tijou_5_016:
+	.byte	W24
+	.byte		N24   , En4 , v100
+	.byte	W48
+	.byte		N24   
+	.byte	W24
+	.byte	PEND
+@@ 017   ----------------------------------------
+	.byte		        Ds4 
+	.byte	W24
+	.byte		N24   
+	.byte	W24
+	.byte		N24   
+	.byte	W24
+	.byte		N24   
+	.byte	W24
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_016
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_012
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_013
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_014
+@@ 023   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_014
+@@ 024   ----------------------------------------
+	.byte	W24
+	.byte		N24   , En4 , v100
+	.byte	W48
+	.byte		        Fn4 
+	.byte	W24
+@@ 025   ----------------------------------------
+	.byte		        En4 
+	.byte	W40
+	.byte		N08   
+	.byte	W56
+@@ 026   ----------------------------------------
+	.byte		VOICE , 96
+	.byte		VOL   , 100*sn_tijou_mvl/mxv
+	.byte	W24
+	.byte		N08   , Gs3 , v064
+	.byte	W16
+	.byte		        Gs3 , v052
+	.byte	W32
+	.byte		        Gs3 , v064
+	.byte	W16
+	.byte		        Gs3 , v052
+	.byte	W08
+@@ 027   ----------------------------------------
+	.byte	W32
+	.byte		        Gs3 , v040
+	.byte	W08
+	.byte		        Gs3 , v052
+	.byte	W08
+	.byte		        Gs3 , v064
+	.byte	W16
+	.byte		        Gs3 , v052
+	.byte	W08
+	.byte		        Gs3 , v064
+	.byte	W16
+	.byte		        Gs3 , v052
+	.byte	W08
+@@ 028   ----------------------------------------
+sn_tijou_5_028:
+	.byte	W24
+	.byte		N08   , An3 , v064
+	.byte	W16
+	.byte		        An3 , v052
+	.byte	W32
+	.byte		        An3 , v064
+	.byte	W16
+	.byte		        An3 , v052
+	.byte	W08
+	.byte	PEND
+@@ 029   ----------------------------------------
+sn_tijou_5_029:
+	.byte	W32
+	.byte		N08   , An3 , v040
+	.byte	W08
+	.byte		        An3 , v052
+	.byte	W08
+	.byte		        An3 , v064
+	.byte	W16
+	.byte		        An3 , v052
+	.byte	W08
+	.byte		        An3 , v064
+	.byte	W16
+	.byte		        An3 , v052
+	.byte	W08
+	.byte	PEND
+@@ 030   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_028
+@@ 031   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_5_029
+@@ 032   ----------------------------------------
+	.byte	W24
+	.byte		N08   , Gn3 , v064
+	.byte	W16
+	.byte		        Gn3 , v052
+	.byte	W32
+	.byte		        Fn3 , v064
+	.byte	W16
+	.byte		        Fn3 , v052
+	.byte	W08
+@@ 033   ----------------------------------------
+	.byte	W32
+	.byte		        Fn3 , v040
+	.byte	W08
+	.byte		        Fn3 , v052
+	.byte	W08
+	.byte		        Fn3 , v064
+	.byte	W16
+	.byte		        Fn3 , v052
+	.byte	W08
+	.byte		        Fn3 , v064
+	.byte	W16
+	.byte		        Fn3 , v052
+	.byte	W08
+	.byte	GOTO
+	 .word	sn_tijou_5_B1
+sn_tijou_5_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 6 (Midi-Chn.6) ****************@@
+
+sn_tijou_6:
+	.byte	KEYSH , sn_tijou_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 104
+	.byte		VOL   , 100*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		TUNE  , c_v+16
+	.byte	W16
+	.byte		N08   , Bn3 , v064
+	.byte	W08
+	.byte		        As3 
+	.byte	W16
+	.byte		        An3 
+	.byte	W08
+	.byte		        Fn3 
+	.byte	W16
+	.byte		        Dn3 
+	.byte	W08
+	.byte		        Cn3 
+	.byte	W16
+	.byte		        Bn2 
+	.byte	W08
+@@ 001   ----------------------------------------
+	.byte		N24   
+	.byte	W24
+	.byte		        Bn3 
+	.byte	W24
+	.byte		        Bn2 
+	.byte	W48
+sn_tijou_6_B1:
+@@ 002   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , Cn4 , v064
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W48
+	.byte		N08   
+	.byte	W24
+@@ 003   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , Bn3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+	.byte		        Cn3 , v040
+	.byte	W08
+	.byte		        Cn3 , v052
+	.byte	W08
+	.byte		        Cn3 , v060
+	.byte	W08
+	.byte		        Cn3 , v064
+	.byte	W24
+@@ 004   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , As3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W48
+	.byte		N08   
+	.byte	W24
+@@ 005   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , An3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+	.byte		        Cn3 , v040
+	.byte	W08
+	.byte		        Cn3 , v052
+	.byte	W08
+	.byte		        Cn3 , v060
+	.byte	W08
+	.byte		        Cn3 , v064
+	.byte	W24
+@@ 006   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , An3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , An3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+@@ 007   ----------------------------------------
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , Bn3 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+	.byte		VOICE , 107
+	.byte		VOL   , 80*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v+32
+	.byte		N24   , Cs4 
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		VOL   , 127*sn_tijou_mvl/mxv
+	.byte		PAN   , c_v-32
+	.byte		N08   , Cn3 
+	.byte	W24
+@@ 008   ----------------------------------------
+	.byte	W24
+	.byte		N08   
+	.byte	W48
+	.byte		N08   
+	.byte	W24
+@@ 009   ----------------------------------------
+	.byte	W24
+	.byte		N08   
+	.byte	W24
+	.byte		        Cn3 , v040
+	.byte	W08
+	.byte		        Cn3 , v052
+	.byte	W08
+	.byte		        Cn3 , v060
+	.byte	W08
+	.byte		        Cn3 , v064
+	.byte	W24
+@@ 010   ----------------------------------------
+sn_tijou_6_010:
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Gn3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Gn3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte	PEND
+@@ 011   ----------------------------------------
+sn_tijou_6_011:
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Gn3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N18   , Gn3 , v100
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 012   ----------------------------------------
+sn_tijou_6_012:
+	.byte		VOICE , 126
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , An3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , An3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte	PEND
+@@ 013   ----------------------------------------
+sn_tijou_6_013:
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , An3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N18   , An3 , v100
+	.byte	W18
+	.byte		N06   
+	.byte	W06
+	.byte	PEND
+@@ 014   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_012
+@@ 015   ----------------------------------------
+sn_tijou_6_015:
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Bn3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Bn3 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte	PEND
+@@ 016   ----------------------------------------
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Cn4 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Cn4 , v100
+	.byte	W24
+@@ 017   ----------------------------------------
+	.byte		        Bn3 
+	.byte	W24
+	.byte		N08   
+	.byte	W24
+	.byte		N08   
+	.byte	W24
+	.byte		N08   
+	.byte	W16
+	.byte		VOICE , 126
+	.byte	W08
+@@ 018   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_010
+@@ 019   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_011
+@@ 020   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_012
+@@ 021   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_013
+@@ 022   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_012
+@@ 023   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_015
+@@ 024   ----------------------------------------
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Cn4 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+	.byte		        En3 
+	.byte	W24
+	.byte		VOICE , 108
+	.byte		N08   , Cn4 , v100
+	.byte	W16
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W08
+@@ 025   ----------------------------------------
+	.byte		VOICE , 108
+	.byte		N24   , Cn4 , v100
+	.byte	W24
+	.byte		VOICE , 126
+	.byte		N08   , Cn3 , v064
+	.byte	W16
+	.byte		VOICE , 108
+	.byte		N08   , Cn4 , v100
+	.byte	W08
+	.byte		VOICE , 126
+	.byte		N08   , En3 , v064
+	.byte	W24
+	.byte		        Cn3 
+	.byte	W16
+	.byte		N08   
+	.byte	W08
+@@ 026   ----------------------------------------
+	.byte		VOICE , 96
+	.byte		VOL   , 100*sn_tijou_mvl/mxv
+	.byte	W24
+	.byte		N08   , Dn3 
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W32
+	.byte		        Dn3 , v064
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W08
+@@ 027   ----------------------------------------
+sn_tijou_6_027:
+	.byte	W32
+	.byte		N08   , Dn3 , v040
+	.byte	W08
+	.byte		        Dn3 , v052
+	.byte	W08
+	.byte		        Dn3 , v064
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W08
+	.byte		        Dn3 , v064
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W08
+	.byte	PEND
+@@ 028   ----------------------------------------
+	.byte	W24
+	.byte		        Cn3 , v064
+	.byte	W16
+	.byte		        Cn3 , v052
+	.byte	W32
+	.byte		        Cn3 , v064
+	.byte	W16
+	.byte		        Cn3 , v052
+	.byte	W08
+@@ 029   ----------------------------------------
+	.byte	W32
+	.byte		        Cn3 , v040
+	.byte	W08
+	.byte		        Cn3 , v052
+	.byte	W08
+	.byte		        Cn3 , v064
+	.byte	W16
+	.byte		        Cn3 , v052
+	.byte	W08
+	.byte		        Cn3 , v064
+	.byte	W16
+	.byte		        Cn3 , v052
+	.byte	W08
+@@ 030   ----------------------------------------
+	.byte	W24
+	.byte		        Dn3 , v064
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W32
+	.byte		        Dn3 , v064
+	.byte	W16
+	.byte		        Dn3 , v052
+	.byte	W08
+@@ 031   ----------------------------------------
+	.byte	PATT
+	 .word	sn_tijou_6_027
+@@ 032   ----------------------------------------
+	.byte	W24
+	.byte		N08   , Bn2 , v064
+	.byte	W16
+	.byte		        Bn2 , v052
+	.byte	W32
+	.byte		        An2 , v064
+	.byte	W16
+	.byte		        An2 , v052
+	.byte	W08
+@@ 033   ----------------------------------------
+	.byte	W32
+	.byte		        Gs2 , v040
+	.byte	W08
+	.byte		        Gs2 , v052
+	.byte	W08
+	.byte		        Gn2 , v064
+	.byte	W16
+	.byte		        Gn2 , v052
+	.byte	W08
+	.byte		        Gn2 , v064
+	.byte	W16
+	.byte		        Gn2 , v052
+	.byte	W08
+	.byte	GOTO
+	 .word	sn_tijou_6_B1
+sn_tijou_6_B2:
+@@ 034   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_tijou:
+	.byte	6	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_tijou_pri	@@ Priority
+	.byte	sn_tijou_rev	@@ Reverb.
+
+	.word	sn_tijou_grp
+
+	.word	sn_tijou_1
+	.word	sn_tijou_2
+	.word	sn_tijou_3
+	.word	sn_tijou_4
+	.word	sn_tijou_5
+	.word	sn_tijou_6
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

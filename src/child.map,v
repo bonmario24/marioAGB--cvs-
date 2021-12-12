@@ -1,0 +1,711 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@Archive member included       because of file (symbol)
+
+C:/agb/lib//libagbsyscall.a(AgbSysCpuFastSet.o)
+                              client_main.o (CpuFastSet)
+C:/agb/lib//libagbsyscall.a(AgbSysCpuSet.o)
+                              client_game.o (CpuSet)
+C:/agb/lib//libagbsyscall.a(AgbSysHuffUnComp.o)
+                              client_game.o (HuffUnComp)
+C:/agb/lib//libagbsyscall.a(AgbSysRegisterRamReset.o)
+                              client_game.o (RegisterRamReset)
+C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                              client_sky.o (_call_via_r1)
+C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                              client_player.o (__udivsi3)
+C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                              C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o) (__div0)
+
+Allocating common symbols
+Common symbol       size              file
+
+ReceiveSize         0x4               client_main.o
+EndTable            0x10              client_main.o
+param               0x30              client_sky.o
+MoveColorB          0x20              client_sub.o
+skyobj              0x1e0             client_sky.o
+game                0xc5c             client_main.o
+IntrTableBuf        0x34              client_main.o
+TransCount          0x4               client_main.o
+Connect             0x4               client_main.o
+Bldmod              0x4               client_main.o
+DesTable            0x10              client_main.o
+NowPalletR          0x20              client_sub.o
+ErrorFlg            0x4               client_player.o
+CheckSumRecv        0x4               client_main.o
+CoLev               0x4               client_main.o
+RecvAddress         0x4               client_main.o
+ID_No               0x4               client_main.o
+SioModeFlg          0x4               client_main.o
+SendAddress         0x4               client_main.o
+SioIntrFunc         0x1000            client_multisio.o
+NowPalletG          0x20              client_sub.o
+SioFlags            0x4               client_main.o
+ScrollEnd           0x4               client_player.o
+Hscroll             0x4               client_main.o
+pl                  0x18              client_player.o
+MoveColorG          0x20              client_sub.o
+TransSize           0x4               client_main.o
+PlayNum             0x4               client_main.o
+ColY                0x4               client_main.o
+NowPalletB          0x20              client_sub.o
+CheckSumSend        0x4               client_main.o
+MoveColorR          0x20              client_sub.o
+OamBak              0x400             client_main.o
+SioSuccess          0x4               client_main.o
+SrcTable            0x10              client_main.o
+ColMoveFlg          0x4               client_main.o
+EndAddress          0x4               client_main.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD crt0_child2.o
+LOAD client_game.o
+LOAD client_main.o
+LOAD d_loader_bg_sch.o
+LOAD d_load_obj_Huff.o
+LOAD d_loader_bg_scl.o
+LOAD d_loader_obj_scl.o
+LOAD client_sub.o
+LOAD client_multisio.o
+LOAD client_player.o
+LOAD client_sky.o
+LOAD C:/agb/lib//libagbsyscall.a
+LOAD C:/agb/lib//libisagbprn.a
+LOAD C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+LOAD C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libg.a
+LOAD C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libc.a
+LOAD C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+Address of section .text set to 0x20002a0
+Address of section .bss set to 0x3000000
+                0x00008000                .=0x8000
+
+.interp
+ *(.interp)
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.init
+ *(.init)
+
+.plt
+ *(.plt)
+
+.text           0x020002a0     0x38dc
+ *(.text)
+ .text          0x020002a0      0x13c crt0_child2.o
+                0x020002a0                _start
+                0x020002a0                start_vector
+                0x020002dc                intr_main
+ .text          0x020003dc      0xe24 client_game.o
+                0x020011d0                loader_main
+ .text          0x02001200      0x3e0 client_main.o
+                0x020014dc                VBlankIntr
+                0x02001570                ObjVanishAll
+                0x02001508                KeyRead
+                0x02001564                InterDammy
+                0x02001384                ChildMain
+ .text          0x020015e0      0x308 client_sub.o
+                0x020016a0                BlendOut
+                0x020016ec                ColorMove
+                0x020015e0                m_lcdcoff
+                0x02001640                WhiteIn
+                0x02001670                WhiteOut
+ .text          0x020018e8      0x6fc client_multisio.o
+                0x02001b24                MultiSioIntr
+                0x020018e8                MultiSioInit
+                0x02001994                Sio32Init_2
+ .text          0x02001fe4      0xe5c client_player.o
+                0x02002d68                player_init
+                0x02002dfc                player_main
+ .text          0x02002e40      0xc74 client_sky.o
+                0x02003640                sky_main
+                0x02003598                sky_init
+ .text          0x02003ab4        0x4 C:/agb/lib//libagbsyscall.a(AgbSysCpuFastSet.o)
+                0x02003ab4                CpuFastSet
+ .text          0x02003ab8        0x4 C:/agb/lib//libagbsyscall.a(AgbSysCpuSet.o)
+                0x02003ab8                CpuSet
+ .text          0x02003abc        0x4 C:/agb/lib//libagbsyscall.a(AgbSysHuffUnComp.o)
+                0x02003abc                HuffUnComp
+ .text          0x02003ac0        0x4 C:/agb/lib//libagbsyscall.a(AgbSysRegisterRamReset.o)
+                0x02003ac0                RegisterRamReset
+ .text          0x02003ac4       0x3c C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                0x02003acc                _call_via_r2
+                0x02003adc                _call_via_r6
+                0x02003ad8                _call_via_r5
+                0x02003ad0                _call_via_r3
+                0x02003af0                _call_via_fp
+                0x02003ae4                _call_via_r8
+                0x02003ae0                _call_via_r7
+                0x02003ac4                _call_via_r0
+                0x02003aec                _call_via_sl
+                0x02003af8                _call_via_sp
+                0x02003ae8                _call_via_r9
+                0x02003ad4                _call_via_r4
+                0x02003ac8                _call_via_r1
+                0x02003af4                _call_via_ip
+                0x02003afc                _call_via_lr
+ .text          0x02003b00       0x78 C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                0x02003b00                __udivsi3
+ .text          0x02003b78        0x4 C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                0x02003b78                __div0
+ *(.text.*)
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7t)
+ *(.glue_7)
+                0x02003b7c                _etext=.
+                0x02003b7c                PROVIDE (etext, .)
+
+.fini
+ *(.fini)
+
+.rodata         0x02003b7c     0x105c
+ *(.rodata)
+ .rodata        0x02003b7c       0xe0 client_game.o
+ .rodata        0x02003c5c       0x80 client_main.o
+                0x02003c5c                IntrTable
+ .rodata        0x02003cdc      0x1a0 d_loader_bg_sch.o
+                0x02003cdc                d_loader_bg_schDT
+ .rodata        0x02003e7c      0x950 d_load_obj_Huff.o
+                0x02003e7c                d_load_obj_Huff
+ .rodata        0x020047cc       0xa0 d_loader_bg_scl.o
+                0x020047cc                d_loader_bg_sclDT
+ .rodata        0x0200486c       0xc0 d_loader_obj_scl.o
+                0x0200486c                d_loader_obj_sclDT
+ .rodata        0x0200492c       0x10 client_sub.o
+ .rodata        0x0200493c       0x6c client_multisio.o
+ .rodata        0x020049a8       0xd4 client_player.o
+                0x020049a8                playerInitDT
+ .rodata        0x02004a7c      0x15c client_sky.o
+                0x02004a7c                sky_inidt
+                0x02004ab4                Position
+ *(.rodata.*)
+ *(.gnu.linkonce.r*)
+
+.rodata1
+ *(.rodata1)
+                0x02004cd8                .=(ALIGN(0x100)+(.&0xff))
+
+.data           0x02004cd8      0x6bc
+ *(.data)
+ .data          0x02004cd8       0x20 client_game.o
+                0x02004ce0                main_menu
+ .data          0x02004cf8        0x8 client_main.o
+ .data          0x02004d00      0x304 client_player.o
+                0x02004e5c                ErrorData
+                0x02004dcc                d_player_sob_07
+                0x02004d48                d_player_sob_02
+                0x02004dfc                d_player_sob_09
+                0x02004db4                d_player_sob_06
+                0x02004e40                player_move
+                0x02004d90                d_player_sob_05
+                0x02004e14                PatternData
+                0x02004d24                d_player_sob_01
+                0x02004d6c                d_player_sob_03
+                0x02004d00                d_player_sob_00
+                0x02004de4                d_player_sob_08
+ .data          0x02005004      0x390 client_sky.o
+                0x02005130                d_cloud_sob_02
+                0x02005358                d_star_yellow
+                0x02005088                d_cloud_sob_01
+                0x02005370                StarData
+                0x02005378                SkyOamTable
+                0x02005340                d_star_white
+                0x02005004                d_cloud_sob_00
+                0x02005334                CloudData
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+
+.data1
+ *(.data1)
+
+.ctors
+ EXCLUDE_FILE ( *crtend.o )*(.ctors)
+ *(SORT(.ctors.*))
+ *crtend(.ctors)
+
+.dtors
+ EXCLUDE_FILE ( *crtend.o )*(.dtors)
+ *(SORT(.dtors.*))
+ *crtend.o(.dtors)
+
+.got
+ *(.got.plt)
+ *(.got)
+
+.dynamic
+ *(.dynamic)
+
+.sdata
+ *(.sdata)
+ *(.sdata.*)
+                0x02005394                _edata=.
+                0x02005394                PROVIDE (edata, .)
+                0x02005394                __bss_start=.
+                0x02005394                __bss_start__=.
+
+.sbss
+ *(.sbss)
+ *(.scommon)
+
+.bss            0x03000000     0x2430
+ *(.dynbss)
+ *(.bss)
+ *(.bss.*)
+ *(COMMON)
+ COMMON         0x03000000     0x1128 client_main.o
+                                  0x0 (size before relaxing)
+                0x03000000                ReceiveSize
+                0x03000010                EndTable
+                0x03000020                game
+                0x03000c80                IntrTableBuf
+                0x03000cb4                TransCount
+                0x03000cb8                Connect
+                0x03000cbc                Bldmod
+                0x03000cc0                DesTable
+                0x03000cd0                CheckSumRecv
+                0x03000cd4                CoLev
+                0x03000cd8                RecvAddress
+                0x03000cdc                ID_No
+                0x03000ce0                SioModeFlg
+                0x03000ce4                SendAddress
+                0x03000ce8                SioFlags
+                0x03000cec                Hscroll
+                0x03000cf0                TransSize
+                0x03000cf4                PlayNum
+                0x03000cf8                ColY
+                0x03000cfc                CheckSumSend
+                0x03000d00                OamBak
+                0x03001100                SioSuccess
+                0x03001110                SrcTable
+                0x03001120                ColMoveFlg
+                0x03001124                EndAddress
+ *fill*         0x03001128        0x8
+ COMMON         0x03001130       0xc0 client_sub.o
+                                  0x0 (size before relaxing)
+                0x03001130                MoveColorB
+                0x03001150                NowPalletR
+                0x03001170                NowPalletG
+                0x03001190                MoveColorG
+                0x030011b0                NowPalletB
+                0x030011d0                MoveColorR
+ COMMON         0x030011f0     0x1000 client_multisio.o
+                                  0x0 (size before relaxing)
+                0x030011f0                SioIntrFunc
+ COMMON         0x030021f0       0x28 client_player.o
+                                  0x0 (size before relaxing)
+                0x030021f0                ErrorFlg
+                0x030021f4                ScrollEnd
+                0x03002200                pl
+ *fill*         0x03002218        0x8
+ COMMON         0x03002220      0x210 client_sky.o
+                                  0x0 (size before relaxing)
+                0x03002220                param
+                0x03002250                skyobj
+                0x03002430                .=ALIGN(0x4)
+                0x03002430                .=ALIGN(0x4)
+                0x03002430                _end=.
+                0x03002430                _bss_end__=.
+                0x03002430                __bss_end__=.
+                0x03002430                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0xc0
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 client_game.o
+ .debug_aranges
+                0x00000020       0x20 client_main.o
+ .debug_aranges
+                0x00000040       0x20 client_sub.o
+ .debug_aranges
+                0x00000060       0x20 client_multisio.o
+ .debug_aranges
+                0x00000080       0x20 client_player.o
+ .debug_aranges
+                0x000000a0       0x20 client_sky.o
+
+.debug_pubnames
+                0x00000000      0x5b4
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000       0x30 client_game.o
+ .debug_pubnames
+                0x00000030      0x1b9 client_main.o
+ .debug_pubnames
+                0x000001e9       0x28 d_loader_bg_sch.o
+ .debug_pubnames
+                0x00000211       0x26 d_load_obj_Huff.o
+ .debug_pubnames
+                0x00000237       0x28 d_loader_bg_scl.o
+ .debug_pubnames
+                0x0000025f       0x29 d_loader_obj_scl.o
+ .debug_pubnames
+                0x00000288       0xae client_sub.o
+ .debug_pubnames
+                0x00000336       0x54 client_multisio.o
+ .debug_pubnames
+                0x0000038a      0x147 client_player.o
+ .debug_pubnames
+                0x000004d1       0xe3 client_sky.o
+
+.debug_info     0x00000000    0x1f0e4
+ *(.debug_info)
+ .debug_info    0x00000000     0x38c6 client_game.o
+ .debug_info    0x000038c6     0x354c client_main.o
+ .debug_info    0x00006e12     0x2d28 d_loader_bg_sch.o
+ .debug_info    0x00009b3a     0x2676 d_load_obj_Huff.o
+ .debug_info    0x0000c1b0     0x2d28 d_loader_bg_scl.o
+ .debug_info    0x0000eed8     0x2d2a d_loader_obj_scl.o
+ .debug_info    0x00011c02     0x31ad client_sub.o
+ .debug_info    0x00014daf     0x329d client_multisio.o
+ .debug_info    0x0001804c     0x3849 client_player.o
+ .debug_info    0x0001b895     0x384f client_sky.o
+
+.debug_abbrev   0x00000000      0xd47
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x1b2 client_game.o
+ .debug_abbrev  0x000001b2      0x190 client_main.o
+ .debug_abbrev  0x00000342       0xfa d_loader_bg_sch.o
+ .debug_abbrev  0x0000043c       0xc3 d_load_obj_Huff.o
+ .debug_abbrev  0x000004ff       0xfa d_loader_bg_scl.o
+ .debug_abbrev  0x000005f9       0xfa d_loader_obj_scl.o
+ .debug_abbrev  0x000006f3      0x188 client_sub.o
+ .debug_abbrev  0x0000087b      0x169 client_multisio.o
+ .debug_abbrev  0x000009e4      0x1b0 client_player.o
+ .debug_abbrev  0x00000b94      0x1b3 client_sky.o
+
+.debug_line     0x00000000     0x21cb
+ *(.debug_line)
+ .debug_line    0x00000000      0x8c4 client_game.o
+ .debug_line    0x000008c4      0x319 client_main.o
+ .debug_line    0x00000bdd      0x271 client_sub.o
+ .debug_line    0x00000e4e      0x509 client_multisio.o
+ .debug_line    0x00001357      0x92d client_player.o
+ .debug_line    0x00001c84      0x547 client_sky.o
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x00080000        0x0
+                0x00080000                _stack=.
+ *(.stack)
+OUTPUT(child.elf elf32-littlearm)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d186 1
+a186 1
+.text           0x020002a0     0x38cc
+d210 34
+a243 34
+ .text          0x02001fe4      0xe4c client_player.o
+                0x02002d58                player_init
+                0x02002dec                player_main
+ .text          0x02002e30      0xc74 client_sky.o
+                0x02003630                sky_main
+                0x02003588                sky_init
+ .text          0x02003aa4        0x4 C:/agb/lib//libagbsyscall.a(AgbSysCpuFastSet.o)
+                0x02003aa4                CpuFastSet
+ .text          0x02003aa8        0x4 C:/agb/lib//libagbsyscall.a(AgbSysCpuSet.o)
+                0x02003aa8                CpuSet
+ .text          0x02003aac        0x4 C:/agb/lib//libagbsyscall.a(AgbSysHuffUnComp.o)
+                0x02003aac                HuffUnComp
+ .text          0x02003ab0        0x4 C:/agb/lib//libagbsyscall.a(AgbSysRegisterRamReset.o)
+                0x02003ab0                RegisterRamReset
+ .text          0x02003ab4       0x3c C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                0x02003abc                _call_via_r2
+                0x02003acc                _call_via_r6
+                0x02003ac8                _call_via_r5
+                0x02003ac0                _call_via_r3
+                0x02003ae0                _call_via_fp
+                0x02003ad4                _call_via_r8
+                0x02003ad0                _call_via_r7
+                0x02003ab4                _call_via_r0
+                0x02003adc                _call_via_sl
+                0x02003ae8                _call_via_sp
+                0x02003ad8                _call_via_r9
+                0x02003ac4                _call_via_r4
+                0x02003ab8                _call_via_r1
+                0x02003ae4                _call_via_ip
+                0x02003aec                _call_via_lr
+ .text          0x02003af0       0x78 C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                0x02003af0                __udivsi3
+ .text          0x02003b68        0x4 C:\PROGRA~1\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                0x02003b68                __div0
+d250 2
+a251 2
+                0x02003b6c                _etext=.
+                0x02003b6c                PROVIDE (etext, .)
+d256 1
+a256 1
+.rodata         0x02003b6c     0x101c
+d258 18
+a275 18
+ .rodata        0x02003b6c       0xe0 client_game.o
+ .rodata        0x02003c4c       0x80 client_main.o
+                0x02003c4c                IntrTable
+ .rodata        0x02003ccc      0x1a0 d_loader_bg_sch.o
+                0x02003ccc                d_loader_bg_schDT
+ .rodata        0x02003e6c      0x910 d_load_obj_Huff.o
+                0x02003e6c                d_load_obj_Huff
+ .rodata        0x0200477c       0xa0 d_loader_bg_scl.o
+                0x0200477c                d_loader_bg_sclDT
+ .rodata        0x0200481c       0xc0 d_loader_obj_scl.o
+                0x0200481c                d_loader_obj_sclDT
+ .rodata        0x020048dc       0x10 client_sub.o
+ .rodata        0x020048ec       0x6c client_multisio.o
+ .rodata        0x02004958       0xd4 client_player.o
+                0x02004958                playerInitDT
+ .rodata        0x02004a2c      0x15c client_sky.o
+                0x02004a2c                sky_inidt
+                0x02004a64                Position
+d281 1
+a281 1
+                0x02004c88                .=(ALIGN(0x100)+(.&0xff))
+d283 1
+a283 1
+.data           0x02004c88      0x668
+d285 25
+a309 25
+ .data          0x02004c88       0x20 client_game.o
+                0x02004c90                main_menu
+ .data          0x02004ca8        0x8 client_main.o
+ .data          0x02004cb0      0x2b0 client_player.o
+                0x02004e0c                ErrorData
+                0x02004d7c                d_player_sob_07
+                0x02004cf8                d_player_sob_02
+                0x02004dac                d_player_sob_09
+                0x02004d64                d_player_sob_06
+                0x02004df0                player_move
+                0x02004d40                d_player_sob_05
+                0x02004dc4                PatternData
+                0x02004cd4                d_player_sob_01
+                0x02004d1c                d_player_sob_03
+                0x02004cb0                d_player_sob_00
+                0x02004d94                d_player_sob_08
+ .data          0x02004f60      0x390 client_sky.o
+                0x0200508c                d_cloud_sob_02
+                0x020052b4                d_star_yellow
+                0x02004fe4                d_cloud_sob_01
+                0x020052cc                StarData
+                0x020052d4                SkyOamTable
+                0x0200529c                d_star_white
+                0x02004f60                d_cloud_sob_00
+                0x02005290                CloudData
+d336 4
+a339 4
+                0x020052f0                _edata=.
+                0x020052f0                PROVIDE (edata, .)
+                0x020052f0                __bss_start=.
+                0x020052f0                __bss_start__=.
+d478 1
+a478 1
+.debug_info     0x00000000    0x1f11e
+d480 10
+a489 10
+ .debug_info    0x00000000     0x38b6 client_game.o
+ .debug_info    0x000038b6     0x353c client_main.o
+ .debug_info    0x00006df2     0x2d18 d_loader_bg_sch.o
+ .debug_info    0x00009b0a     0x2666 d_load_obj_Huff.o
+ .debug_info    0x0000c170     0x2d18 d_loader_bg_scl.o
+ .debug_info    0x0000ee88     0x2d1a d_loader_obj_scl.o
+ .debug_info    0x00011ba2     0x31ad client_sub.o
+ .debug_info    0x00014d4f     0x329d client_multisio.o
+ .debug_info    0x00017fec     0x38e3 client_player.o
+ .debug_info    0x0001b8cf     0x384f client_sky.o
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

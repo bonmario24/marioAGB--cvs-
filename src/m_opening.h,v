@@ -1,0 +1,161 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*--------------------------------------------------------------*/
+/*		オープニング用ヘッダーファ@イル			*/
+/*--------------------------------------------------------------*/
+#ifndef __M_OPENING_H_
+#define __M_OPENING_H_
+
+enum {
+    mario,
+    peach,
+    kinopio,
+    luigi,
+    yossy,
+    egg,
+    c_mark,
+    sel_cursol,
+    mode_select,
+    cloud1A,	// 大
+    cloud1B,	// 大
+    cloud2A,	// 中
+    cloud2B,	// 中
+    cloud3A,	// 小
+    cloud3B,	// 小
+    OPOBJMAX,
+};
+
+#define OPXPOS(pt)	(((Opening_obj_c *)(pt))->xpos)
+#define OPYPOS(pt)	(((Opening_obj_c *)(pt))->ypos)
+#define OPXPOSH(pt)	(((Opening_obj_c *)(pt))->xposh)
+#define OPYPOSH(pt)	(((Opening_obj_c *)(pt))->yposh)
+#define OPXSPD(pt)	(((Opening_obj_c *)(pt))->xspd)
+#define OPYSPD(pt)	(((Opening_obj_c *)(pt))->yspd)
+#define OPPTRN(pt)	(((Opening_obj_c *)(pt))->patrn)
+#define OPOBJMODE(pt)	(((Opening_obj_c *)(pt))->mode)
+#define OPOBJTIME(pt)	(((Opening_obj_c *)(pt))->timer)
+#define	OPHSIZ(pt)	(((Opening_obj_c *)(pt))->hsize)
+#define	OPVSIZ(pt)	(((Opening_obj_c *)(pt))->vsize)
+#define	OPANGL(pt)	(((Opening_obj_c *)(pt))->angle)
+#define	OPHMUKI(pt)	(((Opening_obj_c *)(pt))->hmuki)
+#define	OPVMUKI(pt)	(((Opening_obj_c *)(pt))->vmuki)
+#define	OPWORK(pt)	(((Opening_obj_c *)(pt))->work)
+
+#define OPEXPOS(pt)	(((Opening_eff_c *)(pt))->xpos)
+#define OPEYPOS(pt)	(((Opening_eff_c *)(pt))->ypos)
+#define OPEXPOSH(pt)	(((Opening_eff_c *)(pt))->xposh)
+#define OPEYPOSH(pt)	(((Opening_eff_c *)(pt))->yposh)
+#define OPEXSPD(pt)	(((Opening_eff_c *)(pt))->xspd)
+#define OPEYSPD(pt)	(((Opening_eff_c *)(pt))->yspd)
+#define OPEPTRN(pt)	(((Opening_eff_c *)(pt))->patrn)
+#define OPEOBJMODE(pt)	(((Opening_eff_c *)(pt))->mode)
+#define OPEOBJTIME(pt)	(((Opening_eff_c *)(pt))->timer)
+
+#define	OPTIME	(p_opn->timer)
+#define	OPCLTIM	(p_opn->cloud_timer)
+#define	OPMODE	(p_opn->mode)
+#define OPSETFG	(p_opn->setfg)
+#define OPESTFG	(p_opn->effect_setfg)
+#define	OPOBJDT	(p_opn->objbase)
+#define	OPEFFDT	(p_opn->effbase)
+#define OPIPT	(p_opn->ipt)
+#define OPAPT	(p_opn->affinept)
+#define	OPSPEED	(p_opn->speed)
+#define	OPBG2YP	(p_opn->bg2_ypos)
+#define	OPYOSFG	(p_opn->yossy_fg)
+#define	OPREDFG	(p_opn->redfg)
+
+typedef struct{
+    s32	xpos;
+    s32	ypos;
+    s16	xposh;
+    s16	yposh;
+    s32	xspd;
+    s32	yspd;
+    u16	timer;
+    u8	mode;
+    u8	patrn;
+    u16	hsize;
+    u16	vsize;
+    u16	angle;
+    u8	hmuki;
+    u8	vmuki;
+    u8	work;
+} Opening_obj_c;
+
+extern Opening_obj_c Op_obj_clr;
+
+typedef struct{
+    s32	xpos;
+    s32	ypos;
+    s16	xposh;
+    s16	yposh;
+    s32	xspd;
+    s32	yspd;
+    u16	timer;
+    u8	mode;
+    u8	patrn;
+} Opening_eff_c;
+
+extern Opening_eff_c Op_eff_clr;
+
+typedef struct{
+    Opening_obj_c objbase[OPOBJMAX];
+    Opening_eff_c effbase[16];
+    u8	setfg[OPOBJMAX];
+    u8	effect_setfg[16];
+    u16 timer;
+    u16 cloud_timer;
+    u8	mode;
+    u8  ipt;
+    u8  affinept;
+    s32	speed;
+    s32	bg2_ypos;
+    u8	yossy_fg;
+    u8	redfg;
+} Opening_c;
+
+extern Opening_c	*p_opn;
+
+extern void Opening_Main(void);
+extern void open_obj_init(void);
+extern void op_go_to_4(void);
+extern void mGm_MALLOC_p_opn(void);
+extern void mGm_FREE_p_opn(void);
+#endif
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

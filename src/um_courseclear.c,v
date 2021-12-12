@@ -1,0 +1,280 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include "um_courseclear.h"
+#include "ua_score.h"
+
+/********************************************************/
+/*　@　@　@　@　@ＢＧコースクリアー	　@　@　@　@　@　@            */
+/********************************************************/
+static void BG_COUSECLEAR()
+{
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG3CNT & BG_SCR_BASE_1F) * 8) + VRAM);
+/*    
+    vram_adr += 0xC8 ;
+
+    *(u16 *)(vram_adr) = 0xF364;		// C 
+    *(u16 *)(vram_adr + 0x20) = 0xF365;		 
+    *(u16 *)(vram_adr + 1 ) = 0xF366;		// O 
+    *(u16 *)(vram_adr + 0x21) = 0xF367;		 
+    *(u16 *)(vram_adr + 2 ) = 0xF368;		// U 
+    *(u16 *)(vram_adr + 0x22) = 0xF369;		 
+    *(u16 *)(vram_adr + 3 ) = 0xF372;		// R 
+    *(u16 *)(vram_adr + 0x23) = 0xF373;		 
+    *(u16 *)(vram_adr + 4 ) = 0xF36A;		// S 
+    *(u16 *)(vram_adr + 0x24) = 0xF36B;		 
+    *(u16 *)(vram_adr + 5 ) = 0xF36C;		// E 
+    *(u16 *)(vram_adr + 0x25) = 0xF36D;		 
+
+    vram_adr += 7;
+    *(u16 *)(vram_adr) = 0xF364;		// C 
+    *(u16 *)(vram_adr + 0x20) = 0xF365;		 
+    *(u16 *)(vram_adr + 1 ) = 0xF36E;		// L 
+    *(u16 *)(vram_adr + 0x21) = 0xF36F;		 
+    *(u16 *)(vram_adr + 2 ) = 0xF36C;		// E 
+    *(u16 *)(vram_adr + 0x22) = 0xF36D;		 
+    *(u16 *)(vram_adr + 3 ) = 0xF370;		// A 
+    *(u16 *)(vram_adr + 0x23) = 0xF371;		 
+    *(u16 *)(vram_adr + 4 ) = 0xF372;		// R 
+    *(u16 *)(vram_adr + 0x24) = 0xF373;		 
+
+    *(u16 *)(vram_adr + 0x6 ) = 0xF374;		// ! 
+	*(u16 *)(vram_adr + 0x26) = 0xF375;		 
+*/
+	vram_adr += 0xC8 + 2;
+
+    *(u16 *)(vram_adr) = 0xF364;		//  
+    *(u16 *)(vram_adr + 0x20) = 0xF365;		 
+    *(u16 *)(vram_adr + 1 ) = 0xF366;		//  
+    *(u16 *)(vram_adr + 0x21) = 0xF367;		 
+    *(u16 *)(vram_adr + 2 ) = 0xF368;		//  
+    *(u16 *)(vram_adr + 0x22) = 0xF369;		 
+    *(u16 *)(vram_adr + 3 ) = 0xF36A;		//  
+    *(u16 *)(vram_adr + 0x23) = 0xF36B;		 
+    *(u16 *)(vram_adr + 4 ) = 0xF36C;		//  
+    *(u16 *)(vram_adr + 0x24) = 0xF36D;		 
+    *(u16 *)(vram_adr + 5 ) = 0xF36E;		//  
+    *(u16 *)(vram_adr + 0x25) = 0xF36F;		 
+    *(u16 *)(vram_adr + 6 ) = 0xF370;		//  
+    *(u16 *)(vram_adr + 0x26) = 0xF371;		 
+    *(u16 *)(vram_adr + 7 ) = 0xF372;		//  
+    *(u16 *)(vram_adr + 0x27) = 0xF373;		 
+
+	*(u16 *)(vram_adr + 0x9 ) = 0xF374;		// ! 
+	*(u16 *)(vram_adr + 0x29) = 0xF375;		 
+
+
+}
+
+/********************************************************/
+/*　@　@　@　@　@ＢＧコースクリアーキャラ転送　@　@            */
+/********************************************************/
+void clr_chrchange(void)
+{
+    u16 index_cnt;
+    u8 clearcnt;
+    u32 *vram_adr;
+    u32 tenso_dt;
+    
+    if( CLEAR_CNT == 0 )
+	return;
+
+    if( CLEAR_CNT < 140 ){
+	clearcnt = (CLEAR_CNT>>3);
+	if(clearcnt > 4)
+	    clearcnt = 4;
+    }else if( CLEAR_CNT > 148 ){
+	clearcnt = 5;
+    }else{
+	clearcnt = (CLEAR_CNT-140)>>1;
+	clearcnt = 4 - clearcnt;
+	if(clearcnt > 4)
+	    clearcnt = 0;
+    }
+
+    index_cnt = *(u16 *)(DMA_INDEX);
+    
+    *(u32 *)(DMA_BUF + index_cnt) = 
+	 (u32)(ud_courseclear_schDT + (clearcnt * 0x90));
+    index_cnt += 4;
+    *(u32 *)(DMA_BUF + index_cnt) = BG_VRAM + (0x0364*0x20);
+    index_cnt += 4;
+    *(u32 *)(DMA_BUF + index_cnt) = 0x12 * 0x20 / 4 | 
+	 DMA_ENABLE | DMA_TIMMING_IMM | DMA_SRC_INC | 
+	 DMA_DEST_INC | DMA_32BIT_BUS;
+    index_cnt += 4;
+    
+    *(u16 *)(DMA_INDEX) = index_cnt;
+
+    BG_COUSECLEAR();		// BG書き換え
+}
+
+/********************************************************/
+/*　@　@　@　@　@コースクリアー演出OAMSET	　@　@            */
+/********************************************************/
+static void clr_oamset(u8 *clrdt)
+{
+    u8 xpos, ypos;
+    u8 ipt, i, *hoseidt;
+    u8 base_x, base_y, cha_no, color;
+    u8 add_x, add_y, vflip, hflip;
+    OamData *p_oam;
+
+    ipt = SCORE_OAMPT;
+    while(*clrdt != 0xFF){
+	// データセット
+	base_x = *clrdt;
+	*clrdt++;
+	base_y = *clrdt;
+	*clrdt++;
+	cha_no = *clrdt;
+	*clrdt++;
+	color = *clrdt;
+	*clrdt++;
+	hoseidt = clear_hosei_Dt;
+	
+	for( i=0; i<4; i++ ){
+
+	    // データセット
+	    add_x = *hoseidt;
+	    *hoseidt++;
+	    add_y = *hoseidt;
+	    *hoseidt++;
+	    vflip = *hoseidt;
+	    *hoseidt++;
+	    hflip = *hoseidt;
+	    *hoseidt++;
+	    
+	    xpos = base_x + add_x + 0x78;
+	    ypos = base_y + add_y + 0x30;
+
+	    // OAMセット
+
+	    
+	    p_oam = &OamBak[ipt];
+	    p_oam->HPos = xpos;		// Ｘ座標
+	    p_oam->VPos = ypos;		// Ｙ座標
+	    p_oam->CharNo = cha_no;	// キャラクタＮｏ
+	    p_oam->Pltt = color;
+	    p_oam->Shape = 0;		// ＯＢＪ形状
+	    p_oam->Size = 0;		// ＯＢＪサイズ
+	    p_oam->Priority = 0;	// 表示優先
+	    p_oam->HFlip = hflip;	// Ｈフリップ
+	    p_oam->VFlip = vflip;	// Ｖフリップ
+	    ipt--;
+	}
+    }
+    
+    SCORE_OAMPT = ipt;
+}
+/********************************************************/
+/*　@　@　@　@　@OBJコースクリアー演出	　@　@            */
+/********************************************************/
+void CLEAREFT_MAIN(void)
+{
+    u8 *clrdt, cnt;
+
+    if( CLEAR_CNT == 0 )
+	return;
+    
+#if 0
+    if( CLEAR_CNT < 0x20 )	// 32フレーム目から演出開始
+	return;
+#endif
+
+    if( CLEAR_CNT == 2 )
+	m4aSongNumStart(s_u_se_kirakira);
+    
+    cnt = (CLEAR_CNT)>>2;
+    if( cnt > 0x26 )
+	cnt = 0x26;
+   
+
+    // OBJ2 SET
+    clrdt = clear_effect_ptn2[cnt];
+    if( clrdt != NULL )
+	clr_oamset(clrdt);
+    
+    // OBJ1 SET
+    clrdt = clear_effect_ptn1[cnt];
+    if( clrdt != NULL )
+	clr_oamset(clrdt);
+
+}
+
+/********************************************************/
+/*　@　@　@　@　@ＢＧコースクリアーメイン　@　@　@　@            */
+/********************************************************/
+u8 COUSECLEAR_MAIN(void)
+{
+    u8 check;
+
+    if( CLEAR_CNT > 0 ){
+	if( CLEAR_CNT > 152 ){
+	    CLEAR_CNT = 0;
+	    return 1;
+	}else{
+	    clr_chrchange();
+	    // clr_effect();
+	}
+	CLEAR_CNT++;
+    }
+    return 0;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d12 2
+a13 2
+    
+    vram_adr += 0xC8;
+d41 24
+a64 1
+    *(u16 *)(vram_adr + 0x26) = 0xF375;		 
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

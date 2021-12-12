@@ -1,0 +1,111 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_PERFECT_grp, voicegroup000
+	.equ	sn_PERFECT_pri, 10
+	.equ	sn_PERFECT_rev, 0
+	.equ	sn_PERFECT_mvl, 100
+	.equ	sn_PERFECT_key, 0
+	.equ	sn_PERFECT_tbs, 1
+	.equ	sn_PERFECT_exg, 0
+	.equ	sn_PERFECT_cmp, 1
+
+	.section .rodata
+	.global	sn_PERFECT
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_PERFECT_1:
+	.byte	KEYSH , sn_PERFECT_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 125*sn_PERFECT_tbs/2
+	.byte		VOICE , 17
+	.byte		VOL   , 127*sn_PERFECT_mvl/mxv
+	.byte		N06   , Gn3 , v064
+	.byte	W06
+	.byte		        Bn3 
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W06
+	.byte		        Fn4 
+	.byte	W06
+	.byte		        Gn4 
+	.byte	W06
+	.byte		        Fn4 
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W06
+	.byte		        Bn3 
+	.byte	W06
+	.byte		N24   , Gn3 
+	.byte	W24
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_PERFECT_2:
+	.byte	KEYSH , sn_PERFECT_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 13
+	.byte		VOL   , 127*sn_PERFECT_mvl/mxv
+	.byte		N12   , Gn3 , v064
+	.byte	W24
+	.byte		        Dn3 
+	.byte	W24
+	.byte		N24   , Gn2 
+	.byte	W24
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_PERFECT:
+	.byte	2	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_PERFECT_pri	@@ Priority
+	.byte	sn_PERFECT_rev	@@ Reverb.
+
+	.word	sn_PERFECT_grp
+
+	.word	sn_PERFECT_1
+	.word	sn_PERFECT_2
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

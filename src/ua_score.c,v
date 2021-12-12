@@ -1,0 +1,792 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@
+#include "ua_score.h"
+#include "up_common.h"
+
+#define ENMY_KIND 0x65
+
+s16 pt_addtim[] = {
+    0, 0x04, 0x08, 0xC, 
+    0, 0, 0, 0,
+};
+s16 pt_addspd[] = {
+    0, 0, 0, 0,
+    0, 0x10, 0x20, 0x30,
+};
+s8 scr_pw1up[] = {
+    -8, -0x28, 0x20, -8, -0x28, 0x20, -8, -0x28, 0x20, 
+    -8, -0x28, 0x20, -8, -0x28, 0x20,
+};
+
+static void spoint_init(aSc_score_c *scr_pt, u8 name);
+static void bpoint_init(aSc_score_c *scr_pt, u8 name);
+static void oneup_init(aSc_score_c *scr_pt, u8 name);
+
+/************************************************/
+/*	エフェクト構造体クリア			*/
+/************************************************/
+void m_score_clear(void){
+    
+    u8 t_i;
+
+    for( t_i = 0; t_i < SCORE_MAX; t_i++ ){
+	SCORE_BASE(p_scr)[t_i] = score_clear;
+	SCORE_CMOD(p_scr)[t_i] = 0;
+	SCORE_SYNO(p_scr)[t_i] = 0;
+    }  
+    SCORE_OAMPT = 127;
+    // HITCNT = 0;
+    PWHTCT = 0;
+    INDEX_DT = 0;
+    HANABI_SETFG = 0;
+
+    for( t_i = 0; t_i < HANABI_MAX; t_i++){
+	HANABI_NO[t_i] = 0;
+	HANABI_AFFIN[t_i] = 0;
+    }
+
+}
+/********************************************************/
+/*		花火セット				*/
+/********************************************************/
+static void HANABI_SET(aSc_score_c *eft_pt, u8 index){
+    
+    u8 hahen_no, i, scr_no, cnt;
+    aSc_score_c	*scr_pt;
+    s16 *ps_dt;
+
+    cnt = 0;
+    ps_dt = hanabi_dt;
+    
+    for ( cnt=0; cnt<8; cnt++){
+
+	scr_no = EFFECT_SET(SCORE_HANABI);
+
+	scr_pt = &(p_scr->score_base[scr_no]);
+	//XPOS
+	SCORE_XPOS(scr_pt) = 
+	    SCORE_XPOS(eft_pt) + ((*ps_dt)<<16);
+	SCORE_XPOSH(scr_pt) = SCORE_XPOS(scr_pt)>>16;
+	*ps_dt++;
+	//YPOS
+	SCORE_YPOS(scr_pt) = 
+	    SCORE_YPOS(eft_pt) +  ((*ps_dt)<<16);
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt)>>16;
+	*ps_dt++;
+	//SPD
+	SCORE_XSPD(scr_pt) = (*ps_dt)<<12;
+	*ps_dt++;
+	SCORE_YSPD(scr_pt) = (*ps_dt)<<12;
+	*ps_dt++;
+	
+	SCORE_HSIZE(scr_pt) = 0x100;
+	SCORE_VSIZE(scr_pt) = 0x100;
+	SCORE_TIMER(scr_pt) = 0x80;
+	SCORE_PTRN(scr_pt) = 0;
+	SCORE_ANGL(scr_pt) = 0;
+	
+    }
+}
+/********************************************************/
+/*		10000ptセット				*/
+/********************************************************/
+void EGGSCORE_SET(aAC_base_c *abs_pt){
+
+    u8 hahen_no, i, scr_no;
+    aSc_score_c	*scr_pt;
+    s16 *ps_dt;
+
+    scr_no = EFFECT_SET(SCORE_10000);
+    
+    scr_pt = &(p_scr->score_base[scr_no]);
+    //XPOS
+    SCORE_XPOS(scr_pt) = SCORE_XPOS(abs_pt) + 0xC0000;
+    SCORE_XPOSH(scr_pt) = SCORE_XPOS(scr_pt)>>16;
+    //YPOS
+    SCORE_YPOS(scr_pt) = SCORE_YPOS(abs_pt);
+    SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt)>>16;
+    //SPD
+    SCORE_XSPD(scr_pt) = 0;
+    SCORE_YSPD(scr_pt) = -0x8000;
+    
+    SCORE_HSIZE(scr_pt) = 0x200;
+    SCORE_VSIZE(scr_pt) = 0x200;
+    SCORE_TIMER(scr_pt) = 0x80;
+    SCORE_PTRN(scr_pt) = 0;
+    SCORE_ANGL(scr_pt) = 0;
+}
+/********************************************************/
+/*		得点セット(2桁or3桁)			*/
+/********************************************************/
+void SPOINT_SET(s32 XPOSH, s32 YPOSH, u8 name){
+
+    u8 hahen_no, i, scr_no, point;
+    aSc_score_c	*scr_pt;
+    s16 *ps_dt;
+
+    scr_no = EFFECT_SET(name);
+    if( name < 8 )
+	point = name;
+    
+    if( scr_no != 0xFF ){
+	scr_pt = &(p_scr->score_base[scr_no]);
+	if( name < SCORE_1000 ){
+	    //XPOS
+	    SCORE_XPOSH(scr_pt) = ((XPOSH & 0xFFF0) + 4);
+	    SCORE_XPOS(scr_pt) = SCORE_XPOSH(scr_pt)<<16;
+	    spoint_init(scr_pt, name);
+	}else if( name < SCORE_10 ){
+	    //XPOS
+	    SCORE_XPOSH(scr_pt) = ((XPOSH & 0xFFF0) + 8);
+	    SCORE_XPOS(scr_pt) = SCORE_XPOSH(scr_pt)<<16;
+	    bpoint_init(scr_pt, name);
+	}else{
+	    //XPOS
+	    SCORE_XPOSH(scr_pt) = ((XPOSH & 0xFFF0) + 4);
+	    SCORE_XPOS(scr_pt) = SCORE_XPOSH(scr_pt)<<16;
+	    spoint_init(scr_pt, name);
+	}
+
+	//YPOS
+	SCORE_YPOSH(scr_pt) = (YPOSH & 0xFFF0);
+	SCORE_YPOS(scr_pt) = SCORE_YPOSH(scr_pt)<<16;
+	
+    }
+}
+/********************************************************/
+/*		100ptセット				*/
+/********************************************************/
+void POINT100_SET(s32 XPOSH, s32 YPOSH){
+
+    u8 hahen_no, i, scr_no;
+    aSc_score_c	*scr_pt;
+    s16 *ps_dt;
+
+    scr_no = EFFECT_SET(SCORE_100);
+    
+    if( scr_no != 0xFF ){
+	scr_pt = &(p_scr->score_base[scr_no]);
+	//XPOS
+	SCORE_XPOS(scr_pt) = XPOSH<<16;
+	SCORE_XPOSH(scr_pt) = XPOSH;
+	//YPOS
+	SCORE_YPOS(scr_pt) = YPOSH<<16;
+	SCORE_YPOSH(scr_pt) = YPOSH;
+	
+	spoint_init(scr_pt, SCORE_100);
+	SCORE_TIMER(scr_pt) = 0x60;
+    }
+}
+/********************************************************/
+/*		1UPセット				*/
+/********************************************************/
+void ONEUP_SET(s32 XPOSH, s32 YPOSH){
+
+    u8 hahen_no, i, scr_no;
+    aSc_score_c	*scr_pt;
+    s16 *ps_dt;
+
+    scr_no = EFFECT_SET(SCORE_1UP);
+    
+    if( scr_no != 0xFF ){
+	scr_pt = &(p_scr->score_base[scr_no]);
+	//XPOS
+	SCORE_XPOS(scr_pt) = XPOSH<<16;
+	SCORE_XPOSH(scr_pt) = XPOSH;
+	//YPOS
+	SCORE_YPOS(scr_pt) = YPOSH<<16;
+	SCORE_YPOSH(scr_pt) = YPOSH;
+	
+	oneup_init(scr_pt, scr_no);
+    }
+    m4aSongNumStart(s_u_se_1up);	//1UP音
+}
+
+/********************************************************/
+/*		スコアセット				*/
+/********************************************************/
+// ここのindex2はおかしいから要注意
+// POWで1UPの時は0xFO以上が入ってる
+
+static void SCORE_SET(u8 point, u8 index2){
+ 
+    u8 i, cnt;
+    s8 add_xpos;
+    aAC_base_c	*enmy_pt;
+    aSc_score_c	*scr_pt;
+ 
+    i = EFFECT_SET(point);
+    if( i != 0xFF ){
+	scr_pt = &(p_scr->score_base[i]);
+	
+	if( index2 < 0xF0 ){
+	    enmy_pt = &(p_act->a_base[index2]);
+	    SCORE_XPOS(scr_pt) = ABASE_XPOS(enmy_pt) + 0x80000;
+	    SCORE_YPOS(scr_pt) = ABASE_YPOS(enmy_pt);
+	}else{	 // POWで1UPが出た時の表示位置
+	    cnt = index2 & 0xF;
+	    // YPOSセット
+	    SCORE_YPOS(scr_pt) = PLAY_PLYPOSL - 0x100000*cnt;
+	    // XPOSセット
+	    add_xpos = scr_pw1up[cnt];
+	    SCORE_XPOS(scr_pt) = PLAY_PLXPOSL + (add_xpos<<16);
+	}
+	SCORE_XPOSH(scr_pt) = SCORE_XPOS(scr_pt)>>16;
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt)>>16;
+	SCORE_XSPD(scr_pt) = 0;
+	
+	if( point == SCORE_1UP ){
+	    if( mGm_PLCNT < 99 ){
+		mGm_PLCNT++;
+//		u_score_disp();
+	    }
+	    
+	    oneup_init(scr_pt, i);
+	    m4aSongNumStart(s_u_se_1up);	//1UP音
+	}else{
+	    if( point >= SCORE_1000 ){
+		bpoint_init(scr_pt, point);
+	    }else{
+		spoint_init(scr_pt, point);
+	    }
+	}
+	SCORE_ANGL(scr_pt) = 0;
+	SCORE_PTRN(scr_pt) = 0;
+    }
+}
+
+static void HITSOUND(aAC_base_c *abs_pt, u8 name ){
+    
+    u8 en_hitcnt;
+    
+    en_hitcnt = ABASE_ENHTCT(abs_pt);
+    if(en_hitcnt < 9){
+	m4aSongNumStart(s_u_se_kamekeri0 + en_hitcnt);
+    
+	if( en_hitcnt == 2 ){
+	    if( name < ENEMY_HAPPA ){
+		voice_change(s_u_mario_bravo);
+	    }else{
+		if( name == ENEMY_HAPPA || name == ENEMY_KABU || 
+		    name == ENEMY_BIGKABU ){
+		    voice_change(s_u_mario_what_a_tasty_treat);
+		}
+	    }
+	}
+    }
+}
+/********************************************************/
+/*		スコア計算&セット			*/
+/********************************************************/
+/*  EN VS EN */
+void score_check(u8 index1, u8 index2)
+{
+    u16 score_point, SCWRK0, en_hitcnt;
+    u8 name1, name2, *tokuten, index, cmod;
+    aAC_base_c	*abs_pt, *down_pt;
+    
+    SCWRK0 = 0;
+    
+    abs_pt = &(p_act->a_base[index1]);
+    down_pt = &(p_act->a_base[index2]);
+    name1 = ENTY_ENSYNO(p_act)[index1];
+    name2 = ENTY_ENSYNO(p_act)[index2];
+    cmod = ENTY_ENCMOD(p_act)[index1];
+
+    if((name1 == ENEMY_MASK0) || (name1 == ENEMY_BALLM) ||  
+       (name1 == ENEMY_MAMUU) || (name2 == ENEMY_FIREB) ||
+       (name2 == ENEMY_FIRES )){
+	return;
+    }
+    
+    index = index2;
+    // POWBKでやられた時のスコアセット
+    if( index1 == index2 ){		
+	SCWRK0 = *(score_pwpit_talbe + PWHTCT);
+	if( SCWRK0 == SCORE_1UP ){
+	    index = 0xF0 + PWHTCT - 4;
+	}
+	if( PWHTCT < 0xF )
+	    PWHTCT++;
+    }		
+    // BKDNでやられた時のスコアセット
+    else if( cmod == BRN ){
+	SCWRK0 = 
+	    *(score_point_talbe + (ABASE_ENHTCT(abs_pt)<<1) + 1);
+	if( ABASE_ENHTCT(abs_pt) < 0x6 )
+	    ABASE_ENHTCT(abs_pt)++;
+
+	if( name2 == ENEMY_MIKEY )
+	    SCWRK0 = SCORE_4000;
+    }
+    // 投げた敵や野菜,アイテムでやられた時
+    else{
+	if( cmod == ENM || cmod == EF0 ){
+	    // 敵、野菜を投げた
+	    if( name1 < ENEMY_FACE ){
+		if( ABASE_ENHTCT(abs_pt) > 6 ){
+		    en_hitcnt = 6;
+		}else{
+		    en_hitcnt = ABASE_ENHTCT(abs_pt);
+		}
+		SCWRK0 = *(score_point_talbe + (en_hitcnt<<1)+1);
+		if( name1 == ENEMY_WALK0 && name2 == ENEMY_WALK0 ){
+		    if( ABASE_LIFTON(down_pt) != 0xFF ){
+			SCWRK0 = 8;
+		    }
+		}
+	    }
+	    // アイテムを投げた
+	    else{
+		if( name1 != ENEMY_FACE ){
+		    en_hitcnt = (ABASE_ENHTCT(abs_pt)<<1) + 1;
+		    if( en_hitcnt > 0xC )
+			en_hitcnt = 0xC;
+		}else{
+		    en_hitcnt = ABASE_ENHTCT(abs_pt);
+		}
+		SCWRK0 = *(score_point_talbe + en_hitcnt);
+	    }
+	    
+	    HITSOUND(abs_pt, name1);	//効果音
+	    if( ABASE_ENHTCT(abs_pt) < 0xB ){
+		ABASE_ENHTCT(abs_pt)++;
+	    }
+	}
+	
+	// 得点テーブルと比較
+	tokuten = tokuten_table+(name1*ENMY_KIND)+name2;
+	score_point = *tokuten;
+	if(SCWRK0 <= score_point)
+	    SCWRK0 = score_point;
+    }
+    
+    SCORE_SET(SCWRK0, index);     /* スコアセット */
+
+}
+
+/*  PL VS EN */
+void pl_score_check(u8 index1 ){
+    
+    u16 score_point, SCWRK0;
+    u8 name1, name2, i;
+    aAC_base_c	*enmy_pt;
+    aSc_score_c	*scr_pt;
+    
+    SCWRK0 = 0;
+    
+    enmy_pt = &(p_act->a_base[index1]);
+    name1 = ENTY_ENSYNO(p_act)[index1];
+    
+    if( ENATDT[name1] & 0x10 )
+	return;
+    
+    /* PLAYER スコア計算 */
+    
+    SCWRK0 = *(score_point_talbe + HITCNT + 1);
+    if( HITCNT < 0xA )
+	HITCNT++;
+    if( name1 == ENEMY_BOSS0 )
+	SCWRK0 = SCORE_2000;
+
+    SCORE_SET(SCWRK0, index1);     /* スコアセット */
+
+}
+
+/********************************************************/
+/*		スコアINIT				*/
+/********************************************************/
+
+/* 三桁得点INIT */
+void spoint_init(aSc_score_c *scr_pt, u8 name){
+   
+    SCORE_XSPD(scr_pt) = 0;
+    SCORE_YSPD(scr_pt) = -0x8000;
+    
+    SCORE_HSIZE(scr_pt) = 0x200;
+    SCORE_VSIZE(scr_pt) = 0x200;
+    SCORE_TIMER(scr_pt) = 0x60 + pt_addtim[name];
+    SCORE_PTRN(scr_pt) = 0;
+    SCORE_ANGL(scr_pt) = 0;
+}
+
+/* 四桁得点INIT */
+void bpoint_init(aSc_score_c *scr_pt, u8 name){
+
+    SCORE_XSPD(scr_pt) = 0;
+    SCORE_YSPD(scr_pt) = -((0x80 + pt_addspd[name])<<8);
+    
+    SCORE_HSIZE(scr_pt) = 0x200;
+    SCORE_VSIZE(scr_pt) = 0x200;
+    SCORE_TIMER(scr_pt) = 0x70;
+    SCORE_PTRN(scr_pt) = 0;
+    SCORE_ANGL(scr_pt) = 0;
+}
+
+/* 1UP INIT */
+void oneup_init(aSc_score_c *scr_pt, u8 name){
+
+    SCORE_XSPD(scr_pt) = 0;
+    SCORE_YSPD(scr_pt) = -0x9000;
+    
+    SCORE_HSIZE(scr_pt) = 0x200;
+    SCORE_VSIZE(scr_pt) = 0x200;
+    SCORE_TIMER(scr_pt) = 0x80;
+    SCORE_PTRN(scr_pt) = 0;
+    SCORE_ANGL(scr_pt) = 0;
+    SCORE_WORKA(scr_pt) = SCORE_XPOSH(scr_pt) - mGm_SCCH1;
+}
+/********************************************************/
+/*		スコアMOVE				*/
+/********************************************************/
+/* 共通Ｙ方向強制画面内処理 */
+static void point_yhosei(aSc_score_c *scr_pt){
+
+    if( mGm_SCCV1+0x10 > SCORE_YPOSH(scr_pt) ){
+	SCORE_YPOSH(scr_pt) = mGm_SCCV1+0x10;
+	SCORE_YPOS(scr_pt) = SCORE_YPOSH(scr_pt) << 16;
+    }else if( mGm_SCCV1+0xA0 < SCORE_YPOSH(scr_pt)){
+	SCORE_YPOSH(scr_pt) = mGm_SCCV1 + 0xA0;
+	SCORE_YPOS(scr_pt) = SCORE_YPOSH(scr_pt) << 16;
+    }
+}
+
+/* 三桁得点MOVE */
+void spoint_move(aSc_score_c *scr_pt, u8 index){
+
+    SCORE_HSIZE(scr_pt) = 0x100;
+    SCORE_VSIZE(scr_pt) = 0x100;
+   
+    SCORE_TIMER(scr_pt)--;
+    if( SCORE_TIMER(scr_pt) == 0 ){
+	SCORE_CMOD(p_scr)[index] = 0;
+	// SCORE_CLEAR(index);
+	return;
+    }
+    
+    if( SCORE_TIMER(scr_pt) > 0x20){   
+	SCORE_YPOS(scr_pt) += SCORE_YSPD(scr_pt);
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt) >> 16;
+    }
+    
+    point_yhosei(scr_pt);	// 常に画面内Y軸処理
+}
+/* 四桁得点MOVE */
+void bpoint_move(aSc_score_c *scr_pt, u8 index){
+
+    u8 tim, name;
+    name = SCORE_SYNO(p_scr)[index];
+    tim = SCORE_TIMER(scr_pt);
+    tim--;
+
+    if( tim == 0 ){
+	SCORE_CMOD(p_scr)[index] = 0;
+	// SCORE_CLEAR(index);
+	return;
+    }else if( tim > 0x20){  
+	if( tim > 0x70){
+	    SCORE_HSIZE(scr_pt) = 0x200;
+	    SCORE_VSIZE(scr_pt) = 0x200;
+	}else if( tim > 0x60){
+	    SCORE_HSIZE(scr_pt) -= 0x10;
+	    SCORE_VSIZE(scr_pt) -= 0x18;
+	}else if( tim > 0x50){   
+	    SCORE_HSIZE(scr_pt) -= 0x8;
+	    SCORE_VSIZE(scr_pt) += 0xE;
+	}else if( tim > 0x40){   
+	    SCORE_HSIZE(scr_pt) += 0xC;
+	    SCORE_VSIZE(scr_pt) -= 0x10;
+	}else if( tim > 0x30){   
+	    SCORE_HSIZE(scr_pt) -= 0x8;
+	    SCORE_VSIZE(scr_pt) += 0xC;
+	}else if( tim > 0x20){   
+	    SCORE_HSIZE(scr_pt) += 4;
+	    SCORE_VSIZE(scr_pt) -= 8;
+	}
+	SCORE_YPOS(scr_pt) += SCORE_YSPD(scr_pt);
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt) >> 16;
+    }else{
+  	SCORE_HSIZE(scr_pt) = 0x100;
+	SCORE_VSIZE(scr_pt) = 0x100;
+    }
+
+    point_yhosei(scr_pt);	// 常に画面内Y軸処理
+    
+    SCORE_TIMER(scr_pt) = tim;
+}
+
+/* 1UP MOVE */
+void oneup_move(aSc_score_c *scr_pt, u8 index){
+
+    u8 tim;
+    tim = SCORE_TIMER(scr_pt);
+    tim--;
+    
+    SCORE_PTRN(scr_pt) = (tim>>2) & 0x3;	//パターンセット
+    
+    if( tim == 0 ){
+	if( HANABI_SETFG == 0 ){
+	    HANABI_SET(scr_pt, index);
+	    SCORE_CMOD(p_scr)[index] = 0;
+	    HANABI_SETFG++;
+	}else{
+	
+	}
+	return;
+    }else if( tim < 0x4){
+	SCORE_YPOS(scr_pt) += 0x10000;
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt) >> 16;
+	SCORE_HSIZE(scr_pt) += 0x60;
+	SCORE_VSIZE(scr_pt) += 0x60;
+    }else if( tim < 0xC){
+	SCORE_HSIZE(scr_pt) = 0x80;
+	SCORE_VSIZE(scr_pt) = 0x80;
+    }else if( tim < 0x14){
+	SCORE_HSIZE(scr_pt) -= 0x30;
+	SCORE_VSIZE(scr_pt) -= 0x30;
+    }else if( tim == 0x14 ){
+	SCORE_HSIZE(scr_pt) = 0x200;
+	SCORE_VSIZE(scr_pt) = 0x200;
+    }else if( tim > 0x20){
+	if( tim == 0x38 ){
+	    voice_change(s_u_mario_just_what_i_needed);
+	}
+	if( SCORE_HSIZE(scr_pt) > 0x100 ){
+	    SCORE_HSIZE(scr_pt) -= 0x2;
+	    SCORE_VSIZE(scr_pt) -= 0x2;
+	}
+	SCORE_YPOS(scr_pt) += SCORE_YSPD(scr_pt);
+	SCORE_YPOSH(scr_pt) = SCORE_YPOS(scr_pt) >> 16;
+	SCORE_XPOSH(scr_pt) = mGm_SCCH1 + SCORE_WORKA(scr_pt);
+    }
+    
+    // 常に画面内に…
+    // X軸処理
+    if( mGm_SCCH1+0x20 > SCORE_XPOSH(scr_pt) ){
+	SCORE_XPOSH(scr_pt) = mGm_SCCH1+0x20;
+    }else if( mGm_SCCH1+0xC0 < SCORE_XPOSH(scr_pt)){
+	SCORE_XPOSH(scr_pt) = mGm_SCCH1 + 0xC0;
+    }
+    SCORE_XPOS(scr_pt) = SCORE_XPOSH(scr_pt) << 16;
+    // Y軸処理
+    point_yhosei(scr_pt);
+
+    SCORE_TIMER(scr_pt) = tim;
+}
+
+/* 花火 MOVE */
+void hanabi_move(aSc_score_c *scr_pt, u8 index){
+    
+    u8 tim;
+    tim = SCORE_TIMER(scr_pt);
+    tim--;
+    
+    SCORE_PTRN(scr_pt) = ((tim>>2)&3);		//パターンセット
+    SCORE_HSIZE(scr_pt) += 4;
+    SCORE_VSIZE(scr_pt) += 4;
+    
+    if( tim == 0 ){
+	SCORE_CMOD(p_scr)[index] = 0;
+	// SCORE_CLEAR(index);
+    }else if( tim < 0x60 ){
+	if(SCORE_YSPD(scr_pt) < 0x2E000){
+	    SCORE_YSPD(scr_pt) += 0x2000;
+	}
+    }
+
+    score_posclc(scr_pt);
+    SCORE_TIMER(scr_pt) = tim;
+}
+
+/*--------------------------------------------------------------*/
+/*		得点ＢＧ表示処理				*/
+/*--------------------------------------------------------------*/
+void u_score_disp(void)
+{
+	
+    u8 nuki_flg = 0;
+    u16 *vram_adr;
+    u32 work, coin_fg;
+
+    if(SCORE >= U_HI_SCORE){
+	U_HI_SCORE = SCORE;
+	HI_FLAG = 1;
+    }
+    coin_fg = REDCOIN;
+    work = SCORE;
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG3CNT & BG_SCR_BASE_1F) * 8) + VRAM);
+
+    *(u16 *)(vram_adr + 5) = 0xf35d;		// W
+    *(u16 *)(vram_adr + 7) = 0xf35e;		// O
+//    *(u16 *)(vram_adr + 6) = 0xf35f;		// R
+//    *(u16 *)(vram_adr + 7) = 0xf360;		// L
+//    *(u16 *)(vram_adr + 8) = 0xf361;		// D
+
+    if((coin_fg & 1) == 0)
+	*(u16 *)(vram_adr + 0xb) = 0xe362;
+    else
+	*(u16 *)(vram_adr + 0xb) = 0xe363;
+
+    if((coin_fg & 2) == 0)
+	*(u16 *)(vram_adr + 0xc) = 0xe362;
+    else
+	*(u16 *)(vram_adr + 0xc) = 0xe363;
+
+    if((coin_fg & 4) == 0)
+	*(u16 *)(vram_adr + 0xd) = 0xe362;
+    else
+	*(u16 *)(vram_adr + 0xd) = 0xe363;
+
+    if((coin_fg & 8) == 0)
+	*(u16 *)(vram_adr + 0xe) = 0xe362;
+    else
+	*(u16 *)(vram_adr + 0xe) = 0xe363;
+
+    if((coin_fg & 0x10) == 0)
+	*(u16 *)(vram_adr + 0xf) = 0xe362;
+    else
+	*(u16 *)(vram_adr + 0xf) = 0xe363;
+
+    *(u16 *)(vram_adr + 0x19) = 0xf34d;		// S
+    *(u16 *)(vram_adr + 0x1a) = 0xf34a;		// S
+    *(u16 *)(vram_adr + 0x1c) = 0xf34b;		// C
+/*    *(u16 *)(vram_adr + 0x16) = 0xf34c;		// O
+    *(u16 *)(vram_adr + 0x17) = 0xf34d;		// R
+    *(u16 *)(vram_adr + 0x18) = 0xf34e;		// E
+*/
+    *(u16 *)(vram_adr + 0x25) = WORDNO / 3 + 0xf341;		// ? 
+    *(u16 *)(vram_adr + 0x26) = 0xf34f;				// -
+    *(u16 *)(vram_adr + 0x27) = (WORDNO % 3) + 0xf341;		// ?
+
+    *(u16 *)(vram_adr + 0x2b) = PLAY_PLSYNO * 3 + 0xf350;	// プレイヤー
+    *(u16 *)(vram_adr + 0x2c) = PLAY_PLSYNO * 3 + 0xf351;	// プレイヤー
+    *(u16 *)(vram_adr + 0x2d) = PLAY_PLSYNO * 3 + 0xf352;
+    *(u16 *)(vram_adr + 0x2e) = 0xf35c;
+    if((mGm_PLCNT / 10) != 0)
+	*(u16 *)(vram_adr + 0x2f) = mGm_PLCNT / 10 + 0xf340;
+    *(u16 *)(vram_adr + 0x30) = (mGm_PLCNT % 10) + 0xf340;
+
+    if((work / 10000000) != 0){
+	*(u16 *)(vram_adr + 0x34) = (work / 10000000) + 0xf340;
+	work = work % 10000000;
+	nuki_flg++;
+    }
+
+    if(((work / 1000000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x35) = (work / 1000000) + 0xf340;
+	work = work % 1000000;
+	nuki_flg++;
+    }
+
+    if(((work / 100000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x36) = (work / 100000) + 0xf340;
+	work = work % 100000;
+	nuki_flg++;
+    }
+
+    if(((work / 10000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x37) = (work / 10000) + 0xf340;
+	work = work % 10000;
+	nuki_flg++;
+    }
+
+    if(((work / 1000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x38) = (work / 1000) + 0xf340;
+	work = work % 1000;
+	nuki_flg++;
+    }
+
+    if(((work / 100) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x39) = (work / 100) + 0xf340;
+	work = work % 100;
+	nuki_flg++;
+    }
+
+
+
+    if(((work / 10) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x3a) = (work / 10) + 0xf340;
+	work = work % 10;
+	nuki_flg++;
+    }
+	else{
+    *(u16 *)(vram_adr + 0x3a) = 0xf34c;		// S
+	}
+
+    if(((work % 10) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x3b) = (work % 10) + 0xf340;
+	nuki_flg++;
+    }
+
+    *(u16 *)(vram_adr + 0x3c) = 0xf340;
+
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d605 1
+d618 5
+a622 5
+    *(u16 *)(vram_adr + 4) = 0xf35d;		// W
+    *(u16 *)(vram_adr + 5) = 0xf35e;		// O
+    *(u16 *)(vram_adr + 6) = 0xf35f;		// R
+    *(u16 *)(vram_adr + 7) = 0xf360;		// L
+    *(u16 *)(vram_adr + 8) = 0xf361;		// D
+d649 4
+a652 3
+    *(u16 *)(vram_adr + 0x14) = 0xf34a;		// S
+    *(u16 *)(vram_adr + 0x15) = 0xf34b;		// C
+    *(u16 *)(vram_adr + 0x16) = 0xf34c;		// O
+d655 1
+a655 1
+
+d704 2
+d711 3
+d721 1
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

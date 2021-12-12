@@ -1,0 +1,241 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*--------------------------------------------------------------*/
+/*		ゲーム選択用サブファ@イルヘッダー		*/
+/*--------------------------------------------------------------*/
+#ifndef __M_TITLE_SUB_H_
+#define __M_TITLE_SUB_H_
+
+enum {
+    Hi_score,		// 0
+    Mario,		// 1
+    USA_door,		// 2
+    Bros_pipe,		// 3
+    Cursol,		// 4
+    USA_title,		// 5
+    Bros_title,		// 6
+    USA_smok,		// 7
+    USA_heart,		// 8
+    USA_casalin,	// 9
+    USA_smokbomb,	// A
+    USA_egg,		// B
+    USA_bomb,		// C
+    USA_burn,		// D
+    USA_heiho,		// E
+    USA_tobi,		// F
+    USA_tori,		// 10
+    USA_ninj,		// 11
+    USA_fish,		// 12
+    USA_mask,		// 13
+    USA_kinoko,		// 14
+    USA_coin,		// 15
+    USA_key,		// 16
+    USA_koura,		// 17
+    USA_doorshade,	// 18
+    Bros_pipeshade,	// 19
+    Marioshade,		// 1A
+    TSOBJMAX,		// 1B
+};
+
+// BG1の状態
+enum {
+    GAME_WAIT,
+    GAME_UP,
+    GAME_DOWN,
+    FILE_WAIT,
+    FILE_UP,
+    FILE_DOWN,
+};
+
+// BG2の状態
+enum {
+    WAIT,
+    LEFT_MOVE,
+    RIGHT_MOVE,
+};
+
+typedef struct{
+    s16 x_pos;
+    s16 y_pos;
+    s16 x_spd;
+    s16 y_spd;
+    u16 hsize;
+    u16 vsize;
+    u8  patrn;
+    u8  mode;
+    u16 timer;
+} Title_sel_obj_c;
+
+#define TSOXPOS(pt)	(((Title_sel_obj_c *)(pt))->x_pos)
+#define TSOYPOS(pt)	(((Title_sel_obj_c *)(pt))->y_pos)
+#define TSOXSPD(pt)	(((Title_sel_obj_c *)(pt))->x_spd)
+#define TSOYSPD(pt)	(((Title_sel_obj_c *)(pt))->y_spd)
+#define TSOHSIZ(pt)	(((Title_sel_obj_c *)(pt))->hsize)
+#define TSOVSIZ(pt)	(((Title_sel_obj_c *)(pt))->vsize)
+#define TSOPTRN(pt)	(((Title_sel_obj_c *)(pt))->patrn)
+#define TSOMODE(pt)	(((Title_sel_obj_c *)(pt))->mode)
+#define TSOTIM(pt)	(((Title_sel_obj_c *)(pt))->timer)
+
+extern Title_sel_obj_c Ts_obj_clr;
+
+typedef struct{
+    Title_sel_obj_c Obj_Dt[TSOBJMAX];	// タイトルセレクト用オブジェデータ
+    u8  settbl[TSOBJMAX];		// タイトルセレクト用オブジェセットフラグ
+    u8  tilt;				// 画面揺れフラグ
+    u8  cancelfg;			// キャンセル中フラグ
+    u16 logo_timer;			// ロゴ拡縮用タイマー
+    u8  ipt;				// OAMナンバー
+    u8  affinept;			// 拡縮パラメータナンバー
+    u8	eggnum[3];			// 各ファ@イルの卵の数
+    u8	eggfg[15];			// 各ファ@イルの卵フラグ
+    u8	wldno[3];			// 各ファ@イルのワールドデータ
+    u8	wldmax[3];			// 各ファ@イルのワールドデータの最大値
+    u8	clearfg[3];			// 各ファ@イルのクリアフラグ
+    u8	selwld[3];			// 現在選択中のワールドナンバー
+    u8	bg1movefg:4;			// BG1移動中フラグ
+    u8	bg2movefg:4;			// BG2移動中フラグ
+
+    u8	load_flag:4;			// ファ@イルロードフラグ
+    u8	clear_flag:4;			// ファ@イルクリアフラグ
+
+    u8	chg_timer;			// コースセレクト用タイマー
+    u32	score_data;			// スコア表示用変数(4bit毎に各桁が入る)
+
+} Title_sel_c;
+
+extern Title_sel_c *p_tsl;
+
+#define TSOBJDT (p_tsl->Obj_Dt)
+#define TSIPT	(p_tsl->ipt)
+#define TSAPT	(p_tsl->affinept)
+#define TSSTTBL	(p_tsl->settbl)
+#define TSTILT	(p_tsl->tilt)
+#define TSCCLFG (p_tsl->cancelfg)
+#define TSLGTM  (p_tsl->logo_timer)
+#define TSEGNUM	(p_tsl->eggnum)
+#define TSEGGFG	(p_tsl->eggfg)
+#define TSWRDNO	(p_tsl->wldno)
+#define TSWRDMAX	(p_tsl->wldmax)
+#define TSCLRFG	(p_tsl->clearfg)
+#define TSWLDNO	(p_tsl->wldno)
+#define	TSBG1FG	(p_tsl->bg1movefg)
+#define	TSBG2FG	(p_tsl->bg2movefg)
+#define TSCHGTM	(p_tsl->chg_timer)
+#define TSSCRDT	(p_tsl->score_data)
+#define TSFLDFG	(p_tsl->load_flag)
+#define TSFCLFG	(p_tsl->clear_flag)
+
+#define LOGOSPDL 0x6	// タイトルロゴ＆土管の左移動スピード
+#define LOGOSPDR 0x8	// タイトルロゴ＆土管の右移動スピード
+#define LINE1	0x21
+#define LINE2	0x31
+#define LINE3	0x41
+#define LINE4	0x51
+#define EGGXPOS 0x7D
+
+extern u16    Hi_scoreDT[];
+extern u16    USA_doorDT[];
+extern u16    USA_doorshadeDT[];
+extern u16    Bros_pipeDT[];
+extern u16    Bros_pipeshadeDT[];
+extern u16    USA_titleDT[];
+extern u16    Bros_titleDT[];
+extern u16    MarioDT[];
+extern u16    CursolDT[];
+extern u16    USA_casalinDT[];
+extern u16    USA_smokeDT[];
+extern u16    USA_eggDT[];
+extern u16    USA_smokbombDT[];
+extern u16    USA_bombDT[];
+extern u16    USA_burnDT[];
+extern u16    USA_smokDT[];
+extern u16    USA_heartDT[];
+extern u16    USA_heihoDT[];
+extern u16    USA_tobiDT[];
+extern u16    USA_toriDT[];
+extern u16    USA_ninjDT[];
+extern u16    USA_fishDT[];
+extern u16    USA_maskDT[];
+extern u16    USA_kinokoDT[];
+extern u16    USA_coinDT[];
+extern u16    USA_keyDT[];
+extern u16    USA_kouraDT[];
+
+extern u16    *tlsel_objdt_tbl[];
+
+extern void Hi_score_oamset(u8 t_i);
+extern void objoam_bomb(u8 t_i);
+extern void objoam_door(u8 t_i);
+extern void objoam_pipe(u8 t_i);
+extern void objoam_common(u8 t_i);
+extern void objoam_shade(u8 t_i);
+
+extern void objmove_Hi_score(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_door(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_Bros_pipe(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_Cursol(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_title(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_Bros_title(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_Mario(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_Bros_pipe(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_casalin(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_smokbomb(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_egg(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_bomb(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_burn(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_smok(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_USA_heart(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_fail(Title_sel_obj_c *tso_pt, u8 index);
+extern void objmove_dummy(Title_sel_obj_c *tso_pt, u8 index);
+
+extern void (*title_obj_move_tbl[])(Title_sel_obj_c *tso_pt, u8 index);
+extern void (*title_obj_oam_tbl[])(u8 t_i);
+
+extern void FileData_Set(u8 file_no);
+extern void File_Extra(u8 line);
+extern void File_World(u8 line);
+extern void File_New(u8 line);
+extern void mGm_MALLOC_p_tsl(void);
+extern void mGm_FREE_p_tsl(void);
+
+static void Hi_score_data_set(void);
+static void ts_file_load(Title_sel_obj_c *tso_pt);
+static void ts_file_clear(u8 index);
+
+#endif /* __M_TITLE_SUB_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

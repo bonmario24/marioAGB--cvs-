@@ -1,0 +1,889 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UA_ACT_H_
+#define __UA_ACT_H_
+
+#include "m_main.h"
+#include "ua_endt.h"
+#include "uca_acters.h"
+#include "ua_commondt.h"
+
+//とりあえず　@敵の配置データにないものを表示するとき
+//          敵の初期データ番号の所にいれる
+#define   EN_BULLET     0x50
+#define   BULLET        0x50
+#define   EN_ITEM       0x50
+
+/*------------- ＥＸＴＥＲＮ -----------------------------------*/
+/*** MALLOC & FREE ***/
+extern void mGm_MALLOC_p_act(void);
+extern void mGm_FREE_p_act(void);
+
+extern void act_sub_init(aAC_base_c *abs_pt,u16 name,u8 index);
+extern ObjAffineSrcData Sraffp;
+extern ObjAffineDestData Deaffp;
+extern void act_InitEnmySet(void);
+extern void a_ENGIVEUP(aAC_base_c *enmy_pt, u8 enindex, 
+		       aAC_base_c *abs_pt, u8 index);
+extern void ENCROS(aAC_base_c *abs_pt, u8 index);
+extern void BRNCROS(aAC_base_c *abs_pt, u8 index);
+extern void a_StarSet(void);
+extern void HEARTST( u16 xpos, u16 ypos );
+extern void EGGST( u16 xpos, u16 ypos, u8 type );//ヨッシーの卵set
+extern void MASKST(void);
+extern void WOOD_DRSET(void);
+extern void Cherry_Set(u16 xpos, u16 ypos);
+extern void WHATSMV(aAC_base_c *abs_pt, u8 index);
+extern void act_main(void);
+extern void FairyMove2(aAC_base_c *abs_pt,u8 index);
+extern void C_HEIHO_SET(aAC_base_c *enmy_pt, u8 enindex);
+extern void F_HEIHO_SET(aAC_base_c *enmy_pt, u8 enindex);
+extern void SBTEN_SET(aAC_base_c *enmy_pt, u8 enindex);
+extern void hit_ITEMBALL(aAC_base_c *abs_pt, u8 index);
+extern void Perfect(void);
+extern void redcoin_flagset(void);
+
+/*---Enemy Init---*/
+extern void eninit_dummy(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FAIRY(aAC_base_c *abs_pt,u8 index);
+extern void eninit_WALK(aAC_base_c *abs_pt,u8 index);
+extern void eninit_TORI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_HUCK0(aAC_base_c *abs_pt,u8 index);
+extern void eninit_SHOOT(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FORCE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BURN0(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BIRD(aAC_base_c *abs_pt,u8 index);
+extern void eninit_NINJA(aAC_base_c *abs_pt,u8 index);
+extern void eninit_NINJ1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FLYNG(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BALLM(aAC_base_c *abs_pt,u8 index);
+extern void eninit_PIGMO(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FISH0(aAC_base_c *abs_pt,u8 index);
+
+extern void eninit_MUSI0(aAC_base_c *abs_pt,u8 index);
+extern void eninit_TUBO(aAC_base_c *abs_pt,u8 index);
+extern void eninit_MASK(aAC_base_c *abs_pt,u8 index);
+extern void eninit_HEBI0(aAC_base_c *abs_pt,u8 index);
+extern void eninit_HEBI1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_SBTEN(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BALL1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BOSS0(aAC_base_c *abs_pt,u8 index);
+extern void eninit_MIKEY(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BALL1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_SNAKE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FIRE1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BKANI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BISHI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FLWER(aAC_base_c *abs_pt,u8 index);
+extern void eninit_CANON(aAC_base_c *abs_pt,u8 index);
+
+extern void eninit_DANGN(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FNSUI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_ICEMN(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FIREB(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FIRES(aAC_base_c *abs_pt,u8 index);
+extern void eninit_MAMUU(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BGKAO(aAC_base_c *abs_pt,u8 index);
+extern void eninit_WHATS(aAC_base_c *abs_pt,u8 index);
+
+extern void eninit_CRPET(aAC_base_c *abs_pt,u8 index);
+extern void eninit_WOOD(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BKDN(aAC_base_c *abs_pt,u8 index);
+extern void eninit_EXIT(aAC_base_c *abs_pt,u8 index);
+extern void eninit_XTAL(aAC_base_c *abs_pt,u8 index);
+extern void eninit_YASAI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_STAR(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FACE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_ROCKET(aAC_base_c *abs_pt,u8 index);
+extern void eninit_SMOK2(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BIGDR(aAC_base_c *abs_pt,u8 index);
+extern void eninit_FLAG(aAC_base_c *abs_pt,u8 index);
+extern void eninit_OFFFLAG(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BIGBOSS(aAC_base_c *abs_pt,u8 index);
+extern void eninit_PWBK(aAC_base_c *abs_pt,u8 index);
+extern void eninit_GONDOLA(aAC_base_c *abs_pt,u8 index);
+extern void eninit_CHERRY(aAC_base_c *abs_pt,u8 index);
+extern void eninit_GONBOSS(aAC_base_c *abs_pt,u8 index);
+extern void eninit_AKADAMA(aAC_base_c *abs_pt,u8 index);
+extern void eninit_AODAMA(aAC_base_c *abs_pt,u8 index);
+extern void eninit_TOGE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_EGG(aAC_base_c *abs_pt,u8 index);
+extern void eninit_HIKARI(aAC_base_c *abs_pt,u8 index);
+extern void eninit_MASK1(aAC_base_c *abs_pt,u8 index);
+extern void eninit_CAPSULE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_LIFT(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BUBBLE(aAC_base_c *abs_pt,u8 index);
+extern void eninit_SBOSS(aAC_base_c *abs_pt,u8 index);
+extern void eninit_ITEMBALL(aAC_base_c *abs_pt,u8 index);
+extern void eninit_ONEUP(aAC_base_c *abs_pt,u8 index);
+extern void eninit_MOSAIC(aAC_base_c *abs_pt,u8 index);
+extern void eninit_BIGCOIN(aAC_base_c *abs_pt,u8 index);
+
+/*---Enemy Move---*/
+extern void enmove_dummy(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FAIRY(aAC_base_c *abs_pt,u8 index);
+extern void enmove_WALK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_TORI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_HUCK0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SHOOT(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SHOO1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FORCE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BURN0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIRD(aAC_base_c *abs_pt,u8 index);
+extern void enmove_NINJA(aAC_base_c *abs_pt,u8 index);
+extern void enmove_NINJ1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FLYNG(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BALLM(aAC_base_c *abs_pt,u8 index);
+extern void enmove_PIGMO(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FISH0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MUSI0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_TUBO(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MASK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_HEBI0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_HEBI1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SBTEN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BALL1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BOSS0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MIKEY(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BALL1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SNAKE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FIRE1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BKANI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BISHI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FLWER(aAC_base_c *abs_pt,u8 index);
+extern void enmove_CANON(aAC_base_c *abs_pt,u8 index);
+
+extern void enmove_DANGN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FNSUI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_ICEMN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FIREB(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FIRES(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MAMUU(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BGKAO(aAC_base_c *abs_pt,u8 index);
+extern void enmove_WHATS(aAC_base_c *abs_pt,u8 index);
+
+extern void enmove_CRPET(aAC_base_c *abs_pt,u8 index);
+extern void enmove_WOOD(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BKDN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_EXIT(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BOMB(aAC_base_c *abs_pt,u8 index);
+extern void enmove_KEMURI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_XTAL(aAC_base_c *abs_pt,u8 index);
+extern void enmove_YASAI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_STAR(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FACE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_WATCH(aAC_base_c *abs_pt,u8 index);
+extern void enmove_ROCKET(aAC_base_c *abs_pt,u8 index);
+extern void enmove_POWBK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_LMP0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_ONEUP(aAC_base_c *abs_pt,u8 index);
+extern void enmove_DOOR(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SMOK2(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SPAE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_KEY0(aAC_base_c *abs_pt,u8 index);
+extern void enmove_COIN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_HEART(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIGDR(aAC_base_c *abs_pt,u8 index);
+extern void enmove_WOODDR(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIRDF(aAC_base_c *abs_pt,u8 index);
+extern void enmove_FLYNF(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIGSMK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIGBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enmove_NORMPOWBK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_GONDOLA(aAC_base_c *abs_pt,u8 index);
+extern void enmove_CHERRY(aAC_base_c *abs_pt,u8 index);
+extern void enmove_GONBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enmove_AKADAMA(aAC_base_c *abs_pt,u8 index);
+extern void enmove_AODAMA(aAC_base_c *abs_pt,u8 index);
+extern void enmove_TOGE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_EGG(aAC_base_c *abs_pt,u8 index);
+extern void enmove_HIKARI(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MASK1(aAC_base_c *abs_pt,u8 index);
+extern void enmove_KABUFAIRY(aAC_base_c *abs_pt,u8 index);
+extern void enmove_CAPSULE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_TILTSMK(aAC_base_c *abs_pt,u8 index);
+extern void enmove_OFFFLAG(aAC_base_c *abs_pt,u8 index);
+extern void enmove_LIFT(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BUBBLE(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enmove_ITEMBALL(aAC_base_c *abs_pt,u8 index);
+extern void enmove_MOSAIC(aAC_base_c *abs_pt,u8 index);
+extern void enmove_BIGCOIN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_SCRDOWN(aAC_base_c *abs_pt,u8 index);
+extern void enmove_VSCRUP(aAC_base_c *abs_pt,u8 index);
+extern void enmove_VSCRDOWN(aAC_base_c *abs_pt,u8 index);
+
+/*---Enemy OamSet---*/
+extern void act_oamset(aAC_base_c *abs_pt,u8 my_index);
+extern void enoam_FNSUI(aAC_base_c *abs_pt,u8 index);
+extern void enoam_SBTEN(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BURN0(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIRD0(aAC_base_c *abs_pt,u8 index);
+extern void enoam_TUBO(aAC_base_c *abs_pt,u8 index);
+extern void enoam_WALK(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BOSS0(aAC_base_c *abs_pt, u8 index);
+extern void enoam_XTAL(aAC_base_c *abs_pt, u8 index);
+extern void enoam_SNAKE(aAC_base_c *abs_pt, u8 index);
+extern void enoam_FORCE(aAC_base_c *abs_pt, u8 index);
+extern void enoam_CANON(aAC_base_c *abs_pt, u8 index);
+extern void enoam_EXIT(aAC_base_c *abs_pt, u8 index);
+extern void enoam_STAR(aAC_base_c *abs_pt, u8 index);
+extern void enoam_ROCKET(aAC_base_c *abs_pt, u8 index);
+extern void enoam_PWBK(aAC_base_c *abs_pt,u8 index);
+extern void enoam_HEBI(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BKDN(aAC_base_c *abs_pt,u8 index);
+extern void enoam_PIGMO(aAC_base_c *abs_pt,u8 index);
+extern void enoam_MIKEY(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BKANI(aAC_base_c *abs_pt,u8 index);
+extern void enoam_MASK0(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BGKAO(aAC_base_c *abs_pt,u8 index);
+extern void enoam_DOOR(aAC_base_c *abs_pt,u8 index);
+extern void enoam_MAMUU(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIGDR(aAC_base_c *abs_pt,u8 index);
+extern void enoam_WOODDR(aAC_base_c *abs_pt,u8 index);
+extern void enoam_FIRES(aAC_base_c *abs_pt,u8 index);
+extern void enoam_FIREB(aAC_base_c *abs_pt,u8 index);
+extern void enoam_CMOD(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIGWALK(aAC_base_c *abs_pt,u8 index);
+extern void enoam_FISH0(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIGSMK(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIGBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enoam_GONDOLA(aAC_base_c *abs_pt,u8 index);
+extern void enoam_FAIRY(aAC_base_c *abs_pt,u8 index);
+extern void enoam_GONBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enoam_COIN(aAC_base_c *abs_pt,u8 index);
+extern void enoam_AKADAMA(aAC_base_c *abs_pt,u8 index);
+extern void enoam_TOGE(aAC_base_c *abs_pt,u8 index);
+extern void enoam_EGG(aAC_base_c *abs_pt,u8 index);
+extern void enoam_HIKARI(aAC_base_c *abs_pt,u8 index);
+extern void enoam_MASK1(aAC_base_c *abs_pt,u8 index);
+extern void enoam_KABUFAIRY(aAC_base_c *abs_pt,u8 index);
+extern void enoam_FACE(aAC_base_c *abs_pt,u8 index);
+extern void enoam_CAPSULE(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BIGSUB(aAC_base_c *abs_pt,u8 index);
+extern void enoam_CRPET(aAC_base_c *abs_pt,u8 index);
+extern void enoam_LIFT(aAC_base_c *abs_pt,u8 index);
+extern void enoam_BUBBLE(aAC_base_c *abs_pt,u8 index);
+extern void enoam_SBOSS(aAC_base_c *abs_pt,u8 index);
+extern void enoam_LIFT2(aAC_base_c *abs_pt,u8 index);
+extern void enoam_ITEMBALL(aAC_base_c *abs_pt,u8 index);
+extern void enoam_MOSAIC(aAC_base_c *abs_pt,u8 index);
+
+/*------------- クラス定義 -------------------------------------*/
+/*------------- 敵名前登録（クラス定義）------------------------*/
+/****************************************************************/
+/*		敵Ｎｏ．テーブル（enty_name）			*/
+/****************************************************************/
+#define	ENEMY_MARIO	0		// マリオ
+#define	ENEMY_DUMMY	0		// ダミー（テスト）
+
+#define	ENEMY_FAIRY	0		// (0) ハート
+#define	ENEMY_WALK0	(ENEMY_FAIRY+1)	// (1) ヘイホー（赤）
+#define	ENEMY_WALK1	(ENEMY_WALK0+1)	// (2) 　@　@”　@（青）　@
+#define	ENEMY_TORI	(ENEMY_WALK1+1)	// (3) 鳥（地面を飛ぶ）
+#define	ENEMY_HUCK0	(ENEMY_TORI+1)	// (4) ハリネズミ
+#define	ENEMY_SHOOT	(ENEMY_HUCK0+1)	// (5) ムーチョ（赤）
+#define	ENEMY_SHOO1	(ENEMY_SHOOT+1)	// (6) 　@　@”　@（グレー）
+#define	ENEMY_SHOO2	(ENEMY_SHOO1+1)	// (7) 　@　@”　@（ピンク）
+#define	ENEMY_FORCE	(ENEMY_SHOO2+1)	// (8) ダチョウ
+#define	ENEMY_BURN0	(ENEMY_FORCE+1)	// (9) ＢＯＭ兵
+#define	ENEMY_BIRD0	(ENEMY_BURN0+1)	// (A) 鳥（ＢＯＭ兵とセット）
+#define	ENEMY_BIRD1	(ENEMY_BIRD0+1)	// (B) ”（鳥だけ右へ）
+#define	ENEMY_BIRD2	(ENEMY_BIRD1+1)	// (C) ”（鳥だけ左へ）
+#define	ENEMY_NINJA	(ENEMY_BIRD2+1)	// (D) ゲリラ兵（走ってきてジャンプ）
+#define	ENEMY_NINJ1	(ENEMY_NINJA+1)	// (E) 　@”　@　@（その場とび）
+#define	ENEMY_FLYNG	(ENEMY_NINJ1+1)	// (F) 空とび兵（赤）
+#define	ENEMY_FLYN1	(ENEMY_FLYNG+1)	// (10)　@”　@　@（グレー）
+#define	ENEMY_BALLM	(ENEMY_FLYN1+1)	// (11)マムーのシャボン玉
+#define	ENEMY_PIGMO	(ENEMY_BALLM+1)	// (12)じゅうたん
+#define	ENEMY_FISH0	(ENEMY_PIGMO+1)	// (13)魚
+#define	ENEMY_MUSI0	(ENEMY_FISH0+1)	// (14)てんとう虫
+#define	ENEMY_TBO00	(ENEMY_MUSI0+1)	// (15)つぼヘイホー
+#define	ENEMY_TBO01	(ENEMY_TBO00+1)	// (16)　@”ＢＯＭ兵
+#define	ENEMY_MASK0	(ENEMY_TBO01+1)	// (17)仮面
+#define	ENEMY_HEBI0	(ENEMY_MASK0+1)	// (18)へびｉｎつぼ
+#define	ENEMY_HEBI1	(ENEMY_HEBI0+1)	// (19)　@　@”　@砂
+#define	ENEMY_SBTEN	(ENEMY_HEBI1+1)	// (1A)サボテン
+
+#define	ENEMY_BALL0	(ENEMY_SBTEN+1)	// (1B)ムーチョの弾
+#define	ENEMY_BOSS0	(ENEMY_BALL0+1)	// (1C)キャサリン
+#define	ENEMY_MIKEY	(ENEMY_BOSS0+1)	// (1D)ドン・チュルゲ
+#define	ENEMY_BALL1	(ENEMY_MIKEY+1)	// (1E)キャサリンの弾
+#define	ENEMY_SNAKE	(ENEMY_BALL1+1)	// (1F)ガブチョ（へびボス）
+#define	ENEMY_FIRE1	(ENEMY_SNAKE+1)	// (20)花、Bヘビ、B火の弾
+#define	ENEMY_BKANI	(ENEMY_FIRE1+1)	// (21)チョッキー（かにボス）
+#define	ENEMY_BISHI	(ENEMY_BKANI+1)	// (22)チョッキ―の石
+
+#define	ENEMY_FLWER	(ENEMY_BISHI+1)	// (23)フラワー（赤）
+#define	ENEMY_FLWE1	(ENEMY_FLWER+1)	// (24)　@”　@　@（ピンク）
+#define	ENEMY_FLWE2	(ENEMY_FLWE1+1)	// (25)　@”　@　@（グレー）
+#define	ENEMY_CANON	(ENEMY_FLWE2+1)	// (26)大砲
+#define	ENEMY_DANGN	(ENEMY_CANON+1)	// (27)大砲の弾
+#define	ENEMY_FNSUI	(ENEMY_DANGN+1)	// (28)噴水
+#define	ENEMY_ICEMN	(ENEMY_FNSUI+1)	// (29)アイスマン
+
+#define	ENEMY_FIREB	(ENEMY_ICEMN+1)	// (2A)ヒーボーボー
+#define	ENEMY_FIRES	(ENEMY_FIREB+1)	// (2B)ヒーボーボーの子
+#define	ENEMY_MAMUU	(ENEMY_FIRES+1)	// (2C)マムー
+#define	ENEMY_BGKAO	(ENEMY_MAMUU+1)	// (2D)ボス顔
+
+#define	ENEMY_WHATS	(ENEMY_BGKAO+1)	// (2E)電気
+#define	ENEMY_WHAT1	(ENEMY_WHATS+1)	// (2F)
+#define	ENEMY_WHAT2	(ENEMY_WHAT1+1)	// (30)
+#define	ENEMY_WHAT3	(ENEMY_WHAT2+1)	// (31)
+/*----- 新規敵！！ -----*/
+#define ENEMY_BIGWALK	(ENEMY_WHAT3+1) // (32)
+#define ENEMY_RIBON	(ENEMY_BIGWALK+1) // (33)
+#define ENEMY_BIGBOSS	(ENEMY_RIBON+1) // (34)
+#define ENEMY_BIGBALL	(ENEMY_BIGBOSS+1)// (35)
+#define ENEMY_BIGWALK1	(ENEMY_BIGBALL+1)// (36)青でかヘイホー
+#define ENEMY_BIGNINJI	(ENEMY_BIGWALK1+1)// (37)でかニンジ
+
+/*----- ここからアイテム -----*/
+#define	ENEMY_HAPPA	(ENEMY_BIGNINJI+1)// (38) 大根  ;;Ninjin
+#define	ENEMY_KABU	(ENEMY_HAPPA+1) // (39) かぶ
+#define	ENEMY_BIGKABU	(ENEMY_KABU+1)	// (3A) Kabocha
+#define	ENEMY_FACE	(ENEMY_BIGKABU+1)	// (3B) Big face
+#define	ENEMY_COIN	(ENEMY_FACE+1)	// (3C) コイン ;;;Daikon
+#define	ENEMY_BKDN	(ENEMY_COIN+1)	// (3D) バクダン
+#define	ENEMY_RKET	(ENEMY_BKDN+1)	// (3E) Rocket
+
+#define	ENEMY_BRKA	(ENEMY_RKET+1)	// (3F) 持てるブロック
+#define	ENEMY_BRKB	ENEMY_BRKA	// (" )
+#define	ENEMY_BRKC	ENEMY_BRKA	// (" )
+#define	ENEMY_PWBK	(ENEMY_BRKC+1)	// (40) ＰＯＷブロック
+
+#define	ENEMY_WOOD	(ENEMY_PWBK+1)	// (41)
+#define	ENEMY_DOOR	(ENEMY_WOOD+1)	// (42)
+#define	ENEMY_KEY0	(ENEMY_DOOR+1)	// (43)
+#define	ENEMY_KEY1	ENEMY_KEY0	// (43)
+#define	ENEMY_LMP0	(ENEMY_KEY0+1)	// (44) フラスコ
+#define	ENEMY_HEART	(ENEMY_LMP0+1)	// (45)
+#define	ENEMY_ONEUP	(ENEMY_HEART+1)	// (46) １ＵＰ
+#define	ENEMY_CRPET	(ENEMY_ONEUP+1)	// (47)
+#define	ENEMY_TSURU	00		// (00)
+#define	ENEMY_EXITL	(ENEMY_CRPET+1)	// (48)
+#define	ENEMY_EXITR	(ENEMY_EXITL+1)	// (49)
+#define	ENEMY_BETA0	ENEMY_EXITR	// (49)
+#define	ENEMY_XTAL	(ENEMY_EXITR+1)	// (4A) 水晶
+#define	ENEMY_STAR	(ENEMY_XTAL+1)	// (4B) スター
+#define	ENEMY_WATCH	(ENEMY_STAR+1)	// (4C)
+#define	ENEMY_BOMB	(ENEMY_WATCH+1)	// (4D) //追加！
+#define	ENEMY_KEMURI	(ENEMY_BOMB+1)	// (4E) //追加！
+
+/*------------- フラグセット -----------------------------------*/
+#define	ENEMY_BIRDF	(ENEMY_KEMURI+1)// (4F)
+#define	ENEMY_FLYNF	(ENEMY_BIRDF+1)	// (50)
+#define	ENEMY_OFFFG	(ENEMY_FLYNF+1)	// (51)
+/*------------- フラグセットここまで ---------------------------*/
+
+/*----- ここからアイテム？ -----*/
+#define	ENEMY_DREAM	(ENEMY_OFFFG+1)	// (52)
+#define	DUMMY_MARIO	(ENEMY_DREAM+1)	// (53)
+#define ENEMY_SMOK2	(DUMMY_MARIO+1) // (54)
+#define ENEMY_BIGDR	(ENEMY_SMOK2+1) // (55)
+#define ENEMY_WOODDR	(ENEMY_BIGDR+1) // (56)
+#define ENEMY_BIGSMK	(ENEMY_WOODDR+1)// (57)
+#define ENEMY_BIGPW	(ENEMY_BIGSMK+1)// (58)
+#define ENEMY_GONDOLA	(ENEMY_BIGPW+1) // (59)
+#define ENEMY_CHERRY	(ENEMY_GONDOLA+1) // (5A)
+#define ENEMY_GONBOSS	(ENEMY_CHERRY+1)  // (5B)
+#define ENEMY_AKADAMA	(ENEMY_GONBOSS+1) // (5C)
+#define ENEMY_AODAMA	(ENEMY_AKADAMA+1) // (5D)
+#define ENEMY_TOGE	(ENEMY_AODAMA+1)  // (5E)
+#define ENEMY_EGG	(ENEMY_TOGE+1)	  // (5F)
+#define ENEMY_HIKARI	(ENEMY_EGG+1)	  // (60)
+#define ENEMY_MASK1	(ENEMY_HIKARI+1)  // (61)
+#define ENEMY_BIGHIKARI	(ENEMY_MASK1+1)	  // (62)
+#define ENEMY_KABUFAIRY	(ENEMY_BIGHIKARI+1)	// (63) かぶハート
+#define ENEMY_CAPSULE	(ENEMY_KABUFAIRY+1)	// (64) アイテムカプセル
+#define ENEMY_TILTSMK	(ENEMY_CAPSULE+1) // (65) 
+#define ENEMY_LIFT	(ENEMY_TILTSMK+1) // (66) 
+#define ENEMY_BUBBLE	(ENEMY_LIFT+1)    // (67) 
+#define ENEMY_SMIKEY	(ENEMY_BUBBLE+1)  // (68) 
+#define ENEMY_SKANI	(ENEMY_SMIKEY+1)  // (69) 
+#define ENEMY_SFIREB	(ENEMY_SKANI+1)   // (6A) 
+#define ENEMY_SSNAKE	(ENEMY_SFIREB+1)  // (6B) 
+#define ENEMY_LIFT2	(ENEMY_SSNAKE+1)  // (6C) 
+#define ENEMY_ITEMBALL	(ENEMY_LIFT2+1)	  // (6D) 
+#define ENEMY_MOSAIC	(ENEMY_ITEMBALL+1)	  // (6E) 
+#define ENEMY_REDCOIN1	(ENEMY_MOSAIC+1)  // (6F) 
+#define ENEMY_REDCOIN2	(ENEMY_REDCOIN1+1)  // (70) 
+#define ENEMY_REDCOIN3	(ENEMY_REDCOIN2+1)  // (71) 
+#define ENEMY_REDCOIN4	(ENEMY_REDCOIN3+1)  // (72) 
+#define ENEMY_REDCOIN5	(ENEMY_REDCOIN4+1)  // (73) 
+#define ENEMY_SCRDOWN	(ENEMY_REDCOIN5+1)  // (74) 横画面自動スクロール（下）
+#define ENEMY_VSCRUP	(ENEMY_SCRDOWN+1)   // (75) 縦画面自動スクロール（上）
+#define ENEMY_VSCRDOWN	(ENEMY_VSCRUP+1)    // (76) 縦画面自動スクロール（下）
+#define ENEMY_VSCRUP_U	(ENEMY_VSCRDOWN+1)  // (77) 縦画面自動スクロール（上：上モードのみ）
+#define ENEMY_VSCRDOWN_D (ENEMY_VSCRUP_U+1) // (78) 縦画面自動スクロール（下：下モードのみ）
+
+/****************************************************************/
+/*		アクターイニシャルメニュー配列			*/
+/****************************************************************/
+static void (*actint_menu[])(aAC_base_c *,u8) = {
+
+    eninit_FAIRY,		// (0) FAIRY
+    eninit_WALK,		// (1) WALK0
+    eninit_WALK,		// (2) WALK1
+    eninit_TORI,		// (3) TORI
+    eninit_HUCK0,		// (4) HUCK0
+    eninit_SHOOT,		// (5) SHOOT
+    eninit_SHOOT,		// (6) SHOO1
+    eninit_SHOOT,		// (7) SHOO2
+    eninit_FORCE,		// (8) FORCE
+    eninit_BURN0,		// (9) BURN0
+    eninit_BIRD,		// (A) BIRD0
+    eninit_BIRD,		// (B) BIRD1
+    eninit_BIRD,		// (C) BIRD2
+    eninit_NINJA,		// (D) NINJA
+    eninit_NINJ1,		// (E) NINJ1
+    eninit_FLYNG,		// (F) FLYNG
+    eninit_FLYNG,		// (10) FLYN1
+    eninit_BALLM,		// (11) BALLM
+
+    eninit_PIGMO,		// (12) PIGMO
+    eninit_FISH0,		// (13) FISH0
+    eninit_MUSI0,		// (14) MUSI0
+    eninit_TUBO,		// (15) TUBO0
+    eninit_TUBO,		// (16) TUBO1
+    eninit_MASK,		// (17) MASK0
+    eninit_HEBI0,		// (18) HEBI0
+    eninit_HEBI1,		// (19) HEBI1
+    eninit_SBTEN,		// (1A) SBTEN
+    eninit_BALL1,		// (1B) BALL0
+    eninit_BOSS0,		// (1C) BOSS0
+    eninit_MIKEY,		// (1D) MIKEY
+    eninit_BALL1,		// (1E) BALL1
+    eninit_SNAKE,		// (1F) SNAKE
+    eninit_FIRE1,		// (20) FIRE1
+    eninit_BKANI,		// (21) BKANI
+    eninit_BISHI,		// (22) BISHI
+
+    eninit_FLWER,		// (23) FLWER
+    eninit_FLWER,		// (24) FLWE1
+    eninit_FLWER,		// (25) FLWE2
+    eninit_CANON,		// (26) CANON
+    eninit_DANGN,		// (27) DANGN
+    eninit_FNSUI,		// (28) FNSUI
+    eninit_ICEMN,		// (29) ICEMN
+
+    eninit_FIREB,		// (2A) FIREB
+    eninit_FIRES,		// (2B) FIRES
+    eninit_MAMUU,		// (2C) MAMUU
+    eninit_BGKAO,		// (2D) BGKAO
+
+    eninit_WHATS,		// (2E) WHATS
+    eninit_WHATS,		// (2F) WHAT1
+    eninit_WHATS,		// (30) WHAT2
+    eninit_WHATS,		// (31) WHAT3
+    eninit_WALK,		// (32) BIGWALK
+    eninit_YASAI,		// (33) RIBON
+    eninit_BIGBOSS,		// (34) BIGBOSS
+    eninit_BALL1,		// (35) BIGBALL
+    eninit_WALK,		// (36) BIGWALK1
+    eninit_NINJ1,		// (37) BIGNINJI
+
+    eninit_YASAI,		// (38) YASAI
+    eninit_YASAI,		// (39) 2
+    eninit_YASAI,		// (3A) 3
+    eninit_FACE,		// (3B) 4
+    eninit_YASAI,		// (3C) 5
+    eninit_BKDN,		// (3D) 6
+    eninit_ROCKET,		// (3E) 7
+
+    eninit_YASAI,		// (3F) BLOCK A
+    eninit_YASAI,		// (40)   "   D  POW
+    eninit_WOOD,		// (41) WATER WOOD
+    eninit_YASAI,		// (42) DOOR
+    eninit_XTAL,		// (43) KEY0
+    eninit_YASAI,		// (44) LMP0
+    eninit_YASAI,		// (45) HEART
+    eninit_ONEUP,		// (46) ONEUP
+    eninit_CRPET,		// (47) CRPET
+    eninit_EXIT,		// (48) EXITL
+    eninit_EXIT,		// (49) EXITR
+    eninit_XTAL,		// (4A) XTAL
+    eninit_STAR,		// (4B) STAR
+    eninit_YASAI,		// (4C) WATCH
+
+    eninit_YASAI,		// (4D) BOMB
+    eninit_YASAI,		// (4E) KEMURI
+
+    eninit_FLAG,		// (4F) BIRDF
+    eninit_FLAG,		// (50) FLYNF
+    eninit_OFFFLAG,		// (51) OFFFG dummy
+
+    eninit_YASAI,		// (52) DREAM
+    eninit_YASAI,		// (53) MARIO
+    eninit_SMOK2,		// (54) SMOK2
+    eninit_BIGDR,		// (55) BIGDOOR
+    eninit_YASAI,		// (56) WOODDOOR
+    eninit_YASAI,		// (57) BIGSMK
+    eninit_PWBK,		// (58) BIGPW
+    eninit_GONDOLA,		// (59) GONDOLA
+    eninit_CHERRY,		// (5A) CHERRY
+    eninit_GONBOSS,		// (5B) GONBOSS
+    eninit_AKADAMA,		// (5C) 赤玉
+    eninit_AODAMA,		// (5D) 青玉
+    eninit_TOGE,		// (5E) トゲ
+    eninit_EGG,			// (5F) ヨッシーの玉子
+    eninit_HIKARI,		// (60) 光の扉
+    eninit_MASK1,		// (61) MASK1（ゴンドラ用マスク）
+    eninit_HIKARI,		// (62) 光の扉
+    eninit_YASAI,		// (63) かぶハート
+    eninit_CAPSULE,		// (64) カプセル
+    eninit_YASAI,		// (65) BOSS地震煙
+    eninit_LIFT,		// (66) リフト
+    eninit_BUBBLE,		// (67) ボス前泡
+    eninit_SBOSS,		// (68) ちっちゃいネズミ
+    eninit_SBOSS,		// (69) ちっちゃいカニ
+    eninit_SBOSS,		// (6A) ちっちゃい火
+    eninit_SBOSS,		// (6B) ちっちゃいヘビ
+    eninit_LIFT,		// (6C) リフト２（横３ユニット幅）
+    eninit_ITEMBALL,		// (6D) アイテム玉
+    eninit_MOSAIC,		// (6E) モザイク制御
+    eninit_BIGCOIN,		// (6F) でかコイン
+    eninit_BIGCOIN,		// (70) でかコイン
+    eninit_BIGCOIN,		// (71) でかコイン
+    eninit_BIGCOIN,		// (72) でかコイン
+    eninit_BIGCOIN,		// (73) でかコイン
+    eninit_YASAI,		// (74) 横画面自動スクロール（下）
+    eninit_YASAI,		// (75) 縦画面自動スクロール（上）
+    eninit_YASAI,		// (76) 縦画面自動スクロール（下）
+    eninit_YASAI,		// (77) 縦画面自動スクロール（上：上モードのみ）
+    eninit_YASAI,		// (78) 縦画面自動スクロール（下：下モードのみ）
+};
+
+/****************************************************************/
+/*		アクター移動メニュー配列			*/
+/****************************************************************/
+static void (*actmov_menu[])(aAC_base_c *,u8) = {
+
+    enmove_FAIRY,		// (0) 
+    enmove_WALK,		// (1) 
+    enmove_WALK,		// (2) 
+    enmove_TORI,		// (3) 
+    enmove_HUCK0,		// (4) 
+    enmove_SHOOT,		// (5) 
+    enmove_SHOO1,		// (6) 
+    enmove_SHOOT,		// (7) 
+    enmove_FORCE,		// (8) 
+    enmove_BURN0,		// (9) 
+    enmove_BIRD,		// (A) 
+    enmove_BIRD,		// (B) 
+    enmove_BIRD,		// (C) 
+    enmove_NINJA,		// (D) 
+    enmove_NINJ1,		// (E) 
+    enmove_FLYNG,		// (F)
+    enmove_FLYNG,		// (10) 
+    enmove_BALLM,		// (11) 
+    enmove_PIGMO,		// (12) 
+    enmove_FISH0,		// (13) 
+    enmove_MUSI0,		// (14) 
+    enmove_TUBO,		// (15) 
+    enmove_TUBO,		// (16) 
+    enmove_MASK,		// (17) 
+    enmove_HEBI0,		// (18) 
+    enmove_HEBI1,		// (19) 
+    enmove_SBTEN,		// (1A) 
+    enmove_BALL1,		// (1B) 
+    enmove_BOSS0,		// (1C) 
+    enmove_MIKEY,		// (1D) 
+    enmove_BALL1,		// (1E) 
+    enmove_SNAKE,		// (1F) 
+    enmove_FIRE1,		// (20) 
+    enmove_BKANI,		// (21) 
+    enmove_BISHI,		// (22) 
+
+    enmove_FLWER,		// (23) 
+    enmove_FLWER,		// (24) 
+    enmove_FLWER,		// (25) 
+    enmove_CANON,		// (26) 
+    enmove_DANGN,		// (27) 
+    enmove_FNSUI,		// (28) 
+    enmove_ICEMN,		// (29) 
+
+    enmove_FIREB,		// (2A) 
+    enmove_FIRES,		// (2B) 
+    enmove_MAMUU,		// (2C) 
+    enmove_BGKAO,		// (2D) BGKAO
+
+    enmove_WHATS,		// (2E) WHATS
+    enmove_WHATS,		// (2F) WHAT1
+    enmove_WHATS,		// (30) WHAT2
+    enmove_WHATS,		// (31) WHAT3
+    enmove_WALK,		// (32) BIGWALK
+    enmove_YASAI,		// (33) RIBON
+    enmove_BIGBOSS,		// (34) BIGBOSS
+    enmove_BALL1,		// (35) BIGBALL
+    enmove_WALK,		// (36) BIGWALK1
+    enmove_NINJ1,		// (37) BIGNINJI
+
+
+    enmove_YASAI,		// (38) 1 HAPPA
+    enmove_YASAI,		// (39) 2
+    enmove_YASAI,		// (3A) 3
+    enmove_FACE,		// (3B) 4
+    enmove_COIN,		// (3C) 5
+    enmove_BKDN,		// (3D) 6
+    enmove_ROCKET,		// (3E) 7
+
+    enmove_SPAE,		// (3F) BROCK A
+    enmove_NORMPOWBK,		// (40) POW
+    
+    enmove_WOOD,		// (41) WATER WOOD
+    enmove_DOOR,		// (42) DOOR
+    enmove_KEY0,		// (43) KEY0
+    enmove_LMP0,		// (44) LMP0
+    enmove_HEART,		// (45) HEART
+    enmove_ONEUP,		// (46) ONEUP
+    enmove_CRPET,		// (47) CARPET
+    enmove_EXIT,		// (48) EXITL
+    enmove_EXIT,		// (49) EXITR
+    enmove_XTAL,		// (4A) XTAL
+    enmove_STAR,		// (4B) STAR
+    enmove_WATCH,		// (4C) WATCH
+
+    enmove_BOMB,		// (4D) BOMB
+    enmove_KEMURI,		// (4E) KEMURI
+
+    enmove_BIRDF,		// (4F) BIRDF
+    enmove_FLYNF,		// (50) FLYNF
+    enmove_OFFFLAG,		// (51) OFFFG
+
+    enmove_YASAI,		// (52) DREAM
+    enmove_YASAI,		// (53) MARIO
+    enmove_SMOK2,		// (54) SMOK2
+    enmove_BIGDR,		// (55) BIGDOOR
+    enmove_WOODDR,		// (56) WOODDOOR
+    enmove_BIGSMK,		// (57) BIGSMK
+    enmove_POWBK,		// (58) POW
+    enmove_GONDOLA,		// (59) GONDOLA
+    enmove_CHERRY,		// (5A) CHERRY
+    enmove_GONBOSS,		// (5B) GONBOSS
+    enmove_AKADAMA,		// (5C) 赤玉
+    enmove_AODAMA,		// (5D) 青玉
+    enmove_TOGE,		// (5E) トゲ
+    enmove_EGG,			// (5F) ヨッシーの玉子
+    enmove_HIKARI,		// (60) 光の扉
+    enmove_MASK1,		// (61) MASK1（ゴンドラ用マスク）
+    enmove_HIKARI,		// (62) 光の扉
+    enmove_KABUFAIRY,		// (63) かぶハート
+    enmove_CAPSULE,		// (64) カプセル
+    enmove_TILTSMK,		// (65) BOSS地震煙
+    enmove_LIFT,		// (66) リフト
+    enmove_BUBBLE,		// (67) ボス前泡
+    enmove_SBOSS,		// (68) ちっちゃいネズミ
+    enmove_SBOSS,		// (69) ちっちゃいカニ
+    enmove_SBOSS,		// (6A) ちっちゃい火
+    enmove_SBOSS,		// (6B) ちっちゃいヘビ
+    enmove_LIFT,		// (6C) リフト２（横３ユニット幅）
+    enmove_ITEMBALL,		// (6D) アイテム玉
+    enmove_MOSAIC,		// (6E) モザイク制御
+    enmove_BIGCOIN,		// (6F) でかコイン
+    enmove_BIGCOIN,		// (70) でかコイン
+    enmove_BIGCOIN,		// (71) でかコイン
+    enmove_BIGCOIN,		// (72) でかコイン
+    enmove_BIGCOIN,		// (73) でかコイン
+    enmove_SCRDOWN,		// (74) 横画面自動スクロール（下）
+    enmove_VSCRUP,		// (75) 縦画面自動スクロール（上）
+    enmove_VSCRDOWN,		// (76) 縦画面自動スクロール（下）
+    enmove_VSCRUP,		// (77) 縦画面自動スクロール（上：上モードのみ）
+    enmove_VSCRDOWN,		// (78) 縦画面自動スクロール（下：下モードのみ）
+};
+
+/****************************************************************/
+/*		アクターOamSetメニュー配列			*/
+/****************************************************************/
+static void (*actoam_menu[])(aAC_base_c *,u8) = {
+	
+    enoam_FAIRY,	// (0) 
+    enoam_WALK,		// (1) 
+    act_oamset,		// (2) 
+    act_oamset,		// (3) 
+    act_oamset,		// (4) 
+    act_oamset,		// (5) 
+    act_oamset,		// (6) 
+    act_oamset,		// (7) 
+    enoam_FORCE,	// (8) 
+    enoam_BURN0,	// (9) 
+    enoam_BIRD0,	// (A) 
+    act_oamset,		// (B) 
+    act_oamset,		// (C) 
+    act_oamset,		// (D) 
+    act_oamset,		// (E) 
+    act_oamset,		// (F)
+    act_oamset,		// (10) 
+    act_oamset,		// (11) 
+    enoam_PIGMO,	// (12) 
+    enoam_FISH0,	// (13) 
+    act_oamset,		// (14) 
+    enoam_TUBO,		// (15) 
+    enoam_TUBO,		// (16) 
+    enoam_MASK0,	// (17) 
+    enoam_HEBI,		// (18) 
+    enoam_HEBI,		// (19) 
+    enoam_SBTEN,	// (1A) 
+    act_oamset,		// (1B) 
+    enoam_BOSS0,	// (1C) 
+    enoam_MIKEY,	// (1D) 
+    act_oamset,		// (1E) 
+    enoam_SNAKE,	// (1F) 
+    act_oamset,		// (20) 
+    enoam_BKANI,	// (21) 
+    act_oamset,		// (22) 
+
+    act_oamset,	        // (23) 
+    act_oamset,		// (24) 
+    act_oamset,		// (25) 
+    enoam_CANON,	// (26) 
+    act_oamset,		// (27) 
+    enoam_FNSUI,	// (28) 
+    act_oamset,		// (29) 
+
+    enoam_FIREB, 	// (2A) FIREB 
+    enoam_FIRES,	// (2B) FIRES
+    enoam_MAMUU,	// (2C) 
+    enoam_BGKAO,	// (2D) BGKAO
+
+    act_oamset,		// (2E) WHATS
+    act_oamset,		// (2F) WHAT1
+    act_oamset,		// (30) WHAT2
+    act_oamset,		// (31) WHAT3
+    enoam_BIGWALK,	// (32) BIGWALK
+    act_oamset,		// (33) RIBON
+    enoam_BIGBOSS,	// (34) BIGBOSS
+    enoam_BIGSUB,	// (35) BIGBALL
+    enoam_BIGWALK,	// (36) BIGWALK1
+    enoam_BIGWALK,	// (37) BIGNINJI
+
+
+    act_oamset,		// (38) 1 HAPPA
+    act_oamset,		// (39) 2
+    act_oamset,		// (3A) 3
+    enoam_FACE,		// (3B) 4
+    enoam_COIN,		// (3C) 5
+    enoam_BKDN,		// (3D) 6
+    enoam_ROCKET,	// (3E) 7
+
+    act_oamset,		// (3F) BROCK A
+    enoam_PWBK,		// (40) POW
+
+    act_oamset,		// (41) WATER WOOD
+    enoam_DOOR,		// (42) DOOR
+    enoam_XTAL,		// (43) KEY0
+    act_oamset,		// (44) LMP0
+    act_oamset,		// (45) HEART
+    act_oamset,		// (46) ONEUP
+    enoam_CRPET,	// (47) CARPET
+    enoam_EXIT,		// (48) EXITL
+    enoam_EXIT,		// (49) EXITR
+    enoam_XTAL,		// (4A) XTAL
+    enoam_STAR,		// (4B) STAR
+    act_oamset,		// (4C) WATCH
+
+    act_oamset,		// (4D) BOMB
+    act_oamset,		// (4E) KEMURI
+
+    enoam_TUBO,		// (4F) BIRDF
+    enoam_TUBO,		// (50) FLYNF
+    enoam_TUBO,		// (51) OFFFG
+
+    act_oamset,		// (52) DREAM
+    act_oamset,		// (53) MARIO
+    act_oamset,		// (54) SMOK2
+    enoam_BIGDR,	// (55) BIGDOOR
+    enoam_WOODDR,	// (56) WOODDOOR
+    enoam_BIGSMK,	// (57) BIGSMK
+    enoam_PWBK,		// (58) POW
+    enoam_GONDOLA,	// (59) GONDOLA
+    enoam_FAIRY,	// (5A) CHERRY
+    enoam_GONBOSS,	// (5B) GONBOSS
+
+    enoam_AKADAMA,	// (5C) 赤玉
+    enoam_AKADAMA,	// (5D) 青玉
+    enoam_TOGE,		// (5E) トゲ
+    enoam_EGG,		// (5F) ヨッシーの玉子
+    enoam_HIKARI,	// (60) 光の扉
+    enoam_MASK1,	// (61) MASK1（ゴンドラ用マスク）
+    enoam_HIKARI,	// (62) 光の扉
+    enoam_KABUFAIRY,	// (63) かぶハート
+    enoam_CAPSULE,	// (64) カプセル
+    enoam_BIGSUB,	// (65) BOSS地震煙
+    enoam_LIFT,		// (66) リフト
+    enoam_BUBBLE,	// (67) ボス前泡
+    enoam_SBOSS,	// (68) ちっちゃいネズミ
+    enoam_SBOSS,	// (69) ちっちゃいカニ
+    enoam_SBOSS,	// (6A) ちっちゃい火
+    enoam_SBOSS,	// (6B) ちっちゃいヘビ
+    enoam_LIFT2,	// (6C) リフト２（横３ユニット幅）
+    enoam_ITEMBALL,	// (6D) アイテム玉
+    enoam_MOSAIC,	// (6E) モザイク制御
+    enoam_COIN,		// (6F) でかコイン
+    enoam_COIN,		// (70) でかコイン
+    enoam_COIN,		// (71) でかコイン
+    enoam_COIN,		// (72) でかコイン
+    enoam_COIN,		// (73) でかコイン
+    enoam_TUBO,		// (74) 横画面自動スクロール（下）
+    enoam_TUBO,		// (75) 縦画面自動スクロール（上）
+    enoam_TUBO,		// (76) 縦画面自動スクロール（下）
+    enoam_TUBO,		// (77) 縦画面自動スクロール（上：上モードのみ）
+    enoam_TUBO,		// (78) 縦画面自動スクロール（下：下モードのみ）
+};
+
+/****************************************************************/
+/*		敵モード定義					*/
+/****************************************************************/
+enum {
+    DUMMY,		// (0)ダミー
+    ENI,		// (1)イニシャル
+    ENM,		// (2)処理
+    EF0,		// (3)FAIL DOWN
+    EF1,		// (4)Fail (Bleak)
+    BRN,		// (5)Big burn
+    SMK,		// (6)SmokeFAIL DOWN
+    SND,		// (7)SandFAIL DOWN
+    SNA,		// (8)In RyusaFAIL DOWN
+    EF2,		// (9)FAIL DOWN (pow block Break)
+    EF3,		// (A)FAIL DOWN (small fire boss fail)
+    ECG,		// (B)画面上の敵を他の物変える
+};
+
+#endif /* __UA_ACT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

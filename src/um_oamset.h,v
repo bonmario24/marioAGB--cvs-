@@ -1,0 +1,84 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UM_OAMSET_H_
+#define __UM_OAMSET_H_
+
+enum {
+	SHAPE_SQUARE,
+	SHAPE_YOKO,
+	SHAPE_TATE,
+};
+
+void PrioritySet(u8 Priority);
+void ObjModeSet(u8 ObjMode);
+void ObjSet(u8 ipt,
+			u8 affinpt,
+			u16 set_pos_x,
+			u16 set_pos_y,
+			u8 size,
+			u8 shape,
+			u16 CharNo,
+			u8 Pltt,
+			u8 AffineMode);
+void AffineParamSet(u8 affinpt,
+					u16 scale_x,
+					u16 scale_y,
+					u16 kakudo);
+
+u8 AffineObjSet(s32 x_pos,	//Ｘポジション（上位１６ビット）
+				s32 y_pos,	//Ｙポジション（上位１６ビット）
+				u8 size,	//オブジェサイズ（０～３）
+				u8 Shape,	//形状（０～２）
+				u16 CharNo,	//キャラクターナンバー
+				u8 Pltt,	//（パレットナンバー）
+				u16 kakudo,	//回転角度
+				u16 scale_x,//Ｘ拡大率
+				u16 scale_y,//Ｙ拡大率
+				u8 d_size	//倍角フラグ（０，１）
+				);
+
+u8 NonAffineObjSet(s32 x_pos,	//Ｘポジション（上位１６ビット）
+				s32 y_pos,	//Ｙポジション（上位１６ビット）
+				u8 size,	//オブジェサイズ（０～３）
+				u8 Shape,	//形状（０～２）
+				u16 CharNo,	//キャラクターナンバー
+				u8 Pltt,	//（パレットナンバー）
+				u8 VFlip,	//垂直方向フリップ
+				u8 HFlip	//水平方向フリップ
+				);
+#endif /* __UM_OAMSET_H_ */@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

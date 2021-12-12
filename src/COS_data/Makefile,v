@@ -1,0 +1,223 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#### アセンブラ・ローダ・コンパイラ・変換ツール定義
+AGBINC	=	$(AGBDIR)/include/
+AGBLIB	=	$(AGBDIR)/lib/
+
+AS = as
+LD = ld
+CC = gcc
+OBJCOPY = objcopy
+
+#### ソースファ@イル定義
+.CFILES	=
+
+
+.CFILES	+= ud_cos1_1_0.c
+.CFILES	+= ud_cos1_1_1.c
+.CFILES	+= ud_cos1_1_2.c
+.CFILES	+= ud_cos1_1_3.c
+.CFILES	+= ud_cos1_1_4.c
+.CFILES	+= ud_cos1_1_5.c
+.CFILES	+= ud_cos1_2_0.c
+.CFILES	+= ud_cos1_2_1.c
+.CFILES	+= ud_cos1_2_2.c
+.CFILES	+= ud_cos1_2_3.c
+.CFILES	+= ud_cos1_2_4.c
+.CFILES	+= ud_cos1_3_0.c
+.CFILES	+= ud_cos1_3_1.c
+.CFILES	+= ud_cos1_3_2.c
+.CFILES	+= ud_cos1_3_3.c
+.CFILES	+= ud_cos1_3_4.c
+.CFILES	+= ud_cos2_1_0.c
+.CFILES	+= ud_cos2_1_1.c
+.CFILES	+= ud_cos2_1_2.c
+.CFILES	+= ud_cos2_1_3.c
+.CFILES	+= ud_cos2_1_4.c
+.CFILES	+= ud_cos2_2_0.c
+.CFILES	+= ud_cos2_2_1.c
+.CFILES	+= ud_cos2_2_2.c
+.CFILES	+= ud_cos2_2_3.c
+.CFILES	+= ud_cos2_2_4.c
+.CFILES	+= ud_cos2_2_5.c
+.CFILES	+= ud_cos2_2_6.c
+.CFILES	+= ud_cos2_2_7.c
+.CFILES	+= ud_cos2_3_0.c
+.CFILES	+= ud_cos2_3_1.c
+.CFILES	+= ud_cos2_3_2.c
+.CFILES	+= ud_cos2_3_3.c
+.CFILES	+= ud_cos2_3_4.c
+.CFILES	+= ud_cos2_3_5.c
+.CFILES	+= ud_cos2_3_6.c
+.CFILES	+= ud_cos2_3_7.c
+.CFILES	+= ud_cos3_1_0.c
+.CFILES	+= ud_cos3_1_1.c
+.CFILES	+= ud_cos3_1_2.c
+.CFILES	+= ud_cos3_1_3.c
+.CFILES	+= ud_cos3_1_4.c
+.CFILES	+= ud_cos3_1_5.c
+.CFILES	+= ud_cos3_2_0.c
+.CFILES	+= ud_cos3_2_1.c
+.CFILES	+= ud_cos3_2_2.c
+.CFILES	+= ud_cos3_3_0.c
+.CFILES	+= ud_cos3_3_1.c
+.CFILES	+= ud_cos3_3_2.c
+.CFILES	+= ud_cos3_3_3.c
+.CFILES	+= ud_cos3_3_4.c
+.CFILES	+= ud_cos3_3_5.c
+.CFILES	+= ud_cos3_3_6.c
+.CFILES	+= ud_cos3_3_7.c
+.CFILES	+= ud_cos3_3_8.c
+.CFILES	+= ud_cos4_1_0.c
+.CFILES	+= ud_cos4_1_1.c
+.CFILES	+= ud_cos4_1_2.c
+.CFILES	+= ud_cos4_1_4.c
+.CFILES	+= ud_cos4_2_0.c
+.CFILES	+= ud_cos4_2_1.c
+.CFILES	+= ud_cos4_2_2.c
+.CFILES	+= ud_cos4_2_3.c
+.CFILES	+= ud_cos4_2_4.c
+.CFILES	+= ud_cos4_3_0.c
+.CFILES	+= ud_cos4_3_1.c
+.CFILES	+= ud_cos4_3_2.c
+.CFILES	+= ud_cos4_3_3.c
+.CFILES	+= ud_cos4_3_4.c
+.CFILES	+= ud_cos4_3_5.c
+.CFILES	+= ud_cos4_3_6.c
+.CFILES	+= ud_cos4_3_7.c
+.CFILES	+= ud_cos5_1_0.c
+.CFILES	+= ud_cos5_1_1.c
+.CFILES	+= ud_cos5_1_2.c
+.CFILES	+= ud_cos5_2_0.c
+.CFILES	+= ud_cos5_2_1.c
+.CFILES	+= ud_cos5_2_2.c
+.CFILES	+= ud_cos5_2_3.c
+.CFILES	+= ud_cos5_2_4.c
+.CFILES	+= ud_cos5_2_5.c
+.CFILES	+= ud_cos5_3_0.c
+.CFILES	+= ud_cos5_3_1.c
+.CFILES	+= ud_cos5_3_2.c
+.CFILES	+= ud_cos5_3_3.c
+.CFILES	+= ud_cos5_3_4.c
+.CFILES	+= ud_cos5_3_5.c
+.CFILES	+= ud_cos6_1_0.c
+.CFILES	+= ud_cos6_1_1.c
+.CFILES	+= ud_cos6_1_2.c
+.CFILES	+= ud_cos6_1_3.c
+.CFILES	+= ud_cos6_1_4.c
+.CFILES	+= ud_cos6_1_5.c
+.CFILES	+= ud_cos6_1_6.c
+.CFILES	+= ud_cos6_1_7.c
+.CFILES	+= ud_cos6_2_0.c
+.CFILES	+= ud_cos6_2_1.c
+.CFILES	+= ud_cos6_2_2.c
+.CFILES	+= ud_cos6_3_0.c
+.CFILES	+= ud_cos6_3_1.c
+.CFILES	+= ud_cos6_3_2.c
+.CFILES	+= ud_cos6_3_3.c
+.CFILES	+= ud_cos6_3_4.c
+.CFILES	+= ud_cos6_3_5.c
+.CFILES	+= ud_cos6_3_6.c
+.CFILES	+= ud_cos6_3_7.c
+.CFILES	+= ud_cos7_1_0.c
+.CFILES	+= ud_cos7_1_1.c
+.CFILES	+= ud_cos7_1_2.c
+.CFILES	+= ud_cos7_1_3.c
+.CFILES	+= ud_cos7_1_4.c
+.CFILES	+= ud_cos7_1_5.c
+.CFILES	+= ud_cos7_2_0.c
+.CFILES	+= ud_cos7_2_1.c
+.CFILES	+= ud_cos7_2_2.c
+.CFILES	+= ud_cos7_2_3.c
+.CFILES	+= ud_cos7_2_3.c
+.CFILES	+= ud_cos7_2_4.c
+.CFILES	+= ud_cos7_2_5.c
+.CFILES	+= ud_cos7_2_6.c
+.CFILES	+= ud_cos7_2_7.c
+.CFILES	+= ud_cos7_2_8.c
+.CFILES	+= ud_cos7_2_9.c
+.CFILES	+= ud_cos21_1.c
+.CFILES	+= ud_cos21_2.c
+.CFILES	+= ud_cos21_3.c
+.CFILES	+= ud_cos22_1.c
+.CFILES	+= ud_cos22_2.c
+.CFILES	+= ud_cos22_3.c
+.CFILES	+= ud_cos23_1.c
+.CFILES	+= ud_cos23_2.c
+.CFILES	+= ud_cos23_3.c
+.CFILES	+= ud_cos24_1.c
+.CFILES	+= ud_cos24_2.c
+.CFILES	+= ud_cos24_3.c
+.CFILES	+= ud_cos25_1.c
+.CFILES	+= ud_cos25_2.c
+.CFILES	+= ud_cos25_3.c
+.CFILES	+= ud_cos26_1.c
+.CFILES	+= ud_cos26_2.c
+.CFILES	+= ud_cos26_3.c
+.CFILES	+= ud_cos27_1.c
+.CFILES	+= ud_cos27_2.c
+.CFILES	+= ud_tubo.c
+.CFILES	+= ud_next_goto.c
+
+.OFILES	= $(.CFILES:.c=.o)
+
+#### 各フラグ定義
+#CFLAGS	= -g -c -O0 -I $(AGBINC) -mthumb-interwork -nostdlib
+#CFLAGS	= -g -c -I $(AGBINC) -mthumb-interwork -nostdlib
+CFLAGS	= -c -I$(AGBINC) -mthumb-interwork -nostdlib -Wall
+DEPENDFILE =	Makedepend
+TARGET_ARC =	usa_cos.a
+
+$(TARGET_ARC): $(.OFILES) Makefile
+	ar cr $@@ $(.OFILES)
+
+.PHONY: all clean depend
+
+all:	clean depend $(TARGET_ARC)
+
+clean:
+	-rm -f $(.OFILES) $(DEPENDFILE) $(TARGET_ARC)
+
+depend:
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+$(DEPENDFILE): 
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+##include $(DEPENDFILE)
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

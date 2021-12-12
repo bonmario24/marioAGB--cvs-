@@ -1,0 +1,218 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *              
+ *     ＢＧデータヘッダー
+ *         作成日　@2000年 8月 7日
+ *
+ *****************************************************************
+ */
+#ifndef __COURSE_DATA_H_
+#define __COURSE_DATA_H_
+
+#include <agb.h>
+
+/*------------------------- 定数定義 -------------------------*/
+#define	MAX_ENTRANCE	5	// 最大敵配置データ数
+#define	MAX_PIPEENMY	4	// 片方の土管から登場する敵の最大数
+
+/*---------------------- 敵データ構造体 ----------------------*/
+typedef struct{
+    u16		id;
+    u16		timer;
+} EnTmTbl_c;
+typedef struct{
+    EnTmTbl_c	EnTimeTable_L[MAX_PIPEENMY];
+    EnTmTbl_c	EnTimeTable_R[MAX_PIPEENMY];
+} StageEnTbl_c;
+
+/*-------------------- コースデータ構造体 --------------------*/
+typedef struct{
+//    u16		ActerData[MAX_ENTRANCE];	// 敵配置データ
+    StageEnTbl_c	*EnemyData;	// 敵配置データ
+
+    u8		BackBGNo;		// 背景ＢＧナンバー
+    u8		*BGCoin;		// ＢＧコインデータポインタ
+    u8		IntroNo;		// イントロＢＧＭナンバー
+    u16		bgmNo;			// ＢＧＭナンバー
+    u8		EnemyCNT;		// 敵の数
+} courseDT;
+
+/*------------------- ＢＧのＮｏ.定義(種類) ------------------*/
+enum {
+    BG_NONE,		//00 なし
+
+    /**** 下の床 ****/
+    BG_BASE_START,
+    BG_BASE = BG_BASE_START,
+    BG_YK00 = BG_BASE,
+    BG_YK01,
+    BG_YK02,
+    BG_YK03,
+    BG_YK04,
+    BG_YK05,
+    BG_YK06,
+    BG_YK07,
+    BG_YK08,
+    BG_YK09,
+    BG_YK0A,
+    BG_YK0B,
+    BG_BASE_END = BG_YK0B,
+
+    /**** 半当りの下の床 ****/
+    BG_HALF_START,
+    BG_YK40 = BG_HALF_START,
+    BG_YK41,
+    BG_YK42,
+    BG_YK43,
+    BG_HALF_END = BG_YK43,
+
+    /**** 下から殴られて動く床シリーズ ****/
+    BG_NOMAL_FLOOR_START,
+    BG_NMLF = BG_NOMAL_FLOOR_START,	//02 平らな床
+    BG_SPLF,			//   スプリングみたいな床
+    BG_SFMF,			//   鉄骨みたいな床
+    BG_STPF,			//   ストライプみたいな床
+    BG_ICEF,			//06 凍っている平らな床
+    BG_ICEF0 = BG_ICEF,
+    BG_ICEF1,
+    BG_NOMAL_FLOOR_END = BG_ICEF1,
+
+    BG_MOVE_FLOOR_START,
+    BG_MOVE_FLOOR_LEFT_START = BG_MOVE_FLOOR_START,
+    BG_RISE0 = BG_MOVE_FLOOR_LEFT_START,//03 盛り上がり床(左)
+    BG_ICRSL,			//07 凍っている盛り上がり床(左)
+    BG_MOVE_FLOOR_LEFT_END = BG_ICRSL,
+
+    BG_MOVE_FLOOR_MIDDLE_START,
+    BG_RISE1 = BG_MOVE_FLOOR_MIDDLE_START,//04 盛り上がり床(中)
+    BG_ICRSM,			//08 凍っている盛り上がり床(中)
+    BG_MOVE_FLOOR_MIDDLE_END = BG_ICRSM,
+
+    BG_MOVE_FLOOR_RIGHT_START,
+    BG_RISE2 = BG_MOVE_FLOOR_RIGHT_START,//05 盛り上がり床(右)
+    BG_ICRSR,			//09 凍っている盛り上がり床(右)
+    BG_MOVE_FLOOR_RIGHT_END = BG_ICRSR,
+    BG_MOVE_FLOOR_END = BG_MOVE_FLOOR_RIGHT_END,
+
+    /**** 土管 ****/
+    DOKAN_START,
+    DOKAN00 = DOKAN_START,
+    DOKAN01,DOKAN02,DOKAN03,
+    DOKAN04,DOKAN05,DOKAN06,DOKAN07,
+    DOKAN08,DOKAN09,DOKAN0A,DOKAN0B,
+    DOKAN0C,DOKAN0D,DOKAN0E,
+    DOKAN10,DOKAN11,DOKAN12,DOKAN13,
+    DOKAN14,DOKAN15,DOKAN16,DOKAN17,
+    DOKAN18,DOKAN19,DOKAN1A,DOKAN1B,
+    DOKAN1C,DOKAN1D,DOKAN1E,
+    DOKAN20,DOKAN21,DOKAN22,DOKAN23,
+    DOKAN24,DOKAN25,
+
+    DOKAN40,DOKAN41,DOKAN42,DOKAN43,
+    DOKAN44,DOKAN45,DOKAN46,DOKAN47,
+    DOKAN48,DOKAN49,DOKAN4A,DOKAN4B,
+    DOKAN4C,DOKAN4D,DOKAN4E,
+    DOKAN50,DOKAN51,DOKAN52,DOKAN53,
+    DOKAN54,DOKAN55,DOKAN56,DOKAN57,
+    DOKAN58,DOKAN59,DOKAN5A,DOKAN5B,
+    DOKAN5C,DOKAN5D,DOKAN5E,
+    DOKAN60,DOKAN61,DOKAN62,DOKAN63,
+    DOKAN64,DOKAN65,
+
+    DOKAN80,DOKAN81,DOKAN82,DOKAN83,
+    DOKAN84,DOKAN85,DOKAN86,DOKAN87,
+    DOKAN88,DOKAN89,DOKAN8A,DOKAN8B,
+    DOKAN8C,DOKAN8D,DOKAN8E,
+    DOKAN90,DOKAN91,DOKAN92,DOKAN93,
+    DOKAN94,DOKAN95,DOKAN96,DOKAN97,
+    DOKAN98,DOKAN99,DOKAN9A,DOKAN9B,
+    DOKAN9C,DOKAN9D,DOKAN9E,
+    DOKANA0,DOKANA1,DOKANA2,DOKANA3,
+    DOKANA4,DOKANA5,
+
+    DOKANC0,DOKANC1,DOKANC2,DOKANC3,
+    DOKANC4,DOKANC5,DOKANC6,DOKANC7,
+    DOKANC8,DOKANC9,DOKANCA,DOKANCB,
+    DOKANCC,DOKANCD,DOKANCE,
+    DOKAND0,DOKAND1,DOKAND2,DOKAND3,
+    DOKAND4,DOKAND5,DOKAND6,DOKAND7,
+    DOKAND8,DOKAND9,DOKANDA,DOKANDB,
+    DOKANDC,DOKANDD,DOKANDE,
+    DOKANE0,DOKANE1,DOKANE2,DOKANE3,
+    DOKANE4,DOKANE5,
+    DOKAN_END = DOKANE5,
+
+    /**** ＰＯＷブロック ****/
+    POW_START,
+    POWBK00 = POW_START,
+    POWBK01,POWBK02,POWBK03,
+    POWBK10,POWBK11,POWBK12,POWBK13,
+    POWBK20,POWBK21,POWBK22,POWBK23,
+    POW_END = POWBK23,
+
+    /**** 水中ブロック ****/
+    WTBK00,WTBK01,WTBK02,WTBK03,WTBK04,
+    WTBK05,
+
+    /**** ＢＧコイン ****/
+    BGCOIN0,BGCOIN1,BGCOIN2,BGCOIN3,
+    BGCOIN4,BGCOIN5,BGCOIN6,BGCOIN7,
+
+    /**** 改スクリーンコード ****/
+    NXT_DT,
+
+    /**** 終了コード ****/
+    END_DT,
+};
+
+/*---------------------- 背景ＢＧナンバー --------------------*/
+enum {
+    BackBG0,BackBG1,BackBG2,BackBG3
+};
+
+/*-------------------- EXTURN  ----------------------*/
+extern	const	u16	CHR_DATA[];
+extern	const u8 *BrosCourseTable[];
+////////extern	const	u8	BrosDoKaNData[];
+extern	courseDT	*MapDataTBL[];
+
+
+#endif /* __COURSE_DATA_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

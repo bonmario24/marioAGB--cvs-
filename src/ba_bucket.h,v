@@ -1,0 +1,86 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+
+	バケツヘッダー
+
+ *****************************************************************
+ */
+#ifndef __BA_BUCKET_H_
+#define __BA_BUCKET_H_
+#include "ba_player.h"
+
+/*-------------------------- 構造体 --------------------------*/
+typedef struct{
+////////    u8			frcnt;		// バケツ専用フレームカウンタ
+    u8		itemID;		// 前回出したアイテムインデックス
+    u8		pay;		// コイン支払ったかフラグ
+    u8		struggle;	// 暴れフラグ
+    playerDT_c	*pl;		// 中に入っているプレイヤーのポインタ
+    playerDT_c	*OnPlayer;	// 上に乗っているプレイヤーのポインタ
+    u16		openflag:1;	// かつぎ中開閉フラグ
+    u16		opentimer:10;	// 開閉タイマー
+    u16		NoUsed:5;	// 未使用
+} bucketDT_c;
+
+////////#define	aB_FRCNT(p)	((p)->frcnt)
+#define	aB_ITEMID(p)	((p)->itemID)
+#define	aB_PAY(p)	((p)->pay)
+#define	aB_STRUGGLE(p)	((p)->struggle)
+#define	aB_PL(p)	((p)->pl)
+#define	aB_ONPLAYER(p)	((p)->OnPlayer)
+#define	aB_OPENFLAG(p)	((p)->openflag)
+#define	aB_OPENTIMER(p)	((p)->opentimer)
+
+/*------------------------ モード定義 ------------------------*/
+enum {
+    BK_INIT,		// イニシャル
+    BK_MOVE,		// ＭＯＶＥ
+    BK_PLIN,		// プレイヤー入る
+    BK_PLAYER,		// プレイヤーが入っている最中
+    BK_PLOUT,		// プレイヤー飛び出し中
+};
+
+/*-------------------- EXTURN  -----------------------*/
+extern	void	bucket_init(acterDT_c *);
+extern	void	bucket_PowJump(acterDT_c *);
+extern	void	bucket_main(acterDT_c *);
+
+#endif /* __BA_BUCKET_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

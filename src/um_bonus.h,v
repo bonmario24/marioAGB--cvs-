@@ -1,0 +1,76 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ヘッダーファ@イル				*/
+/****************************************************************/
+#ifndef __UM_BONUS_H_
+#define __UM_BONUS_H_
+
+typedef struct {
+    u16 move;
+    u16 speed;
+    u8  slot_no:4;
+    u8  stop_flag:4;
+    u8  timer;
+    u8  sound_timer;
+} Slot_Param_c;
+
+typedef struct {
+    Slot_Param_c Slot[6];	// スロットドラムパラメータ
+    u8  kekka:3;		// 結果保存用変数
+    u8  coinupfg:3;		// コインアップ用変数
+    u8  hitfg:2;		// ボタン押しフラグ
+    u8  waittimer;		// ボタン用ウェイトタイマー
+    u16 etctimer;		// その他タイマー
+    u16 egara:12;		// 絵柄
+    u16 flash:4;		// フラッシュフラグ
+    u8  suberifg:1;		// すべりフラグ
+    u8  suberi:7;		// すべりタイマー
+    u8  bet;			// 賭けたコイン数
+    u16	effect_timer;		// 各種効果用タイマー
+} Slot_c;
+
+extern Slot_c *SlotDt;
+
+/*------------- EXTERN -----------------------------------------*/
+extern  void M_game_bonus(void);
+extern void mGm_MALLOC_SlotDt(void);
+extern void mGm_FREE_SlotDt(void);
+
+#endif /* __UM_BONUS_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

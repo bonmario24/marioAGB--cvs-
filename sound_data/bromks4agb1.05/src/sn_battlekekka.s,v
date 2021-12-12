@@ -1,0 +1,356 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_battlekekka_grp, voicegroup000
+	.equ	sn_battlekekka_pri, 10
+	.equ	sn_battlekekka_rev, 0
+	.equ	sn_battlekekka_mvl, 100
+	.equ	sn_battlekekka_key, 0
+	.equ	sn_battlekekka_tbs, 1
+	.equ	sn_battlekekka_exg, 0
+	.equ	sn_battlekekka_cmp, 1
+
+	.section .rodata
+	.global	sn_battlekekka
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_battlekekka_1:
+	.byte	KEYSH , sn_battlekekka_key+0
+sn_battlekekka_1_B1:
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 90*sn_battlekekka_tbs/2
+	.byte		VOICE , 23
+	.byte		PAN   , c_v+0
+	.byte		VOL   , 110*sn_battlekekka_mvl/mxv
+	.byte		N18   , Cn4 , v064
+	.byte	W18
+	.byte		N06   , Gn3 
+	.byte	W18
+	.byte		        Gn4 
+	.byte	W18
+	.byte		        Fn4 
+	.byte	W12
+	.byte		        En4 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Dn4 
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		N18   , En4 
+	.byte	W18
+	.byte		N06   , Cn4 
+	.byte	W18
+	.byte		N12   , Gn3 
+	.byte	W18
+	.byte		PAN   , c_v+32
+	.byte		N06   , Bn5 , v016
+	.byte	W06
+	.byte		        Gn5 , v020
+	.byte	W06
+	.byte		        Dn5 , v028
+	.byte	W06
+	.byte		PAN   , c_v-32
+	.byte		N06   , Dn6 , v032
+	.byte	W06
+	.byte		        Bn5 , v036
+	.byte	W06
+	.byte		        Gn5 , v040
+	.byte	W06
+	.byte		        Dn5 , v048
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_battlekekka_1_B1
+sn_battlekekka_1_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_battlekekka_2:
+	.byte	KEYSH , sn_battlekekka_key+0
+sn_battlekekka_2_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 20
+	.byte		VOL   , 100*sn_battlekekka_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N18   , En3 , v064
+	.byte	W18
+	.byte		N06   , Cn3 
+	.byte	W18
+	.byte		        En3 
+	.byte	W18
+	.byte		        An3 
+	.byte	W12
+	.byte		        Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Fn3 
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		N18   , Cn3 
+	.byte	W18
+	.byte		N06   , En3 
+	.byte	W18
+	.byte		N12   , Cn3 
+	.byte	W18
+	.byte		N06   , An3 
+	.byte	W12
+	.byte		        Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Fn3 
+	.byte	W12
+	.byte	GOTO
+	 .word	sn_battlekekka_2_B1
+sn_battlekekka_2_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_battlekekka_3:
+	.byte	KEYSH , sn_battlekekka_key+0
+sn_battlekekka_3_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 11
+	.byte		VOL   , 127*sn_battlekekka_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N18   , Cn3 , v064
+	.byte	W18
+	.byte		N06   , Gn2 
+	.byte	W06
+	.byte		N18   
+	.byte	W18
+	.byte		N06   , Dn3 
+	.byte	W06
+	.byte		N18   
+	.byte	W18
+	.byte		N06   , Gn2 
+	.byte	W06
+	.byte		N12   
+	.byte	W12
+	.byte		N06   , An2 
+	.byte	W06
+	.byte		        Bn2 
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte		N18   , Cn3 
+	.byte	W18
+	.byte		N06   , Gn2 
+	.byte	W06
+	.byte		N18   
+	.byte	W18
+	.byte		N06   , Dn3 
+	.byte	W06
+	.byte		N18   
+	.byte	W18
+	.byte		N06   , Gn2 
+	.byte	W06
+	.byte		N12   
+	.byte	W12
+	.byte		N06   , An2 
+	.byte	W06
+	.byte		        Bn2 
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_battlekekka_3_B1
+sn_battlekekka_3_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 4 (Midi-Chn.4) ****************@@
+
+sn_battlekekka_4:
+	.byte	KEYSH , sn_battlekekka_key+0
+sn_battlekekka_4_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 3
+	.byte		VOL   , 60*sn_battlekekka_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N01   , Bn3 , v064
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W12
+	.byte		N01   
+	.byte	W06
+	.byte		N01   
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_battlekekka_4_B1
+sn_battlekekka_4_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 5 (Midi-Chn.5) ****************@@
+
+sn_battlekekka_5:
+	.byte	KEYSH , sn_battlekekka_key+0
+sn_battlekekka_5_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 124
+	.byte		VOL   , 127*sn_battlekekka_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N06   , Cn3 , v064
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_battlekekka_5_B1
+sn_battlekekka_5_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_battlekekka:
+	.byte	5	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_battlekekka_pri	@@ Priority
+	.byte	sn_battlekekka_rev	@@ Reverb.
+
+	.word	sn_battlekekka_grp
+
+	.word	sn_battlekekka_1
+	.word	sn_battlekekka_2
+	.word	sn_battlekekka_3
+	.word	sn_battlekekka_4
+	.word	sn_battlekekka_5
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

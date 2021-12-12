@@ -1,0 +1,628 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.24;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.24;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@＊＊＊＊＊＊＊＊  マリオブラザーズ＆マリオＵＳＡ曲リスト  ＊＊＊＊＊＊＊＊
+
+					平成13年03月07日
+					任天堂（株）開発２部 米
+
+
+●ソングナンバー
+
+s000 マリオブラザーズ「タイトル画面」
+s001 マリオブラザーズ「ステージ１スタート」
+s002 マリオブラザーズ「ステージ２スタート」
+s003 マリオブラザーズ「ステージクリア」
+s004 マリオブラザーズ「ゲームオーバー」
+s005 マリオブラザーズ「ボーナス面タイムカウント」
+s006 マリオブラザーズ「結果コイン音（リーチ音）」
+s007 マリオブラザーズ「パーフェクト」
+
+s008 マリオブラザーズ「自機@昇天音」
+s009 マリオブラザーズ「ハートで復活音」
+s010 マリオブラザーズ「コイン５枚音」
+
+s011 マリオブラザーズ「ジャンプ」
+s012 マリオブラザーズ「急ブレーキ」
+s013 マリオブラザーズ「歩き音Ｃ」
+s014 マリオブラザーズ「歩き音Ｅ」
+s015 マリオブラザーズ「歩き音Ｇ」
+s016 マリオブラザーズ「マリオやられた」
+s017 マリオブラザーズ「マリオ落下」
+s018 マリオブラザーズ「マリオ復活」
+s019 マリオブラザーズ「ＰＯＷ」
+s020 マリオブラザーズ「ポーズ・１ＵＰ」
+
+s021 マリオブラザーズ「カメ出現」
+s022 マリオブラザーズ「カニ出現」
+s023 マリオブラザーズ「ハエ出現」
+s024 マリオブラザーズ「コイン・フリーザ出現」
+s025 マリオブラザーズ「敵ひっくりかえる」
+s026 マリオブラザーズ「敵倒す」
+s027 マリオブラザーズ「ドボン」
+s028 マリオブラザーズ「コイン取得」
+s029 マリオブラザーズ「フリーザ凍結」
+s030 マリオブラザーズ「フリーザ倒す」
+s031 マリオブラザーズ「火の玉移動」
+
+
+s032 マリオブラザーズ「ボス面（ＰＣＭなし）」
+s033 マリオブラザーズ「無敵ＢＧＭ（ＰＣＭ１音）」
+s034 マリオブラザーズ「クッパ城ＢＧＭ」
+s035 マリオブラザーズ「クッパのどっすん音」
+s036 マリオブラザーズ「勝ちＢＧＭ」
+s037 マリオブラザーズ「負けＢＧＭ」
+s038 マリオブラザーズ「総合勝ちＢＧＭ」
+s039 マリオブラザーズ「総合負けＢＧＭ」
+s040 ■未使用
+s041 マリオブラザーズ「バトルＢＧＭ」
+s042 マリオブラザーズ「バトル結果ＢＧＭ」
+
+s043 マリオブラザーズ「ゼルダ宝箱ファ@ンファ@ーレ」
+s044 マリオブラザーズ「クッパの吐く炎音」
+
+s045 マリオブラザーズ「バケツ叩@く音」
+s046 マリオブラザーズ「自機@・ＰＯＷ持つ音」
+s047 マリオブラザーズ「投げる音」
+s048 マリオブラザーズ「自機@しゃがみため音」
+s049 マリオブラザーズ「自機@ダメージ音」
+s050 マリオブラザーズ「自機@小さくなる音」
+s051 マリオブラザーズ「自機@乗っかり音」
+s052 マリオブラザーズ「自機@ぶつかり音」
+s053 マリオブラザーズ「ハート取得音」
+s054 マリオブラザーズ「自機@大きくなる音」
+s055 マリオブラザーズ「顔が大きくなる音」
+s056 マリオブラザーズ「結果のPUSH START音」
+s057 マリオブラザーズ「クッパダメージ音」
+s058 マリオブラザーズ「クッパやられ音」
+s059 マリオブラザーズ「画面スクロール音」
+s060 マリオブラザーズ「セーブ終了音」
+s061 マリオブラザーズ「バトルＢＧＭ（イントロ）」
+
+s062 マリオブラザーズ「カメの甲羅蹴る音１」
+s063 マリオブラザーズ「カメの甲羅蹴る音２」
+s064 マリオブラザーズ「カメの甲羅蹴る音３」
+s065 マリオブラザーズ「カメの甲羅蹴る音４」
+
+s066 マリオブラザーズ「ピンポーン音」
+s067 マリオブラザーズ「ブブー音」
+
+s068 マリオブラザーズ「バトル結果ＢＧＭ（イントロ）」
+
+s069 マリオブラザーズ「ファ@イア倒し音」
+s070 マリオブラザーズ「つらら倒し音」
+
+
+
+;s071
+;s072
+;s073
+;s074
+;s075
+;s076 (予備)
+;s077
+;s078
+;s079
+;s080
+;s081
+;s082
+;s083
+;s084
+;s085
+;s086
+;s087
+;s088
+;s089
+;s090
+;s091
+;s092
+;s093
+;s094
+;s095
+;s096
+;s097
+;s098
+;s099
+;s100
+;s101
+;s102
+;s103
+;s104
+;s105
+;s106
+;s107
+;s108
+;s109
+;s110
+;s111
+;s112
+;s113
+;s114
+;s115
+;s116
+;s117
+;s118
+;s119
+
+
+
+;●クラシック専用●
+s120 マリオブラザーズ「クラシックBGM１（明るい）」
+s121 マリオブラザーズ「クラシックBGM２（地下面）」
+s122 マリオブラザーズ「クラシックBGM３（Ｂ＆Ｄ）」
+s123 マリオブラザーズ「クラシックBGM（イントロ）」
+s124 マリオブラザーズ「ＮＯ ＢＯＮＵＳ音」
+
+
+;s125
+;s126
+;s127
+;s128
+;s129
+;s130 (予備)
+;s131
+;s132
+;s133
+;s134
+;s135
+;s136
+;s137
+;s138
+;s139
+;s140
+;s141
+;s142
+;s143
+;s144
+;s145
+;s146
+;s147
+;s148
+;s149
+;s150
+;s151
+;s152
+;s153
+;s154
+;s155
+;s156
+;s157
+;s158
+;s159
+;s160
+;s161
+;s162
+;s163
+;s164
+;s165
+;s166
+;s167
+;s168
+;s169
+
+
+
+
+
+s170 マリオＵＳＡ「総合タイトル画面」
+
+s171 マリオＵＳＡ「地上面」
+s172 マリオＵＳＡ「地下面」
+s173 マリオＵＳＡ「ボーナス面（裏側）」
+s174 マリオＵＳＡ「キャラセレクト画面」
+s175 マリオＵＳＡ「ボス面（通常）」
+s176 マリオＵＳＡ「ボス面（最終面）」
+
+s177 マリオＵＳＡ「ボス面クリア」
+s178 マリオＵＳＡ「水晶取得音、スロットで当たり」
+s179 マリオＵＳＡ「ゲームオーバー」
+s180 マリオＵＳＡ「スロットファ@ンファ@ーレ」
+s181 マリオＵＳＡ「プレイヤーダウン」
+s182 マリオＵＳＡ「プレイヤー無敵」
+s183 マリオＵＳＡ「ワープＢＧＭ」
+s184 マリオＵＳＡ「エンディング（一人）」
+s185 ■未使用
+
+s186 マリオＵＳＡ「最後のPUSH START音」
+
+s187 マリオＵＳＡ「セレクト画面決定音」
+s188 マリオＵＳＡ「草、敵投げ音」
+s189 マリオＵＳＡ「チェリー取った音」
+s190 マリオＵＳＡ「敵倒した音」
+s191 マリオＵＳＡ「はしご登る音」
+s192 マリオＵＳＡ「自機@ダメージ音」
+s193 マリオＵＳＡ「草を抜く音」
+s194 マリオＵＳＡ「敵を持つ音」
+s195 マリオＵＳＡ「タイマー取った音」
+s196 マリオＵＳＡ「ドア開ける音」
+s197 マリオＵＳＡ「ドア閉める音」
+s198 マリオＵＳＡ「カメーン怒り音」
+s199 マリオＵＳＡ「鯨潮ふき音」
+s200 マリオＵＳＡ「爆発音」
+s201 マリオＵＳＡ「コイン取った音」
+s202 マリオＵＳＡ「しゃがみため音」
+s203 マリオＵＳＡ「つぼに入る音」
+s204 マリオＵＳＡ「つぼから出る音」
+s205 マリオＵＳＡ「１ＵＰ音」
+s206 マリオＵＳＡ「ＰＯＷ音」
+s207 マリオＵＳＡ「ポーズ音」
+s208 マリオＵＳＡ「鳥開く音」
+s209 マリオＵＳＡ「鳥閉じる音」
+s210 マリオＵＳＡ「自機@大きくなる音」
+s211 マリオＵＳＡ「スロット回ってる音」
+s212 マリオＵＳＡ「スロット決定音」
+s213 マリオＵＳＡ「スロットドラム音（始め）」
+s214 マリオＵＳＡ「スロットドラム音（終わり）」
+s215 マリオＵＳＡ「ボスダメージ音」
+s216 マリオＵＳＡ「ボス攻撃音」
+s217 マリオＵＳＡ「自機@落下音」
+s218 マリオＵＳＡ「ボスやられ音」
+s219 マリオＵＳＡ「甲羅消え音」
+s220 マリオＵＳＡ「ジャンプ音」
+s221 マリオＵＳＡ「ロケット音」
+s222 マリオＵＳＡ「自機@小さくなる音」
+s223 マリオＵＳＡ「自機@スリップ音」
+
+s224 マリオＵＳＡ「カメ蹴り音０」
+s225 マリオＵＳＡ「カメ蹴り音１」
+s226 マリオＵＳＡ「カメ蹴り音２」
+s227 マリオＵＳＡ「カメ蹴り音３」
+s228 マリオＵＳＡ「カメ蹴り音４」
+s229 マリオＵＳＡ「カメ蹴り音５」
+s230 マリオＵＳＡ「カメ蹴り音６」
+s231 マリオＵＳＡ「カメ蹴り音７」
+s232 マリオＵＳＡ「カメ蹴り音８」
+
+s233 マリオＵＳＡ「マムー攻撃音」
+s234 マリオＵＳＡ「マムー倒し音」
+s235 マリオＵＳＡ「植物の吐く炎の音」
+s236 マリオＵＳＡ「マムーの吐く煙の音」
+s237 マリオＵＳＡ「ヨッシーの鳴き声」
+s238 マリオＵＳＡ「つぼ観覧車ＢＧＭ」
+s239 マリオＵＳＡ「ワールド結果画面」
+s240 マリオＵＳＡ「泡の音」
+s241 マリオＵＳＡ「カメーンの音」
+s242 マリオＵＳＡ「赤玉・青玉出た音」
+s243 マリオＵＳＡ「ボス前ＢＧＭ」
+s244 マリオＵＳＡ「ゲーム選択ＢＧＭ」
+s245 マリオＵＳＡ「ジャンプ台」
+s246 マリオＵＳＡ「ボス巨大化音」
+s247 マリオＵＳＡ「爆弾の火花音」
+s248 マリオＵＳＡ「キャンセル、はねる音１回目」
+s249 マリオＵＳＡ「ハート、スターファ@ンファ@ーレ」
+s250 マリオＵＳＡ「電気ビリビリ音」
+s251 マリオＵＳＡ「ヨッシー卵ファ@ンファ@ーレ」
+s252 マリオＵＳＡ「画面スクロール音」
+s253 マリオＵＳＡ「総合タイトル決定音」
+s254 マリオＵＳＡ「セーブ終了音」
+s255 マリオＵＳＡ「背景カメーン怒り音」
+s256 マリオＵＳＡ「甲羅が壁に当たる音」
+
+s257 マリオＵＳＡ「タイトルを引き抜く音」
+s258 マリオＵＳＡ「タイトルはねる音２回目」
+s259 マリオＵＳＡ「タイトルはねる音３回目」
+s260 マリオＵＳＡ「ヨッシーたまご割れる音」
+
+s261 マリオＵＳＡ「ボス前ＢＧＭリバーブ」
+s262 マリオＵＳＡ「ボス面（通常）リバーブ」
+s263 マリオＵＳＡ「クリア後の星きらきら音」
+
+s264 マリオＵＳＡ「デカ野菜を抜く音」
+
+
+;s265
+;s266
+;s267 (予備)
+;s268
+;s269
+
+
+
+
+
+;*****************  （音声ＭＩＤＩ）  *******************
+
+;（共通の合成音声）
+s270 ４人で「super mario2!」   
+s271 マリオとルイージで「mariobros」
+
+
+ ;●マリオのボイス●
+s272 mario_here_i_come          
+s273 mario_lets_go              
+
+
+
+;↓（４人共通並びはここから）
+s274 mario_yahoo                
+s275 mario_wah_hah              
+s276 mario_yah                  
+s277 mario_hah                  
+s278 mario_ya                   
+s279 mario_ohmm_hmm             
+s280 mario_eeee_yah             //分離後「いー」
+s281 mario_what_a_tasty_treat   
+s282 mario_ow                   
+s283 mario_oof                  
+s284 mario_mamma_mia            
+s285 mario_oh_no                
+s286 mario_ah_cha_cha           
+s287 mario_gotcha               
+s288 mario_thank_you            
+s289 mario_lacky                
+s290 mario_just_what_i_needed   
+s291 mario_here_i_go            
+s292 mario_duh_da_da_dum        
+s293 mario_ha                   
+s294 mario_hoh                  
+s295 mario_bravo                
+s296 mario_a_crystal            
+s297 mario_im_moving_now        
+s298 mario_no_problem           
+s299 mario_eeee_yah             //分離後「やっ」
+
+
+
+
+
+     ;●敵のボイス●
+s300 mouser_have_some_bombs     
+s301 mouser_ah_da_da            
+s302 mouser_no_way              
+s303 tryclyde_step_right_up     
+s304 tryclyde_ready_to_get      
+s305 tryclyde_toasted           
+s306 tryclyde_gyaoh             
+s307 tryclyde_impossible        
+s308 clawgrip_tasty_treat       
+s309 clawgrip_ow_wow            
+s310 clawgrip_you_got_me        
+s311 flyguy_im_too_hot_to_touch 
+s312 flyguy_woh_woh             
+s313 flyguy_too_hot_to_touch    
+s314 wart_im_great_wart         
+s315 wart_arrbbit               
+s316 wart_orrbbit               
+s317 wart_bbit_tough            
+s318 wart_nobbit_arrbbit        
+
+
+
+
+
+     ;●ナビのボイス●
+s319 navi_choose_a_game         
+s320 navi_choose_a_player       
+s321 navi_classic               
+s322 navi_battle                
+
+
+;s323
+;s324
+;s325
+;s326 (予備)
+;s327
+;s328
+;s329
+
+
+
+     ;●雌敵のボイス●
+s330 pinkbirdo_hello_there      
+s331 pinkbirdo_you_go           
+s332 pinkbirdo_no               
+s333 pinkbirdo_remember_this    
+s334 redbirdo_come_a_long_way   
+s335 redbirdo_finish_you_off    
+s336 redbirdo_aaa               
+s337 redbirdo_how_could_you     
+s338 greenbirdo_lot_of_nerve    
+s339 greenbirdo_ready_for_you   
+s340 greenbirdo_wah             
+s341 greenbirdo_help            
+
+;●雌敵のメカボイス●(vgroup=3)
+s342 mekabirdo_come_a_long_way  
+s343 mekabirdo_finish_you_off   
+s344 mekabirdo_aaa              
+s345 mekabirdo_how_could_you    
+
+
+
+;s346
+;s347  (予備)
+;s348
+
+
+
+
+
+
+;●ルイージのボイス●
+s349 luigi_here_we_go        
+s350 luigi_lets_go           
+
+
+
+;↓（４人共通並びはここから）
+s351 luigi_yeaa              
+s352 luigi_wah_hah           
+s353 luigi_yah               
+s354 luigi_hah               
+s355 luigi_ya                
+s356 luigi_oomm_hmm          
+s357 luigi_eeee_yah          //分離後「いー」
+s358 luigi_thats_delicious   
+s359 luigi_ow                
+s360 luigi_hyaaa             
+s361 luigi_mamma_mia         
+s362 luigi_hyaaaoowao        
+s363 luigi_gwaaa             
+s364 luigi_gotcha            
+s365 luigi_thank_you         
+s366 luigi_lacky             
+s367 luigi_just_what_i_needed
+s368 luigi_here_i_go         
+s369 luigi_great             
+s370 luigi_ha                
+s371 luigi_hoh               
+s372 luigi_bravo             
+s373 luigi_im_moving_now     
+s374 luigi_piece_of_cake     
+s375 luigi_perfect           
+s376 luigi_eeee_yah          //分離後「やっ」
+
+
+
+
+ ;●ピーチのボイス●
+s377 peach_leave_it_to_me      
+
+
+
+;↓（４人共通並びはここから）
+s378 peach_yahoo               
+s379 peach_hai_yah             
+s380 peach_ho_oh               
+s381 peach_yippee              
+s382 peach_ya                  
+s383 peach_ohmm_hmm            
+s384 peach_eeee_yah            //分離後「いー」
+s385 peach_fresh_garden        
+s386 peach_oof                 
+s387 peach_kya                 
+s388 peach_oh_no               
+s389 peach_too_bad             
+s390 peach_ahhhh               
+s391 peach_gotcha              
+s392 peach_thank_you           
+s393 peach_lacky               
+s394 peach_just_what_i_needed  
+s395 peach_here_i_go           
+s396 peach_duh_da_da_dum       
+s397 peach_hee_ya              
+s398 peach_take_that           
+s399 peach_oh_yeah             
+s400 peach_a_crystal           
+s401 peach_i_got_it            
+s402 peach_oo_hoo_hoo          
+s403 peach_eeee_yah            //分離後「やっ」
+
+
+;s404
+;s405
+;s406
+;s407
+;s408  (予備)
+;s409
+;s410
+;s411
+;s412
+;s413
+
+
+
+
+
+
+
+ ;●トード（キノピオ）のボイス●
+s414 toad_ok                    
+s415 toad_hi_yah                
+;s416
+;s417
+;s418  (予備)
+;s419
+;s420
+
+
+
+
+;↓（４人共通並びはここから）
+s421 toad_yeaa                  
+s422 toad_hai_yah               
+s423 toad_ho_oh                 
+s424 toad_yippee                
+s425 toad_ya                    
+s426 toad_ohmm_hmm              
+s427 toad_eeee_yah              //分離後「いー」
+s428 toad_all_vegies            
+s429 toad_kya                   
+s430 toad_hyaaa                 
+s431 toad_hyaaa_aaa             
+s432 toad_too_bad               
+s433 toad_uh_wahh               
+s434 toad_gotcha                
+s435 toad_thank_you             
+s436 toad_lacky                 
+s437 toad_just_what_i_needed    
+s438 toad_here_i_go             
+s439 toad_great                 
+s440 toad_hee_ya                
+s441 toad_take_that             
+s442 toad_oh_yeah               
+s443 toad_i_got_it              
+s444 toad_piece_of_cake         
+s445 toad_yea_hay               
+s446 toad_eeee_yah              //分離後「やっ」
+
+
+
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+海外版マリオＵＳＡサウンドファ@イルです。
+
+＜このバージョンの変更点＞
+
+以下のサウンドを追加しました。
+
+s069 マリオブラザーズ「ファ@イア倒し音」
+s070 マリオブラザーズ「つらら倒し音」
+
+また、以下のサウンドを変更しました。
+
+(変更前)s270 ４人で「super mario USA!」
+				↓
+(変更後)s270 ４人で「super mario 2!」   
+
+
+ソング名定義ファ@イル(song_num.txt)は、
+「m4aLib.h」の最後に追記ました。
+
+
+よろしくお願いします。
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

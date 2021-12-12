@@ -1,0 +1,462 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ ****************************************************************
+ *              
+ *	クラシック対戦のゲームメイン処理	m_VsGame.c
+ *	作成開始日	201年 1月 12日
+ *
+ ****************************************************************
+ */
+#include "m_main.h"
+#include "m_VsGame.h"
+#include "m_classic_sub.h"
+#include "m_game_sub.h"
+#include "m_score.h"
+#include "cm_game.h"
+
+extern void multi_title(void);
+extern void game_play(void);
+
+
+/*
+ ****************************************************************
+ *     メインゲームメニュー配列
+ ****************************************************************
+ */
+mfunc vs_game_menu[] = {
+    multi_title,	// タイトル
+    game_play,		// ゲーム
+    multi_error,	// 通信断絶エラー
+};
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ポーズチェック
+	出力
+	TRUE ：ＯＮ
+	FALSE：ＯＦＦ
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	u8	PauseCHK(u16 trg)
+{
+    u8		i;
+    u8		mode = mGm_GMMODE;
+
+    if( mGm_SLMODE != BROS_GAME_MODE )
+	return FALSE;
+    if( !((mode == GMPL_MOVE) || (mode == GMPL_GMOVR)) )
+	return FALSE;
+
+    if( play_mode == PLAY_CLSS ){	// クラシック？
+	if( !mGm_PLTYPE ){		// マルチゲーム？
+	    if( (trg & START_BUTTON) )
+		return TRUE;
+	    return FALSE;
+	} else {
+	    for( i = 0; i < ConnectAGB; i++ ){
+		if( (mGm_KEYBUF(i, 0) & START_BUTTON) ){
+		    mode = aP_MODE(mGm_PLAYER(i));
+		    if( (mode == PL_GAMEOVER) || (mode == PL_ALLGAMEOVER) )
+			return FALSE;
+		    return TRUE;
+		}
+	    }
+	}
+	return FALSE;
+    } else {
+	if( !(trg & START_BUTTON) )
+	    return FALSE;
+	for( i = 0; i < ConnectAGB; i++ ){
+	    if( aP_LoseSelectFG(mGm_PLAYER(i)) )
+		return FALSE;
+	}
+	return TRUE;
+    }
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	ポーズチェック
+////////	出力
+////////	TRUE ：ＯＮ
+////////	FALSE：ＯＦＦ
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	u8	PauseCHK(u16 trg)
+////////{
+////////    u8		i;
+////////    u8		mode = mGm_GMMODE;
+////////
+////////    if( mGm_SLMODE != BROS_GAME_MODE )
+////////	return FALSE;
+////////    if( !((mode == GMPL_MOVE) || (mode == GMPL_GMOVR)) )
+////////	return FALSE;
+////////
+////////    if( play_mode == PLAY_CLSS ){	// クラシック？
+////////	for( i = 0; i <= mGm_PLTYPE; i++ ){
+////////	    if( (mGm_KEYBUF(i,0) & START_BUTTON) ){
+////////		mode = aP_MODE(mGm_PLAYER(i));
+////////		if( (mode == PL_GAMEOVER) || (mode == PL_ALLGAMEOVER) )
+////////		    return FALSE;
+////////		return TRUE;
+////////	    }
+////////	}
+////////	return FALSE;
+////////    } else {
+////////	if( !(trg & START_BUTTON) )
+////////	    return FALSE;
+////////	for( i = 0; i <= mGm_PLTYPE; i++ ){
+////////	    if( aP_LoseSelectFG(mGm_PLAYER(i)) )
+////////		return FALSE;
+////////	}
+////////    }
+////////    return TRUE;
+////////}
+
+
+/*
+ ****************************************************************
+ *    ゲームメインループ
+ ****************************************************************
+ */
+void VsClassicGame(void)
+{
+    u16		*BufpTmp;
+    u16		flagback;
+    u16		trg, cnt, trg_back, cnt_back;
+    u8		i, x;
+    u8		sync;
+//    u32		(*GameMain)(void) = (u32 (*)(void))0x08000000;
+    u32		out;
+
+    while(1) {
+
+	KeyRead();			//コントローラー入力
+
+	/***** 通信 *****/
+	switch(SioModeFlg){
+	case COM_SYNC:
+	    UsrSendBuf[0] = MULTI_SIO_VS_SYNC;//0xFC00;
+	    //UsrSendBuf[1] = mGm_FRAME_COUNT;
+	    SioFlags = MultiSioMain(UsrSendBuf, UsrRecvBuf);//マルチプレイ通信メイン
+	    mGm_KEYBUF(mGm_AGBNO,0) = mGm_TRG;
+	    mGm_KEYBUF(mGm_AGBNO,1) = mGm_CONT;
+	    break;
+	case COM_START:
+	    UsrSendBuf[0] = MULTI_SIO_VS_START;
+	    //UsrSendBuf[1] = mGm_FRAME_COUNT;
+	    SioFlags = MultiSioMain(UsrSendBuf, UsrRecvBuf);//マルチプレイ通信メイン
+	    mGm_KEYBUF(mGm_AGBNO,0) = mGm_TRG;
+	    mGm_KEYBUF(mGm_AGBNO,1) = mGm_CONT;
+	    break;
+	case COM_GAME:
+	    UsrSendBuf[0] = mGm_CONT + 1;//←★0x0000を送信しないように＋１
+	    //UsrSendBuf[1] = mGm_FRAME_COUNT;
+	    SioFlags = MultiSioMain(UsrSendBuf, UsrRecvBuf);//マルチプレイ通信メイン
+	    for(i=0; i<4; i++){
+		if(SioFlags & (0x01 << i)){
+		    UsrRecvBuf[i][0] -= 1;//←★＋１されているので１引く
+		}
+		mGm_KEYBUF(i,0) = UsrRecvBuf[i][0] &
+		    (UsrRecvBuf[i][0]^mGm_KEYBUF(i,1));//trg
+		mGm_KEYBUF(i,1) = UsrRecvBuf[i][0];//cont
+	    }
+	    break;
+	case COM_ERROR:
+	    break;
+	default:
+	    mGm_KEYBUF(mGm_AGBNO,0) = mGm_TRG;
+	    mGm_KEYBUF(mGm_AGBNO,1) = mGm_CONT;
+	}
+
+	trg_back = mGm_TRG;	//今フレームの入力保存
+	cnt_back = mGm_CONT;
+//	mGm_TRG = mGm_KEYBUF(0,0);		//ポーズなどのキーを
+//	mGm_CONT = mGm_KEYBUF(0,1);		//統一して操作しやすくする為
+	trg = 0;
+	for(i=0; i<ConnectAGB; i++){
+	    trg |= mGm_KEYBUF(i,0);
+	}
+	cnt = 0;
+	for(i=0; i<ConnectAGB; i++){
+	    cnt |= mGm_KEYBUF(i,1);
+	}
+
+	/***** ソフトリセット処理 *****/
+	if(NO_RESET == 0){
+//	    if((cnt & 0x3ff) == (START_BUTTON | SELECT_BUTTON | A_BUTTON | B_BUTTON)){
+	    for(i=0; i<ConnectAGB; i++){
+		if((mGm_KEYBUF(i,1) & 0x3ff) == (START_BUTTON | SELECT_BUTTON | A_BUTTON | B_BUTTON)){
+		    SoftResetRom(RESET_ALL_FLAG);
+		    return;
+		}
+	    }
+	}
+#if DEBUG
+//	if(mGm_KEYBUF(0,1) & L_BUTTON && mGm_KEYBUF(0,0) & R_BUTTON){
+	if(cnt & L_BUTTON && trg & R_BUTTON){
+	    if(Ms.Type == SIO_MULTI_PARENT){
+		m4aSoundVSyncOff();
+		RegisterRamReset(RESET_REG_SIO_FLAG);
+		*(vu16 *)REG_IME = 0;           // IME リセット
+		*(vu16 *)REG_IF  = 0xffff;	// IF  リセット
+		*(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;
+		GameMain();
+	    }else{
+		SioModeFlg = COM_NONE;
+		Ms.State = 0;
+		for(i=0; i<4; i++){
+		    mGm_KEYBUF(i,0) = 0;
+		    mGm_KEYBUF(i,1) = 0;
+		}
+	    }
+	}
+#endif
+
+	/***** ゲームのメイン処理 *****/
+	ObjVanishAll();
+	mGm_OAMIDX = 0;
+	if( mGm_PAUSEFG ){
+	    BrosPause(trg);
+	    vs_game_menu[mGm_SLMODE]();		//ゲームメニューセレクト
+	    if( (trg & (START_BUTTON | A_BUTTON)) ){
+		if( mGm_PAUSEFG == 2 ){
+		    mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+		    mGm_GMMODE = GMPL_NEXT;
+		    mGm_COURSE = 0x0FF;	// "GMPL_NEXT"のモードで足される為
+		    mGm_ROUND = 0;
+		    mGm_CLASSICOUT = 0;
+		    mGm_CEDIT = mGm_PLTYPE + 1;
+////////		    if( GAME_CLEAR )	// ＵＳＡで７－２をクリアしてる？
+////////			mGm_CEDIT++;
+		    for( i = 0; i < MAX_PLAYER; i++ ){
+			mGm_SCORE(i) = 0;
+			mGm_ONEUPSCORE(i) = 20000;
+			mGm_PLCOUNT(i) = MAX_PLCOUNT;
+			mGm_DEADORDER(i) = 0;
+		    }
+		}
+		mGm_PAUSEFG = 0;
+		mGm_ENMYSTOPFG = 0;
+		mGm_SCORECALC = 1;
+		ScoreMain();
+#if SOUND_ON
+		m4aSongNumStart(s_b_PAUSE1UP);
+		m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+#endif
+	    }
+#if DEBUG
+	    if( (trg & R_BUTTON) ){
+		mGm_FRAME_COUNTER();		//フレームカウンターｉｎｃ
+		vs_game_menu[mGm_SLMODE]();	//ゲームメニューセレクト
+	    }
+#endif
+	} else {
+	    mGm_FRAME_COUNTER();		// フレームカウンターｉｎｃ
+	    if( PauseCHK(trg) == TRUE ){
+		mGm_PAUSEFG = 1;
+		mGm_ENMYSTOPFG = 1;
+		mGm_SCORECALC = 1;
+		ScoreMain();
+#if SOUND_ON
+		m4aSongNumStart(s_b_PAUSE1UP);
+		m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 100);
+#endif
+	    }
+	    vs_game_menu[mGm_SLMODE]();		// ゲームメニューセレクト
+	}
+
+	mGm_TRG = trg_back;	//今フレームの入力復帰
+	mGm_CONT = cnt_back;
+
+	/******** ＯＡＭセット ********/
+	CpuFastArrayCopy(OamBak, OAM);
+
+	/******* カラーＤＭＡ転送 ********/
+	if( mGm_COLFLG ){
+	    if( (mGm_COLFLG & BG_COL_TRANS) ){
+		CpuArrayCopy(mGm_ColBufBG, BG_PLTT, 16);
+	    }
+	    if( (mGm_COLFLG & OBJ_COL_TRANS) ){
+		CpuArrayCopy(mGm_ColBufOBJ, OBJ_PLTT, 16);
+	    }
+	    mGm_COLFLG = 0;
+	}
+
+#if SOUND_ON
+#if DEBUG
+	*(vu16 *)REG_DISPCNT |= DISP_LCDC_OFF;	// 強制ブランク
+#endif
+	if(!mGm_SOUNDFG)
+	    m4aSoundMain();
+#if DEBUG
+	*(vu16 *)REG_DISPCNT &= ~DISP_LCDC_OFF;	// 強制ブランク解除
+#endif
+#endif//SOUND_ON
+
+	/***** フレーム終了処理 *****/
+	if(!Ms.State){
+
+	    // Vﾌﾞﾗﾝｸ割込ﾁｪｯｸ･ﾌﾗｸﾞのｸﾘｱ
+	    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+	    while (1) {
+		// Vﾌﾞﾗﾝｸ割込処理 終了
+		if (game.IntrCheck & V_BLANK_INTR_FLAG)
+		    break;
+	    }
+	    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+
+	}else{
+	    if(Ms.Type == SIO_MULTI_PARENT){
+		/*** 親機@ ***/
+
+		/* 子機@の処理終了フラグ受信待ち */
+		out = 0;
+		while(1){
+		    sync = 1;
+		    for(i=1; i<ConnectAGB; i++){
+			if((!Ms.FrameEndRecv[i]) || 
+			   (Ms.RecvBufCounter[i] <= MULTI_SIO_BLOCK_SIZE)){
+			    sync = 0;
+			}
+		    }
+		    if(sync){
+			break;
+		    }
+		    out++;
+		    if(out >= 0x0000FFFF){
+			SioError();	//エラー
+			break;
+		    }
+		}
+
+		// Vﾌﾞﾗﾝｸ割込ﾁｪｯｸ･ﾌﾗｸﾞのｸﾘｱ
+		game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+		while (1) {
+		    // Vﾌﾞﾗﾝｸ割込処理 終了
+		    if (game.IntrCheck & V_BLANK_INTR_FLAG)
+			break;
+		}
+		game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+
+		*(vu32 *)REG_MULTI_SIO_TIMER &= ~TMR_ENABLE;//タイマーストップ
+		*(vu16 *)REG_IF  =  SIO_INTR_FLAG	// IF リセット
+		    |  MULTI_SIO_TIMER_INTR_FLAG;
+		*(vu32 *)REG_MULTI_SIO_TIMER	// タイマー スタート
+		    = (0x10000 - MULTI_SIO_TIMER_COUNT)
+		    | TMR_PRESCALER_1CK
+		    | TMR_IF_ENABLE | TMR_ENABLE;
+	    }else{
+		/*** 子機@ ***/
+
+		/* 通信完了チェック */
+		out = 0;
+		while(1){
+		    sync = 1;
+		    for(i=0; i<ConnectAGB; i++){
+			if(Ms.RecvBufCounter[i] <= MULTI_SIO_BLOCK_SIZE){
+			    sync = 0;
+			}
+		    }
+		    if(sync){
+			break;
+		    }
+		    out++;
+		    if(out >= 0x0000FFFF){
+			SioError();	//エラー
+			break;
+		    }
+		}
+	    }
+
+	    /* 処理終了フラグ送信 */
+	    Ms.SendBufCounter = MULTI_SIO_BLOCK_SIZE + 2;
+
+	    /* 全機@処理終了フラグ受信待ち */
+	    out = 0;
+	    while(1){
+		sync = 1;
+		for(i=0; i<ConnectAGB; i++){
+		    if(!Ms.FrameEndRecv[i]){
+			sync = 0;
+		    }
+		}
+		if(sync || SioModeFlg == COM_ERROR){
+		    break;
+		}
+		out++;
+		if(out >= 0x0000FFFF){
+		    SioError();	//エラー
+		    break;
+		}
+	    }
+#if DEBUG
+	    *(vu16 *)REG_DISPCNT |= DISP_LCDC_OFF;	// 強制ブランク
+#endif
+//////	    *(vu16 *)REG_IME = 0;	// 割込不許可
+	    flagback = *(vu16 *)REG_IE;
+	    *(vu16 *)REG_IE &= ~(SIO_INTR_FLAG | MULTI_SIO_TIMER_INTR_FLAG);//通信割り込み不許可
+	    BufpTmp = Ms.CurrentSendBufp;	// 送信バッファ@入れ替え
+	    Ms.CurrentSendBufp = Ms.NextSendBufp;
+	    Ms.NextSendBufp = BufpTmp;
+	    Ms.SendBufCounter = -1;
+	    for(i=0; i<4; i++){
+//	    for(i=0; i<ConnectAGB; i++){
+		BufpTmp = Ms.RecvCheckBufp[i];  // 受信バッファ@入れ替え
+//		Ms.RecvCheckBufp[i] = Ms.LastRecvBufp[i];
+//		Ms.LastRecvBufp[i] = Ms.CurrentRecvBufp[i];
+		Ms.RecvCheckBufp[i] = Ms.CurrentRecvBufp[i];
+		Ms.CurrentRecvBufp[i] = BufpTmp;
+		Ms.RecvBufCounter[i] = -1;
+		Ms.SyncRecvFlag[i] = 0;
+		Ms.FrameEndRecv[i] = 0;
+	    }
+//////	    *(vu16 *)REG_IME = 1;   // 割込許可
+	    *(vu16 *)REG_IE = flagback;//通信割り込み許可
+#if DEBUG
+//	    *(vu16 *)REG_DISPCNT &= ~DISP_LCDC_OFF;	// 強制ブランク解除
+#endif
+	}
+
+	/******** ＢＧコイン書き換えアニメーション ********/
+	BrosBGCoinAnime();
+	BackBGAnime();
+	/******** ＢＧ水面アニメーション ********/
+	BrosBGWaterFace();
+    }
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,586 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@ゲームオーバー処理		*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_color.h"
+#include "up_player.h"
+#include "uca_acters.h"
+#include "ua_stareffect.h"
+#include "ua_score.h"
+#include "ua_game.h"
+#include "ua_save.h"
+
+#include "ud_cad.h"
+
+#include "ua_game_over.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void over_score_set(void);
+static void over_oam_set(void);
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバーＯＡＭデータ			*/
+/*--------------------------------------------------------------*/
+static u16 over_oam_data[4*71] = {
+    0x0050,0x0030,0x2326,0x0000,	//00 カーソル
+
+    0x803C,0x0038,0x2307,0x0000,	//01 continue
+	0x803C,0x0040,0x2308,0x0000,	//02 
+    0x803C,0x0048,0x2309,0x0000,	//03 
+	0x804C,0x0038,0x230A,0x0000,	//04 save and continue
+    0x804C,0x0040,0x230B,0x0000,	//05 
+    0x804C,0x0048,0x230C,0x0000,	//06 
+    0x804C,0x0050,0x2307,0x0000,	//07 
+    0x804C,0x0058,0x2308,0x0000,	//08 
+	0x804C,0x0060,0x2309,0x0000,	//09 
+	0x805C,0x0038,0x230A,0x0000,	//0a save and quit
+    0x805C,0x0040,0x230B,0x0000,	//0b 
+    0x805C,0x0048,0x230C,0x0000,	//0c 
+    0x805C,0x0050,0x230D,0x0000,	//0d
+    0x805C,0x0058,0x230E,0x0000,	//0e
+    0x805C,0x0060,0x2312,0x0000,	//0f
+
+    0x0028,0x4020,0x2300,0x0000,	//16
+    0x0028,0x4030,0x2301,0x0000,	//18
+    0x0028,0x4040,0x2301,0x0000,	//18
+    0x0028,0x4050,0x2301,0x0000,	//19
+    0x0028,0x4060,0x2301,0x0000,	//1a
+    0x0028,0x4070,0x2301,0x0000,	//1b
+    0x0028,0x4080,0x2301,0x0000,	//1c
+    0x0028,0x4090,0x2301,0x0000,	//1d
+    0x0028,0x40a0,0x2301,0x0000,	//1e
+    0x0028,0x40b0,0x2301,0x0000,	//1f
+    0x0028,0x50c0,0x2300,0x0000,	//20
+
+    0x0038,0x4020,0x2320,0x0000,	//21
+    0x0038,0x4030,0x2321,0x0000,	//22
+    0x0038,0x4040,0x2321,0x0000,	//23
+    0x0038,0x4050,0x2321,0x0000,	//24
+    0x0038,0x4060,0x2321,0x0000,	//25
+    0x0038,0x4070,0x2321,0x0000,	//26
+    0x0038,0x4080,0x2321,0x0000,	//27
+    0x0038,0x4090,0x2321,0x0000,	//28
+    0x0038,0x40a0,0x2321,0x0000,	//29
+    0x0038,0x40b0,0x2321,0x0000,	//2a
+    0x0038,0x50c0,0x2320,0x0000,	//2b
+
+    0x0048,0x4020,0x2320,0x0000,	//2c
+    0x0048,0x4030,0x2321,0x0000,	//2d
+    0x0048,0x4040,0x2321,0x0000,	//2e
+    0x0048,0x4050,0x2321,0x0000,	//2f
+    0x0048,0x4060,0x2321,0x0000,	//30
+    0x0048,0x4070,0x2321,0x0000,	//31
+    0x0048,0x4080,0x2321,0x0000,	//32
+    0x0048,0x4090,0x2321,0x0000,	//33
+    0x0048,0x40a0,0x2321,0x0000,	//34
+    0x0048,0x40b0,0x2321,0x0000,	//35
+    0x0048,0x50c0,0x2320,0x0000,	//36
+
+    0x0058,0x4020,0x2320,0x0000,	//37
+    0x0058,0x4030,0x2321,0x0000,	//38
+    0x0058,0x4040,0x2321,0x0000,	//39
+    0x0058,0x4050,0x2321,0x0000,	//3a
+    0x0058,0x4060,0x2321,0x0000,	//3b
+    0x0058,0x4070,0x2321,0x0000,	//3c
+    0x0058,0x4080,0x2321,0x0000,	//3d
+    0x0058,0x4090,0x2321,0x0000,	//3e
+    0x0058,0x40a0,0x2321,0x0000,	//3f
+    0x0058,0x40b0,0x2321,0x0000,	//40
+    0x0058,0x50c0,0x2320,0x0000,	//41
+
+    0x0068,0x6020,0x2300,0x0000,	//42
+    0x0068,0x6030,0x2301,0x0000,	//43
+    0x0068,0x6040,0x2301,0x0000,	//44
+    0x0068,0x6050,0x2301,0x0000,	//45
+    0x0068,0x6060,0x2301,0x0000,	//46
+    0x0068,0x6070,0x2301,0x0000,	//47
+    0x0068,0x6080,0x2301,0x0000,	//48
+    0x0068,0x6090,0x2301,0x0000,	//49
+    0x0068,0x60a0,0x2301,0x0000,	//4a
+    0x0068,0x60b0,0x2301,0x0000,	//4b
+    0x0068,0x70c0,0x2300,0x0000,	//4c
+};
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバーＯＡＭセット処理			*/
+/*--------------------------------------------------------------*/
+void over_oam_set(void)
+{
+    DmaArrayCopy(3, over_oam_data, OamBak, 16);
+
+    if((PASTIM & 0x10) == 0x10)
+	OamBak[0].CharNo = 0x321;
+    else
+	OamBak[0].VPos = SAVEPT * 0x10 + 0x40;
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバーイニシャル処理			*/
+/*--------------------------------------------------------------*/
+void game_over_init(void)
+{
+//    u8 word_bak;
+
+    lcdc_off();			//強制ブランキング処理
+//    m4aSoundVSyncOff();		//サウンドストップ
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+
+/*------------- キャラクターセット -------------*/
+    DmaCopy(3, ud_waku_base_schDT, BG_VRAM, 0x1800, 32);
+    DmaCopy(3, ud_waku_tenso_schDT, BG_VRAM + 0x1800, 0x800, 32);
+    DmaCopy(3, ud_waku_base_schDT + 8 * 0xc0, BG_VRAM + 0x2000, 0x800, 32);
+//    DmaCopy(3, sm_2_y_1f_schDT + 8 * 0x140, BG_VRAM + 0x3000, 0x800, 32);
+
+/*------------- スクリーンセット -------------*/
+    DmaArrayCopy(3, d_game_over_sscDT, BG_VRAM + 0xf800, 16);
+    DmaArrayCopy(3, ud_slot_BG2_sscDT, BG_VRAM + 0xf000, 16);
+    over_score_set();
+
+/*------------- カラーセット -------------*/
+    game_over_col_set();
+
+/*------------- 初期値セット -------------*/
+    SORTFG = 0;
+    SCORE = 0;			// スコアのクリア
+    mGm_PLCNT = 5;		// プレイヤー人数のイニシャル
+    BOSS_DEMOFG = 0;		// ボスのデモフラグクリア
+
+    FLGCLEAR();
+    SAVEPT = 0;
+    PASTIM = 0;
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    game.scch2 = 0;
+    game.sccv2 = 0;
+//    word_bak = WORDNO;
+//    WORDNO = CHAPTN * 3;
+    save_push();
+//    WORDNO = word_bak;
+
+    BLDCNT = 0x00b7;
+    BLDALPHA = 0x0000;
+    BLDY = 0x000f;
+    game.fade_flag = 1;
+    *(vu16 *)REG_BLDCNT = BLDCNT;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA;
+    *(vu16 *)REG_BLDY = BLDY;
+
+    NMI_NO = nmi_title;
+    IRQ_NO = irq_dummy;
+    DISPCNT = 0;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+//    m4aSoundVSyncOff();			//サウンドスタート
+    m4aSoundVSyncOn();			//サウンドスタート
+    m4aSongNumStart( s_u_game_over );	//サウンドセット
+
+    game.GMMODE++;
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_OBJ_ON;
+//    *(vu16 *)REG_DISPCNT = DISP_MODE_1 | DISP_BG0_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバー処理				*/
+/*--------------------------------------------------------------*/
+void game_over_disp(void)
+{
+    if(mGm_TRG & (A_BUTTON | START_BUTTON)){
+	PAUSE_TIM = 0;
+	PAUSE_CUR = 0;
+	WIN0H = 0x40b0;
+	WIN1H = 0x20d0;
+	WIN0V = 0x4858;
+	WIN1V = 0x2878;
+	WININ = 0x0f10;
+	WINOUT = 0x1f;
+	DISPCNT |= 0x6000;
+	over_oam_set();
+	m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 100);
+	m4aSongNumStart( s_u_se_pause );
+	mGm_GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバーウィンドウ開く処理		*/
+/*--------------------------------------------------------------*/
+void over_open(void)
+{
+    over_oam_set();
+    WIN0H = ((WIN0H & 0xff00) - 0x800) | ((WIN0H & 0x00ff) + 0x8);
+    WIN0V = ((WIN0V & 0xff00) - 0x800) | ((WIN0V & 0x00ff) + 0x8);
+    if((WIN0H & 0xff00) == 0x2000){
+	WIN0H = 0x23cd;
+	WIN0V = 0x2b75;
+	WININ = 0x1f10;
+	game.GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバー処理				*/
+/*--------------------------------------------------------------*/
+void over_key_wait(void)
+{
+    u16 vram_point;
+    u16 bit_data;
+    u8 cur_cnt;
+    u8 loop_ct;
+    u8 byte_no,bit_no;
+    u8 word_bak_o = 0;
+
+    PASTIM++;
+    switch(SAVE_ON){
+    case 0:
+	if((game.Trg & U_KEY) || (game.Trg & D_KEY) || (game.Trg & SELECT_BUTTON)){
+	    m4aSongNumStart( s_u_se_coin );
+	    PASTIM = 0;
+	    if(game.Trg & U_KEY){
+		SAVEPT--;
+		if(SAVEPT == 0xff)
+		    SAVEPT = 2;
+	    }
+	    else{
+		SAVEPT++;
+		if(SAVEPT == 3)
+		    SAVEPT = 0;
+	    }
+	}
+	if(!((mGm_CONT & SELECT_BUTTON) ||
+	     (mGm_CONT & R_BUTTON) ||
+	     (mGm_CONT & L_BUTTON) ||
+	     (mGm_CONT & B_BUTTON))){
+	    if((game.Trg & A_BUTTON) || (game.Trg & START_BUTTON)){
+		PASTIM = 0;
+		REDCOIN = 0;
+		if(SAVEPT != 0){
+		    SAVE_ON = 1;
+		}
+		else{
+		    PLAY_PLLIFE = 0x0f;
+		    PLAY_PLLIFEB = 0;
+		    PLAY_PLSMAL = 1;
+		    game.SLMODE = select_mode;
+		    game.GMMODE = pl_sel_init;
+		    COSUNO = 0;
+		    mGm_FREE_p_act();		// 敵フリー
+		    mGm_FREE_p_scr();		// スコアフリー
+		    mGm_FREE_p_eff();		// スター＆コインエフェクトフリー
+		    mGm_GC();
+		}
+		VSYNC_OFF = 1;
+	    }
+	}
+	break;
+    case 1:
+	byte_no = (WORDNO * 5) / 8;
+	bit_no = (WORDNO * 5) % 8;
+	bit_data = REDCOIN << bit_no;
+	RED_COIN[byte_no] = RED_COIN[byte_no] | (bit_data & 0xff);
+	RED_COIN[byte_no + 1] = RED_COIN[byte_no + 1] | (bit_data >> 8);
+	if(MAX_WORDNO[FILE_NO] == WORDNO){
+//		WORDNO = CHAPTN * 3;		// ワールドのイニシャル
+	    word_bak_o = WORDNO;
+	}
+	else if(MAX_WORDNO[FILE_NO] > WORDNO){
+	    word_bak_o = WORDNO;
+	    WORDNO = MAX_WORDNO[FILE_NO];
+	}
+	*(vu16 *)REG_IME = 0;
+	file_save(FILE_NO);
+	*(vu16 *)REG_IME = 1;
+	V_blank_wait();
+	WORDNO = word_bak_o;
+	SAVE_ON = 0;
+	if(ERROR_NO != 0){
+	    mGm_FREE_usa_game();
+	    mGm_FREE_p_act();	// 敵フリー
+	    ply_free_set();	// プレイヤー領域フリー
+	    mGm_FREE_p_scr();	// スコアフリー
+	    mGm_FREE_p_eff();	// スコアフリー
+	    mGm_GC();
+	    m4aMPlayAllStop();
+	    return;
+	}
+
+	if(SAVEPT == 2){
+	    BRUSFG = MAIN_mode;
+	    game.SLMODE = 0;
+	    game.GMMODE = 0;
+	    mGm_FREE_usa_game();
+	    mGm_FREE_p_act();	// 敵フリー
+	    ply_free_set();	// プレイヤー領域フリー
+	    mGm_FREE_p_scr();	// スコアフリー
+	    mGm_FREE_p_eff();	// スコアフリー
+	    mGm_GC();
+	    return;
+	}
+	else{
+	    PLAY_PLLIFE = 0x0f;
+	    PLAY_PLLIFEB = 0;
+	    PLAY_PLSMAL = 1;
+	    game.SLMODE = select_mode;
+	    game.GMMODE = pl_sel_init;
+	    COSUNO = 0;
+	    mGm_FREE_p_act();		// 敵フリー
+	    mGm_FREE_p_scr();		// スコアフリー
+	    mGm_FREE_p_eff();		// スター＆コインエフェクトフリー
+	    mGm_GC();
+	}
+    }
+
+/*	if((game.Trg & A_BUTTON) || (game.Trg & START_BUTTON)){
+	    PASTIM = 0;
+	    if(SAVEPT != 0){
+		byte_no = (WORDNO * 5) / 8;
+		bit_no = (WORDNO * 5) % 8;
+		bit_data = REDCOIN << bit_no;
+		RED_COIN[byte_no] = RED_COIN[byte_no] | (bit_data & 0xff);
+		RED_COIN[byte_no + 1] = RED_COIN[byte_no + 1] | (bit_data >> 8);
+		if((MAX_WORDNO[FILE_NO] / 3) == (WORDNO / 3)){
+		    WORDNO = CHAPTN * 3;		// ワールドのイニシャル
+		    word_bak_o = WORDNO;
+		    MAX_WORDNO[FILE_NO] = WORDNO;
+		}
+		else if((MAX_WORDNO[FILE_NO] / 3) > (WORDNO / 3)){
+		    word_bak_o = WORDNO;
+		    WORDNO = MAX_WORDNO[FILE_NO];
+		}
+		m4aMPlayAllStop();
+		m4aSoundMain();
+		*(vu16 *)REG_IME = 0;
+		m4aSoundVSyncOff();
+		file_save(FILE_NO);
+		*(vu16 *)REG_IME = 1;
+		V_blank_wait();
+		m4aSoundVSyncOff();
+		m4aSoundVSyncOn();
+		WORDNO = word_bak_o;
+		if(ERROR_NO != 0){
+		    mGm_FREE_usa_game();
+		    mGm_FREE_p_act();	// 敵フリー
+		    ply_free_set();	// プレイヤー領域フリー
+		    mGm_FREE_p_scr();	// スコアフリー
+		    mGm_FREE_p_eff();	// スコアフリー
+		    mGm_GC();
+		    m4aMPlayAllStop();
+		    return;
+		}
+	    }
+	    REDCOIN = 0;
+//	    WORDNO = CHAPTN * 3;	// ワールドのイニシャル
+
+	    if(SAVEPT == 2){
+		BRUSFG = MAIN_mode;
+		game.SLMODE = 0;
+		game.GMMODE = 0;
+		mGm_FREE_usa_game();
+		mGm_FREE_p_act();	// 敵フリー
+		ply_free_set();	// プレイヤー領域フリー
+		mGm_FREE_p_scr();	// スコアフリー
+		mGm_FREE_p_eff();	// スコアフリー
+		mGm_GC();
+		return;
+	    }
+	    else{
+		PLAY_PLLIFE = 0x0f;
+		PLAY_PLLIFEB = 0;
+		PLAY_PLSMAL = 1;
+		game.SLMODE = select_mode;
+		game.GMMODE = pl_sel_init;
+		COSUNO = 0;
+		mGm_FREE_p_act();		// 敵フリー
+		mGm_FREE_p_scr();		// スコアフリー
+		mGm_FREE_p_eff();		// スター＆コインエフェクトフリー
+		mGm_GC();
+	    }
+	}
+	}*/
+    over_oam_set();
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバーのスコアセット処理		*/
+/*--------------------------------------------------------------*/
+void over_score_set(void)
+{
+    u8 nuki_flg = 0;
+    u16 *vram_adr;
+    u32 work;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) + VRAM + 0x300);
+
+    if(SCORE >= U_HI_SCORE)
+	{
+	work = U_HI_SCORE;
+/*	*(u16 *)(vram_adr + 0x45) = 0xd123;
+	*(u16 *)(vram_adr + 0x46) = 0xd124;
+	*(u16 *)(vram_adr + 0x47) = 0xd125;
+	*(u16 *)(vram_adr + 0x48) = 0xd126;
+	*(u16 *)(vram_adr + 0x49) = 0xd127;
+*/
+	*(u16 *)(vram_adr + 0x29) = 0xd126;
+	*(u16 *)(vram_adr + 0x2a) = 0xd127;
+	*(u16 *)(vram_adr + 0x48) = 0xd123;
+	*(u16 *)(vram_adr + 0x49) = 0xd124;
+	*(u16 *)(vram_adr + 0x4a) = 0xd125;
+    }
+    else
+	work = SCORE;
+
+    *(u16 *)(vram_adr + 0x10) = WORDNO / 3 + 0xd111;
+    *(u16 *)(vram_adr + 0x12) = WORDNO % 3 + 0xd111;
+
+    if((work / 10000000) != 0){
+	*(u16 *)(vram_adr + 0x4f) = (work / 10000000) + 0xd110;
+	work = work % 10000000;
+	nuki_flg++;
+    }
+
+    if(((work / 1000000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x50) = (work / 1000000) + 0xd110;
+	work = work % 1000000;
+	nuki_flg++;
+    }
+
+    if(((work / 100000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x51) = (work / 100000) + 0xd110;
+	work = work % 100000;
+	nuki_flg++;
+    }
+
+    if(((work / 10000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x52) = (work / 10000) + 0xd110;
+	work = work % 10000;
+	nuki_flg++;
+    }
+
+    if(((work / 1000) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x53) = (work / 1000) + 0xd110;
+	work = work % 1000;
+	nuki_flg++;
+    }
+
+    if(((work / 100) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x54) = (work / 100) + 0xd110;
+	work = work % 100;
+	nuki_flg++;
+    }
+
+    if(((work / 10) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x55) = (work / 10) + 0xd110;
+	work = work % 10;
+	nuki_flg++;
+    }
+
+    if(((work % 10) != 0) || (nuki_flg != 0)){
+	*(u16 *)(vram_adr + 0x56) = (work % 10) + 0xd110;
+	nuki_flg++;
+    }
+
+//    *(u16 *)(vram_adr + 0x95) = 0xb110;
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d28 2
+a29 2
+static u16 over_oam_data[4*77] = {
+    0x0050,0x0030,0x232e,0x0000,	//00 カーソル
+d31 15
+a45 21
+    0x4040,0x0038,0x2328,0x0000,	//01 ＣＯ
+    0x0040,0x0048,0x232a,0x0000,	//02 Ｎ
+    0x0040,0x0050,0x230f,0x0000,	//03 Ｔ
+    0x0040,0x0058,0x230e,0x0000,	//04 Ｉ
+    0x0040,0x0060,0x232a,0x0000,	//05 Ｎ
+    0x0040,0x0068,0x230d,0x0000,	//06 Ｕ
+    0x0040,0x0070,0x230b,0x0000,	//07 Ｅ
+    0x4050,0x4038,0x2308,0x0000,	//08 ＳＡＶＥ
+    0x0050,0x0060,0x2309,0x0000,	//09 Ａ
+    0x4050,0x0068,0x232a,0x0000,	//0a ＮＤ
+    0x4050,0x0080,0x2328,0x0000,	//0b ＣＯ
+    0x0050,0x0090,0x232a,0x0000,	//0c Ｎ
+    0x0050,0x0098,0x230f,0x0000,	//0d Ｔ
+    0x0050,0x00a0,0x230e,0x0000,	//0e Ｉ
+    0x0050,0x00a8,0x232a,0x0000,	//0f Ｎ
+    0x0050,0x00b0,0x230d,0x0000,	//10 Ｕ
+    0x0050,0x00b8,0x230b,0x0000,	//11 Ｅ
+    0x4060,0x4038,0x2308,0x0000,	//12 ＳＡＶＥ
+    0x0060,0x0060,0x2309,0x0000,	//13 Ａ
+    0x4060,0x0068,0x232a,0x0000,	//14 ＮＤ
+    0x4060,0x4080,0x230c,0x0000,	//15 ＱＵＩＴ
+d429 2
+a430 1
+    if(SCORE >= U_HI_SCORE){
+d432 1
+a432 1
+	*(u16 *)(vram_adr + 0x45) = 0xd123;
+d437 6
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

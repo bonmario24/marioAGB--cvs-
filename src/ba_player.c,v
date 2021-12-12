@@ -1,0 +1,5547 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.19;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.19;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*
+ ****************************************************************
+
+	プレイヤープログラム
+
+ ****************************************************************
+*/
+#include "m_main.h"
+#include "m_game_sub.h"
+#include "m_sub.h"
+#include "m_bgcheck.h"
+#include "ba_act.h"
+#include "ba_bucket.h"
+#include "ba_bgYuKa.h"
+#include "ba_coin.h"
+#include "ba_common.h"
+#include "ba_effect.h"
+#include "ba_enmy.h"
+#include "ba_enNoKo.h"
+#include "ba_heart.h"
+#include "ba_koura.h"
+#include "ba_mutekiStar.h"
+#include "ba_player.h"
+#include "ba_pow.h"
+#include "ba_reach.h"
+#include "ba_smoke.h"
+#include "ba_spark.h"
+#include "course_data.h"
+#include "d_playerA_sob.h"
+#include "d_playerB_sob.h"
+
+/*
+ ================================================================
+	ｄｅｆｉｎｅ
+ ================================================================
+ */
+#define	PL_SHRINKJPSPD		0x0100		// 縮み中ののジャンプ
+#define	PL_MAXBIGJPSPD		0x0548		// しゃがみジャンプ
+#define	PL_GRAVITY		0x0038		// 重力
+#define	PL_GRAVITY2		0x0028		// 重力(ふんばり)
+#define	PLXCENTER		0x08		// 中心までのＸ距離
+#define	PLYCENTER		0x13		// 中心までのＹ距離
+#define	PLSQUATYCENTER		0x18		// しゃがみ時の中心までのＹ距離
+#define	PLXSIZE			0x06		// Ｘサイズ
+#define	PLYSIZE			0x0C		// Ｙサイズ
+#define	PLSQUATYSIZE		0x07		// しゃがみ時のＹサイズ
+////////#define	DISPHIGHPOS		0x08		// 画面上部ポジション
+////////#define	DISPLOWPOS		0x70		// 画面下部ポジション
+#define	DISPHIGHPOS		0x38		// 画面上部ポジション
+#define	DISPLOWPOS		0x78		// 画面下部ポジション
+#define	ACCEL_SPD		0x0020		// アクセルＸスピード
+#define	SLIP_ACCEL_SPD		0x0014		// スリップアクセル
+#define	SLIP_ACCEL_SPD2		0x0004		// スリップアクセル
+#define	JUMP_BRAKE_SPD		0x0002		// ジャンプ中ブレーキ
+#define	BRAKE_ACCEL_SPD		0x0020		// ブレーキアクセル
+#define	BRAKE_ACCEL_SPD2	0x0004		// 氷の上ブレーキアクセル
+#define	MUTEKI_DASH_MAXSPD	0x0127		// 無敵ダッシュの最大スピード
+#define	B_DASH_MAXSPD		0x013E		// Ｂダッシュの最大スピード
+#define	MUTEKI_B_DASH_MAXSPD	0x0154		// 無敵Ｂダッシュの最大スピード
+#define	MUTEKI_ACCEL_SPD	0x0008		// 無敵のＸ加速度
+#define	MUTEKI_B_ACCEL_SPD	0x0008		// 無敵ＢダッシュのＸ加速度
+#define	MAX_DISPVMVCT		0xA0		// 最大画面移動数(ドット単位)
+#define	SHRINK_TIMER		0x80		// 縮んでいる時間
+#define	MAX_HANDS_UP_DT		6		// 最大持ち上げデータ数
+#define	THROWTIMER		0x20		// 投げポーズタイマー
+#define	PLPRIOFF		2		// 表示優先　@後
+#define	PLPRIBUCKET		3		// バケツに入る時の表示優先
+#define	MAX_MOJISPD		0x040		// 最大文字上下移動スピード
+#define	MAX_MOJICALC		0x0008		// 文字上下移動加速度
+////////#define	PL_KICK_TM		0x18		// 蹴りポーズタイマー
+#define	PL_KICK_TM		0x14		// 蹴りポーズタイマー
+#define	PL_RESTART_TM		0x40		// 再スタートタイマー
+#define	PL_RESTART_IDX		0x03		// 再スタートインデックス
+#define	ASCENSION_XSPD		0x0100		// 昇天Ｘスピード
+#define	ASCENSION_YSPD		0x0080		// 昇天Ｙスピード
+#define	PUSH_XSPD		0x0100		// 画面外よりの押しだしスピード
+#define	HaNPaTu_XSPD		0x0200		// 反発初速
+#define	PLACARD_TM		(60 * 5)	// プラカード表示タイマー
+////////#define	SELECT_XPOS		0x00002800	// 選択文字Ｘ座標
+#define	SELECT_XPOS		0x00004000	// 選択文字Ｘ座標
+////////#define	MaKe_XPOS		0x00004800	// "まけ"文字Ｘ座標
+#define	MaKe_XPOS		0x00005000	// "まけ"文字Ｘ座標
+#define	MaKe_START_YPOS		0x0000B000	// "まけ"文字Ｙ座標
+#define	MaKe_YPOS		0x00004000	// "まけ"文字Ｙ座標
+#define	SMALL_MAX_XSPD		0x000002C0	// チビの時の反発最大Ｘスピード
+////////#define	MAX_UP_SCCV		0x00F0		// Ｖスクロールの上限
+#define	MAX_UP_SCCV		0x0108		// Ｖスクロールの上限
+#define	MAX_GAMEOVER_WAIT_TM	60		// キー入力キャンセルタイマー
+/*
+ ================================================================
+	プレイヤー初期データ
+ ================================================================
+ */
+const	playerDT_c	playerInitDT = {
+    0, PL_NOT, 2, SMALL_STAMINA, 0,
+    PLPRION, 0,0,0,0,
+    0,0,
+    0,0,0,0,1,
+    0,0x0001C8F0,0,0,0,0x0150,0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,
+    0,0,0,0,0,0,
+    0,0,0,0,0,
+    0,0,
+    0,0,0,0,0,
+    NULL,
+    NULL,
+    NULL,
+};
+/*
+ ================================================================
+	オブジェデータアドレステーブル
+ ================================================================
+ */
+static	OamData		*PatternAData[0x1E] = {
+    d_playerA_sob_00, d_playerA_sob_01, d_playerA_sob_02, d_playerA_sob_03,
+    d_playerA_sob_04, d_playerA_sob_05, d_playerA_sob_05, d_playerA_sob_05,
+    d_playerA_sob_08, d_playerA_sob_09, d_playerA_sob_0A, d_playerA_sob_0B,
+    d_playerA_sob_0C, d_playerA_sob_0D, d_playerA_sob_0E, d_playerA_sob_0F,
+    d_playerA_sob_10, d_playerA_sob_11, d_playerA_sob_12, d_playerA_sob_13,
+    d_playerA_sob_14, d_playerA_sob_15, d_playerA_sob_16, d_playerA_sob_17,
+    d_playerA_sob_18, d_playerA_sob_19, d_playerA_sob_1A, d_playerA_sob_1B,
+    d_playerA_sob_1B, d_playerA_sob_1D
+};
+static	OamData		*PatternBData[0x1E] = {
+    d_playerB_sob_00, d_playerB_sob_01, d_playerB_sob_02, d_playerB_sob_03,
+    d_playerB_sob_04, d_playerB_sob_05, d_playerB_sob_06, d_playerB_sob_05,
+    d_playerB_sob_08, d_playerB_sob_09, d_playerB_sob_0A, d_playerB_sob_0B,
+    d_playerB_sob_0C, d_playerB_sob_0D, d_playerB_sob_0E, d_playerB_sob_0F,
+    d_playerB_sob_10, d_playerB_sob_11, d_playerB_sob_11, d_playerB_sob_12,
+    d_playerB_sob_13, d_playerB_sob_14, d_playerB_sob_15, d_playerB_sob_16,
+    d_playerB_sob_17, d_playerB_sob_18, d_playerB_sob_19, d_playerB_sob_1A,
+    d_playerB_sob_1B, d_playerB_sob_1D
+};
+/*
+ ================================================================
+	死に顔Ｘ座標データ
+ ================================================================
+ */
+////////const	u32	DeathXposDT[MAX_PLAYER] = { 0x010,0x0C8,0x048,0x090 };
+const	u32	DeathXposDT[MAX_PLAYER] = { 0x000,0x0B0,0x038,0x078 };
+const	u32	BattleDeathXposDT[MAX_PLAYER] = { 0x000,0x0B8,0x038,0x080 };
+/*
+ ================================================================
+	アニメーションパターンデータ
+ ================================================================
+ */
+const	u8	HandUpDT[MAX_HANDS_UP_DT] = {0x08,0x08,0x08,0x08,0x09,0x09};
+const	u8	BigJumpAnimeDT[6] = {0x14, 0x15, 0x15, 0x16, 0x16, 0x17};
+const	u8	DownAnimeDT[6] = {0x10, 0x0C, 0x0C, 0x1D, 0x1D, 0x00};
+const	u8	WalkAnimeDT[3] = {0x02,0x00,0x01};
+const	u8	VFlipWalkAnimeDT[3] = {0x1B,0x19,0x1A};
+const	u8	HandsUpWalkAnimeDT[3] = {0x05,0x03,0x04};
+/*
+ ================================================================
+	サウンドデータ
+ ================================================================
+ */
+#if SOUND_ON
+const	u16	WalkSoundDT[8] = {
+    s_b_WALK_E,s_b_WALK_G,s_b_WALK_E,s_b_WALK_G,
+    s_b_WALK_E,s_b_WALK_C,s_b_WALK_E,s_b_WALK_G
+    };
+#endif
+/////////*
+//////// ================================================================
+////////	アイテムを投げた時のスピードデータ
+//////// ================================================================
+//////// */
+////////const	s32	ItemThrowSpeedDT[4] = {
+////////    -0x00000240,-0x00000240,-0x00000240,-0x00000240
+////////};
+/*
+ ================================================================
+	フラッシングカラーデータ
+ ================================================================
+*/
+static	u16	MarioCol1[16] = {
+    0x45bc,0x7fff,0x4631,0x3bde,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x329a,0x7a8b,0x5da6,0x7f32,0x2d9f,0x295c,0x3a1f
+};
+static	u16	MarioCol2[16] = {
+    0x45bc,0x7fff,0x5ad6,0x57ff,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x573f,0x7f54,0x5da6,0x7f32,0x2d9f,0x295c,0x4ebf
+};
+static	u16	LuigiCol1[16] = {
+    0x4924,0x7fff,0x4631,0x3bde,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x329a,0x76bb,0x6514,0x7f1e,0x5b91,0x4ace,0x5b91
+};
+static	u16	LuigiCol2[16] = {
+    0x4924,0x7fff,0x5ad6,0x57ff,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x573f,0x7f3e,0x6514,0x7f1e,0x5b91,0x4ace,0x73f3
+};
+static	u16	PeachCol1[16] = {
+    0x45bc,0x7fff,0x4631,0x3bde,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x329a,0x46db,0x2e57,0x6fdf,0x43ff,0x0f7b,0x57ff
+};
+static	u16	PeachCol2[16] = {
+    0x45bc,0x7fff,0x5ad6,0x57ff,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x573f,0x6fbf,0x2e57,0x6fdf,0x43ff,0x0f7b,0x6fff
+};
+static	u16	KinopioCol1[16] = {
+    0x4924,0x7fff,0x4631,0x3bde,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x329a,0x435d,0x3eb9,0x77ff,0x7eae,0x71e6,0x7f11
+};
+static	u16	KinopioCol2[16] = {
+    0x4924,0x7fff,0x5ad6,0x57ff,0x2a9f,0x33ff,0x465f,0x537f,
+    0x18c6,0x573f,0x67df,0x3eb9,0x77ff,0x7eae,0x71e6,0x7f95
+};
+static	u16	*ColDataTBL[MAX_PLAYER][4] = {
+    {(d_Bros_obj_sclDT + 0x000), MarioCol1, MarioCol2, MarioCol1},
+    {(d_Bros_obj_sclDT + 0x010), LuigiCol1, LuigiCol2, LuigiCol1},
+    {(d_Bros_obj_sclDT + 0x020), PeachCol1, PeachCol2, PeachCol1},
+    {(d_Bros_obj_sclDT + 0x030), KinopioCol1, KinopioCol2, KinopioCol1}
+};
+/////////*
+//////// ================================================================
+////////	おまめフラッシングカラーデータ
+//////// ================================================================
+////////*/
+////////static	u16	OmameMarioCol0[16] = {
+////////    0x0000,0x7fff,0x4a52,0x3218,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x573f,0x7f31,0x7f31,0x7f31,0x56bf,0x56bf,0x56bf
+////////};
+////////static	u16	OmameMarioCol1[16] = {
+////////    0x0000,0x7fff,0x5ef7,0x53de,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x679f,0x76ad,0x6e6b,0x7eef,0x3dff,0x2d7d,0x463f
+////////};
+////////static	u16	OmameMarioCol2[16] = {
+////////    0x0000,0x7fff,0x77bd,0x73ff,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x77df,0x7fb8,0x6e6b,0x7eef,0x3dff,0x2d7d,0x673f
+////////};
+////////static	u16	OmameLuigiCol0[16] = {
+////////    0x0000,0x7fff,0x4a52,0x3218,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x573f,0x7efa,0x7efa,0x7efa,0x4bf2,0x4bf2,0x4bf2
+////////};
+////////static	u16	OmameLuigiCol1[16] = {
+////////    0x0000,0x7fff,0x5ef7,0x53de,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x679f,0x7ab8,0x7256,0x7efa,0x4bf2,0x3b8e,0x57f5
+////////};
+////////static	u16	OmameLuigiCol2[16] = {
+////////    0x0000,0x7fff,0x77bd,0x73ff,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x77df,0x7f7d,0x7256,0x7efa,0x4bf2,0x3b8e,0x6bfa
+////////};
+////////static	u16	OmamePeachCol0[16] = {
+////////    0x0000,0x7fff,0x4a52,0x3218,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x573f,0x53ff,0x53ff,0x53ff,0x6dfa,0x6dfa,0x6dfa
+////////};
+////////static	u16	OmamePeachCol1[16] = {
+////////    0x0000,0x7fff,0x5ef7,0x53de,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x679f,0x4fde,0x437b,0x53ff,0x6dfa,0x6197,0x721b
+////////};
+////////static	u16	OmamePeachCol2[16] = {
+////////    0x0000,0x7fff,0x77bd,0x73ff,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x77df,0x6fff,0x437b,0x53ff,0x6dfa,0x6197,0x7f1e
+////////};
+////////static	u16	OmameKinopioCol0[16] = {
+////////    0x0000,0x7fff,0x4a52,0x3218,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x573f,0x529f,0x529f,0x529f,0x5f9f,0x5f9f,0x5f9f
+////////};
+////////static	u16	OmameKinopioCol1[16] = {
+////////    0x0000,0x7fff,0x5ef7,0x53de,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x679f,0x4a5f,0x463d,0x529f,0x5f9f,0x531d,0x63bf
+////////};
+////////static	u16	OmameKinopioCol2[16] = {
+////////    0x0000,0x7fff,0x77bd,0x73ff,0x7fff,0x7fff,0x7fff,0x7fff,
+////////    0x0000,0x77df,0x6b5f,0x463d,0x529f,0x5f9f,0x531d,0x77df
+////////};
+////////static	u16	*OmameColDataTBL[MAX_PLAYER][4] = {
+////////    {OmameMarioCol0,OmameMarioCol1,OmameMarioCol2,OmameMarioCol1},
+////////    {OmameLuigiCol0,OmameLuigiCol1,OmameLuigiCol2,OmameLuigiCol1},
+////////    {OmamePeachCol0,OmamePeachCol1,OmamePeachCol2,OmamePeachCol1},
+////////    {OmameKinopioCol0,OmameKinopioCol1,OmameKinopioCol2,OmameKinopioCol1}
+////////};
+/////////*
+//////// ================================================================
+////////	おまめフラッシングカラーデータ(ダーク版)
+//////// ================================================================
+////////*/
+////////static	u16	DarkOmameMarioCol1[16] = {
+////////    0x45bc,0x56b5,0x1ce7,0x1294,0x0155,0x0ab5,0x1d15,0x2a35,
+////////    0x0000,0x1950,0x5141,0x3440,0x5582,0x0455,0x0012,0x0495
+////////};
+////////static	u16	DarkOmameMarioCol2[16] = {
+////////    0x45bc,0x56b5,0x318c,0x2eb5,0x0155,0x0ab5,0x1d15,0x2a35,
+////////    0x0000,0x2df5,0x560a,0x3440,0x5582,0x0455,0x0012,0x1935
+////////};
+////////static	u16	DarkOmameLuigiCol1[16] = {
+////////    0x4924,0x56b5,0x1ce7,0x1294,0x0155,0x0ab5,0x1d15,0x2a35,
+////////    0x0000,0x0950,0x55b1,0x54eb,0x55d2,0x4aae,0x3227,0x3eac
+////////};
+////////static	u16	DarkOmameLuigiCol2[16] = {
+////////    0x4924,0x56b5,0x318c,0x2eb5,0x0155,0x0ab5,0x1d15,0x2a35,
+////////    0x0000,0x2df5,0x5675,0x54eb,0x55d2,0x4aae,0x3227,0x56b2
+////////};
+/*
+ ================================================================
+	無敵フラッシングカラーデータ
+ ================================================================
+*/
+static	u16	MuTeKiColDT1[16] = {
+    0x45bc,0x739c,0x4210,0x53bf,0x1a9e,0x1aff,0x537f,0x465f,
+    0x18c6,0x2df5,0x7fff,0x4bcc,0x5bf0,0x1aff,0x1a9e,0x7fde
+};
+static	u16	MuTeKiColDT2[16] = {
+    0x45bc,0x7fff,0x2d6b,0x1958,0x195e,0x195f,0x465f,0x537f,
+    0x18c6,0x2df5,0x455b,0x59ff,0x6e9f,0x7f75,0x7f10,0x6a6c
+};
+static	u16	MuTeKiColDT3[16] = {
+    0x45bc,0x739c,0x4210,0x53bf,0x59ff,0x6e9f,0x537f,0x465f,
+    0x18c6,0x2df5,0x7fff,0x2d9f,0x3a3f,0x1bdf,0x1b3f,0x7fde
+};
+static	u16	*MuTeKiColDataTBL[MAX_PLAYER][4] = {
+    {(d_Bros_obj_sclDT + 0x000), MuTeKiColDT1, MuTeKiColDT2, MuTeKiColDT3},
+    {(d_Bros_obj_sclDT + 0x010), MuTeKiColDT1, MuTeKiColDT2, MuTeKiColDT3},
+    {(d_Bros_obj_sclDT + 0x020), MuTeKiColDT1, MuTeKiColDT2, MuTeKiColDT3},
+    {(d_Bros_obj_sclDT + 0x030), MuTeKiColDT1, MuTeKiColDT2, MuTeKiColDT3}
+};
+/*
+ ================================================================
+	無敵スターカラーデータ
+ ================================================================
+*/
+static	u16	MutekiStarColDT1[3] = { 0x6b9f,0x6b5f,0x6edd };
+static	u16	MutekiStarColDT2[3] = { 0x4fdd,0x47bc,0x4b5c };
+static	u16	MutekiStarColDT3[3] = { 0x5bbe,0x575d,0x52de };
+static	u16	*MutekiStarColDataTBL[4] = {
+    (d_Bros_obj_sclDT + 0x0D8),
+    MutekiStarColDT1, MutekiStarColDT2, MutekiStarColDT3
+};
+/*
+ ================================================================
+	ダメージカラーデータ
+ ================================================================
+*/
+const	u16	FireDamageColDT[16] = {
+    0x0000,0x679f,0x0011,0x153f,0x25fe,0x4b3f,0x22df,0x5bbf,
+    0x263f,0x152f,0x0177,0x5fbf,0x7fff,0x677f,0x3a3f,0x0035
+};
+const	u16	IceDamageColDT[16] = {
+    0x0000,0x7fff,0x5d8c,0x6e51,0x6eb3,0x7fff,0x7f9d,0x7fff,
+    0x7f79,0x59ed,0x69ed,0x7b9d,0x7fff,0x7fff,0x7f79,0x620e
+};
+/////////*
+//////// ================================================================
+////////	ダメージカラーデータ(ダーク版)
+//////// ================================================================
+////////*/
+////////const	u16	DarkFireDamageColDT[16] = {
+////////    0x0000,0x679f,0x0011,0x153f,0x25fe,0x4b3f,0x22df,0x5bbf,
+////////    0x263f,0x152f,0x0177,0x5fbf,0x7fff,0x677f,0x3a3f,0x0035
+////////};
+////////const	u16	DarkIceDamageColDT[16] = {
+////////    0x0000,0x56b5,0x3442,0x4507,0x4569,0x56b5,0x5653,0x56b5,
+////////    0x562f,0x30a3,0x40a3,0x5253,0x56b5,0x56b5,0x562f,0x38c4
+////////};
+/////////*
+//////// ================================================================
+////////	ＢＧハートキャラクタデータ
+//////// ================================================================
+////////*/
+////////const	u16	BGHeartData[8] = {
+////////    0x30C6, 0x30C7, 0x30D6, 0x30D7,
+////////    0x30C8, 0x30C9, 0x30D8, 0x30D9
+////////};
+/*
+ ================================================================
+	スコアコインＢＧアドレスデータ
+ ================================================================
+*/
+u16	*ScoreCoinBGAddress[MAX_PLAYER] = {
+    (u16 *)(BG_VRAM + BG0_ADDRESS + 0x800 + 0x482),
+    (u16 *)(BG_VRAM + BG0_ADDRESS + 0x800 + 0x4B0),
+    (u16 *)(BG_VRAM + BG0_ADDRESS + 0x800 + 0x490),
+    (u16 *)(BG_VRAM + BG0_ADDRESS + 0x800 + 0x4A2)
+};
+/*
+ ================================================================
+	勝者ＢＩＴフラグデータ
+ ================================================================
+*/
+const	u8	WinBitDT[4] = {0x01, 0x02, 0x04, 0x08};
+/*
+ ================================================================
+	初期配置データ
+ ================================================================
+*/
+const	s32	PLXPosDT[MAX_PLAYER] = {
+////////    0x00004000, 0x00013600, 0x00009200, 0x0000E400
+    0x00003800, 0x0000C800, 0x00006800, 0x00009800
+};
+const	u16	PLInitScchDT[MAX_PLAYER] = {
+////////    0x0008,0x0086,0x0032,0x005C
+    0x0008,0x0018,0x0008,0x0018
+};
+/*
+ ================================================================
+	スコアコインリーチフラッシングデータ
+ ================================================================
+*/
+const	u16	CoinReachFlashDT[10][4] = {
+    { 0xC13E,0x513E,0x513E,0x513E },
+    { 0xD13E,0x513E,0x513E,0x513E },
+    { 0x513E,0xC13E,0x513E,0x513E },
+    { 0x513E,0xD13E,0x513E,0x513E },
+    { 0x513E,0x513E,0xC13E,0x513E },
+    { 0x513E,0x513E,0xD13E,0x513E },
+    { 0x513E,0x513E,0x513E,0xC13E },
+    { 0x513E,0x513E,0x513E,0xD13E },
+    { 0x513E,0x513E,0x513E,0x513E },
+    { 0x513E,0x513E,0x513E,0x513E }
+};
+/*
+ ================================================================
+	登場してくる時の台のキャラクターナンバー
+ ================================================================
+*/
+const	u16	DaI_data[3] = {0x062, 0x0E4, 0x116};
+/*
+ ================================================================
+	無敵点滅データ
+ ================================================================
+*/
+const	u8	MuTeKiFlashDT[16] = {
+    0x04,0x04,0x04,0x02,0x02,0x01,0x01,0x01,
+    0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01
+};
+/*
+ ================================================================
+	連続キック点数データ
+ ================================================================
+*/
+const	u16	KickScoreDT[5] = {
+    POINT_800, POINT_1600, POINT_2400, POINT_3200, POINT_1UP
+};
+/*
+ ================================================================
+	連続キック音データ
+ ================================================================
+*/
+const	u16	KamekeriSoundDT[5] = {
+    s_b_KAMEKERI1,s_b_KAMEKERI2,s_b_KAMEKERI3,s_b_KAMEKERI4,s_b_KAMEKERI4
+};
+/*
+ ================================================================
+	"Ｐ？"文字オフセットデータ
+ ================================================================
+*/
+const	u16	POffsetDT[4] = { 0x009, 0x00C, 0x00C, 0x00D };
+/*
+ ================================================================
+	リーチプラカードデータ
+ ================================================================
+*/
+const	u32	ReachPlacardData[15] = {
+    0x00000000,ST_OAM_H_RECTANGLE,0xFFFFFFFC,0x0032,0x004,
+    0x00000000,ST_OAM_SQUARE,0x0000000C,0x0318,0x004,
+    0x00000008,ST_OAM_SQUARE,0x00000004,0x0354,0x003
+};
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	元カラー再セット
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	MoToColorReset(u8 idx)
+{
+    u8		i, j;
+    u16		*ColBuf = mGm_ColBufOBJ;
+    u16		*ColDataAddress;
+
+    j =  0x0010 * idx;
+    ColDataAddress = MuTeKiColDataTBL[idx][0];
+    for( i = 0; i < 16; i++, j++ ){
+	ColBuf[j] = ColDataAddress[i];
+    }
+    mGm_COLFLG |= OBJ_COL_TRANS;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	プレイヤーの発生
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	MakePlayer(void)
+{
+    playerDT_c	*pl;
+    u8		cnt = mGm_PLTYPE + 1;
+    u8		i;
+    u8		InitMuKiDT[4] = { 1,0,1,0 };
+
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	if( mGm_PLAYER(i) == NULL ){
+	    mGm_PLAYER(i) = mGm_MALLOC(sizeof(playerDT_c));
+	}
+	*mGm_PLAYER(i) = playerInitDT;
+    }
+    for( i = 0; i < cnt; i++ ){
+	pl = mGm_PLAYER(i);
+	aP_MODE(pl) = PL_INIT;
+	aP_TBLNO(pl) = i;
+	aP_PLTT(pl) = i;
+	aP_XPOS(pl) = PLXPosDT[i];
+	aP_SCCH(pl) = PLInitScchDT[i];
+	aP_DIREC(pl) = aP_HFLIP(pl) = InitMuKiDT[(aP_TBLNO(pl))];
+	if( play_mode == PLAY_CLSS ){		// クラシック？
+	    if( (mGm_CLASSICOUT & WinBitDT[i]) || (mGm_PLCOUNT(i) >= 100) ){
+		aP_HITFG(pl) = 1;
+		aP_STAMINA(pl) = 0;
+		aP_MODE(pl) = PL_ALLGAMEOVER;
+		aP_BucketINFG(pl) = 1;		// プレイヤー表示ＯＦＦ
+		aP_BattleLoseFG(pl) = 1;
+		MoToColorReset(aP_TBLNO(pl));
+////////		aP_MODE(pl) = PL_ALLLOSEWAIT;
+		mGm_PLCOUNT(i) = 0;
+	    }
+	} else {
+	    aP_STAMINA(pl) = MAX_STAMINA;
+	}
+    }
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	プレイヤーの完全消去
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	PerfectDeletePlayer(void)
+{
+    u8		i;
+
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	if( mGm_PLAYER(i) != NULL ){
+	    mGm_FREE(mGm_PLAYER(i));
+	    mGm_PLAYER(i) = NULL;
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	高さサイズ変更
+	flg
+	０：ノーマルサイズ
+	１：踏まれて縮んだサイズ
+	２：しゃがんだサイズ
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+void	SizeChange(playerDT_c *pl, u8 flg)
+{
+    u8		stamina = aP_STAMINA(pl);
+    u8		YCenter, YSize;
+
+    YCenter = PLYCENTER;
+    YSize = PLYSIZE;
+    switch(flg){
+    case 0:
+	if( (stamina <= SMALL_STAMINA) || (play_mode == PLAY_CLSS) ){
+	    YCenter += 3;
+	    YSize -= 3;
+	}
+	break;
+    case 1:
+	YCenter = PLSHRINKYCENTER;
+	YSize = PLSHRINKYSIZE;
+	break;
+    case 2:
+	YCenter = PLSQUATYCENTER;
+	YSize = PLSQUATYSIZE;
+	break;
+    }
+    aP_YCENTER(pl) = YCenter;
+    aP_YSIZE(pl) = YSize;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	縮む初期設定
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	ShrinkInit(playerDT_c *p)
+{
+    if( aP_MODE(p) >= PL_ENHIT)
+	return;
+
+    SizeChange(p, 1);
+    aP_ShrinkTM(p) = SHRINK_TIMER;
+    aP_ShrinkUpTM(p) = 0;
+    aP_MODE(p) = PL_SHRINK;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	大ジャンプフラッシング処理
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	BigJumpFlashing(playerDT_c *pl)
+{
+    u8		i, j, pltt, idx, CrouchTM;
+    u16		*ColDataAddress, *ColBuf;
+
+    if( aP_MuTeKiTM(pl) )
+	return;
+
+    idx = aP_FLASHID(pl);
+    CrouchTM = aP_CrouchTM(pl);
+    if( aP_BIGJUMPFG(pl) ){
+	CrouchTM++;
+	if( CrouchTM >= 0x02 ){
+	    CrouchTM = 0;
+	    idx = (idx + 1) & 0x03;
+	}
+    } else {
+	CrouchTM = 0;
+	if( !idx ){
+	    aP_CrouchTM(pl) = CrouchTM;
+	    return;
+	}
+	idx = 0;
+    }
+
+    aP_CrouchTM(pl) = CrouchTM;
+    aP_FLASHID(pl) = idx;
+    pltt = aP_PLTT(pl);
+    ColBuf = mGm_ColBufOBJ;
+////////    if( aP_STAMINA(pl) ){
+	ColDataAddress = ColDataTBL[pltt][idx];
+////////    } else {
+////////	ColDataAddress = OmameColDataTBL[pltt][idx];
+////////    }
+    j = 0x0010 * pltt;
+    for( i = 0; i < 16; i++, j++ ){
+	ColBuf[j] = ColDataAddress[i];
+    }
+    mGm_COLFLG |= OBJ_COL_TRANS;
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	死んだためにスコアコインを消す
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	void	ScoreCoinCls(u8 TBLNo)
+////////{
+////////    u8		i;
+////////    u16		*address = ScoreCoinBGAddress[TBLNo];
+////////
+////////    for( i = 0; i < 5; i++ ){
+////////	*address = 0x0000;
+////////	address++;
+////////    }
+////////}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	無敵フラッシング処理
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	MuTeKiFlashing(playerDT_c *pl)
+{
+    u8		i, j, idx;
+    u8		pltt = aP_PLTT(pl);
+    u8		mode = aP_MODE(pl);
+    u16		MuTeKiTM = aP_MuTeKiTM(pl);
+    u16		*ColBuf = mGm_ColBufOBJ;
+    u16		*ColDataAddress;
+
+    MuTeKiTM--;
+    aP_MuTeKiTM(pl) = MuTeKiTM;
+    if( !MuTeKiTM ){
+	if( !(mode >= PL_END) )
+	    m4aSongNumStart(mGm_BGMNO);
+    } else {
+	MakeMutekiStar(pl);
+    }
+    idx = (MuTeKiTM >> 1) & 0x03;
+    ColDataAddress = MuTeKiColDataTBL[pltt][idx];
+    j = 0x0010 * pltt;
+    for( i = 0; i < 16; i++, j++ ){
+	ColBuf[j] = ColDataAddress[i];
+    }
+    ColBuf = mGm_ColBufOBJ + 0x0D8;
+    ColDataAddress = MutekiStarColDataTBL[idx];
+    for( i = 0; i < 3; i++ ){
+	ColBuf[i] = ColDataAddress[i];
+    }
+    mGm_COLFLG |= OBJ_COL_TRANS;
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	最後の一人チェック
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	void	LastOneCHK(void)
+////////{
+////////    u8		i, cnt;
+////////    playerDT_c	*pl;
+////////
+////////    if( play_mode == PLAY_CLSS )	// クラシック？
+////////	return;				//	YES --> return
+////////    for( i = cnt = 0; i < MAX_PLAYER; i++ ){
+////////	pl = mGm_PLAYER(i);
+////////	if( aP_MODE(pl) != PL_NOT ){
+////////	    if( !aP_STAMINA(pl) ){
+////////		cnt++;
+////////	    }
+////////	}
+////////    }
+////////    if( cnt <= (mGm_PLTYPE - 1))	// 一人だけ残った？
+////////	return;				//	NO --> return;
+////////
+////////    for( i = 0; i < MAX_PLAYER; i++ ){
+////////	pl = mGm_PLAYER(i);
+////////	if( aP_MODE(pl) != PL_NOT ){
+////////	    if( aP_MuTeKiTM(pl) ){
+////////		aP_MuTeKiTM(pl) = 1;
+////////		MuTeKiFlashing(pl);
+////////	    }
+////////	    if( aP_STAMINA(pl) ){
+////////		mGm_WINNERFG = WinBitDT[i];
+////////	    }
+////////	    aP_MODE(pl) = PL_END;
+////////	}
+////////    }
+////////    mGm_ENMYSTOPFG = 1;
+////////}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	敵ＨＩＴチェック
+ ＲＡＭ実行している為、ここから別の場所に移動する時は、注意が必要
+	出力：当った敵のテーブルナンバー
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+u8	PLEnemyHitCheck(playerDT_c *my)
+{
+    u8		i, id;
+    u8		stamina = aP_STAMINA(my);
+    s32		myXpos = (aP_XPOS(my) >> 8) + (s32)aP_XCENTER(my);
+    s32		myYpos = (aP_YPOS(my) >> 8) + (s32)aP_YCENTER(my);
+    s32		myXsize = (s32)aP_XSIZE(my);
+    s32		myYsize = (s32)aP_YSIZE(my);
+    s32		myXpos2 = 0x000180 + myXpos;
+    s32		Xpos, Ypos, youXpos, youYpos, Xsize, Ysize;
+    acterDT_c	*you;
+    s16		pYpos, eYpos, Ywide;
+    bucketDT_c	*bucket;
+    playerDT_c	*Other;
+
+    aP_BucketON(my) = NULL;	// バケツのポインタ取り消し
+    if( aP_HITFG(my) )
+	return 0xFF;
+////////    if( aP_SafetyFG(my) )
+////////	return 0xFF;
+////////    if( !aP_STAMINA(my) )
+////////	return 0xFF;
+
+    for(i = 0; i < MAX_ACTER; i++ ){
+	you = mGm_ACTER_p(i);
+	if( !a_HITFG(you) && stamina ){		/** 当る？ **/
+	    Xsize = myXsize + ((s32)a_XSIZE(you) >> 1);
+	    Ysize = myYsize + ((s32)a_YSIZE(you) >> 1);
+	    youXpos = (a_XPOS(you) >> 8) + (s32)a_XCENTER(you);
+	    youYpos = (a_YPOS(you) >> 8) + (s32)a_YCENTER(you);
+	    Xpos = youXpos - myXpos;
+	    if( Xpos < 0 )
+		Xpos = (Xpos ^ -1) + 1;
+	    if( Xsize >= Xpos){
+		Ypos = youYpos - myYpos;
+		if( Ypos < 0 )
+		    Ypos = (Ypos ^ -1) + 1;
+		if( Ysize >= Ypos )
+		    return i;
+	    }
+	    Xpos = youXpos - myXpos2;
+	    if( Xpos < 0 )
+		Xpos = (Xpos ^ -1) + 1;
+	    if( Xsize >= Xpos){
+		Ypos = youYpos - myYpos;
+		if( Ypos < 0 )
+		    Ypos = (Ypos ^ -1) + 1;
+		if( Ysize >= Ypos )
+		    return i;
+	    }
+	} else {
+	    if( a_ACTERID(you) == EN_BUCKET ){		// バケツ？
+		Xsize = myXsize + (s32)a_XSIZE(you);
+		Ysize = myYsize + (s32)a_YSIZE(you);
+		youXpos = (a_XPOS(you) >> 8) + (s32)a_XCENTER(you);
+		Xpos = youXpos - myXpos;
+		if( Xpos < 0 )
+		    Xpos = (Xpos ^ -1) + 1;
+		if( Xsize >= Xpos){
+		    youYpos = (a_YPOS(you) >> 8) + 0x01;
+		    Ypos = youYpos - (myYpos + myYsize);
+////////		    if( (Ypos <= 0) && (Ypos > -(PL_MAXBIGJPSPD >> 8)) ){
+		    if( (Ypos <= 0) && (Ypos > -0x10) ){		// 範囲に入った？
+			if( aP_JUMPFG(my) && (aP_YSPD(my) > 0) && !a_JUMPFG(you) ){
+			    bucket = (bucketDT_c *)(a_OTHER(you));
+			    pYpos = (s16)(aP_YPOS(my) >> 8) + (s16)aP_YCENTER(my);
+			    eYpos = (s16)(a_YPOS(you) >> 8) + (s16)a_YCENTER(you);
+////////			    if( a_MODE(you) == BK_PLAYER ){	// バケツの中にプレイヤーがいる？
+			    if( a_CHRNO(you) != 0x01 ){			// バケツの蓋閉じている？
+				aP_JUMPFG(my) = 1;
+				aP_YPOS(my) = (aP_YPOS(my) + ((Ypos << 8)) & 0xFFFFFF00);
+				aP_BlockFG(my) = 0;
+				if( aP_VFLIP(my) ){
+				    aP_YSPD(my) *= -1;
+				    aP_VFLIP(my) = 0;
+				} else {
+				    aP_YSPD(my) = 0x0100;
+				    aP_BucketON(my) = you;	// バケツのポインタ登録
+				    aB_ONPLAYER(bucket) = my;	// プレイヤーのポインタ登録
+				}
+				return 0xFF;
+			    }
+////////			    if( aP_MODE(my) == PL_SQUAT )
+////////				return 0xFF;
+			    if( a_MODE(you) != BK_MOVE )
+				return 0xFF;
+			    if( pYpos >= (eYpos + a_YSIZE(you)) )
+				return 0xFF;
+			    if( aP_HandsUpFG(my) == 0x01 ){		// 他のプレイヤーを持っている？
+				Other = (playerDT_c *)aP_HANDSUPPL(my);
+				aP_HandsUpFG(my) = 0;
+				aP_HANDSUPPL(my) = NULL;
+				if( Other != NULL ){
+				    aP_HandsUpFG(Other) = 0;
+////////				    aP_PlacardTM(Other) = PLACARD_TM;
+				}
+			    }
+			    aP_XPOS(my) = (a_XPOS(you) + ((s32)a_XCENTER(you) << 8)) - ((s32)aP_XSIZE(my) << 8);
+			    aP_XSPD(my) = 0;
+			    aP_PRIORITY(my) = PLPRIBUCKET;
+			    aP_MODE(my) = PL_NOMOVE;
+			    a_MODE(you) = BK_PLIN;
+			    aB_PL(bucket) = my;
+			    return 0xFF;
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return 0xFF;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	プレイヤーダウンチェック
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+void	PlayerDownCheck(playerDT_c *pl)
+{
+    s32		Xspd;
+    u16		acterID;
+////////    u8		i;
+    u8		stamina = aP_STAMINA(pl);
+    u8		mode = aP_MODE(pl);
+    u8		Vflip = aP_VFLIP(pl);
+    playerDT_c	*Other;
+    acterDT_c	*en;
+
+    if( mode >= PL_ENHIT )
+	return;
+    if( aP_SafetyFG(pl) )
+	return;
+    aP_HitTime(pl) = 0x32;
+    aP_HITFG(pl) = 1;
+    aP_VFLIP(pl) = 0;
+////////    aP_MODE(pl) = PL_ENHIT;
+
+    /******** チビマリオに変身 ********/
+    if( stamina >= MAX_STAMINA ){
+	aP_BackUpMode(pl) = mode;
+	if( mode == PL_HANDSUP2 )
+	    aP_BackUpMode(pl) = PL_MOVE;
+	aP_MODE(pl) = PL_CHGSML;
+	aP_BigCHGTM(pl) = 0;
+#if SOUND_ON
+	m4aSongNumStart(s_b_TIBI);
+#endif
+    } else {
+	if( play_mode == PLAY_CLSS )		// クラシック？
+	    mGm_PLCOUNT(aP_TBLNO(pl))--;	// 残機@数カウントダウン！
+	aP_MODE(pl) = PL_ENHIT;
+	aP_LookSccvFG(pl) = 0;
+#if SOUND_ON
+	m4aSongNumStart(s_b_MR_DEAD);
+#endif
+    }
+
+    aP_BIGJUMPFG(pl) = 0;
+    BigJumpFlashing(pl);
+////////    if( stamina == 1 ){
+////////	stamina--;
+////////	aP_STAMINA(pl) = stamina;
+////////	if( !stamina )
+////////	    ScoreCoinCls(aP_TBLNO(pl));
+////////////////	LastOneCHK();
+////////    }
+
+    if( aP_HandsUpFG(pl) == 2 ){
+	en = (acterDT_c *)aP_HANDSUPPL(pl);
+////////	Xspd = a_XSPD(pl);
+////////	if( Xspd < 0 )
+////////	    Xspd *= -1;
+////////	i = (u8)(Xspd >> 7);
+////////	Xspd = ItemThrowSpeedDT[i];
+	Xspd = -0x0240;
+	acterID = a_ACTERID(en);
+////////	if( acterID == EN_EGG ){
+////////	    a_YSPD(en) = -0x0100;
+////////	    Xspd += -0x0100;
+////////	}
+	if( (acterID == EN_KOURA) || (acterID == EN_NOKOKAME) ){
+	    Xspd = 0x0100;
+	}
+	if( aP_HFLIP(pl) )
+	    Xspd *= -1;
+////////	if( (acterID == EN_KOURA) || (acterID == EN_NOKOKAME) ){
+////////	    a_YSPD(en) = -0x0100;
+////////	    Xspd *= 0x02;
+////////	}
+	a_XSPD(en) = Xspd;
+	a_MODE(en)++;
+    } else {
+	Other = (playerDT_c *)aP_HANDSUPPL(pl);
+	if( aP_MODE(Other) < PL_ENHIT ){
+	    aP_HandsUpFG(Other) = 0;
+////////	    aP_JUMPFG(Other) = 1;
+////////	    aP_MODE(Other) = PL_MOVE;
+	    if( !aP_VFLIP(Other) ){
+		aP_PRIORITY(Other) = PLPRION;
+		aP_HANDSUPPL(Other) = NULL;
+	    }
+	}
+    }
+    aP_PRIORITY(pl) = PLPRION;
+    aP_HANDSUPPL(pl) = NULL;
+    aP_HandsUpFG(pl) = 0;
+    if( Vflip ){
+	aP_YSPD(pl) = 0;
+	aP_JUMPFG(pl) = 1;
+	aP_ShrinkTM(pl) = 0;
+	aP_PlacardTM(pl) = PLACARD_TM;
+    }
+}
+/*
+ ****************************************************************
+	イニシャル処理
+ ****************************************************************
+ */
+static	void	player_init(playerDT_c *pl)
+{
+    /******* 初期サイズ設定 ********/
+    aP_XCENTER(pl) = PLXCENTER;
+    aP_XSIZE(pl) = PLXSIZE;
+    SizeChange(pl, 0);
+
+    /******* 初期スピード設定 ********/
+    aP_XSPD(pl) = 0;
+    aP_YSPD(pl) = 0x0010;
+
+    /******** ＨＩＴフラグＯＮ ********/
+    aP_HITFG(pl) = 0;
+
+    aP_MODE(pl)++;
+}
+/*
+ ----------------------------------------------------------------
+	投げ設定
+ ----------------------------------------------------------------
+*/
+static	void	ThrowSet(playerDT_c *pl)
+{
+    void	*Other;
+    acterDT_c	*en;
+    u16		acterID;
+    s32		Xspd;
+////////    u8		i;
+
+    if( aP_HandsUpFG(pl) == 2 ){	// アイテム？
+////////	Xspd = a_XSPD(pl);
+	Other = aP_HANDSUPPL(pl);
+	en = (acterDT_c *)Other;
+////////	if( Xspd < 0 )
+////////	    Xspd *= -1;
+////////	i = (u8)(Xspd >> 7);
+////////	Xspd = ItemThrowSpeedDT[i];
+	Xspd = -0x0240;
+	acterID = a_ACTERID(en);
+	if( acterID == EN_EGG ){
+	    a_TIMER(en) = 0;
+	}
+////////		a_YSPD(en) = -0x0100;
+////////		Xspd += -0x0100;
+////////	    }
+	if( aP_HFLIP(pl) )
+	    Xspd *= -1;
+////////	    if( (acterID == EN_KOURA) || (acterID == EN_NOKOKAME) ){
+////////		a_YSPD(en) = -0x0100;
+////////		Xspd *= 0x02;
+////////	    }
+	a_XSPD(en) = Xspd;
+	a_MODE(en)++;
+////////    } else {
+////////	aP_PlacardTM((playerDT_c *)aP_HANDSUPPL(pl)) = PLACARD_TM;
+    }
+    aP_ThrowTM(pl) = THROWTIMER;
+    aP_PRIORITY(pl) = PLPRION;
+    aP_HandsUpFG(pl) = 0;
+    aP_HANDSUPPL(pl) = NULL;
+#if SOUND_ON
+    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )
+	m4aSongNumStart(s_u_mario_ha);
+#endif
+}
+/*
+ ----------------------------------------------------------------
+	ジャンプフラグチェック
+ ----------------------------------------------------------------
+*/
+static	u8	BigJumpCHK(u8 JumpFG)
+{
+    if( JumpFG == 2 )
+	return 2;
+    return 1;
+}
+/*
+ ----------------------------------------------------------------
+	ＢＧコインＧＥＴチェック
+	　@　@　@取れた : TRUE
+	取れていない : FALSE
+ ----------------------------------------------------------------
+*/
+static	u8	BGCoinGetCHK(playerDT_c *pl, s16 Xpos, s16 Ypos, u8 bg)
+{
+    if( (bg >= BGCOIN0) && (bg <= BGCOIN7) ){
+	if( (bg == BGCOIN1) || (bg == BGCOIN3) ||
+	    (bg == BGCOIN5) || (bg == BGCOIN7) )
+	    Xpos -= 8;
+	if( (bg == BGCOIN2) || (bg == BGCOIN3) ||
+	    (bg == BGCOIN6) || (bg == BGCOIN7) )
+	    Ypos -= 8;
+	BGBF_SCR_CHG(BG_NONE, Xpos, Ypos);
+
+	if( play_mode == PLAY_CLSS ){		// クラシック？
+	    aP_COINCOUNT(pl)++;
+	    mGm_ENMYCNT--;
+	    if( !mGm_ENMYCNT ){			// 全てのＢＧコインを取った？
+		mGm_TIME = 0;
+		mGm_ENMYSTOPFG = 0x01;
+		mGm_GMMODE = GMBNS_CLINIT;
+#if SOUND_ON
+		m4aSongNumStop(mGm_BGMNO);
+#endif
+	    }
+	} else {
+	    if( aP_COINCOUNT(pl) < 5 ){
+		aP_COINCOUNT(pl)++;
+		player_coinGet(pl);
+	    }
+	}
+	MakeDemoCoin(((s32)Xpos << 8), ((s32)Ypos << 8), pl);
+#if SOUND_ON
+	m4aSongNumStart(s_b_COIN_GET);
+#endif
+	return TRUE;
+    }
+    return FALSE;
+}
+/*
+ ----------------------------------------------------------------
+	ＢＧＰＯＷブロック持ち上げチェック
+ ----------------------------------------------------------------
+ */
+static	u8	PowHandsUpCHK(playerDT_c *pl, u8 bg, s16 Xpos, s16 Ypos)
+{
+    u16		tblNO;
+
+    if( (bg < POW_START) || (bg > POW_END) )
+	return bg;
+    if( aP_HandsUpFG(pl) )		// 何かを持ち上げている？
+	return bg;
+    if( aP_JUMPFG(pl) )			// ジャンプ中？
+	return bg;
+    if( aP_ThrowTM(pl) )
+	return bg;
+
+    if( !(mGm_TRG & B_BUTTON) )
+	return bg;
+
+    tblNO = MakeObjPow(pl, Xpos, Ypos, bg);
+    if( tblNO == 0xFFFF )
+	return bg;
+
+    aP_MODE(pl) = PL_POWHANDSUP;
+    aP_ANIMETM(pl) = 0;
+    aP_ANIMEIDX(pl) = 0;
+    aP_PRIORITY(pl) = PLPRIOFF;
+    aP_HandsUpFG(pl) = 2;
+#if SOUND_ON
+    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )
+	m4aSongNumStart(s_u_mario_eeee_yah1);
+    else
+	m4aSongNumStart(s_b_MOTI);
+#endif
+    aP_HANDSUPPL(pl) = mGm_ACTER_p(tblNO);
+    return BG_NONE;
+}
+/*
+ ----------------------------------------------------------------
+	プレイヤー足元ＢＧチェック
+ ----------------------------------------------------------------
+ */
+static	void	player_FootCheck(playerDT_c *pl)
+{
+    s16		Xpos = (s16)(aP_XPOS(pl) >> 8);
+    s32		Ypos = aP_YPOS(pl);
+    s32		Xspd;
+    u8		bg, CmpData;
+    u8		(*bgbufCheck)(s16, s16);
+
+    aP_IceFG(pl) = 0;
+    Xpos += (s16)aP_XCENTER(pl);
+    Ypos += ((s32)(aP_YCENTER(pl) + aP_YSIZE(pl)) << 8);
+////////    bg = bgbuf_check2(Xpos, (s16)(Ypos >> 8));
+    bg = mGm_bgbuf_check(Xpos, (s16)(Ypos >> 8));
+
+    if( BGCoinGetCHK(pl, Xpos, (s16)(Ypos >> 8), bg) == TRUE )
+	return;
+
+    /******** ジャンプの上昇中チェック ********/
+    if( aP_JUMPFG(pl) ){
+	if( aP_YSPD(pl) < 0 ){
+	    if( (bg >= BG_HALF_START) && (bg <= BG_HALF_END) )
+		aP_HalfBlockFG(pl) = 1;
+	    aP_slipFG(pl) = 0;
+	    return;
+	}
+    }
+
+    bg = PowHandsUpCHK(pl, bg, Xpos, (s16)(Ypos >> 8));
+
+    if( (bg >= BG_MOVE_FLOOR_START) && (bg <= BG_MOVE_FLOOR_END) ){
+	aP_YSPD(pl) = -PL_JPSPD;
+	aP_JUMPFG(pl) = BigJumpCHK(aP_JUMPFG(pl));
+	if( aP_HandsUpFG(pl) ){
+	    aP_HandsUpFG((playerDT_c *)aP_HANDSUPPL(pl)) = 0;
+	    ThrowSet(pl);
+	} else {
+	    if( !aP_MuTeKiTM(pl) ){		// 無敵中？
+		ShrinkInit(pl);
+	    }
+	}
+	return;
+    }
+
+    if( !((bg >= BG_HALF_START) && (bg <= BG_HALF_END)) )
+	aP_HalfBlockFG(pl) = 0;
+
+    if( (bg >= DOKAN_START ) && (bg <= DOKAN_END) ){
+	aP_JUMPFG(pl) = BigJumpCHK(aP_JUMPFG(pl));
+	return;
+    }
+    if( bg == BG_NONE ){
+	aP_JUMPFG(pl) = BigJumpCHK(aP_JUMPFG(pl));
+	return;
+    }
+
+    if( aP_HalfBlockFG(pl) ){
+	aP_JUMPFG(pl) = BigJumpCHK(aP_JUMPFG(pl));
+	return;
+    }
+    if( (bg == POWBK02) || (bg == POWBK03) ||
+	(bg == POWBK12) || (bg == POWBK13) ||
+	(bg == POWBK22) || (bg == POWBK23) ){
+	return;
+    }
+    if( (bg == POWBK10) || (bg == POWBK11) ){
+	if( (Ypos & 0x000700) < 0x000200 )
+	    return;
+	else
+	    Ypos -= 0x000200;
+    }
+    if( (bg == POWBK20) || (bg == POWBK21) ){
+	if( (Ypos & 0x000700) < 0x000400 )
+	    return;
+	else
+	    Ypos -= 0x000400;
+    }
+    if( (bg >= POW_START) && (bg <= POW_END) ){
+	if( aP_slipFG(pl) ){
+	    Xspd = aP_XSPD(pl);
+	    if( (Xspd >= 0x0080) || (Xspd <= -0x0080) ){
+		Xspd = Xspd >> 1;
+		aP_XSPD(pl) = Xspd;
+	    }
+	}
+    }
+
+    if( (bg == BG_ICEF0) || (bg == BG_ICEF1) )
+	aP_IceFG(pl) = 1;
+////////    aP_YPOS(pl) -= 0x0010;
+////////    player_FootCheck(pl);
+    aP_JUMPFG(pl) = 0;
+    if( !mGm_QUAKEFG )
+	aP_YSPD(pl) = 0x0010;
+    aP_BlockFG(pl) = 0;
+    CmpData = bg;
+    bgbufCheck = mGm_bgbuf_check;
+    while( bg == CmpData ){
+	aP_YPOS(pl) -= 0x0010;
+	Ypos -= 0x0010;
+////////	bg = bgbuf_check2(Xpos, (s16)(Ypos >> 8));
+	bg = bgbufCheck(Xpos, (s16)(Ypos >> 8));
+    }
+    aP_VFLIP(pl) = 0;
+}
+/*
+ ----------------------------------------------------------------
+	プレイヤー頭ＢＧチェック
+ ----------------------------------------------------------------
+ */
+static	void	player_HeadCheck(playerDT_c *pl)
+{
+    u8		bg;
+    s16		Xpos, Ypos, Ycenter, Ysize;
+    s32		Yspd;
+
+    Ycenter = (s16)aP_YCENTER(pl);
+    Ysize = (s16)aP_YSIZE(pl);
+    Xpos = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+    Ypos = ((s16)(aP_YPOS(pl) >> 8) + Ycenter) - Ysize;
+////////    bg = bgbuf_check2(Xpos, Ypos);
+    bg = mGm_bgbuf_check(Xpos, Ypos);
+    if( bg == BG_NONE )
+	return;
+    if( (bg >= BG_HALF_START) && (bg <= BG_HALF_END) )
+	return;
+    if( (bg >= DOKAN_START) && (bg <= DOKAN_END) )
+	return;
+    if( (bg == POWBK12) || (bg == POWBK13) ){
+	if( (Ypos & 0x0007) >= 0x0006 )
+	    return;
+    }
+    if( (bg == POWBK22) || (bg == POWBK23) ){
+	if( (Ypos & 0x0007) >= 0x0003 )
+	    return;
+    }
+    if( BGCoinGetCHK(pl, Xpos, Ypos, bg) == TRUE )
+	return;
+
+    if( !aP_HandsUpFG(pl) ){
+	if( play_mode == PLAY_BATL )	// バトル？
+	    MakeBGYuKa(bg, pl);
+	else {
+	    if( aP_STAMINA(pl) )
+		MakeBGYuKa(bg, pl);
+	}
+	MakePow(pl, Xpos, Ypos, bg);
+    }
+
+    Yspd = aP_YSPD(pl);
+    if( ((bg >= BG_NOMAL_FLOOR_START) && (bg <= BG_NOMAL_FLOOR_END)) ||
+	((bg >= BG_MOVE_FLOOR_START) && (bg <= BG_MOVE_FLOOR_END)) ){
+	aP_HeadHitFG(pl) = 1;
+	aP_flyingFG(pl) = 1;
+	if( aP_JUMPFG(pl) == 2 ){
+	    if( Yspd < -0x00000180 )
+		Yspd = -0x00000180;
+	}
+    } else {
+	if( Yspd < 0 )
+	    Yspd = 0;
+    }
+    aP_YSPD(pl) = Yspd;
+}
+/*
+ ----------------------------------------------------------------
+	プレイヤー頭めり込みＢＧチェック
+ ----------------------------------------------------------------
+ */
+static	void	player_HeadCheck2(playerDT_c *pl)
+{
+    s16		Ycenter = (s16)aP_YCENTER(pl);
+    s16		Ysize = (s16)aP_YSIZE(pl);
+    s16		Xpos = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+    s16		Ypos = ((s16)(aP_YPOS(pl) >> 8) + Ycenter) - Ysize;
+    u8		JumpFG = aP_JUMPFG(pl);
+    u8		bg, CmpData;
+
+////////    bg = bgbuf_check2(Xpos, Ypos);
+    if( JumpFG == 1 )
+	Ypos += 0x0004;
+    bg = mGm_bgbuf_check(Xpos, Ypos);
+
+    if( (bg == BG_NONE) ||
+	((bg >= BG_HALF_START) && (bg <= BG_HALF_END)) ||
+	((bg >= DOKAN_START) && (bg <= DOKAN_END)) ){
+	aP_HeadHitFG(pl) = 0;
+	return;
+    }
+////////    if( bg == BG_NONE ){
+////////	aP_HeadHitFG(pl) = 0;
+////////	return;
+////////    }
+////////    if( (bg >= BG_HALF_START) && (bg <= BG_HALF_END) ){
+////////	aP_HeadHitFG(pl) = 0;
+////////	return;
+////////    }
+////////    if( (bg >= DOKAN_START) && (bg <= DOKAN_END) ){
+////////	aP_HeadHitFG(pl) = 0;
+////////	return;
+////////    }
+    if( BGCoinGetCHK(pl, Xpos, Ypos, bg) == TRUE )
+	return;
+
+    CmpData = bg;
+    while( bg == CmpData ){
+	aP_YPOS(pl) += 0x0100;
+	Ypos += 0x0001;
+	bg = bgbuf_check2(Xpos, Ypos);
+    }
+}
+/*
+ ................................................................
+	横方向の補正
+ ................................................................
+*/
+static	void	SideRevise(playerDT_c *pl, s16 Xpos, s16 Ypos, s32 HoSeI)
+{
+    u8		bg, CmpData;
+
+////////    bg = bgbuf_check2(Xpos, Ypos);
+    bg = mGm_bgbuf_check(Xpos, Ypos);
+    if( (bg == BG_NONE) ||
+	((bg >= BG_HALF_START) && (bg <= BG_HALF_END)) )
+	return;
+    if( (bg >= DOKAN_START) && (bg <= DOKAN_END) )
+	return;
+    if( (bg == POWBK10) || (bg == POWBK11) ){
+	if( (Ypos & 0x000700) < 0x000200 )
+	    return;
+    }
+    if( (bg == POWBK12) || (bg == POWBK13) ){
+	if( (Ypos & 0x0007) >= 0x0006 )
+	    return;
+    }
+    if( (bg == POWBK20) || (bg == POWBK21) ){
+	if( (Ypos & 0x000700) < 0x000400 )
+	    return;
+    }
+    if( (bg == POWBK22) || (bg == POWBK23) ){
+	if( (Ypos & 0x0007) >= 0x0003 )
+	    return;
+    }
+    if( BGCoinGetCHK(pl, Xpos, Ypos, bg) == TRUE )
+	return;
+
+    aP_HoSeI(pl) = HoSeI;
+
+////////    CmpData = bg;
+////////    while( bg == CmpData ){
+////////	aP_XPOS(pl) += HoSeI;
+////////	Xpos += (HoSeI >> 8);
+////////	bg = bgbuf_check2(Xpos, Ypos);
+////////    }
+}
+/*
+ ----------------------------------------------------------------
+	プレイヤー横ＢＧチェック
+ ----------------------------------------------------------------
+ */
+static	void	player_SideCheck(playerDT_c *pl)
+{
+    s16		Xpos = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+    s16		Ypos, Ysize;
+    s32		HoSeI;
+
+    if( aP_VFLIP(pl) )
+	return;
+    if( aP_HoSeI(pl) )
+	return;
+
+    if( aP_XSPD(pl) == 0 )
+	return;
+
+    if( aP_XSPD(pl) > 0 ){
+	Xpos += (s16)aP_XSIZE(pl);
+	HoSeI = -0x0100;
+    } else {
+	Xpos -= (s16)aP_XSIZE(pl);
+	HoSeI = 0x0100;
+    }
+
+    Ysize = (s16)aP_YSIZE(pl) >> 1;
+    Ypos = ((s16)(aP_YPOS(pl) >> 8) + (s16)aP_YCENTER(pl)) - Ysize;
+
+    SideRevise(pl, Xpos, Ypos, HoSeI);
+    if( aP_HoSeI(pl) )
+	return;
+
+    Ypos += (s16)aP_YSIZE(pl);
+    SideRevise(pl, Xpos, Ypos, HoSeI);
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	プレイヤーＢＧチェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+static	void	player_BGcheck(playerDT_c *pl)
+{
+////////    if( aP_JUMPFG(pl) ){
+	if( aP_HeadHitFG(pl) ){
+	    player_HeadCheck2(pl);	// 頭チェック２
+	} else {
+	    player_HeadCheck(pl);	// 頭チェック
+	}
+////////    }
+
+    player_FootCheck(pl);		// 足元チェック
+
+    if( !aP_DISPVMVCT(pl) ){
+	if( !aP_HeadHitFG(pl) )
+	    player_SideCheck(pl);	// サイドチェック
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	スリップ煙発生
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	player_MakeSmoke(playerDT_c *pl)
+{
+    s32		Xpos;
+    u8		smokeTM;
+
+    if( aP_slipFG(pl) && !aP_JUMPFG(pl) ){
+	smokeTM = aP_smokeTM(pl);
+	smokeTM++;
+	if( smokeTM >= 0x04 ){
+#if SOUND_ON
+	    m4aSongNumStart(s_b_SLIP);
+#endif
+	    smokeTM = 0;
+	    if( !aP_DISPHMVFG(pl) ){
+		Xpos = aP_XPOS(pl) - 0x0600;
+		if( !aP_DIREC(pl) )
+////////		if( aP_DIREC(pl) )
+		    Xpos += 0x1400;
+		MakeEffect(EF_SMOKE, Xpos, (aP_YPOS(pl) + 0x1A00));
+	    }
+	}
+    } else {
+	smokeTM = 0;
+    }
+    aP_smokeTM(pl) = smokeTM;
+}
+/*
+ ----------------------------------------------------------------
+	上下チェック
+ ----------------------------------------------------------------
+ */
+static	s32	UpDownCheck(s32 Xpos, s32 Ypos, s32 Xsize, s32 Ysize)
+{
+    if( Ypos < 0 )
+	return -1;
+    if( Ypos > Ysize )
+	return -1;
+    if( Ypos < (Ysize >> 1) )
+	return -1;
+    if( Xpos < 0 )
+	Xpos = (Xpos ^ -1) + 1;
+    if( Xpos > Xsize )
+	return -1;
+    return (Ysize - Ypos);
+}
+/*
+ ----------------------------------------------------------------
+	左右チェック
+ ----------------------------------------------------------------
+ */
+static	s32	LeftRightCheck(s32 Xpos, s32 Ypos, s32 Xsize, s32 Ysize)
+{
+    if( Xpos < 0 )
+	return 0;
+    if( Xpos > Xsize )
+	return 0;
+////////    if( Xpos < (Xsize >> 1) )
+////////	return 0;
+    if( Ypos < 0 )
+	Ypos = (Ypos ^ -1) + 1;
+    if( Ypos > Ysize )
+	return 0;
+    return (Xsize - Xpos);
+}
+/*
+ ----------------------------------------------------------------
+	チビになっている時の反発スピード設定
+ ----------------------------------------------------------------
+*/
+static	s32	SmallSpeedSet(s32 Xspd, u8 myStamina, u8 youStamina)
+{
+    if( myStamina > SMALL_STAMINA )	// 自分は、チビ？
+	return Xspd;			//	NO --> return
+    if( youStamina <= SMALL_STAMINA )	// 相手もチビ？
+	return Xspd;			//	NO --> return
+
+    Xspd *= 0x00000160;		// 下位８ビットは小数点以下の数字
+    Xspd = Xspd >> 8;
+    if( Xspd > SMALL_MAX_XSPD )
+	Xspd = SMALL_MAX_XSPD;
+    if( Xspd < -SMALL_MAX_XSPD )
+	Xspd = -SMALL_MAX_XSPD;
+    return Xspd;
+}
+/*
+ ----------------------------------------------------------------
+	相手プレイヤーの向き＆スピードセット
+	反発した　@TRUE
+	しない　@　@FALSE
+ ----------------------------------------------------------------
+ */
+static	u8	OtherPlayerSPDMuKiSet(playerDT_c *Other, s32 Xspd, u8 stamina)
+{
+////////    if( aP_HandsUpFG(Other) )
+////////	return FALSE;
+    if( aP_RepulsionFG(Other) )
+	return FALSE;
+    if( aP_VFLIP(Other) )
+	return FALSE;
+    if( aP_MODE(Other) == PL_RESTART ){
+	aP_ANIMETM(Other) = PL_RESTART_TM;
+	aP_ANIMEIDX(Other) = PL_RESTART_IDX;
+    }
+
+    if( aP_ShrinkTM(Other) ){
+	aP_YSPD(Other) = -0x0380;
+	aP_JUMPFG(Other) = 1;
+    } else {
+	if( !aP_XSPD(Other) ){
+	    aP_slipFG(Other) = 1;
+	    if( Xspd >= 0 ){
+		aP_DIREC(Other) = aP_HFLIP(Other) = 1;
+	    } else {
+		aP_DIREC(Other) = aP_HFLIP(Other) = 0;
+	    }
+	}
+    }
+
+    if( !aP_XSPD(Other) ){
+	Xspd = aP_XSPD(Other) + (Xspd * -1);
+	Xspd = SmallSpeedSet(Xspd, aP_STAMINA(Other), stamina);
+	aP_XSPD(Other) = Xspd;
+    }
+    return TRUE;
+}
+/*
+ ----------------------------------------------------------------
+	他のプレイヤーを持ち上げ
+ ----------------------------------------------------------------
+*/
+static	void	OtherPlayerHandsUp(playerDT_c *pl, playerDT_c *Other)
+{
+    playerDT_c	*HandsUpPL;
+
+    if( aP_ThrowTM(pl) )
+	return;
+    if( aP_HandsUpFG(pl) )
+	return;
+    if( aP_HandsUpFG(Other) ){
+	aP_JUMPFG(pl) = 1;
+	aP_YSPD(pl) = -PL_SHRINKJPSPD;
+	aP_BIGJUMPFG(pl) = 0;
+	MakeSpark((aP_XPOS(pl) + ((s32)aP_XCENTER(pl) << 8)),
+		  (aP_YPOS(pl) + ((s32)aP_YCENTER(pl) << 8)),
+		  (aP_XPOS(Other) + ((s32)aP_XCENTER(Other) << 8)),
+		  (aP_YPOS(Other) + ((s32)aP_YCENTER(Other) << 8)));
+#if SOUND_ON
+	m4aSongNumStart(s_b_NORI);
+#endif
+	return;
+    }
+    if( aP_MODE(pl) >= PL_ENHIT )
+	return;
+
+    aP_MODE(pl) = PL_HANDSUP;
+    aP_ANIMETM(pl) = 0;
+    aP_ANIMEIDX(pl) = 0;
+    aP_PRIORITY(pl) = PLPRIOFF;
+    aP_HandsUpFG(pl) = 1;
+#if SOUND_ON
+    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )
+	m4aSongNumStart(s_u_mario_eeee_yah1);
+    else
+	m4aSongNumStart(s_b_MOTI);
+#endif
+    HandsUpPL = (playerDT_c *)aP_HANDSUPPL(pl);
+    if( HandsUpPL != NULL ){
+	aP_HandsUpFG(HandsUpPL) = 0;
+    }
+    aP_HANDSUPPL(pl) = Other;
+    aP_MODE(Other) = PL_HANDSUP2;
+    SizeChange(Other, 0);
+    aP_HandsUpFG(Other) = 1;
+    aP_HANDSUPPL(Other) = pl;
+    aP_ShrinkTM(Other) = 0;
+    aP_LookSccvFG(Other) = 0;
+    aP_BIGJUMPFG(Other) = 0;
+    aP_CrouchTM(Other) = 0;
+    aP_FLASHID(Other) = 0;
+    MoToColorReset(aP_TBLNO(Other));
+}
+/*
+ ----------------------------------------------------------------
+	飛んできたプレイヤーとの当った位置により縮むか蹴るか？
+	投げられた相手に当った   TRUE
+	投げられた相手に当らない FALSE
+ ----------------------------------------------------------------
+ */
+static	void	FlyingPlayerCHK(playerDT_c *pl, playerDT_c *Other,
+				s32 pYpos, s32 eYpos)
+{
+    if( aP_VFLIP(Other) ){
+	if( aP_ThrowTM(pl) )
+	    return;
+	if( pYpos <= eYpos ){
+	    ShrinkInit(pl);
+	    aP_KickTime(Other) = PL_KICK_TM;
+	} else {
+	    ShrinkInit(pl);
+	    aP_JUMPFG(Other) = 1;
+	    aP_YSPD(Other) = -PL_MAXJPSPD;
+	    aP_VFLIP(Other) = 0;
+	    aP_BIGJUMPFG(Other) = 0;
+	}
+    }
+    if( aP_VFLIP(pl) ){
+	if( aP_ThrowTM(Other) )
+	    return;
+	if( pYpos <= eYpos ){
+	    ShrinkInit(Other);
+	    aP_KickTime(pl) = PL_KICK_TM;
+	} else {
+	    ShrinkInit(Other);
+	    aP_JUMPFG(pl) = 1;
+	    aP_YSPD(pl) = -PL_MAXJPSPD;
+	    aP_VFLIP(pl) = 0;
+	    aP_BIGJUMPFG(pl) = 0;
+	}
+    }
+}
+/*
+ ----------------------------------------------------------------
+	他のプレイヤーとの当りチェック
+ ----------------------------------------------------------------
+ */
+static	void	PLHitCheckSB(playerDT_c *pl, playerDT_c *Other)
+{
+    u8		stamina = aP_STAMINA(pl);
+    s32		OffSet;
+    s32		Xpos = aP_XPOS(pl);
+    s32		Ypos = aP_YPOS(pl);
+    s32		Xspd = aP_XSPD(pl);
+    s32		Yspd = aP_YSPD(pl);
+    s32		pXpos = Xpos + ((s32)aP_XCENTER(pl) << 8);
+    s32		pYpos = Ypos + ((s32)aP_YCENTER(pl) << 8);
+    s32		eXpos = aP_XPOS(Other) + ((s32)aP_XCENTER(Other) << 8);
+    s32		eYpos = aP_YPOS(Other) + ((s32)aP_YCENTER(Other) << 8);
+    s32		XSize = (s32)(aP_XSIZE(pl) + aP_XSIZE(Other)) << 8;
+    s32		YSize = (s32)(aP_YSIZE(pl) + aP_YSIZE(Other)) << 8;
+    s32		MaxScch = 0x00018000;
+    playerDT_c	*HandsUpOther;
+    acterDT_c	*BucketON;
+
+    /******** 足元チェック ********/
+    OffSet = UpDownCheck((pXpos - eXpos), (eYpos - pYpos),
+			 XSize, YSize);
+////////    if( OffSet >= 0 ){
+////////    if( (OffSet >= 0) && !aP_HeadHitFG(pl) ){
+////////    if( (OffSet >= 0) && !aP_BlockFG(pl) ){	// ？？なぜ？？
+    if( OffSet >= 0 ){
+	if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+	    if( aP_MuTeKiTM(Other) ){
+		PlayerDownCheck(pl);
+		return;
+	    } else {
+		PlayerDownCheck(Other);
+	    }
+	} else {
+	    if( Yspd >= 0){
+		aP_JUMPFG(pl) = 0;
+		aP_BlockFG(pl) = 0;
+		aP_YSPD(pl) = 0x0010;
+		Ypos -= OffSet;
+		if( !aP_VFLIP(pl) ){
+		    if( aP_MODE(Other) < PL_ENHIT ){
+			BucketON = aP_BucketON(Other);
+			if( aP_JUMPFG(Other) && (BucketON == NULL) ){
+			    if( aP_YSPD(Other) < 0 )
+				aP_YSPD(Other) = 0;
+			} else {
+			    if( (mGm_CONT & B_BUTTON) && !aP_HandsUpFG(pl) ){
+				OtherPlayerHandsUp(pl, Other);
+			    } else {
+				ShrinkInit(Other);
+				aP_JUMPFG(pl) = 1;
+				aP_YSPD(pl) = -PL_SHRINKJPSPD;
+				aP_BIGJUMPFG(pl) = 0;
+				if( (pXpos - eXpos) < 0 ){
+				    Xspd += -0x0020;
+				} else {
+				    Xspd += 0x0020;
+				}
+				MakeSpark(pXpos, pYpos, eXpos, eYpos);
+#if SOUND_ON
+				m4aSongNumStart(s_b_NORI);
+#endif
+			    }
+			}
+		    }
+		}
+	    }
+	    FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+	}
+    }
+
+    pYpos = Ypos + ((s32)aP_YCENTER(pl) << 8);
+    /******** 頭チェック ********/
+    if( aP_VFLIP(Other) ){
+	OffSet = UpDownCheck((pXpos - eXpos), (pYpos - eYpos),
+			     XSize, YSize);
+	if( OffSet >= 0 ){
+	    if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+		if( aP_MuTeKiTM(Other) ){
+		    PlayerDownCheck(pl);
+		    return;
+		} else {
+		    PlayerDownCheck(Other);
+		}
+	    } else {
+		FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+		aP_YPOS(Other) -= OffSet;
+		eYpos = aP_YPOS(Other) + ((s32)aP_YCENTER(Other) << 8);
+	    }
+	}
+    }
+
+    /******** 左チェック ********/
+    OffSet = LeftRightCheck((pXpos - eXpos), (pYpos - eYpos),
+			    XSize, (YSize - 4));
+    if( OffSet ){
+	if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+	    if( aP_MuTeKiTM(Other) ){
+		PlayerDownCheck(pl);
+		return;
+	    } else {
+		PlayerDownCheck(Other);
+	    }
+	} else {
+	    Xpos += OffSet;
+	    if( Xspd > -HaNPaTu_XSPD )
+		Xspd = HaNPaTu_XSPD;
+	    else
+		Xspd *= -1;
+	    Xspd = SmallSpeedSet(Xspd, stamina, aP_STAMINA(Other));
+	    if( (OtherPlayerSPDMuKiSet(Other, Xspd, stamina)) == TRUE )
+		MakeSpark(pXpos, pYpos, eXpos, eYpos);
+	    m4aSongNumStart(s_b_BUTUKARI);
+	    if( aP_RepulsionFG(Other) )
+		aP_OtherHitFG(pl) = 1;
+	    aP_slipFG(pl) = 0;
+	    FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+	}
+    }
+    /******** 左チェック２ ********/
+    OffSet = LeftRightCheck((pXpos - (eXpos + MaxScch)), (pYpos - eYpos),
+			    XSize, (YSize - 4));
+    if( OffSet ){
+	if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+	    if( aP_MuTeKiTM(Other) ){
+		PlayerDownCheck(pl);
+		return;
+	    } else {
+		PlayerDownCheck(Other);
+	    }
+	} else {
+	    Xpos += OffSet;
+	    if( Xspd > -HaNPaTu_XSPD )
+		Xspd = HaNPaTu_XSPD;
+	    else
+		Xspd *= -1;
+	    Xspd = SmallSpeedSet(Xspd, stamina, aP_STAMINA(Other));
+	    if( (OtherPlayerSPDMuKiSet(Other, Xspd, stamina)) == TRUE )
+		MakeSpark(pXpos, pYpos, eXpos, eYpos);
+	    m4aSongNumStart(s_b_BUTUKARI);
+	    if( aP_RepulsionFG(Other) )
+		aP_OtherHitFG(pl) = 1;
+	    aP_slipFG(pl) = 0;
+	    FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+	}
+    }
+    /******** 右チェック ********/
+    OffSet = LeftRightCheck((eXpos - pXpos), (pYpos - eYpos),
+			    XSize, (YSize - 4));
+    if( OffSet ){
+	if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+	    if( aP_MuTeKiTM(Other) ){
+		PlayerDownCheck(pl);
+		return;
+	    } else {
+		PlayerDownCheck(Other);
+	    }
+	} else {
+	    Xpos -= OffSet;
+	    if( Xspd < HaNPaTu_XSPD )
+		Xspd = -HaNPaTu_XSPD;
+	    else
+		Xspd *= -1;
+	    Xspd = SmallSpeedSet(Xspd, stamina, aP_STAMINA(Other));
+	    if( (OtherPlayerSPDMuKiSet(Other, Xspd, stamina)) == TRUE )
+		MakeSpark(pXpos, pYpos, eXpos, eYpos);
+	    m4aSongNumStart(s_b_BUTUKARI);
+	    if( aP_RepulsionFG(Other) )
+		aP_OtherHitFG(pl) = 1;
+	    aP_slipFG(pl) = 0;
+	    FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+	}
+    }
+    /******** 右チェック２ ********/
+    OffSet = LeftRightCheck(((eXpos + MaxScch) - pXpos), (pYpos - eYpos),
+			    XSize, (YSize - 4));
+    if( OffSet ){
+	if( aP_MuTeKiTM(pl) || aP_MuTeKiTM(Other) ){
+	    if( aP_MuTeKiTM(Other) ){
+		PlayerDownCheck(pl);
+		return;
+	    } else {
+		PlayerDownCheck(Other);
+	    }
+	} else {
+	    Xpos -= OffSet;
+	    if( Xspd < HaNPaTu_XSPD )
+		Xspd = -HaNPaTu_XSPD;
+	    else
+		Xspd *= -1;
+	    Xspd = SmallSpeedSet(Xspd, stamina, aP_STAMINA(Other));
+	    if( (OtherPlayerSPDMuKiSet(Other, Xspd, stamina)) == TRUE )
+		MakeSpark(pXpos, pYpos, eXpos, eYpos);
+	    m4aSongNumStart(s_b_BUTUKARI);
+	    if( aP_RepulsionFG(Other) )
+		aP_OtherHitFG(pl) = 1;
+	    aP_slipFG(pl) = 0;
+	    FlyingPlayerCHK(pl, Other, pYpos, eYpos);
+	}
+    }
+
+    aP_XSPD(pl) = Xspd;
+    aP_XPOS(pl) = Xpos;
+    aP_YPOS(pl) = Ypos;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	プレイヤー同士の当りチェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	PLHitCheck(playerDT_c *pl)
+{
+    u8		i, TBLNo;
+    playerDT_c	*Other;
+
+    if( aP_SafetyFG(pl) )
+	return;
+    if( !aP_STAMINA(pl) )
+	return;
+
+    /******** 他のプレイヤーとの当りチェック ********/
+    TBLNo = aP_TBLNO(pl);
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	if( TBLNo != i ){
+	    Other = mGm_PLAYER(i);
+	    if( !aP_HITFG(Other)  && aP_STAMINA(Other) ){
+		if( aP_MODE(Other) < PL_HANDSUP2 ){
+		    if( !aP_SafetyFG(Other) ){
+			PLHitCheckSB(pl, Other);
+			if( aP_MODE(pl) >= PL_ENHIT )
+			    return;
+		    }
+		}
+	    }
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	勝ち数表示
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	WinCountDisp(void)
+{
+    u8		i;
+    playerDT_c	*pl;
+
+    if( play_mode == PLAY_CLSS )	// クラシック？
+	return;				//	YES --> return
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	pl = mGm_PLAYER(i);
+	if( aP_MODE(pl) != PL_NOT ){
+////////	    if( aP_MuTeKiTM(pl) ){
+////////		aP_MuTeKiTM(pl) = 1;
+////////		MuTeKiFlashing(pl);
+////////	    }
+	    if( aP_COINCOUNT(pl) >= 5 ){
+		mGm_WINNERFG = WinBitDT[i];
+	    }
+	    aP_HITFG(pl) = 1;
+	    aP_MODE(pl) = PL_END;
+	    if( aP_HandsUpFG(pl) == 0x02 ){	// アイテムを持っている？
+		EraseEnemy((acterDT_c *)aP_HANDSUPPL(pl));
+		aP_HandsUpFG(pl) = 0;
+	    }
+	    if( aP_JUMPFG(pl) == 2 ){		// バク転ジャンプ中？
+		aP_JUMPFG(pl) = 1;
+		aP_CHRNO(pl) = 0x0E;
+	    }
+	}
+    }
+    mGm_ENMYSTOPFG = 1;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	コインＧＥＴ
+	TRUE	:５枚そろった
+	FALSE	:まだそろっていない
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+u8	player_coinGet(playerDT_c *pl)
+{
+    u8		i, wincnt, TBLNo;
+    u8		CoinCount = aP_COINCOUNT(pl);
+    u16		*address = ScoreCoinBGAddress[aP_TBLNO(pl)];
+
+    if( CoinCount >= 6 ){		// 大丈夫なはずだけど、
+	aP_COINCOUNT(pl) = 5;		// 一応ここで再びリミットを
+	CoinCount = 5;			// かけておく！
+    }
+
+    if( play_mode == PLAY_CLSS )	// クラシック？
+	return FALSE;			//	YES --> return
+
+    for( i = 1; i < 6; i++ ){
+	if( i <= CoinCount )
+	    *address = 0x513E;
+	else
+	    *address = 0x513D;
+	address++;
+    }
+
+    if( CoinCount < 5 )
+	return FALSE;
+
+    aP_HandsUpFG(pl) = 0;
+    aP_HANDSUPPL(pl) = NULL;
+    aP_PRIORITY(pl) = PLPRION;
+    aP_TIMER(pl) = 0;
+    aP_ANIMEIDX(pl) = 0;
+    aP_ANIMETM(pl) = 0;
+
+    WinCountDisp();
+
+    return TRUE;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	コインリーチフラッシング
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+static	void	ScoreCoinFlash(playerDT_c *pl)
+{
+    u8		i, wincnt, TBLNo, time, idx;
+    u8		CoinCount = aP_COINCOUNT(pl);
+    u16		*address;
+
+    if( play_mode == PLAY_CLSS )	// クラシック？
+	return;				//	YES --> return
+////////    if( !mGm_PLTYPE )
+////////	return;
+    if( !aP_STAMINA(pl) )
+	return;
+    if( CoinCount < 4 ){
+	if( aP_CoinReach(pl) ){
+	    address = ScoreCoinBGAddress[aP_TBLNO(pl)];
+	    aP_CoinFlashTM(pl) = 0;
+	    aP_CoinReach(pl) = 0;
+	    aP_CoinFlashIDX(pl) = 0;
+	    for( i = 1; i < 6; i++ ){
+		if( i <= CoinCount )
+		    *address = 0x513E;
+		else
+		    *address = 0x513D;
+		address++;
+	    }
+	}
+    } else {
+	if( !aP_CoinReach(pl) )
+	    MakeReach(pl);
+	time = aP_CoinFlashTM(pl);
+	idx = aP_CoinFlashIDX(pl);
+	time++;
+	if( time > 5 ){
+	    time = 0;
+	    idx++;
+	    if( idx >= 10 ){
+		idx = 0;
+#if SOUND_ON
+		m4aSongNumStart(s_b_KEKKA);
+#endif
+	    }
+	}
+	aP_CoinFlashTM(pl) = time;
+	aP_CoinFlashIDX(pl) = idx;
+	address = ScoreCoinBGAddress[aP_TBLNO(pl)];
+	aP_CoinReach(pl) = 1;
+	for( i = 0; i < 4; i++ ){
+	    *address = CoinReachFlashDT[idx][i];
+	    address++;
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	敵を蹴る！
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+static	void	EnemyKick(playerDT_c *pl, u8 idx)
+{
+    u8		ScoreIDX, direc, i, mode;
+    u8		MuKi = aP_DIREC(pl);
+    u8		TBLNo = aP_TBLNO(pl);
+    s32		Xpos = aP_XPOS(pl);
+    s32		Ypos = aP_YPOS(pl) + 0x0800;
+    s32		myXpos, youXpos;
+    acterDT_c	*em = mGm_ACTER_p(idx);
+    playerDT_c	*LastKickPL;
+    CoinDT_c    *coindt;
+
+    myXpos = aP_XPOS(pl) + ((s32)aP_XCENTER(pl) << 8);
+    youXpos = a_XPOS(em) + ((s32)a_XCENTER(em) << 8);
+    direc = 0;
+    if( myXpos < youXpos )
+	direc = 1;
+    Enemy_PLKick(idx, direc);
+    if( play_mode == PLAY_CLSS ){
+	if( !mGm_ENMYCNT ){
+	    for( i = 0; i <= mGm_PLTYPE; i++ ){
+		LastKickPL = mGm_PLAYER(i);
+		mode = aP_MODE(LastKickPL);
+		if( (mode == PL_STOP) ||
+////////		    ((mode >= PL_ENHIT) && (mode <= PL_DOWNWAIT)) )
+		    ((mode >= PL_ENHIT) && (mode <= PL_ENTR)) )
+		    aP_LastKickFG(LastKickPL) = 1;
+	    }
+	}
+    }
+    if( direc ){
+	Xpos += 0x1000;
+    } else {
+	Xpos -= 0x1200;
+    }
+
+////////    if( MuKi ){
+////////	Xpos += 0x1000;
+////////    } else {
+////////	Xpos -= 0x1200;
+////////    }
+////////    Enemy_PLKick(idx, aP_DIREC(pl));
+    coindt = a_OTHER(em); 
+    if( a_ACTERID(em) == EN_COIN ){		// コイン？
+	a_CoinPLNum(coindt) = TBLNo;
+	a_HowManyCoin(coindt) = aP_COINCOUNT(pl);
+	return;
+    }
+
+    aP_HFLIP(pl) = direc;
+    if( !aP_HandsUpFG(pl) )
+	aP_KickTime(pl) = PL_KICK_TM;
+    ScoreIDX = aP_ScoreIDX(pl);
+    if( !aP_ScoreTM(pl) ){
+	ScoreIDX = 0;
+	m4aSongNumStart(KamekeriSoundDT[ScoreIDX]);	// HIT SOUND
+    } else {
+	ScoreIDX++;
+	if( ScoreIDX >= 4 )
+	    ScoreIDX = 4;
+	m4aSongNumStart(KamekeriSoundDT[ScoreIDX]);	// HIT SOUND
+    }
+    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )	//キックの時にも
+	m4aSongNumStart(s_u_mario_ha);			//"はっ"って言う
+    aP_ScoreTM(pl) = 52;
+    aP_ScoreIDX(pl) = ScoreIDX;
+    if( a_ACTERID(em) == EN_NOKOKAME )
+	a_BGJUMP(em)(em);
+    if( a_ACTERID(em) == EN_FIREBALL )
+	a_POWJUMP(em)(em);
+    Create_Point(Xpos, Ypos, KickScoreDT[ScoreIDX], TBLNo);
+    AddScore(TBLNo, KickScoreDT[ScoreIDX]);    
+#if SOUND_ON
+    m4aSongNumStart(s_b_TEKI_DEAD);
+#endif
+    Ypos = aP_YPOS(pl) + ((s32)aP_YCENTER(pl) << 8);
+    myXpos = aP_XPOS(pl) + ((s32)aP_XCENTER(pl) << 8);
+    if( aP_HFLIP(pl) )
+	youXpos = myXpos + 0x1800;
+    else
+	youXpos = myXpos - 0x1800;
+    MakeSpark(myXpos, Ypos, youXpos, (Ypos + 0x0800));
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	Ｘ移動処理(真の１．５画面用)
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	PlayerXcalc(playerDT_c *pl)
+{
+    s32		scch = (s32)aP_SCCH(pl) << 8;
+    s32		Xpos, MaxScch, Xspd, HoSeI;
+    s16		size;
+    u8		DispHMVFG = aP_DISPHMVFG(pl);
+    u8		MuKi, SafetyFG;
+
+    Xpos = aP_XPOS(pl);
+    scch |= (Xpos & 0x000000FF);
+    size = (s16)((Xpos - scch) >> 8);
+    switch( DispHMVFG ){
+    case 0:				/**** ノーマル移動 ****/
+	HoSeI = aP_HoSeI(pl);
+	if( HoSeI == 0 ){
+	    Xspd = aP_XSPD(pl);
+	} else {
+	    Xspd = aP_HoSeI(pl);
+	    aP_HoSeI(pl) = 0;
+	    aP_XSPD(pl) = 0;
+	}
+	Xpos += Xspd;
+	if( Xspd ){
+	    if( Xspd > 0 )
+		MuKi = 1;
+	    else
+		MuKi = 0;
+	} else {
+////////	    MuKi = aP_HFLIP(pl);
+	    MuKi = aP_DIREC(pl);
+	}
+	if( MuKi ){
+	    if( size > 0x0068 ){
+		if( scch < 0x00001800 ){
+		    scch += Xspd;
+		    if( scch > 0x00001800 )
+			scch = 0x00001800;
+		}
+		if( Xpos > 0x00010800 ){
+		    Xpos -= 0x00011000;
+		    DispHMVFG = 2;
+		    if( !aP_slipFG(pl) ){
+			if( aP_XSPD(pl) < PUSH_XSPD)
+			    aP_XSPD(pl) = PUSH_XSPD;
+		    }
+		}
+	    }
+	} else {
+	    if( size < 0x0068 ){
+		if( scch > 0x00000800 ){
+		    scch += Xspd;
+		    if( scch < 0x00000800 )
+			scch = 0x00000800;
+		}
+		if( Xpos < -0x00000800 ){
+		    Xpos += 0x00011000;
+		    DispHMVFG = 1;
+		    if( !aP_slipFG(pl) ){
+			if( aP_XSPD(pl) > -PUSH_XSPD)
+			    aP_XSPD(pl) = -PUSH_XSPD;
+		    }
+		}
+	    }
+	}
+	break;
+    case 1:				/**** 左画面移動 ****/
+	scch += 0x0200;
+	if( scch > 0x00001800 ){
+	    scch = 0x00001800;
+	    DispHMVFG = 0;
+	}
+	break;
+    case 2:				/**** 右画面移動 ****/
+	scch -= 0x0200;
+	if( scch < 0x00000800 ){
+	    scch = 0x00000800;
+	    DispHMVFG = 0;
+	}
+	break;
+    }
+    aP_XPOS(pl) = Xpos;
+    aP_SCCH(pl) = (u16)(scch >> 8);
+    aP_DISPHMVFG(pl) = DispHMVFG;
+////////    SafetyFG = 0;
+////////    if( (Xpos < 0x00000800) || (Xpos > 0x0000F800) )
+////////	SafetyFG = 1;
+////////    aP_SafetyFG(pl) = SafetyFG;
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	Ｘ移動処理(１．５画面用)
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	void	PlayerXcalc(playerDT_c *pl)
+////////{
+////////    s32		scch = (s32)aP_SCCH(pl) << 8;
+////////    s32		Xpos, MaxScch, Xspd, HoSeI;
+////////    s16		size;
+////////    u8		DispHMVFG = aP_DISPHMVFG(pl);
+////////    u8		MuKi, SafetyFG;
+////////
+////////    Xpos = aP_XPOS(pl);
+////////    scch |= (Xpos & 0x000000FF);
+////////    size = (s16)((Xpos - scch) >> 8);
+////////    switch( DispHMVFG ){
+////////    case 0:				/**** ノーマル移動 ****/
+////////	HoSeI = aP_HoSeI(pl);
+////////	if( HoSeI == 0 ){
+////////	    Xspd = aP_XSPD(pl);
+////////	} else {
+////////	    Xspd = aP_HoSeI(pl);
+////////	    aP_HoSeI(pl) = 0;
+////////	    aP_XSPD(pl) = 0;
+////////	}
+////////	Xpos += Xspd;
+////////	if( Xspd ){
+////////	    if( Xspd > 0 )
+////////		MuKi = 1;
+////////	    else
+////////		MuKi = 0;
+////////	} else {
+////////	    MuKi = aP_HFLIP(pl);
+////////	}
+////////	if( MuKi ){
+////////	    if( size > 0x0068 ){
+////////		if( scch != 0x00010800 ){
+////////		    scch += Xspd;
+////////		    if( scch > 0x00008800 )
+////////			scch = 0x00008800;
+////////		}
+////////		if( Xpos > 0x00017800 ){
+////////		    Xpos -= 0x00018000;
+////////		    DispHMVFG = 2;
+////////		    aP_XSPD(pl) = PUSH_XSPD;
+////////		}
+////////	    }
+////////	} else {
+////////	    if( size < 0x0068 ){
+////////		if( scch != 0x00000800 ){
+////////		    scch += Xspd;
+////////		    if( scch < 0x00000800 )
+////////			scch = 0x00000800;
+////////		}
+////////		if( Xpos < -0x00000800 ){
+////////		    Xpos += 0x00018000;
+////////		    DispHMVFG = 1;
+////////		    aP_XSPD(pl) = -PUSH_XSPD;
+////////		}
+////////	    }
+////////	}
+////////	break;
+////////    case 1:				/**** 左画面移動 ****/
+////////	scch += 0x0400;
+////////	if( scch > 0x00008800 ){
+////////	    scch = 0x00008800;
+////////	    DispHMVFG = 0;
+////////	}
+////////	break;
+////////    case 2:				/**** 右画面移動 ****/
+////////	scch -= 0x0400;
+////////	if( scch < 0x00000800 ){
+////////	    scch = 0x00000800;
+////////	    DispHMVFG = 0;
+////////	}
+////////	break;
+////////    }
+////////    aP_XPOS(pl) = Xpos;
+////////    aP_SCCH(pl) = (u16)(scch >> 8);
+////////    aP_DISPHMVFG(pl) = DispHMVFG;
+////////    SafetyFG = 0;
+////////////////    if( (Xpos < -0x00000400) || (Xpos > 0x00018400) )
+////////    if( (Xpos < 0x00000800) || (Xpos > 0x00016900) )
+////////	SafetyFG = 1;
+////////    aP_SafetyFG(pl) = SafetyFG;
+////////}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	Ｙ移動処理
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	PlayerYcalc(playerDT_c *pl)
+{
+    s32		Ypos = aP_YPOS(pl);
+    s32		Yspd = aP_YSPD(pl);
+    u16		sccv = aP_SCCV(pl);
+    s16		DispPos, Maxsccv, DispVMVCT;
+
+    Maxsccv = 0x0150;
+    DispVMVCT = aP_DISPVMVCT(pl);
+    if( aP_flyingFG(pl) ){
+	if( Yspd >= 0 ){
+	    Ypos += Yspd;
+	    aP_flyingFG(pl) = 0;
+	}
+    } else
+	Ypos += Yspd;
+    if( mGm_QUAKEFG ){
+	aP_YPOS(pl) = Ypos;
+	return;
+    }
+    if( Ypos < 0 ){
+	aP_YPOS(pl) = Ypos;
+	aP_SCCV(pl) = 0;
+	return;
+    }
+
+    DispPos = 0;
+    if( DispVMVCT ){
+	if( (Yspd >= 0) && (Ypos > 0x0000D100) ){
+	    sccv += 0x0006;
+	    DispVMVCT += 0x0006;
+	    if( DispVMVCT >= MAX_DISPVMVCT ){
+		sccv = 0;
+		DispVMVCT = 0;
+		Ypos -= 0x00010000;
+	    }
+	} else {
+	    sccv -= 0x0006;
+	    DispVMVCT -= 0x0006;
+	    if( DispVMVCT & 0x8000 ){
+		sccv = Maxsccv;
+		DispVMVCT = 0;
+	    }
+	}
+    } else {
+	DispPos = (s16)(Ypos >> 8) - (s16)sccv;
+	if( DispPos < 0x0030 ){
+	    if( Yspd < 0 ){
+		sccv -= 0x0002;
+		if( DispPos < 0x0010 )
+		    sccv -= 0x0002;
+	    }
+	    if( (sccv & 0x8000) )
+		sccv = 0;
+	    aP_LookSccvFG(pl) = 0;
+	}
+	if( DispPos > 0x0040 ){
+////////	    if( Yspd >= 0 ){
+	    if( Yspd > 0x00000010 ){
+		sccv += 0x0004;
+		if( DispPos > 0x0060 )
+		    sccv += 0x0008;
+		if( !(sccv & 0x8000) ){
+		    if( sccv > Maxsccv )
+			sccv = Maxsccv;
+		}
+		aP_LookSccvFG(pl) = 0;
+	    }
+	}
+    }
+
+    aP_YPOS(pl) = Ypos;
+    aP_DISPVMVCT(pl) = DispVMVCT;
+    if( !(mGm_CONT & L_BUTTON) ){
+	if( aP_BIGJUMPFG(pl) ){
+	    sccv = aP_SCCV(pl);
+	    if( DispPos < DISPLOWPOS )
+		sccv -= 0x02;
+	    else {
+		if( DispPos > (DISPLOWPOS + 2) )
+		    sccv += 0x04;
+		    if( sccv > Maxsccv )
+			sccv = Maxsccv;
+	    }
+	}
+    }
+    if( sccv >= MAX_UP_SCCV )
+	aP_SCCV(pl) = sccv;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	Ｂボタンダッシュ
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	B_DashCHK(playerDT_c *pl)
+{
+    s32		Xspd = aP_XSPD(pl);
+    u16		ContKey = mGm_CONT;
+    u16		MuTeKi;
+    u8		HFlip;
+
+    if( !Xspd )
+	return;
+    if( aP_VFLIP(pl) )
+	return;
+    MuTeKi = aP_MuTeKiTM(pl);
+    HFlip = aP_HFLIP(pl);
+    if( ((ContKey & B_BUTTON) || (ContKey & R_BUTTON)) &&
+	(ContKey & (L_KEY | R_KEY)) ){
+	if( Xspd >= 0 ){
+	    if( !HFlip || aP_KickTime(pl) )
+		return;
+	    if( !MuTeKi ){
+		if( Xspd < B_DASH_MAXSPD )
+		    Xspd += ACCEL_SPD;
+		else {
+		    if( Xspd > B_DASH_MAXSPD ){
+			Xspd -= MUTEKI_B_ACCEL_SPD;
+			if( Xspd < B_DASH_MAXSPD )
+			    Xspd = B_DASH_MAXSPD;
+		    }
+		}
+	    } else {
+		if( Xspd < MUTEKI_B_DASH_MAXSPD )
+		    Xspd +=  MUTEKI_B_ACCEL_SPD;
+		else
+		    Xspd = MUTEKI_B_DASH_MAXSPD;
+	    }
+	} else {
+	    if( HFlip || aP_KickTime(pl) )
+		return;
+	    if( !MuTeKi ){
+		if( Xspd > -B_DASH_MAXSPD )
+		    Xspd -= ACCEL_SPD;
+		else {
+		    if( Xspd < -B_DASH_MAXSPD ){
+			Xspd += MUTEKI_B_ACCEL_SPD;
+			if( Xspd > -B_DASH_MAXSPD )
+			    Xspd = -B_DASH_MAXSPD;
+		    }
+		}
+	    } else {
+		if( Xspd > -MUTEKI_B_DASH_MAXSPD )
+		    Xspd -= MUTEKI_B_ACCEL_SPD;
+		else
+		    Xspd = -MUTEKI_B_DASH_MAXSPD;
+	    }
+	}
+    } else {
+	if( Xspd >= 0 ){
+	    if( !HFlip )
+		return;
+	    if( Xspd > PL_MAXSPDX )
+		Xspd -= ACCEL_SPD;
+	} else {
+	    if( HFlip )
+		return;
+	    if( Xspd < -PL_MAXSPDX )
+		Xspd += ACCEL_SPD;
+	}
+    }
+    aP_XSPD(pl) = Xspd;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ジャンプ計算
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	s32	PLJumpCalc(s32 Yspd, u16 ContKey)
+{
+    if( ContKey & A_BUTTON ){
+	Yspd += PL_GRAVITY2;
+    } else {
+	Yspd += PL_GRAVITY;
+    }
+    if( Yspd >= 0 ){
+	if( Yspd >= PL_JPSPD )
+	    Yspd = PL_JPSPD;
+    }
+    return Yspd;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	スピードダウン処理
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	s32	PLSpeedDownCalc(s32 Xspd, u8 stamina, u8 IceFG,
+				u8 JumpFG, acterDT_c *BucketON)
+{
+////////    s32		Accel = ACCEL_SPD;
+    s32		Accel;
+
+////////    if( stamina <= SMALL_STAMINA )
+////////	Accel = SLIP_ACCEL_SPD;
+    Accel = SLIP_ACCEL_SPD;
+    if( JumpFG && (BucketON == NULL) )		// ジャンプしてる？
+	Accel = JUMP_BRAKE_SPD;
+    if( IceFG )
+	Accel = SLIP_ACCEL_SPD2;
+    if( Xspd ){
+	if( Xspd < 0 ){
+	    Xspd += Accel;
+	    if( Xspd >= 0 )
+		Xspd = 0;
+	} else {
+	    Xspd -= Accel;
+	    if( Xspd <= 0 )
+		Xspd = 0;
+	}
+    }
+    return Xspd;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	投げチェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	ThrowCheck(playerDT_c *pl, u16 TrgKey)
+{
+    void	*Other;
+    u8		HandsUpFG;
+
+    if( (TrgKey & B_BUTTON) ){
+	HandsUpFG = aP_HandsUpFG(pl);
+	Other = aP_HANDSUPPL(pl);
+	if( Other == NULL )
+	    return;
+	ThrowSet(pl);
+	if( HandsUpFG != 2 ){
+	    aP_HandsUpFG((playerDT_c *)Other) = 0;
+	}
+#if SOUND_ON
+	m4aSongNumStart(s_b_NAGE);
+#endif
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	甲羅チェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	KoURaCHK(playerDT_c *pl, acterDT_c *en)
+{
+    kouraDT_c	*kouraDT;
+    s32		eXspd;
+    s16		pXpos, eXpos, pYpos, eYpos, pXsize;
+    u16		MuTeKiTM = aP_MuTeKiTM(pl);
+    u16		RevivalTM = aP_RevivalTM(pl);
+    u8		enMode;
+
+    if( en == NULL )
+	return;
+    if( !a_SELLFG(en) )
+	return;
+    if( a_HITFG(en) )
+	return;
+    if( aP_SafetyFG(pl) )
+	return;
+    if( a_ACTERID(en) == EN_ICICLE ){	// つらら？
+	a_MODE(en) = a_KCKMODE(en);
+	return;
+    }
+
+    eXspd = a_XSPD(en);
+    pYpos = (s16)(aP_YPOS(pl) >> 8) + (s16)(aP_YCENTER(pl) + aP_YSIZE(pl));
+    eYpos = (s16)(a_YPOS(en) >> 8) + (s16)a_YCENTER(en) + 0x0002;
+    if( pYpos > eYpos ){
+	if( eXspd ){				// 甲羅移動してる？
+	    pXpos = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+	    pXsize = (s16)aP_XSIZE(pl);
+	    eXpos = (s16)(a_XPOS(en) >> 8) + (s16)a_XCENTER(en);
+	    if( eXspd > 0 ){			// 甲羅右移動中？
+		if( ((pXpos + pXsize) >= eXpos) && !MuTeKiTM && !RevivalTM )
+		    PlayerDownCheck(pl);
+	    } else {
+		if( ((pXpos - pXsize) <= eXpos) && !MuTeKiTM && !RevivalTM )
+		    PlayerDownCheck(pl);
+	    }
+////////	    a_XSPD(en) *= -1;		// プレイヤーに当ったので
+////////	    a_DIREC(en) ^= 1;		// 移動方向逆転
+	} else {
+////////	    EnemyKick(pl, a_TBLNO(en));
+////////	    a_JUMPFG(en) = 0;
+////////	    a_HITFG(en) = 0;
+	    if( !aP_HandsUpFG(pl) )
+		aP_KickTime(pl) = PL_KICK_TM;
+	    eXspd = -0x0200;
+	    if( aP_HFLIP(pl) )
+		eXspd *= -1;
+	    a_XSPD(en) = eXspd;
+	    a_HITFG(en) = 1;
+	    a_MODE(en) = a_KCKMODE(en);
+	    a_TIMER(en) = 0;		// 当り無しタイマークリア
+	    m4aSongNumStart(s_b_KAMEKERI1);
+	}
+	return;
+    } else {
+	if( eXspd ){		// 甲羅に乗った？
+	    a_XSPD(en) = 0;
+	    aP_JUMPFG(pl) = 1;
+	    aP_YSPD(pl) = -PL_JPSPD;
+	    a_PRIORITY(en) = ENPRION;
+#if SOUND_ON
+	    m4aSongNumStart(s_b_NORI);
+#endif
+	} else {
+	    if( aP_YSPD(pl) >= 0 ){
+		aP_JUMPFG(pl) = 0;
+		aP_BlockFG(pl) = 0;
+		aP_YSPD(pl) = 0x0010;
+		eYpos -= 0x0005;
+		if( pYpos >= eYpos ){
+		    pYpos -= eYpos;
+		    if( pYpos > 0 )
+			aP_YPOS(pl) -= ((s32)pYpos << 8);
+		}
+		/******** 持ち上げチェック ********/
+		if( !aP_HandsUpFG(pl) && (mGm_CONT & B_BUTTON) ){
+		    if( aP_ThrowTM(pl) )
+			return;
+		    aP_MODE(pl) = PL_POWHANDSUP;
+		    aP_ANIMETM(pl) = 0;
+		    aP_ANIMEIDX(pl) = 0;
+		    aP_PRIORITY(pl) = PLPRIOFF;
+		    aP_HandsUpFG(pl) = 2;
+#if SOUND_ON
+		    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )
+			m4aSongNumStart(s_u_mario_eeee_yah1);
+		    else
+			m4aSongNumStart(s_b_MOTI);
+#endif
+		    aP_HANDSUPPL(pl) = en;
+		    a_YSPD(en) = -KOURA_HANDSUP_SPD;
+		    a_XSPD(en) = 0;
+		    a_PRIORITY(en) = 0;
+		    kouraDT = (kouraDT_c *)a_OTHER(en);
+		    aK_PL(kouraDT) = pl;
+		    a_MODE(en) = KOURA_HANDSUP;
+		}
+	    }
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ダメージチェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	DamageCHK(playerDT_c *pl, acterDT_c *en, u16 acterID)
+{
+    u8		i;
+    u8		idx = aP_TBLNO(pl) * 0x10;
+
+    if( aP_SafetyFG(pl) )
+	return;
+    if( (acterID == EN_ICICLE) && a_SELLFG(en) )
+	return;
+
+    if( acterID != EN_BGYuKa ){
+	if( !a_SELLFG(en) ){
+	    Enemy_PLTurn(pl, en);
+	    PlayerDownCheck(pl);
+	}
+    }
+
+    /******** 火系の敵に当った ********/
+    if( (acterID == EN_FIREBALL) || (acterID == EN_KPPFIRE) ){
+#if SOUND_ON
+	if( !mGm_PLTYPE )
+	    m4aSongNumStart(s_u_mario_ah_cha_cha);
+#endif
+	for( i = 0; i < 16; i++ ){
+	    mGm_ColBufOBJ[(idx + i)] = FireDamageColDT[i];
+	}
+	mGm_COLFLG |= OBJ_COL_TRANS;
+    }
+
+    /******** 氷系の敵に当った ********/
+    if( (acterID == EN_ICE) || (acterID == EN_ICICLE) ){
+	for( i = 0; i < 16; i++ ){
+	    mGm_ColBufOBJ[(idx + i)] = IceDamageColDT[i];
+	}
+	mGm_COLFLG |= OBJ_COL_TRANS;
+    }
+}
+/*
+ ****************************************************************
+	プレイヤー移動ＭＡＩＮ処理
+ ****************************************************************
+ */
+static	void	player_move(playerDT_c *pl)
+{
+    u16		MuTeKiTM = aP_MuTeKiTM(pl);
+    u16		TrgKey = mGm_TRG;
+    u16		ContKey = mGm_CONT;
+    u16		acterID = NoActer;
+    s32		Xspd = aP_XSPD(pl);
+    s32		Yspd, Xpos;
+    s32		SlipAccel = SLIP_ACCEL_SPD;
+    u8		idx, JumpFG, flag, enMode;
+    u8		slipFG = aP_slipFG(pl);
+    u8		stamina = aP_STAMINA(pl);
+    acterDT_c	*BucketON = aP_BucketON(pl);
+    acterDT_c	*en = NULL;
+
+    if( aP_VFLIP(pl) ){			// 投げられた後なのでキー入力を
+	TrgKey = 0;			// キャンセルする。
+	ContKey = 0;			//
+    } else {
+	aP_HITFG(pl) = 0;
+    }
+
+    /******** 敵との当りチェック ********/
+    idx = mGm_PLEnemyHitCheck(pl);
+    if( idx != 0xFF ){
+	en = mGm_ACTER_p(idx);
+	if( a_BACKFG(en) || MuTeKiTM ){		// 仰向け又は無敵中？
+	    flag = FALSE;
+	    if( a_ACTERID(en) == EN_COIN ){
+		if( aP_COINCOUNT(pl) < 5 ){
+		    aP_COINCOUNT(pl)++;
+		    flag = player_coinGet(pl);
+		}
+	    }
+	    EnemyKick(pl, idx);
+	    if( flag == TRUE )
+		return;
+	} else {
+	    DamageCHK(pl, en, a_ACTERID(en));
+////////	    acterID = a_ACTERID(en);
+////////	    if( acterID != EN_BGYuKa ){
+////////		if( !a_SELLFG(en) ){
+////////		    Enemy_PLTurn(pl, en);
+////////		    PlayerDownCheck(pl);
+////////		}
+////////	    }
+	}
+    }
+
+    /******** ジャンプ処理関係 ********/
+    Yspd = aP_YSPD(pl);
+    JumpFG = aP_JUMPFG(pl);
+    if( (!JumpFG || (BucketON != NULL)) && !aP_VFLIP(pl) ){
+	if( TrgKey & A_BUTTON ){
+	    Yspd = -PL_JPSPD;
+	    if( (Xspd >= 0x00000080) || (Xspd <= -0x00000080) )
+		    Yspd = -PL_MAXJPSPD;
+	    JumpFG = 1;
+#if SOUND_ON
+	    m4aSongNumStart(s_b_JUMP);
+#endif
+	    if( aP_BIGJUMPFG(pl) ){
+		Yspd = -PL_MAXBIGJPSPD;
+		aP_BIGJUMPFG(pl) = 0;
+		if( !aP_HandsUpFG(pl) ){
+		    JumpFG = 2;			// 大ジャンプＯＮ
+#if SOUND_ON
+		if( !mGm_PLTYPE )
+		    m4aSongNumStart(s_u_mario_yahoo);
+#endif
+		}
+	    }
+	}
+    } else {
+	Yspd = PLJumpCalc(Yspd, ContKey);
+    }
+
+    /******** 普通の移動スピード処理 ********/
+    if( ContKey & (L_KEY | R_KEY) ){
+	aP_BIGJUMPFG(pl) = 0;
+	if( stamina <= SMALL_STAMINA )
+	    SlipAccel = BRAKE_ACCEL_SPD;
+	if( aP_IceFG(pl) )
+	    SlipAccel = BRAKE_ACCEL_SPD2;
+	if( MuTeKiTM )
+	    SlipAccel += MUTEKI_ACCEL_SPD;
+	if( ContKey & R_KEY ){
+	    if( !aP_KickTime(pl) )
+		aP_HFLIP(pl) = 1;
+	    slipFG = 0;
+	    if( Xspd < 0 )
+		slipFG = 1;
+	    if( !MuTeKiTM ){
+		if( Xspd < PL_MAXSPDX ){
+		    Xspd += SlipAccel;
+		} else {
+		    if( Xspd > PL_MAXSPDX ){
+			Xspd -= MUTEKI_ACCEL_SPD;
+			if( Xspd < PL_MAXSPDX )
+			    Xspd = PL_MAXSPDX;
+		    }
+		}
+	    } else {
+		if( Xspd < MUTEKI_DASH_MAXSPD )
+		    Xspd += SlipAccel;
+	    }
+	} else {
+	    if( !aP_KickTime(pl) )
+		aP_HFLIP(pl) = 0;
+	    slipFG = 0;
+	    if( Xspd >= 0 )
+		slipFG = 1;
+	    if( !MuTeKiTM ){
+		if( Xspd > -PL_MAXSPDX ){
+		    Xspd -= SlipAccel;
+		} else {
+		    if( Xspd < -PL_MAXSPDX ){
+			Xspd += MUTEKI_ACCEL_SPD;
+			if( Xspd > -PL_MAXSPDX )
+			    Xspd = -PL_MAXSPDX;
+		    }
+		}
+	    } else {
+		if( Xspd > -MUTEKI_DASH_MAXSPD )
+		    Xspd -= SlipAccel;
+	    }
+	}
+	if( Xspd ){
+	    if( Xspd > 0 )
+		aP_DIREC(pl) = 1;
+	    else
+		aP_DIREC(pl) = 0;
+	}
+    } else {
+////////	if( !JumpFG || (BucketON != NULL) ){
+	    Xpos = aP_XPOS(pl);
+	    if( !aP_VFLIP(pl) &&
+////////		((Xpos >= 0x00000400) && (Xpos <= 0x00016D00)) )
+		((Xpos >= 0x00000200) && (Xpos <= 0x00010200)) )
+		Xspd = PLSpeedDownCalc(Xspd, stamina, aP_IceFG(pl),
+				       JumpFG, aP_BucketON(pl) );
+////////	}
+    }
+
+    aP_JUMPFG(pl) = JumpFG;
+    aP_XSPD(pl) = Xspd;
+    if( !Xspd )
+	slipFG = 0;
+    aP_slipFG(pl) = slipFG;
+
+    /******** Ｂダッシュ＆投げチェック ********/
+    if( !aP_HandsUpFG(pl) ){
+	B_DashCHK(pl);
+    } else{
+	ThrowCheck(pl, TrgKey);
+    }
+    PlayerXcalc(pl);
+    aP_YSPD(pl) = Yspd;
+    PlayerYcalc(pl);
+
+    player_BGcheck(pl);			// プレイヤーＢＧチェック
+    PLHitCheck(pl);			// 敵以外との当りチェック
+    KoURaCHK(pl, en);			// 甲羅チェック
+    player_MakeSmoke(pl);		// スリップ煙発生
+    
+    /******** しゃがみチェック ********/
+////////    if( !JumpFG ){
+    if( !JumpFG || (BucketON != NULL) ){
+	if( (ContKey & D_KEY) && (aP_MODE(pl) == PL_MOVE) ){
+	    SizeChange(pl, 2);
+	    aP_MODE(pl) = PL_SQUAT;
+	    if( !aP_BIGJUMPFG(pl) ){
+		aP_CrouchTM(pl) = 0;
+////////		aP_FLASHID(pl) = 0;
+	    }
+	}
+    }
+    if( MuTeKiTM )
+	MuTeKiFlashing(pl);
+    BigJumpFlashing(pl);
+}
+/*
+ ****************************************************************
+	しゃがみ処理
+ ****************************************************************
+ */
+static	void	player_squat(playerDT_c *pl)
+{
+    u8		idx, CrouchTM, flag, enMode;
+    u8		JumpFG = aP_JUMPFG(pl);
+    u16		TrgKey = mGm_TRG;
+    u16		ContKey = mGm_CONT;
+    u16		acterID = NoActer;
+    s32		Yspd;
+    acterDT_c	*en = NULL;
+
+    /******** 敵との当りチェック ********/
+    idx = mGm_PLEnemyHitCheck(pl);
+    if( idx != 0xFF ){
+	en = mGm_ACTER_p(idx);
+	if( a_BACKFG(en) || aP_MuTeKiTM(pl) ){	// 仰向け又は無敵中？
+	    flag = FALSE;
+	    if( a_ACTERID(en) == EN_COIN ){
+		if( aP_COINCOUNT(pl) < 5 ){
+		    aP_COINCOUNT(pl)++;
+		    flag = player_coinGet(pl);
+		}
+	    }
+	    EnemyKick(pl, idx);
+	    if( flag == TRUE )
+		return;
+	} else {
+	    DamageCHK(pl, en, a_ACTERID(en));
+////////	    acterID = a_ACTERID(en);
+////////	    if( acterID != EN_BGYuKa ){
+////////		if( !a_SELLFG(en) ){
+////////		    Enemy_PLTurn(pl, en);
+////////		    PlayerDownCheck(pl);
+////////		}
+////////	    }
+	}
+    }
+
+    Yspd = aP_YSPD(pl);
+    if( JumpFG ){
+	Yspd = PLJumpCalc(Yspd, ContKey);
+    }
+
+    if( aP_MuTeKiTM(pl) )
+	MuTeKiFlashing(pl);
+
+    /**** ためジャンプフラッシュ ****/
+    if( !aP_ThrowTM(pl) ){
+	if( !aP_BIGJUMPFG(pl) ){
+	    CrouchTM = aP_CrouchTM(pl);
+	    if( !(ContKey & L_BUTTON) )
+		CrouchTM++;
+	    if( CrouchTM >= BIG_JUMP_MAXTM ){
+		aP_BIGJUMPFG(pl) = 1;
+		aP_BigJumpTM(pl) = 0;
+		aP_BigJumpIDX(pl) = 0;
+		CrouchTM = 0;
+#if SOUND_ON
+		m4aSongNumStart(s_b_TAME);
+		if( !mGm_PLTYPE )
+		    m4aSongNumStart(s_u_mario_ohmm_hmm);
+#endif
+	    }
+	    aP_CrouchTM(pl) = CrouchTM;
+	} else {
+	    BigJumpFlashing(pl);
+	}
+    }
+
+    /**** キーチェック ****/
+    if( !(ContKey & D_KEY) ){
+	SizeChange(pl, 0);
+	if( aP_MODE(pl) < PL_ENHIT )
+	    aP_MODE(pl) = PL_MOVE;
+	JumpFG = 0;
+    } else {
+	if( !JumpFG && (mGm_TRG & A_BUTTON) ){
+	    SizeChange(pl, 0);
+	    aP_MODE(pl) = PL_MOVE;
+	    Yspd = -PL_JPSPD;
+	    JumpFG = 1;
+#if SOUND_ON
+	    m4aSongNumStart(s_b_JUMP);
+#endif
+	    if( aP_BIGJUMPFG(pl) ){
+		Yspd = -PL_MAXBIGJPSPD;
+		aP_BIGJUMPFG(pl) = 0;
+		if( !aP_HandsUpFG(pl) ){
+		    JumpFG = 2;			// 大ジャンプＯＮ
+#if SOUND_ON
+		if( !mGm_PLTYPE )
+		    m4aSongNumStart(s_u_mario_yahoo);
+#endif
+		}
+	    }
+	    BigJumpFlashing(pl);
+	}
+    }
+
+    /******** Ｂダッシュ＆投げチェック ********/
+    if( aP_HandsUpFG(pl) ){
+	ThrowCheck(pl, TrgKey);
+    }
+
+
+    /**** しゃがみ中なので減速する ****/
+    if( !aP_DISPHMVFG(pl) ){
+	aP_XSPD(pl) = PLSpeedDownCalc(aP_XSPD(pl),
+				      aP_STAMINA(pl),
+				      aP_IceFG(pl),
+				      JumpFG, aP_BucketON(pl) );
+    }
+
+    aP_JUMPFG(pl) = JumpFG;
+    aP_YSPD(pl) = Yspd;
+    PlayerXcalc(pl);
+    PlayerYcalc(pl);
+
+    player_BGcheck(pl);			// プレイヤーＢＧチェック
+    PLHitCheck(pl);			// 敵以外との当りチェック
+    KoURaCHK(pl, en);			// 甲羅チェック
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	縮ん出いるときの頭の上チェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	playerDT_c	*ShrinkHeadCheck(playerDT_c *pl)
+{
+    u8		idx, i, TBLNo, youYsize;
+    u8		myYsize = aP_YSIZE(pl);
+    s32		myX, myY, Xpos, Ypos;
+    playerDT_c	*Other;
+
+    if( aP_SafetyFG(pl) )
+	return NULL;
+
+    TBLNo = aP_TBLNO(pl);
+    myX = (aP_XPOS(pl) >> 8) + (s32)aP_XCENTER(pl);
+    myY = (aP_YPOS(pl) >> 8) + (s32)aP_YCENTER(pl);
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	if( TBLNo != i ){
+	    Other = mGm_PLAYER(i);
+	    if( aP_MODE(Other) != PL_NOT ){
+		Xpos = (aP_XPOS(Other) >> 8) + (s32)aP_XCENTER(Other);
+		Xpos -= myX;
+		if( Xpos < 0 )
+		    Xpos *= -1;
+		if( Xpos <= ((s32)aP_XSIZE(Other) * 2) ){
+		    youYsize = aP_YSIZE(Other) + myYsize;
+		    Ypos = myY -
+			((aP_YPOS(Other) >> 8) + (s32)aP_YCENTER(Other));
+		    if( (Ypos >= 0) && (Ypos <= youYsize) ){
+			if( !aP_SafetyFG(Other) )
+			    return Other;
+			else
+			    return NULL;
+		    }
+		}
+	    }
+	}
+    }
+    return NULL;
+}
+/*
+ ****************************************************************
+	縮む処理
+ ****************************************************************
+ */
+static	void	player_shrink(playerDT_c *pl)
+{
+    u8		ShrinkTM = aP_ShrinkTM(pl);
+    u8		ShrinkUpTM = aP_ShrinkUpTM(pl);
+    u8		idx, i, TBLNo, flag, enMode;
+    u16		ContKey = mGm_CONT;
+    u16		TrgKey = mGm_TRG;
+    u16		acterID = NoActer;
+    s32		Xpos, Ypos;
+    acterDT_c	*en = NULL;
+    playerDT_c	*Other;
+
+    /******** 敵との当りチェック ********/
+    idx = mGm_PLEnemyHitCheck(pl);
+    if( idx != 0xFF ){
+	en = mGm_ACTER_p(idx);
+	if( a_BACKFG(en) || aP_MuTeKiTM(pl) ){	// 仰向け又は無敵中？
+	    flag = FALSE;
+	    if( a_ACTERID(en) == EN_COIN ){
+		if( aP_COINCOUNT(pl) < 5 ){
+		    aP_COINCOUNT(pl)++;
+		    flag = player_coinGet(pl);
+		}
+	    }
+	    EnemyKick(pl, idx);
+	    if( flag == TRUE )
+		return;
+	} else {
+	    DamageCHK(pl, en, a_ACTERID(en));
+////////	    acterID = a_ACTERID(en);
+////////	    if( acterID != EN_BGYuKa ){
+////////		if( !a_SELLFG(en) ){
+////////		    Enemy_PLTurn(pl, en);
+////////		    PlayerDownCheck(pl);
+////////		}
+////////	    }
+	}
+    }
+
+    /**** 縮み中なので減速する ****/
+    if( !aP_DISPHMVFG(pl) ){
+	aP_XSPD(pl) = PLSpeedDownCalc(aP_XSPD(pl),
+				      aP_STAMINA(pl),
+				      aP_IceFG(pl),
+				      aP_JUMPFG(pl), aP_BucketON(pl) );
+    }
+
+    if( aP_JUMPFG(pl) ){
+	aP_YSPD(pl) = PLJumpCalc(aP_YSPD(pl), ContKey);
+    }
+
+    PlayerXcalc(pl);
+    PlayerYcalc(pl);
+
+    player_BGcheck(pl);			// プレイヤーＢＧチェック
+    PLHitCheck(pl);			// 敵以外との当りチェック
+    KoURaCHK(pl, en);			// 甲羅チェック
+
+    Other = ShrinkHeadCheck(pl);
+
+    ShrinkTM--;
+    if( TrgKey & (R_KEY | L_KEY) ){
+	aP_DIREC(pl) = aP_HFLIP(pl) = aP_HFLIP(pl) ^ 1;
+	if( ShrinkTM >= 2)
+	    ShrinkTM -= 2;
+    }
+
+    if( !aP_JUMPFG(pl) && (mGm_TRG & A_BUTTON) ){
+	aP_JUMPFG(pl) = 1;
+	aP_YSPD(pl) = -PL_SHRINKJPSPD;
+	if( ShrinkTM >= 3 )
+	    ShrinkTM -= 3;
+	if( Other != NULL ){
+	    aP_JUMPFG(Other) = 1;
+	    aP_YSPD(Other) = -PL_SHRINKJPSPD;
+	}
+	if( aP_BIGJUMPFG(pl) ){
+	    aP_FLASHID(pl) = 1;
+	    aP_BIGJUMPFG(pl) = 0;
+	}
+    } else {
+	if( !aP_XSPD(pl) ){
+	    if( TrgKey & R_KEY ){
+		aP_XSPD(pl) = PL_MAXSPDX;
+		if( aP_BIGJUMPFG(pl) ){
+		    aP_FLASHID(pl) = 1;
+		    aP_BIGJUMPFG(pl) = 0;
+		}
+	    }
+	    if( TrgKey & L_KEY ){
+		aP_XSPD(pl) = -PL_MAXSPDX;
+		if( aP_BIGJUMPFG(pl) ){
+		    aP_FLASHID(pl) = 1;
+		    aP_BIGJUMPFG(pl) = 0;
+		}
+	    }
+	}
+    }
+
+    BigJumpFlashing(pl);
+    aP_ShrinkTM(pl) = ShrinkTM;
+
+////////    if( Other != NULL ){
+////////	ShrinkUpTM++;
+////////	if( ShrinkUpTM >= 10 ){
+////////	    ShrinkUpTM = 0;
+////////	    aP_JUMPFG(Other) = 1;
+////////	    aP_BlockFG(Other) = 0;
+////////	    aP_YSPD(Other) = -0x0480;
+////////	    aP_BIGJUMPFG(Other) = 0;
+////////	    if( aP_HFLIP(Other) ){
+////////		aP_XSPD(Other) = PL_MAXSPDX >> 2;
+////////	    } else {
+////////		aP_XSPD(Other) = -PL_MAXSPDX >> 2;
+////////	    }
+////////	}
+////////    }
+    aP_ShrinkUpTM(pl) = ShrinkUpTM;
+
+    if( ShrinkTM )
+	return;
+    SizeChange(pl, 0);
+    if( aP_MODE(pl) < PL_ENHIT )
+	aP_MODE(pl) = PL_MOVE;
+
+    /******** 再跳ね上げチェック ********/
+    if( Other != NULL ){
+	aP_JUMPFG(Other) = 1;
+	aP_BlockFG(Other) = 0;
+	aP_YSPD(Other) = -PL_MAXJPSPD;
+	aP_BIGJUMPFG(Other) = 0;
+    }
+////////    TBLNo = aP_TBLNO(pl);
+////////    myX = (aP_XPOS(pl) >> 8) + (s32)aP_XCENTER(pl);
+////////    myY = (aP_YPOS(pl) >> 8) + (s32)aP_YCENTER(pl);
+////////    for( i = 0; i < MAX_PLAYER; i++ ){
+////////	if( TBLNo != i ){
+////////	    Other = mGm_PLAYER(i);
+////////	    if( aP_MODE(Other) != PL_NOT ){
+////////		Xpos = (aP_XPOS(Other) >> 8) + (s32)aP_XCENTER(Other);
+////////		Xpos -= myX;
+////////		if( Xpos < 0 )
+////////		    Xpos *= -1;
+////////		if( Xpos <= ((s32)aP_XSIZE(Other) * 2) ){
+////////		    Ypos = myY -
+////////			((aP_YPOS(Other) >> 8) + (s32)aP_YCENTER(Other));
+////////		    if( (Ypos >= 0) && (Ypos <= 0x000E) ){
+////////			aP_JUMPFG(Other) = 1;
+////////			aP_BlockFG(Other) = 0;
+////////			aP_YSPD(Other) = -PL_MAXJPSPD;
+////////			aP_BIGJUMPFG(Other) = 0;
+////////		    }
+////////		}
+////////	    }
+////////	}
+////////    }
+}
+/*
+ ****************************************************************
+	プレイヤー持ち上げ処理
+ ****************************************************************
+ */
+static	void	player_HandsUp(playerDT_c *pl)
+{
+    playerDT_c	*Other = (playerDT_c *)aP_HANDSUPPL(pl);
+    u8		index = aP_ANIMEIDX(pl);
+
+    aP_YSPD(Other) = -0x00000140;
+    if( index < (MAX_HANDS_UP_DT - 1) )
+	return;
+
+    aP_JUMPFG(Other) = 0;
+    aP_YSPD(Other) = 0;
+    aP_IceFG(Other) = 0;
+    aP_PRIORITY(pl) = PLPRIOFF;
+    aP_ANIMEIDX(pl) = aP_ANIMETM(pl) = 0;
+    aP_ShrinkTM(pl) = 0;
+    aP_MODE(pl) = PL_MOVE;
+    SizeChange(pl, 0);
+#if SOUND_ON
+    if( !mGm_PLTYPE )
+	m4aSongNumStart(s_u_mario_eeee_yah2);
+#endif
+}
+/*
+ ****************************************************************
+	プレイヤー持ち上げられ処理
+ ****************************************************************
+ */
+static	void	player_HandsUp2(playerDT_c *pl)
+{
+    playerDT_c	*Other = (playerDT_c *)aP_HANDSUPPL(pl);
+    acterDT_c	*en = NULL;
+    s32		Ysize = 0x00001200;
+    s32		Xpos, Xspd;
+    s16		BGCheckX, BGCheckY, Xsize;
+    u16		TrgKey = mGm_TRG;
+    u16		sccv, acterID;
+    u8		mode = aP_MODE(Other);
+    u8		ShrinkTM = aP_ShrinkTM(pl);
+    u8		i, idx, flag, SafetyFG, bg;
+
+    if( mode == PL_HANDSUP ){
+	PlayerYcalc(pl);
+	return;
+    }
+
+    /******** 敵との当りチェック ********/
+    idx = mGm_PLEnemyHitCheck(pl);
+    if( idx != 0xFF ){
+	en = mGm_ACTER_p(idx);
+	if( a_BACKFG(en) || aP_MuTeKiTM(pl) ){	// 仰向け又は無敵中？
+	    flag = FALSE;
+	    if( a_ACTERID(en) == EN_COIN ){
+		if( aP_COINCOUNT(pl) < 5 ){
+		    aP_COINCOUNT(pl)++;
+		    flag = player_coinGet(pl);
+		}
+	    }
+	    EnemyKick(pl, idx);
+	    if( flag == TRUE )
+		return;
+	} else {
+	    acterID = a_ACTERID(en);
+	    if( !(acterID == EN_BGYuKa) ){
+		Enemy_PLTurn(pl, en);
+		idx = aP_TBLNO(pl) * 0x10;
+		if( !((acterID == EN_ICICLE) && a_SELLFG(en)) ){
+		    PlayerDownCheck(pl);
+		    /******** 氷系の敵に当った ********/
+		    if( (acterID == EN_ICE) || (acterID == EN_ICICLE) ){
+			for( i = 0; i < 16; i++ ){
+			    mGm_ColBufOBJ[(idx + i)] = IceDamageColDT[i];
+			}
+			mGm_COLFLG |= OBJ_COL_TRANS;
+		    }
+		}
+		/******** 火系の敵に当った ********/
+		if( (acterID == EN_FIREBALL) || (acterID == EN_KPPFIRE) ){
+#if SOUND_ON
+		    if( !mGm_PLTYPE )
+			m4aSongNumStart(s_u_mario_ah_cha_cha);
+#endif
+		    for( i = 0; i < 16; i++ ){
+			mGm_ColBufOBJ[(idx + i)] = FireDamageColDT[i];
+		    }
+		    mGm_COLFLG |= OBJ_COL_TRANS;
+		}
+		return;
+	    }
+	}
+    }
+
+    if( (aP_STAMINA(Other) <= SMALL_STAMINA) || (play_mode == PLAY_CLSS) )
+	Ysize = 0x00000B00;
+    if( (aP_STAMINA(pl) <= SMALL_STAMINA) || (play_mode == PLAY_CLSS) ){
+	Ysize = 0x00001300;
+	if( (aP_STAMINA(Other) <= SMALL_STAMINA) || (play_mode == PLAY_CLSS) ){
+		Ysize = 0x00000B00;
+	    }
+    }
+    if( (mode == PL_SQUAT) || aP_ShrinkTM(Other))
+	Ysize = 0x00000800;
+    aP_VFLIP(pl) = 1;
+    aP_XPOS(pl) = aP_XPOS(Other);
+    aP_YPOS(pl) = aP_YPOS(Other) - Ysize;
+    if( a_CHRNO(Other) == 0x03 ){
+	a_YPOS(pl) -= 0x0100;
+    }
+    aP_XSPD(pl) = PL_MAXSPDX;
+    aP_SCCH(pl) = aP_SCCH(Other);
+////////    sccv = aP_SCCV(Other) - (u16)(Ysize >> 8);
+    sccv = aP_SCCV(Other);
+    if( sccv < 0x0F0 )
+	sccv = 0x0F0;
+    aP_SCCV(pl) = sccv;
+
+    if( TrgKey & (R_KEY | L_KEY | A_BUTTON) ){
+	ShrinkTM++;
+	if( TrgKey & R_KEY )
+	    aP_HFLIP(pl) = 1;
+	if( TrgKey & L_KEY )
+	    aP_HFLIP(pl) = 0;
+	aP_ShrinkTM(pl) = ShrinkTM;
+    }
+
+////////    SafetyFG = 0;
+////////    Xpos = aP_XPOS(pl);
+////////    if( (Xpos < 0x00000800) || (Xpos > 0x00016900) )
+////////	SafetyFG = 1;
+////////    aP_SafetyFG(pl) = SafetyFG;
+
+    /******** ＢＧコインチェック ********/
+    BGCheckX = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+    BGCheckY = (s16)(aP_YPOS(pl) >> 8);
+    bg = mGm_bgbuf_check(BGCheckX, BGCheckY);
+    if( BGCoinGetCHK(pl, BGCheckX, BGCheckY, bg) == FALSE ){
+	BGCheckY += (s16)aP_YCENTER(pl);
+	bg = mGm_bgbuf_check(BGCheckX, BGCheckY);
+	BGCoinGetCHK(pl, BGCheckX, BGCheckY, bg);
+    }
+
+    /******** 振り解きチェック ********/
+    if( ShrinkTM >= 0x20 ){
+	ThrowSet(Other);
+	aP_HandsUpFG(pl) = 0;
+    }
+
+    /******** 投げられたかチェック ********/
+    if( !aP_HandsUpFG(pl) ){
+	if( aP_HFLIP(Other) )
+	    Xspd = PL_MAXSPDX;
+	else
+	    Xspd = -PL_MAXSPDX;
+	aP_XSPD(pl) = Xspd + aP_XSPD(Other);
+	aP_YSPD(pl) = 0;
+	aP_JUMPFG(pl) = 1;
+	aP_ShrinkTM(pl) = 0;
+	aP_HANDSUPPL(pl) = NULL;
+	aP_PlacardTM(pl) = PLACARD_TM;
+	if( aP_MODE(pl) < PL_ENHIT )
+	    aP_MODE(pl) = PL_MOVE;
+    }
+}
+/*
+ ****************************************************************
+	ＢＧＰＯＷ持ち上げ処理
+ ****************************************************************
+ */
+static	void	player_PowHandsUp(playerDT_c *pl)
+{
+    acterDT_c	*en = (acterDT_c *)aP_HANDSUPPL(pl);
+    u8		index = aP_ANIMEIDX(pl);
+
+    a_YSPD(en) = -0x00000140;
+    if( index < (MAX_HANDS_UP_DT - 1) )
+	return;
+
+    SizeChange(pl, 0);
+    a_YSPD(en) = 0;
+    aP_PRIORITY(pl) = PLPRIOFF;
+    aP_ANIMEIDX(pl) = aP_ANIMETM(pl) = 0;
+    aP_ShrinkTM(pl) = 0;
+    aP_MODE(pl) = PL_MOVE;
+#if SOUND_ON
+    if( !mGm_PLTYPE )
+	m4aSongNumStart(s_u_mario_eeee_yah2);
+#endif
+}
+/*
+ ****************************************************************
+	敵に当った処理
+ ****************************************************************
+ */
+static	void	player_enemyHit(playerDT_c *pl)
+{
+    u8		HitTime = aP_HitTime(pl);
+
+    HitTime--;
+    aP_HitTime(pl) = HitTime;
+    if( !(HitTime & 0x80) )
+	return;
+
+    aP_YSPD(pl) = -0x0300;
+    aP_MODE(pl)++;
+    aP_HitTime(pl) = 60;
+#if SOUND_ON
+    if( !mGm_PLTYPE && (play_mode == PLAY_CLSS) )
+	m4aSongNumStart(s_u_mario_mamma_mia);
+    m4aSongNumStart(s_b_MR_DOWN);
+#endif
+    if( play_mode == PLAY_CLSS )	// クラシック？
+	return;				//	YES --> return
+    if( aP_STAMINA(pl) )		// 昇天デモスタート？
+	return;				//	NO --> return;
+    aP_MODE(pl) = PL_ASCENSION;
+    aP_DIREC(pl) = 0x01;
+    aP_XSPD(pl) = ASCENSION_XSPD;
+    aP_YSPD(pl) = -ASCENSION_YSPD;
+////////    MakeHeart((aP_XPOS(pl) - 0x0800), (aP_YPOS(pl) - 0x1000));
+}
+/*
+ ****************************************************************
+	ダウン処理
+ ****************************************************************
+ */
+static	void	player_down(playerDT_c *pl)
+{
+////////    u8		i, wincnt, cnt, stamina;
+    u8		i, wincnt, cnt;
+    u8		HeartTime = aP_HitTime(pl);
+    u16		id, sccv, *address;
+    s32		Yspd = aP_YSPD(pl);
+    s32		Ypos = aP_YPOS(pl);
+    effectDT_c	*ef;
+
+    Ypos += Yspd;
+    Yspd += 0x0020;
+    if( Yspd > PL_MAXJPSPD )
+	Yspd = PL_MAXJPSPD;
+    if( Yspd >= 0 ){
+	sccv = aP_SCCV(pl);
+	sccv += (u16)(Yspd >> 8);
+	if( sccv > 0x0150 )
+	    sccv = 0x0150;
+	aP_SCCV(pl) = sccv;
+    }
+    aP_YPOS(pl) = Ypos;
+    aP_YSPD(pl) = Yspd;
+
+    if( HeartTime ){
+	HeartTime--;
+	aP_HitTime(pl) = HeartTime;
+////////	if( !HeartTime ){
+////////	    if( play_mode == PLAY_BATL ){
+////////		MakeHeart((aP_XPOS(pl) - 0x0800), aP_YPOS(pl));
+////////	    }
+////////	}
+    }
+
+    if( Ypos < 0x00020000 )
+	return;
+#if SOUND_ON
+    m4aSongNumStart(s_b_DOBON);
+#endif
+    id = MakeEffect(EF_SPLASH, a_XPOS(pl), 0x0000C800);
+    if( id != 0xFFFF ){
+	ef = mGm_EFFECTACT(id);
+	aE_HFLIP(ef) = 1;
+    }
+    aP_HitTime(pl) = 0x64;
+    aP_MODE(pl)++;
+    if( play_mode == PLAY_CLSS ){	// クラシック？
+	return;
+    }
+////////    stamina = aP_STAMINA(pl);
+////////    if( stamina )
+////////	stamina--;
+////////    aP_STAMINA(pl) = stamina;
+////////    if( !stamina )
+////////	ScoreCoinCls(aP_TBLNO(pl));
+////////////////    LastOneCHK();
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	再登場初期設定
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	restartInit(playerDT_c *pl)
+{
+    aP_XPOS(pl) = PLXPosDT[aP_TBLNO(pl)];
+    aP_SCCH(pl) = PLInitScchDT[aP_TBLNO(pl)];
+    aP_YPOS(pl) = 0x0000B800;
+    aP_SCCV(pl) = MAX_UP_SCCV;
+    aP_XSPD(pl) = aP_YSPD(pl) = 0x00;
+    aP_HFLIP(pl) = 0;
+    aP_slipFG(pl) = 0;
+    aP_JUMPFG(pl) = 0;
+    aP_DISPHMVFG(pl) = 0;
+    aP_MODE(pl) = PL_ENTR;
+#if SOUND_ON
+    m4aSongNumStart(s_b_MR_NEXT);
+#endif
+}
+/*
+ ****************************************************************
+	ダウンＷＡＩＴ処理
+ ****************************************************************
+ */
+static	void	player_downWait(playerDT_c *pl)
+{
+    u8		HitTime = aP_HitTime(pl);
+    u8		i, PLCount, TBLNo;
+    u16		*address;
+
+    HitTime--;
+    aP_HitTime(pl) = HitTime;
+    if( !(HitTime & 0x80) )
+	return;
+    if( play_mode == PLAY_CLSS ){	// クラシック？
+	PLCount = mGm_PLCOUNT(aP_TBLNO(pl));
+	mGm_SCORECALC = 1;
+	if( PLCount ){
+	    if( mGm_ENMYCNT ){			// 敵、全滅してる？
+		restartInit(pl);
+		TBLNo = aP_TBLNO(pl);
+		if( mGm_PLCOUNT(TBLNo) > 99 )
+		    mGm_PLCOUNT(TBLNo) = 99;
+		aP_ANIMEIDX(pl) = 0;
+	    } else {
+		aP_MODE(pl) = PL_STOP;
+		if( !mGm_DEADORDER(0) ){
+		    for( i = 0; i <= mGm_PLTYPE; i++ ){
+			if( aP_MODE(mGm_PLAYER(i)) != PL_STOP )
+			    return;
+		    }
+		    mGm_GMMODE = GMPL_COSCL;
+		}
+	    }
+	} else {
+	    aP_BucketINFG(pl) = 1;		// プレイヤー表示ＯＦＦ
+	    aP_TIMER(pl) = 0;
+	    aP_GameOverSLCT(pl) = 0;
+	    TBLNo = aP_TBLNO(pl);
+	    for( i = 0; i < MAX_PLAYER; i++ ){
+		if( !mGm_DEADORDER(i) ){
+		    mGm_DEADORDER(i) = TBLNo + 1;
+		    break;
+		}
+	    }
+	    if( mGm_CEDIT ){
+		aP_MODE(pl) = PL_GAMEOVER;
+		aP_STAMINA(pl) = 0;
+		aP_ANIMETM(pl) = MAX_GAMEOVER_WAIT_TM;
+#if SOUND_ON
+		if( TBLNo == mGm_AGBNO ){
+		    m4aSongNumStart(s_b_lose1);
+		    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 100);
+		}
+#endif
+	    } else {
+		mGm_PLCOUNT(TBLNo) = 0;
+		mGm_CLASSICOUT |= WinBitDT[TBLNo];
+		aP_STAMINA(pl) = 0;
+		aP_TIMER(pl) = 0;
+		aP_MODE(pl) = PL_ALLGAMEOVER;
+		aP_BattleLoseFG(pl) = 1;
+		mGm_DEADORDER(0) = mGm_DEADORDER(1);
+		mGm_DEADORDER(1) = mGm_DEADORDER(2);
+		mGm_DEADORDER(2) = mGm_DEADORDER(3);
+		mGm_DEADORDER(3) = 0;
+		MoToColorReset(TBLNo);
+#if SOUND_ON
+		if( TBLNo == mGm_AGBNO )
+		    m4aSongNumStart(s_b_GAMEOVER);
+#endif
+	    }
+	    mGm_GMMODE = GMPL_GMOVR;		// ゲームオーバー処理へ
+	}
+    } else {
+	aP_MODE(pl) = PL_LOSEDEMO;
+	aP_GMOV_X(pl) = MaKe_XPOS + ((s32)aP_SCCH(pl) << 8);
+	aP_GMOV_Y(pl) = MaKe_START_YPOS + ((s32)aP_SCCV(pl) << 8);
+	aP_XSPD(pl) = 0;
+	aP_YSPD(pl) = -0x00000480;
+	if( aP_CoinReach(pl) ){
+	    address = ScoreCoinBGAddress[aP_TBLNO(pl)];
+	    for( i = 0; i < 4; i++ ){
+		*address = 0x513E;
+		address++;
+	    }
+	}
+////////	aP_BattleLoseFG(pl) = 1;
+    }
+    MoToColorReset(aP_TBLNO(pl));
+////////    aP_FLASHID(pl) = 1;
+////////    BigJumpFlashing(pl);
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	台オブジェセット
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+void	DaIOamSet(s32 Xpos, s32 Ypos, u16 chrNO)
+{
+    commonDT_c	data;
+
+    data.Xpos = Xpos;
+    data.Ypos = Ypos;
+    data.HFlip = 0x00;
+    data.VFlip = 0x00;
+    data.Pltt = 0x08;
+    data.chrNO = chrNO;
+    data.Pri = 0x01;
+    data.ObjMode = ST_OAM_OBJ_NORMAL;
+    data.Shape = ST_OAM_H_RECTANGLE;
+    data.Size = 0x00;
+//    OamOtherSet(&data);
+    mGm_OamOtherSet(&data);
+}
+/*
+ ****************************************************************
+	登場処理
+ ****************************************************************
+ */
+static	void	player_entrance(playerDT_c *pl)
+{
+    s32		Xpos = aP_XPOS(pl) >> 8;
+    s32		Ypos = aP_YPOS(pl);
+    u8		i;
+
+    if( !mGm_ENMYCNT ){
+	aP_MODE(pl) = PL_STOP;
+	if( !mGm_DEADORDER(0) )
+	    mGm_GMMODE = GMPL_COSCL;
+	return;
+    }
+
+    Ypos += 0x0080;
+    aP_YPOS(pl) = Ypos;
+
+////////    if( mGm_HSCROLL1 > 0x0129 ){
+////////	if( Xpos < 0x00000100 )
+////////	    Xpos += 0x00000200;
+////////    }
+    Xpos -= ((s32)mGm_HSCROLL1);
+    DaIOamSet(Xpos,
+	      (((Ypos >> 8) + 0x20) - (s32)mGm_VSCROLL1),
+	      DaI_data[0]);
+
+    if( Ypos < 0x000F800 )
+	return;
+
+    aP_ShrinkTM(pl) = aP_ANIMEIDX(pl) = aP_ANIMETM(pl) = aP_HITFG(pl) = 0;
+    SizeChange(pl, 0);
+    aP_MODE(pl) = PL_RESTART;
+////////    if( !mGm_WINNERFG )
+////////	return;
+
+////////    if( play_mode == PLAY_BATL ){	// バトル？
+////////	for( i = 0; i < MAX_PLAYER; i++ ){
+////////	    pl = mGm_PLAYER(i);
+////////	    if( aP_MODE(pl) != PL_NOT ){
+////////		aP_MODE(pl) = PL_END;
+////////	    }
+////////	}
+////////    }
+////////    mGm_ENMYSTOPFG = 1;
+}
+/*
+ ****************************************************************
+	再スタート処理
+ ****************************************************************
+ */
+static	void	player_restart(playerDT_c *pl)
+{
+    u8		index = aP_ANIMEIDX(pl);
+    u8		time = aP_ANIMETM(pl);
+    u16		TrgKey = mGm_TRG;
+    s32		Xpos = aP_XPOS(pl) >> 8;
+    s32		Xspd;
+
+    if( !mGm_ENMYCNT ){
+	aP_MODE(pl) = PL_STOP;
+	if( !mGm_DEADORDER(0) )
+	    mGm_GMMODE = GMPL_COSCL;
+	return;
+    }
+
+////////    if( mGm_HSCROLL1 > 0x0109 ){
+////////	if( Xpos < 0x00000100 )
+////////	    Xpos += 0x00000200;
+////////    }
+    Xpos -= ((s32)mGm_HSCROLL1);
+    DaIOamSet(Xpos,
+	      (((aP_YPOS(pl) >> 8) + 0x20) - (s32)mGm_VSCROLL1),
+	      DaI_data[index]);
+
+    if( (TrgKey & (A_BUTTON | L_KEY | R_KEY)) ){
+	time = PL_RESTART_TM;
+	index = PL_RESTART_IDX;
+    }
+
+    time++;
+    aP_ANIMETM(pl) = time;
+    if( time < PL_RESTART_TM )
+	return;
+    aP_ANIMETM(pl) = 0;
+    index++;
+    aP_ANIMEIDX(pl) = index;
+    if( index < PL_RESTART_IDX )
+	return;
+
+    if( TrgKey == A_BUTTON ){
+	aP_YSPD(pl) = -PL_JPSPD;
+#if SOUND_ON
+	m4aSongNumStart(s_b_JUMP);
+#endif
+    }
+    Xspd = 0;
+    if( TrgKey == L_KEY ){
+	Xspd = -PL_MAXSPDX;
+	aP_HFLIP(pl) = 0;
+    }
+    if( TrgKey == R_KEY ){
+	Xspd = PL_MAXSPDX;
+	aP_HFLIP(pl) = 1;
+    }
+    aP_XSPD(pl) = Xspd;
+    aP_JUMPFG(pl) = 1;
+    aP_BIGJUMPFG(pl) = 0;
+    aP_ANIMEIDX(pl) = aP_ANIMETM(pl) = 0;
+    aP_MODE(pl) = PL_MOVE;
+}
+/*
+ ****************************************************************
+	大マリオへの変身処理
+ ****************************************************************
+ */
+static	void	player_ChengeBig(playerDT_c *pl)
+{
+    u8		BigData[6] = {0x011, 0x012, 0x011, 0x012, 0x011, 0x012};
+    u8		BigCHGTM = aP_BigCHGTM(pl);
+
+    BigJumpFlashing(pl);
+    BigCHGTM++;
+    aP_CHRNO(pl) = BigData[(BigCHGTM >> 2)];
+    aP_BigCHGTM(pl) = BigCHGTM;
+    if( BigCHGTM < 24)
+	return;
+
+    SizeChange(pl, 0);
+    aP_HITFG(pl) = 0;
+    aP_BigCHGTM(pl) = 0;
+    aP_MODE(pl) = aP_BackUpMode(pl);
+////////    aP_RevivalTM(pl) = 0x7F;		// 変身無敵タイマーセット
+}
+/*
+ ****************************************************************
+	チビマリオへの変身処理
+ ****************************************************************
+ */
+static	void	player_ChengeSmall(playerDT_c *pl)
+{
+    u8		BigData[6] = {0x011, 0x012, 0x011, 0x012, 0x011, 0x012};
+    u8		BigCHGTM = aP_BigCHGTM(pl);
+    u8		stamina;
+
+    BigCHGTM++;
+    aP_CHRNO(pl) = BigData[(BigCHGTM >> 2)];
+    aP_BigCHGTM(pl) = BigCHGTM;
+    if( BigCHGTM < 24)
+	return;
+
+    stamina = aP_STAMINA(pl);
+    stamina--;
+    if( !stamina )
+	stamina = SMALL_STAMINA;
+    aP_STAMINA(pl) = stamina;
+    SizeChange(pl, 0);
+    aP_HITFG(pl) = 0;
+    aP_BigCHGTM(pl) = 0;
+    aP_MODE(pl) = aP_BackUpMode(pl);
+    aP_FLASHID(pl) = 1;
+    BigJumpFlashing(pl);
+    aP_RevivalTM(pl) = 0x0FF;		// 変身無敵タイマーセット
+}
+/*
+ ****************************************************************
+	昇天デモ
+ ****************************************************************
+ */
+static	void	player_Ascension(playerDT_c *pl)
+{
+    u8		MuKi = aP_DIREC(pl);
+    u16		time = aP_AscensionTM(pl);
+    s32		Xspd = aP_XSPD(pl);
+
+    aP_XPOS(pl) += Xspd;
+    aP_YPOS(pl) += aP_YSPD(pl);
+    if( MuKi ){
+	Xspd -= 0x008;
+	if( Xspd <= -ASCENSION_XSPD ){
+	    Xspd = -ASCENSION_XSPD;
+	    MuKi = 0;
+	}
+    } else {
+	Xspd += 0x008;
+	if( Xspd >= ASCENSION_XSPD ){
+	    Xspd = ASCENSION_XSPD;
+	    MuKi = 1;
+	}
+    }
+    aP_DIREC(pl) = MuKi;
+    aP_XSPD(pl) = Xspd;
+
+    time++;
+    aP_AscensionTM(pl) = time;
+    if( time < (60 * 3) )
+	return;
+    aP_AscensionTM(pl) = 0;
+    restartInit(pl);
+    aP_FLASHID(pl) = 1;
+    BigJumpFlashing(pl);
+}
+/*
+ ****************************************************************
+	ＳＴＯＰ処理
+ ****************************************************************
+ */
+static	void	player_stop(playerDT_c *pl)
+{
+    if( aP_MuTeKiTM(pl) )
+	MuTeKiFlashing(pl);
+    if( aP_ThrowTM(pl) )
+	aP_ThrowTM(pl) = 0;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	負けて暇だからせめて画面だけでも動かす処理
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	LoseScroll(playerDT_c *pl)
+{
+    u16		ContKey, sccv, scch;
+    s32		Xpos, Ypos;
+
+    ContKey = mGm_CONT;
+    if( (ContKey & (U_KEY | D_KEY | L_KEY | R_KEY)) ){
+	Xpos = aP_XPOS(pl);
+	Ypos = aP_YPOS(pl);
+	scch = aP_SCCH(pl);
+	sccv = aP_SCCV(pl);
+	if( (ContKey & U_KEY) ){
+	    sccv -= 0x02;
+	    if( sccv < MAX_UP_SCCV ){
+		sccv = MAX_UP_SCCV;
+	    } else {
+		Ypos -= 0x00000200;
+	    }
+	}
+	if( (ContKey & D_KEY) ){
+	    sccv += 0x02;
+	    if( sccv > 0x150 ){
+		sccv = 0x150;
+	    } else {
+		Ypos += 0x00000200;
+	    }
+	}
+	aP_YPOS(pl) = Ypos;
+	aP_SCCV(pl) = sccv;
+	if( (ContKey & L_KEY) ){
+	    scch -= 0x02;
+	    if( scch < 0x008 ){
+		scch = 0x008;
+	    } else {
+		Xpos -= 0x00000200;
+	    }
+	}
+	if( (ContKey & R_KEY) ){
+	    scch += 0x02;
+	    if( scch > 0x018 ){
+		scch = 0x018;
+	    } else {
+		Xpos += 0x00000200;
+	    }
+	}
+	aP_XPOS(pl) = Xpos;
+	aP_SCCH(pl) = scch;
+    }
+}
+/*
+ ****************************************************************
+	勝敗が決定した後処理
+ ****************************************************************
+ */
+static	void	player_end(playerDT_c *pl)
+{
+    u8		bg, CmpData, i;
+    s16		Xpos;
+    s32		Ypos, Xspd, Yspd;
+    u8		(*bgbufCheck)(s16, s16);
+    playerDT_c	*chk_pl;
+
+    if( !aP_STAMINA(pl) )
+	return;
+
+    if( mGm_WINNERFG == WinBitDT[aP_TBLNO(pl)] ){
+////////	MoToColorReset(aP_TBLNO(pl));
+	aP_VFLIP(pl) = 0;
+	for( i = 0; i <= mGm_PLTYPE; i++ ){
+	    chk_pl = mGm_PLAYER(i);
+	    if( aP_STAMINA(chk_pl) ){
+		MoToColorReset(aP_TBLNO(chk_pl));
+		aP_BucketINFG(chk_pl) = 0;	// プレイヤーを必ず表示する
+		aP_RevivalTM(chk_pl) = 0;	// フラッシングタイマークリア
+	    }
+	}
+	if( !aP_JUMPFG(pl) ){
+	    aP_HFLIP(pl) = 0;
+	    aP_CHRNO(pl) = 0x18;
+	}
+	mGm_TIME = 0;
+	mGm_GMMODE = GMPL_WININIT;
+#if SOUND_ON
+	m4aSongNumStop(s_b_star_bros);
+	m4aSongNumStop(mGm_BGMNO);
+////////	m4aMPlayAllStop();
+#endif
+    }
+}
+/////////*
+//////// ****************************************************************
+////////	勝敗が決定した後処理
+//////// ****************************************************************
+//////// */
+////////static	void	player_end(playerDT_c *pl)
+////////{
+////////    u8		bg, CmpData;
+////////    s16		Xpos;
+////////    s32		Ypos, Xspd, Yspd;
+////////    u8		(*bgbufCheck)(s16, s16);
+////////
+////////    if( !aP_STAMINA(pl) )
+////////	return;
+////////
+////////    if( aP_JUMPFG(pl) ){
+////////	if( !aP_VFLIP(pl) ){
+////////	    Xspd = aP_XSPD(pl);
+////////	    Xspd = PLSpeedDownCalc(Xspd, aP_STAMINA(pl), aP_IceFG(pl));
+////////	    aP_XSPD(pl) = Xspd;
+////////	}
+////////	PlayerXcalc(pl);
+////////	Yspd = aP_YSPD(pl);
+////////	Yspd = PLJumpCalc(Yspd, mGm_CONT);
+////////	aP_YSPD(pl) = Yspd;
+////////	PlayerYcalc(pl);
+////////	Xpos = (s16)(aP_XPOS(pl) >> 8) + (s16)aP_XCENTER(pl);
+////////	Ypos = aP_YPOS(pl) + ((s32)(aP_YCENTER(pl) + aP_YSIZE(pl)) << 8);
+////////	bg = mGm_bgbuf_check(Xpos, (s16)(Ypos >> 8));
+////////	if( bg == BG_NONE )
+////////	    return;
+////////	CmpData = bg;
+////////	bgbufCheck = mGm_bgbuf_check;
+////////	while( bg == CmpData ){
+////////	    aP_YPOS(pl) -= 0x0010;
+////////	    Ypos -= 0x0010;
+////////	    bg = bgbufCheck(Xpos, (s16)(Ypos >> 8));
+////////	}
+////////	aP_VFLIP(pl) = 0;
+////////    }
+////////    if( mGm_WINNERFG == WinBitDT[aP_TBLNO(pl)] ){
+////////	MoToColorReset(aP_TBLNO(pl));
+////////	aP_HFLIP(pl) = 0;
+////////	aP_CHRNO(pl) = 0x18;
+////////	mGm_TIME = 0;
+////////	mGm_GMMODE = GMPL_WININIT;
+////////#if SOUND_ON
+////////	m4aSongNumStart(s_b_COIN5);
+////////#endif
+////////    }
+////////}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	メインタイトルへ戻る為のホワイトアウト初期設定
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	WhiteOutInit(void)
+{
+    mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+    mGm_GMMODE = GMPL_TITL;
+}
+/*
+ ****************************************************************
+	個人別ＧＡＭＥ ＯＶＥＲ表示処理
+ ****************************************************************
+ */
+static	void	player_GameOver(playerDT_c *pl)
+{
+    u8		GameOverSLCT = aP_GameOverSLCT(pl);
+    u8		TBLNo = aP_TBLNO(pl);
+    u8		KeyTM = aP_ANIMETM(pl);
+    u8		i;
+    u16		Timer = aP_TIMER(pl);
+    u16		TrgKey;
+
+    if( !mGm_CEDIT ){
+	mGm_CLASSICOUT |= WinBitDT[TBLNo];
+	aP_TIMER(pl) = 0;
+	aP_MODE(pl) = PL_ALLGAMEOVER;
+	aP_STAMINA(pl) = 0;
+	aP_BattleLoseFG(pl) = 1;
+	mGm_DEADORDER(0) = mGm_DEADORDER(1);
+	mGm_DEADORDER(1) = mGm_DEADORDER(2);
+	mGm_DEADORDER(2) = mGm_DEADORDER(3);
+	mGm_DEADORDER(3) = 0;
+	MoToColorReset(TBLNo);
+#if SOUND_ON
+	if( TBLNo == mGm_AGBNO )
+	    m4aSongNumStart(s_b_GAMEOVER);
+#endif
+	return;
+    }
+    if( Timer < CLASSIC_ONE_GMOVTM )
+	return;
+    if( mGm_DEADORDER(0) != (TBLNo + 1) )
+	return;
+
+////////    if( play_mode == PLAY_BATL ){
+////////	TrgKey = mGm_KEYBUF(TBLNo, 0);
+////////    } else {
+////////	TrgKey = mGm_TRG;
+////////    }
+    if( mGm_PLTYPE ){			// マルチゲーム？
+	TrgKey = mGm_KEYBUF(TBLNo, 0);
+    } else {
+	TrgKey = mGm_TRG;
+    }
+    if( (TrgKey & (U_KEY | D_KEY | SELECT_BUTTON)) ){
+	GameOverSLCT = (GameOverSLCT + 1) & 0x01;
+	aP_GameOverSLCT(pl) = GameOverSLCT;
+#if SOUND_ON
+	if( TBLNo == mGm_AGBNO )
+	    m4aSongNumStart(s_b_HEART_GET);
+#endif
+    }
+    KeyTM--;
+    if( KeyTM != 0 ){
+	aP_ANIMETM(pl) = KeyTM;
+	return;
+    }
+    if( (TrgKey & A_BUTTON) ){
+#if SOUND_ON
+	m4aSongNumStart(s_b_COIN_GET);
+#endif
+	if( GameOverSLCT ){
+	    mGm_PLCOUNT(TBLNo) = 0;
+	    aP_STAMINA(pl) = 0;
+	    mGm_CLASSICOUT |= WinBitDT[TBLNo];
+	    aP_TIMER(pl) = 0;
+	    aP_MODE(pl) = PL_ALLGAMEOVER;
+	    aP_BattleLoseFG(pl) = 1;
+	    MoToColorReset(TBLNo);
+#if SOUND_ON
+	    if( aP_TBLNO(pl) == mGm_AGBNO )
+		m4aSongNumStart(s_b_GAMEOVER);
+#endif
+	} else {
+	    if( mGm_ENMYCNT ){			// 敵、全滅してる？
+		restartInit(pl);
+	    } else {
+		aP_MODE(pl) = PL_STOP;
+		aP_LastKickFG(pl) = 1;
+		mGm_TIME = 100;
+	    }
+	    aP_STAMINA(pl) = SMALL_STAMINA;
+	    mGm_SCORE(TBLNo) = 0;
+	    mGm_SCORECALC = 1;
+	    mGm_PLCOUNT(TBLNo) = MAX_PLCOUNT;
+	    mGm_ONEUPSCORE(TBLNo) = 20000;
+	    mGm_CEDIT--;
+	    if( !mGm_CLASSICOUT )
+		mGm_GMMODE = GMPL_MOVE;
+	    if( mGm_DEADORDER(1) )
+		mGm_GMMODE = GMPL_GMOVR;
+////////	    if( mGm_PLTYPE ){
+////////		if( mGm_CLASSICOUT )
+////////		    mGm_GMMODE = GMPL_GMOVR;
+////////	    }
+#if SOUND_ON
+	    if( TBLNo == mGm_AGBNO )
+		m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+#endif
+	}
+	aP_ANIMETM(pl) = 0;
+	aP_BucketINFG(pl) = 0;
+	mGm_DEADORDER(0) = mGm_DEADORDER(1);
+	mGm_DEADORDER(1) = mGm_DEADORDER(2);
+	mGm_DEADORDER(2) = mGm_DEADORDER(3);
+	mGm_DEADORDER(3) = 0;
+	if( !mGm_ENMYCNT && !mGm_DEADORDER(0) )
+	    mGm_GMMODE = GMPL_COSCL;
+    }
+}
+/*
+ ****************************************************************
+	ＧＡＭＥ ＯＶＥＲ表示処理
+ ****************************************************************
+ */
+static	void	player_AllGameOver(playerDT_c *pl)
+{
+    u16		TrgKey = mGm_TRG;
+    u8		TBLNo = aP_TBLNO(pl);
+    u8		i, cnt;
+    u16		Timer = aP_TIMER(pl);
+    playerDT_c	*ChkPl;
+
+    if( !mGm_ENMYCNT ){				// 敵、全滅してる？
+	if( !mGm_DEADORDER(0) ){
+	    if( Timer <= CLASSIC_ALLGMOVTM ){	// ゲームオーバーサウンド終了？
+		Timer++;
+		aP_TIMER(pl) = Timer;
+		return;
+	    }
+	    mGm_TIME = 150;
+	    mGm_GMMODE = GMPL_COSCL;
+	    return;
+	}
+    }
+
+    for( i = cnt = 0; i <= mGm_PLTYPE; i++ ){
+	ChkPl = mGm_PLAYER(i);
+	if( aP_MODE(ChkPl) == PL_ALLGAMEOVER )
+	    cnt++;
+    }
+    if( cnt != (mGm_PLTYPE + 1) ){
+	LoseScroll(pl);
+	return;
+    }
+
+    if( Timer <= CLASSIC_ALLGMOVTM ){		// 全員ゲームオーバー？
+	Timer++;
+	aP_TIMER(pl) = Timer;
+	return;
+    }
+
+    if( mGm_PLTYPE ){
+	TrgKey = 0;
+	for( i = 0; i <= mGm_PLTYPE; i++ ){
+	    TrgKey |= mGm_KEYBUF(i, 0);
+	}
+    }
+    if( (TrgKey & (A_BUTTON | START_BUTTON)) ){
+#if SOUND_ON
+	m4aSongNumStart(s_b_COIN_GET);
+#endif
+	if( mGm_PLTYPE ){			// マルチゲーム？
+	    mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+	    mGm_GMMODE = GMPL_NEXT;
+	    mGm_COURSE = 0x0FF;		// "GMPL_NEXT"のモードで足される為
+	    mGm_ROUND = 0;
+	    mGm_CLASSICOUT = 0;
+	    mGm_CEDIT = mGm_PLTYPE + 1;
+////////	    if( GAME_CLEAR )	//ＵＳＡで７－２をクリアしてる？
+////////		mGm_CEDIT++;
+	    for( i = 0; i < MAX_PLAYER; i++ ){
+		mGm_WINCNT[i] = 0;
+		mGm_SCORE(i) = 0;
+		mGm_ONEUPSCORE(i) = 20000;
+		mGm_PLCOUNT(i) = MAX_PLCOUNT;
+		mGm_DEADORDER(i) = 0;
+	    }
+////////	    mGm_WINCNT[0] = 0;
+////////	    mGm_WINCNT[1] = 0;
+////////	    mGm_WINCNT[2] = 0;
+////////	    mGm_WINCNT[3] = 0;
+////////	    mGm_SCORE(0) = 0;
+////////	    mGm_SCORE(1) = 0;
+////////	    mGm_SCORE(2) = 0;
+////////	    mGm_SCORE(3) = 0;
+////////	    mGm_ONEUPSCORE(0) = 20000;
+////////	    mGm_ONEUPSCORE(1) = 20000;
+////////	    mGm_ONEUPSCORE(2) = 20000;
+////////	    mGm_ONEUPSCORE(3) = 20000;
+////////	    mGm_PLCOUNT(0) = MAX_PLCOUNT;
+////////	    mGm_PLCOUNT(1) = MAX_PLCOUNT;
+////////	    mGm_PLCOUNT(2) = MAX_PLCOUNT;
+////////	    mGm_PLCOUNT(3) = MAX_PLCOUNT;
+////////	    mGm_DEADORDER(0) = 0;
+////////	    mGm_DEADORDER(1) = 0;
+////////	    mGm_DEADORDER(2) = 0;
+////////	    mGm_DEADORDER(3) = 0;
+	} else {
+	    WhiteOutInit();
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	全員負けチェック
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	u8	AllLoseCHK(void)
+{
+    u8		i, cnt, mode;
+
+    for( i = 0, cnt = 0; i <= mGm_PLTYPE; i++ ){
+	mode = aP_MODE(mGm_PLAYER(i));
+	if( (mode >= PL_ALLLOSEWAIT) && (mode <= PL_LASTCHK) )
+	    cnt++;
+    }
+    return ((mGm_PLTYPE + 1) - cnt);
+}
+/*
+ ****************************************************************
+	"まけ"文字デモ処理(バトル時のみ)
+ ****************************************************************
+ */
+static	void	player_LoseDemo(playerDT_c *pl)
+{
+    s32		Ypos, Yspd;
+    u16		time = aP_TIMER(pl);
+
+    Ypos = aP_GMOV_Y(pl);
+    Yspd = aP_YSPD(pl);
+    Ypos += Yspd;
+    Yspd += 0x00000014;
+    if( Yspd < 0 ){
+	aP_YSPD(pl) = Yspd;
+	aP_GMOV_Y(pl) = Ypos;
+	return;
+    }
+    if( time < 50 ){
+	time++;
+	aP_TIMER(pl) = time;
+#if SOUND_ON
+	if( time == 50 )
+	    m4aSongNumStart(s_b_KUPPA_DEAD);
+#endif
+	return;
+    }
+
+    aP_YSPD(pl) = Yspd;
+    aP_GMOV_Y(pl) = Ypos;
+    if( Ypos < (0x0000B000 + ((s32)aP_SCCV(pl) << 8)) )
+	return;
+    aP_TIMER(pl) = 0;
+    aP_GMOV_Y(pl) = MaKe_YPOS + ((s32)aP_SCCV(pl) << 8);
+    aP_YSPD(pl) = 0;
+    aP_STAMINA(pl) = 0;
+////////    aP_BattleLoseFG(pl) = 1;
+    aP_MODE(pl) = PL_ALLLOSEWAIT;
+////////    ScoreCoinCls(aP_TBLNO(pl));
+}
+/*
+ ****************************************************************
+	全員負け待ち処理(バトル時のみ)
+ ****************************************************************
+ */
+static	void	player_AllLoseWait(playerDT_c *pl)
+{
+    u8		i, cnt, mode;
+    u8		TBLNo = aP_TBLNO(pl);
+    playerDT_c	*last_pl;
+
+    aP_BattleLoseFG(pl) = 1;
+    cnt = AllLoseCHK();
+    mode = 0;
+    last_pl = NULL;
+    if( !cnt ){
+	mGm_GMMODE = GMPL_WININIT;
+	mGm_TIME = 0;
+	mGm_WINNERFG = 0;
+	mGm_ENMYSTOPFG = 1;
+#if SOUND_ON
+	m4aSongNumStop(s_b_star_bros);
+	m4aSongNumStop(mGm_BGMNO);
+////////	m4aMPlayAllStop();
+#endif
+    } else {
+	LoseScroll(pl);
+	if( cnt != 1 )			// 残り一人になった？
+	    return;			//	NO --> return
+	for( i = 0; i <= mGm_PLTYPE; i++ ){
+	    last_pl = mGm_PLAYER(i);
+	    mode = aP_MODE(last_pl);
+	    if( !((mode >= PL_ALLLOSEWAIT) && (mode <= PL_LASTCHK)) )
+		break;
+	}
+	if( aP_JUMPFG(last_pl) )
+	    return;
+	if( (mode >= PL_ENHIT) )
+	    return;
+	aP_LoseSelectFG(pl) = 0;		// 生き残ったプレイヤー再始動
+////////	aP_COINCOUNT(last_pl) = 5;
+	aP_LoseSelectFG(last_pl) = 0;		// 生き残ったプレイヤー再始動
+	aP_BattleLoseFG(last_pl) = 0;
+	aP_GMOV_X(last_pl) = SELECT_XPOS + ((s32)aP_SCCH(last_pl) << 8);
+	aP_GMOV_Y(last_pl) = MaKe_YPOS + ((s32)aP_SCCV(last_pl) << 8);
+	WinCountDisp();
+////////	mGm_GMMODE = GMPL_WININIT;
+	aP_MODE(last_pl) = PL_END;
+	mGm_TIME = 0;
+	mGm_WINNERFG = WinBitDT[aP_TBLNO(last_pl)];
+#if SOUND_ON
+	m4aSongNumStop(s_b_star_bros);
+	m4aSongNumStop(mGm_BGMNO);
+////////	m4aMPlayAllStop();
+#endif
+    }
+}
+/////////*
+//////// ****************************************************************
+////////	全員負け待ち処理(バトル時のみ)
+//////// ****************************************************************
+//////// */
+////////static	void	player_AllLoseWait(playerDT_c *pl)
+////////{
+////////    u8		i, cnt, mode;
+////////    u8		TBLNo = aP_TBLNO(pl);
+////////    playerDT_c	*last_pl;
+////////
+////////    cnt = AllLoseCHK();
+////////    if( !cnt ){
+////////	mGm_GMMODE = GMPL_WININIT;
+////////	mGm_TIME = 0;
+////////	mGm_WINNERFG = 0;
+////////    } else {
+////////	LoseScroll(pl);
+////////	if( cnt != 1 )			// 残り一人になった？
+////////	    return;			//	NO --> return
+////////	for( i = 0; i <= mGm_PLTYPE; i++ ){
+////////	    last_pl = mGm_PLAYER(i);
+////////	    mode = aP_MODE(last_pl);
+////////	    if( !((mode >= PL_ALLLOSEWAIT) && (mode <= PL_LASTCHK)) )
+////////		break;
+////////	}
+////////	if( aP_JUMPFG(last_pl) )
+////////	    return;
+////////	if( (mode >= PL_ENHIT) )
+////////	    return;
+////////#if SOUND_ON
+////////	if( TBLNo == mGm_AGBNO ){
+////////	    m4aSongNumStart(s_b_HEART);
+////////	    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 100);
+////////	}
+////////#endif
+////////	aP_TIMER(pl) = 0;
+////////	aP_BattleLoseFG(pl) = 2;	// 選択画面に切り替え
+////////	aP_GMOV_X(pl) -= 0x00002800;
+////////	aP_LastPlayer(pl) = last_pl;	// 注意！生き残りプレイヤーポインタ登録
+////////	aP_MODE(pl) = PL_ACCEPT;
+////////	mGm_AcceptLose = 0;
+////////	aP_BucketINFG(last_pl) = 0;	// プレイヤーを必ず表示する
+////////	aP_LoseSelectFG(last_pl) = 1;	// 残った奴を止める！
+////////	aP_GMOV_X(last_pl) = SELECT_XPOS + ((s32)aP_SCCH(last_pl) << 8);
+////////	aP_GMOV_Y(last_pl) = MaKe_YPOS + ((s32)aP_SCCV(last_pl) << 8);
+////////	aP_BattleLoseFG(last_pl) = 2;
+////////	mGm_ENMYSTOPFG = 1;		// 敵ストップ！
+////////    }
+////////}
+/*
+ ****************************************************************
+	負けを認め待ち処理(バトル時のみ)
+ ****************************************************************
+ */
+static	void	player_accept(playerDT_c *pl)
+{
+////////    u8		i, GameOverSLCT;
+////////    u8		TBLNo = aP_TBLNO(pl);
+////////    u16		TrgKey;
+////////
+////////    TrgKey = mGm_KEYBUF(TBLNo, 0);
+////////    GameOverSLCT = aP_GameOverSLCT(pl);
+////////    if( (TrgKey & (U_KEY | D_KEY)) ){
+////////	GameOverSLCT = (GameOverSLCT + 1) & 0x01;
+////////#if SOUND_ON
+////////	if( TBLNo == mGm_AGBNO )
+////////	    m4aSongNumStart(s_b_HEART_GET);
+////////#endif
+////////    }
+////////    aP_GameOverSLCT(pl) = GameOverSLCT;
+////////	
+////////    if( !(TrgKey & A_BUTTON) )
+////////	return;
+////////
+////////    aP_MODE(pl) = PL_SLCTLOSE;
+////////    aP_LoseSelectFG(pl) = 2;		// 選択肢だけを消す
+////////    if( !GameOverSLCT )			// 負けを認めた？
+////////	mGm_AcceptLose++;
+////////#if SOUND_ON
+////////    if( TBLNo == mGm_AGBNO ){
+////////	if( GameOverSLCT )
+////////	    m4aSongNumStart(s_b_BUU);
+////////	else
+////////	    m4aSongNumStart(s_b_PINPON);
+////////    }
+////////#endif
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	"はい"and"いいえ"答え表示
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	void	AnswerDisp(playerDT_c *pl)
+////////{
+////////    commonDT_c	data;
+////////    const	u16	AnsXposDT[4] = { 0x0010, 0x00C8, 0x0048, 0x0090 };
+////////
+////////    data.Xpos = AnsXposDT[aP_TBLNO(pl)];
+////////    data.Ypos = 0x084;
+////////    data.HFlip = 0x00;
+////////    data.VFlip = 0x00;
+////////    data.Pltt = 0x09;
+////////    data.Pri = 0x00;
+////////    data.ObjMode = ST_OAM_OBJ_NORMAL;
+////////    data.Shape = ST_OAM_SQUARE;
+////////    data.Size = 0x00;
+////////    if( aP_GameOverSLCT(pl) ){
+////////	/**** "いいえ" ****/
+////////	data.chrNO = 0x0152;
+////////	mGm_OamOtherSet(&data);
+////////	data.Xpos += 0x08;
+////////	data.chrNO = 0x0152;
+////////	mGm_OamOtherSet(&data);
+////////	data.Xpos += 0x08;
+////////	data.chrNO = 0x0208;
+////////	mGm_OamOtherSet(&data);
+////////    } else {
+////////	/**** "はい" ****/
+////////	data.Xpos += 0x04;
+////////	data.chrNO = 0x0210;
+////////	mGm_OamOtherSet(&data);
+////////	data.Xpos += 0x08;
+////////	data.chrNO = 0x0152;
+////////	mGm_OamOtherSet(&data);
+////////    }
+////////}
+/*
+ ****************************************************************
+	負けた奴全員の選択待ち処理(バトル時のみ)
+ ****************************************************************
+ */
+static	void	player_SelectLose(playerDT_c *pl)
+{
+////////    u8		i, cnt, mode;
+////////    u8		TBLNo = aP_TBLNO(pl);
+////////    playerDT_c	*last_pl = (playerDT_c *)aP_LastPlayer(pl);
+////////
+////////    AnswerDisp(pl);
+////////
+////////    LoseScroll(pl);
+////////    TBLNo = aP_TBLNO(last_pl);
+////////    for( i = cnt = 0; i <= mGm_PLTYPE; i++ ){
+////////	mode = aP_MODE(mGm_PLAYER(i));
+////////	if( (mode == PL_SLCTLOSE) || (mode == PL_SLCTOUT) )
+////////	    cnt++;
+////////    }
+////////    if( cnt != mGm_PLTYPE )
+////////	return;
+////////    if( mGm_AcceptLose == mGm_PLTYPE ){		// 全員負けを認めた？
+////////	aP_LoseSelectFG(pl) = 0;		// 生き残ったプレイヤー再始動
+////////	aP_COINCOUNT(last_pl) = 5;
+////////	aP_LoseSelectFG(last_pl) = 0;		// 生き残ったプレイヤー再始動
+////////	aP_BattleLoseFG(last_pl) = 0;
+////////	WinCountDisp();
+////////#if SOUND_ON
+////////	m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+////////#endif
+////////    } else {
+////////	aP_YSPD(pl) = 0;
+////////	aP_MODE(pl) = PL_SLCTOUT;
+////////	aP_GMOV_YSPD(pl) = 0;
+////////	aP_GMOV_YSPD(last_pl) = 0;
+////////	aP_LoseSelectFG(last_pl) = 3;
+////////#if SOUND_ON
+////////	m4aSongNumStart(s_b_BATTLE_DEAD);
+////////#endif
+////////    }
+}
+/*
+ ****************************************************************
+	選択文退場デモ
+ ****************************************************************
+ */
+static	void	player_SelectOUT(playerDT_c *pl)
+{
+////////    playerDT_c	*last_pl;
+////////
+////////    AnswerDisp(pl);
+////////    if( aP_GMOV_Y(pl) < (0x0000B000 + ((s32)aP_SCCV(pl) << 8)) )
+////////	return;
+////////
+////////    last_pl = (playerDT_c *)aP_LastPlayer(pl);
+////////    aP_LoseSelectFG(pl) = 0;		// 生き残ったプレイヤー再始動
+////////    aP_LoseSelectFG(last_pl) = 0;	// 生き残ったプレイヤー再始動
+////////    aP_BattleLoseFG(last_pl) = 0;
+////////    aP_YSPD(pl) = 0;
+////////    aP_BattleLoseFG(pl) = 1;		// "まけ"文字を再表示
+////////    aP_GMOV_X(pl) = MaKe_XPOS + ((s32)aP_SCCH(pl) << 8);
+////////    aP_GMOV_Y(pl) = MaKe_YPOS + ((s32)aP_SCCV(pl) << 8);
+////////    aP_MODE(pl) = PL_LASTCHK;
+////////    mGm_ENMYSTOPFG = 0;
+////////#if SOUND_ON
+////////    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+////////#endif
+}
+/*
+ ****************************************************************
+	最後の一人が死ぬかコイン５枚取るまで待つ処理(バトル時のみ)
+ ****************************************************************
+ */
+static	void	player_LastCheck(playerDT_c *pl)
+{
+////////    u8		cnt;
+////////
+////////    cnt = AllLoseCHK();
+////////    if( !cnt ){
+////////	mGm_GMMODE = GMPL_WININIT;
+////////	mGm_TIME = 0;
+////////	mGm_WINNERFG = 0;
+////////    } else {
+////////	LoseScroll(pl);
+////////    }
+}
+/*
+ ****************************************************************
+	アニメーション処理
+ ****************************************************************
+ */
+static	void	player_anime(playerDT_c *pl)
+{
+    u8		BigJumpTM, BigJumpIDX, ScoreTM, Walk_MAX_TM;
+    u8		stamina = aP_STAMINA(pl);
+    u8		index = aP_ANIMEIDX(pl);
+    u8		time = aP_ANIMETM(pl);
+    u8		mode = aP_MODE(pl);
+    u8		HandsUpFG = aP_HandsUpFG(pl);
+    u8		VFlip = aP_VFLIP(pl);
+    u8		BucketINFG = aP_BucketINFG(pl);
+    u16		RevivalTM = aP_RevivalTM(pl);
+////////    s32		Yspd;
+
+    /******** 連続蹴りタイマーカウントダウン ********/
+    ScoreTM = aP_ScoreTM(pl);
+    if( ScoreTM )
+	ScoreTM--;
+    aP_ScoreTM(pl) = ScoreTM;
+
+    /******** 復活後の無敵タイマーカウントダウン ********/
+    aP_SafetyFG(pl) = 0;
+    if( RevivalTM ){
+	RevivalTM--;
+	aP_RevivalTM(pl) = RevivalTM;
+	aP_SafetyFG(pl) = 1;
+	BucketINFG = 0;
+	if( (RevivalTM & MuTeKiFlashDT[(RevivalTM >> 4)]) )
+	    BucketINFG = 1;
+    } else {
+	if( BucketINFG )
+	    BucketINFG = 0;
+    }
+    aP_BucketINFG(pl) = BucketINFG;
+
+    /******** アニメーション無し ********/
+    if( mode >= PL_NOMOVE )
+	return;
+
+    /******** 死にデモ ********/
+    if( mode == PL_RESTART ){
+	aP_CHRNO(pl) = 0x1D;
+	return;
+    }
+    if( mode >= PL_ENHIT ){
+	index = (u8)(mode - PL_ENHIT);
+	aP_CHRNO(pl) = DownAnimeDT[index];
+	if( mode == PL_ASCENSION )	// 昇天？
+	    aP_CHRNO(pl) = 0x06;
+	return;
+    }
+
+    /******** 投げ ********/
+    if( aP_ThrowTM(pl) ){
+	aP_ThrowTM(pl)--;
+	aP_CHRNO(pl) = 0x0A;
+	return;
+    }
+
+    /******** しゃがみ ********/
+    if( mode == PL_SQUAT ){
+	aP_CHRNO(pl) = 0x0B;
+	if( HandsUpFG ){
+	    aP_CHRNO(pl) = 0x09;
+	}
+	return;
+    }
+
+    /******** 縮む ********/
+    if( mode == PL_SHRINK ){
+	aP_CHRNO(pl) = 0x13;
+	if( HandsUpFG ){
+	    aP_CHRNO(pl) = 0x09;
+	}
+	return;
+    }
+
+    /******** 持ち上げ ********/
+    if( (mode == PL_HANDSUP) || (mode == PL_POWHANDSUP) ){
+	time++;
+	if( time >= 0x04 ){
+	    time = 0;
+	    index++;
+	}
+	aP_ANIMEIDX(pl) = index;
+	aP_ANIMETM(pl) = time;
+	aP_CHRNO(pl) = HandUpDT[index];
+	return;
+    }
+
+    /******** 持ち上げられる ********/
+    if( mode == PL_HANDSUP2 ){
+	aP_CHRNO(pl) = 0x13;
+	if( !VFlip )	// 持ち上げられている最中？
+	    return;	//	yes --> return
+    }
+
+    /******** キック ********/
+    if( aP_KickTime(pl) ){
+	aP_KickTime(pl)--;
+	aP_CHRNO(pl) = 0x00;
+	return;
+    }
+
+    /******** ジャンプ ********/
+    if( aP_JUMPFG(pl) && (aP_BucketON(pl) == NULL) ){
+	if( !VFlip ){
+	    if( aP_JUMPFG(pl) == 2 ){
+		BigJumpIDX = aP_BigJumpIDX(pl);
+		BigJumpTM = aP_BigJumpTM(pl);
+		BigJumpTM++;
+		if( BigJumpTM >= 4 ){
+		    BigJumpTM = 0;
+		    if( BigJumpIDX < 5 )
+			BigJumpIDX++;
+		}
+		aP_BigJumpTM(pl) = BigJumpTM;
+		aP_BigJumpIDX(pl) = BigJumpIDX;
+		aP_CHRNO(pl) = BigJumpAnimeDT[BigJumpIDX];
+		return;
+	    } else {
+		aP_CHRNO(pl) = 0x0E;
+		if( HandsUpFG )
+		    aP_CHRNO(pl) = 0x03;
+		return;
+	    }
+	}
+    }
+
+    /******** ＰＯＷジャンプされ中 ********/
+    if( aP_QuakeTM(pl) ){
+	aP_CHRNO(pl) = 0x13;
+	return;
+    }
+
+    /******** スリップ ********/
+    if( aP_slipFG(pl) ){
+	if( !HandsUpFG ){
+	    aP_CHRNO(pl) = 0x0D;
+	    return;
+	}
+    }
+
+    /******** 氷の上での滑り ********/
+    if( aP_IceFG(pl) ){
+	if( !(mGm_CONT & (L_KEY | R_KEY)) ){
+	    if( HandsUpFG ){
+		aP_CHRNO(pl) = 0x05;
+	    } else {
+		aP_CHRNO(pl) = 0x02;
+	    }
+	    return;
+	}
+    }
+
+    aP_CHRNO(pl) = 0x02;
+    if( (HandsUpFG) && !VFlip ){
+	aP_CHRNO(pl) = 0x05;
+    }
+    if( !aP_XSPD(pl) && !aP_RepulsionFG(pl) ){
+	if( !(mGm_CONT & (L_KEY | R_KEY)) )
+	    return;
+    }
+
+    if( HandsUpFG && !VFlip ){
+	aP_CHRNO(pl) = HandsUpWalkAnimeDT[index];
+    } else {
+	aP_CHRNO(pl) = WalkAnimeDT[index];
+	if( VFlip ){
+	    aP_CHRNO(pl) = VFlipWalkAnimeDT[index];
+	}
+    }
+    if( (mGm_CONT & (B_BUTTON | R_BUTTON)) )
+	Walk_MAX_TM = 0x02;
+    else
+	Walk_MAX_TM = 0x04;
+    time++;
+    if( time >= Walk_MAX_TM ){
+	time = 0;
+	index++;
+	if( index >= sizeof(WalkAnimeDT) )
+	    index = 0;
+    }
+    aP_ANIMEIDX(pl) = index;
+    aP_ANIMETM(pl) = time;
+#if SOUND_ON
+    time = aP_WalkTM(pl);
+    time++;
+    if( time >= 0x0A ){
+	time = 0;
+	index = aP_WalkIDX(pl);
+	m4aSongNumStart(WalkSoundDT[index]);
+	index = (index + 1) & 0x07;
+	aP_WalkIDX(pl) = index;
+    }
+    aP_WalkTM(pl) = time;
+#endif
+}
+/*
+ ****************************************************************
+	メニュー配列
+ ****************************************************************
+ */
+static	void	(*player_menu[])(playerDT_c *pl) = {
+    player_init,		// イニシャル処理
+    player_move,		// プレイヤー移動ＭＡＩＮ処理
+    player_squat,		// しゃがみ処理
+    player_shrink,		// 縮む処理
+    player_HandsUp,		// プレイヤー持ち上げ処理
+    player_restart,		// 再スタート処理
+    player_PowHandsUp,		// ＰＯＷ持ち上げ処理
+    player_HandsUp2,		// プレイヤー持ち上げられ処理
+    player_enemyHit,		// 敵に当った処理
+    player_down,		// ダウン処理
+    player_downWait,		// ダウンＷＡＩＴ処理
+    player_entrance,		// 登場処理
+    player_Ascension,		// 昇天デモ
+    player_stop,		// 動かない
+    player_ChengeBig,		// 大マリオへの変身処理
+    player_ChengeSmall,		// チビマリオへの変身処理
+    player_stop,		// ＳＴＯＰ処理
+    player_end,			// 勝敗が決定した後処理
+    player_GameOver,		// 個人別ＧＡＭＥ ＯＶＥＲ表示処理
+    player_AllGameOver,		// ＧＡＭＥ ＯＶＥＲ表示処理
+    player_LoseDemo,		// "まけ"文字デモ処理(バトル時のみ)
+    player_AllLoseWait,		// 全員負け待ち処理(バトル時のみ)
+    player_accept,		// 負けを認め待ち処理(バトル時のみ)
+    player_SelectLose,		// 負けた奴全員の選択待ち処理(バトル時のみ)
+    player_SelectOUT,		// 選択文退場デモ
+    player_LastCheck,		// 最後の一人が死ぬかコイン５枚取るまで待つ処理
+};
+/*
+ ****************************************************************
+	キー操作による画面上下移動
+ ****************************************************************
+ */
+static	u16	KeyDispMV(s32 Ypos, u16 sccv, playerDT_c *pl)
+{
+    u8		LookSccvFG = aP_LookSccvFG(pl);
+    u16		TrgKey = mGm_TRG;
+
+    if( mGm_QUAKEFG )			// 地震中？
+	return sccv;
+    if( aP_BIGJUMPFG(pl) )		// 大ジャンプフラッシング中？
+	return sccv;
+    if( aP_JUMPFG(pl) )			// ジャンプ中？
+	return sccv;
+    if( aP_MODE(pl) >= PL_RESTART )
+	return sccv;
+////////    if( (sccv <= 0x00F0) || (sccv >= 0x0150) )
+////////	return sccv;
+    if( mGm_PLTYPE ){			// マルチプレイ？
+	TrgKey = mGm_KEYBUF(mGm_AGBNO,0);
+    }
+    if( !(TrgKey & L_BUTTON) ){
+	if( !LookSccvFG )
+	    return sccv;
+    } else {
+	LookSccvFG++;
+	if( LookSccvFG >= 3 )
+	    LookSccvFG = 1;
+	aP_LookSccvFG(pl) = LookSccvFG;
+	if( ((Ypos >> 8) - sccv) >= DISPLOWPOS ){
+	    if( sccv >= 0x0150 )
+		return sccv;
+	}
+	if( ((Ypos >> 8) - sccv) <= DISPHIGHPOS ){
+	    if( sccv <= MAX_UP_SCCV )
+		return sccv;
+	}
+#if SOUND_ON
+	m4aSongNumStart(s_b_SHIFT);
+#endif
+    }
+
+    if( LookSccvFG == 1 ){
+	if( sccv > MAX_UP_SCCV ){
+	    if( ((Ypos >> 8) - sccv) < DISPLOWPOS )
+		sccv -= 0x02;
+	}
+    }
+    if( LookSccvFG == 2 ){
+	if( sccv < 0x0150 ){
+	    if( ((Ypos >> 8) - sccv) >= DISPHIGHPOS )
+		sccv += 0x02;
+	}
+    }
+    return sccv;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	"？Ｐ"文字ＯＡＭセット
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+static	void	BattleNumbarOAMSET(commonDT_c *data, playerDT_c *pl)
+{
+    u8	TBLNo = aP_TBLNO(pl);
+
+    /**** 基本設定 ****/
+    data->Xpos = (aP_GMOV_X(pl) >> 8) - (s32)aP_SCCH(pl);
+    data->Ypos = (aP_GMOV_Y(pl) >> 8) - (s32)aP_SCCV(pl);
+    data->HFlip = 0x00;
+    data->VFlip = 0x00;
+    data->Pltt = 0x0F;
+    data->Pri = 0x00;
+    data->ObjMode = ST_OAM_OBJ_NORMAL;
+
+    /**** "Ｐ" ****/
+    data->Shape = ST_OAM_SQUARE;
+    data->Size = 0x01;
+    data->chrNO = 0x02F3;
+    mGm_OamOtherSet(data);
+
+    /**** 数字 ****/
+    data->Xpos += POffsetDT[TBLNo];
+    data->chrNO = 0x0337 + (TBLNo * 2);
+    mGm_OamOtherSet(data);
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	"ＬＯＳＥ"文字ＯＡＭセット
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+// modified by yu ting
+static	void	BattleLoseOAMSET(commonDT_c *data)
+{
+    data->Shape = ST_OAM_SQUARE;
+    data->Size = 0x01;
+    data->chrNO = 0x0224;
+    mGm_OamOtherSet(data);
+    data->Xpos += 0x010;
+    data->chrNO = 0x0226;
+    mGm_OamOtherSet(data);
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	"ＬＯＳＥ"文字ＯＡＭセット
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//////// */
+////////static	void	BattleLoseOAMSET(commonDT_c *data)
+////////{
+////////    data->Shape = ST_OAM_H_RECTANGLE;
+////////    data->Size = 0x02;
+////////    data->chrNO = 0x0220;
+////////    mGm_OamOtherSet(data);
+////////    data->Shape = ST_OAM_SQUARE;
+////////    data->Xpos += 0x020;
+////////    data->Size = 0x01;
+////////    data->chrNO = 0x0224;
+////////    mGm_OamOtherSet(data);
+////////}
+/*
+ ****************************************************************
+	"？Ｐまけ"文字表示(上下移動)
+ ****************************************************************
+*/
+static	void	BattleLoseUpDown(playerDT_c *pl)
+{
+    commonDT_c	data;
+
+    if( aP_MODE(pl) != PL_LOSEDEMO )
+	return;
+
+    BattleNumbarOAMSET(&data, pl);
+
+    data.Xpos += 0x018;
+    BattleLoseOAMSET(&data);
+}
+/*
+ ****************************************************************
+	"？Ｐまけ"文字表示(自分のモニターだけ表示)
+ ****************************************************************
+*/
+static	void	BattleLoseMyDisp(playerDT_c *pl)
+{
+    commonDT_c	data;
+
+    if( mGm_AGBNO != aP_TBLNO(pl) )
+	return;
+    if( aP_BattleLoseFG(pl) != 1 )
+	return;
+    if( mGm_WINNERFG )
+	return;
+
+    BattleNumbarOAMSET(&data, pl);
+
+    data.Xpos += 0x018;
+    BattleLoseOAMSET(&data);
+}
+/////////*
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////	"はい"and"いいえ"文字表示
+//////// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+////////*/
+////////static	void	YesNoOAMSET(commonDT_c *data, u8 GameOverSLCT)
+////////{
+////////    /**** "はい" ****/
+////////    data->Pltt = 0x09;
+////////    data->chrNO = 0x0210;
+////////    mGm_OamOtherSet(data);
+////////    data->Xpos += 0x008;
+////////    data->chrNO = 0x0152;
+////////    mGm_OamOtherSet(data);
+////////    /**** "いいえ" ****/
+////////    data->Ypos += 0x00C;
+////////    data->Xpos -= 0x008;
+////////    data->chrNO = 0x0152;
+////////    mGm_OamOtherSet(data);
+////////    data->Xpos += 0x008;
+////////    data->chrNO = 0x0152;
+////////    mGm_OamOtherSet(data);
+////////    data->Xpos += 0x008;
+////////    data->chrNO = 0x0208;
+////////    mGm_OamOtherSet(data);
+////////    /**** カーソル ****/
+////////    data->Ypos -= 0x00C;
+////////    if( GameOverSLCT )
+////////	data->Ypos += 0x0C;
+////////    data->Pltt = 0x08;
+////////    data->Xpos -= 0x01A;
+////////    data->chrNO = 0x0251;
+////////    mGm_OamOtherSet(data);
+////////}
+/////////*
+//////// ****************************************************************
+////////	"？Ｐかちでいい"文字表示(自分のモニターだけ表示)
+//////// ****************************************************************
+////////*/
+////////static	void	BattleSelectWinDisp(playerDT_c *pl)
+////////{
+////////    u8		i, LoseSelectFG, GameOverSLCT;
+////////    u8		TBLNo = aP_TBLNO(pl);
+////////    s32		Ypos;
+////////    commonDT_c	data;
+////////
+////////
+////////    if( mGm_AGBNO != TBLNo )
+////////	return;
+////////    if( aP_BattleLoseFG(pl) != 2 )
+////////	return;
+////////
+////////    LoseSelectFG = aP_LoseSelectFG(pl);
+////////    GameOverSLCT = aP_GameOverSLCT(pl);
+////////
+////////    BattleNumbarOAMSET(&data, pl);
+////////
+////////    data.Xpos += 0x018;
+////////    data.Shape = ST_OAM_H_RECTANGLE;
+////////    data.Size = 0x02;
+////////    data.Pltt = 0x0F;
+////////    /**** "かち" ****/
+////////    data.chrNO = 0x0220;
+////////    mGm_OamOtherSet(&data);
+////////    if( !LoseSelectFG ){
+////////	/**** "で" ****/
+////////	data.Xpos += 0x020;
+////////	data.Shape = ST_OAM_SQUARE;
+////////	data.Size = 0x01;
+////////	data.chrNO = 0x010C;
+////////	mGm_OamOtherSet(&data);
+////////	/**** "い" ****/
+////////	data.Xpos += 0x018;
+////////	data.chrNO = 0x010E;
+////////	mGm_OamOtherSet(&data);
+////////	/**** "い？" ****/
+////////	data.Xpos += 0x010;
+////////	data.Shape = ST_OAM_H_RECTANGLE;
+////////	data.Size = 0x02;
+////////	mGm_OamOtherSet(&data);
+////////	data.Shape = ST_OAM_SQUARE;
+////////	data.Size = 0x00;
+////////	data.Ypos += 0x020;
+////////	data.Xpos -= 0x030;
+////////	YesNoOAMSET(&data, GameOverSLCT);
+////////    }
+////////    if( (LoseSelectFG & 0x01) ){
+////////	/**** "？" ****/
+////////	data.Shape = ST_OAM_SQUARE;
+////////	data.Size = 0x01;
+////////	data.Xpos += 0x020;
+////////	data.chrNO = 0x0110;
+////////	mGm_OamOtherSet(&data);
+////////	/**** "！" ****/
+////////	data.Size = 0x01;
+////////	data.Xpos += 0x0A;
+////////	data.chrNO = 0x01AA;
+////////	mGm_OamOtherSet(&data);
+////////	data.Size = 0x00;
+////////	if( LoseSelectFG == 1 ){
+////////	    for( i = 0; i <= mGm_PLTYPE; i++ ){
+////////		pl = mGm_PLAYER(i);
+////////		if( !aP_LoseSelectFG(pl) && (aP_MODE(pl) == PL_ACCEPT) ){
+////////		    if( play_mode == PLAY_CLSS )
+////////			data.Xpos = DeathXposDT[(aP_TBLNO(pl))];
+////////		    else
+////////			data.Xpos = BattleDeathXposDT[(aP_TBLNO(pl))];
+////////		    data.Ypos = 0x0060;
+////////		    YesNoOAMSET(&data, aP_GameOverSLCT(pl));
+////////		}
+////////	    }
+////////	}
+////////    }
+////////}
+/*
+ ****************************************************************
+	"ＣＬＥＡＲ！"表示
+ ****************************************************************
+ */
+static	void	ClearDisp(void)
+{
+	// modified by yu ting
+    const	u16	ClearDispData[6] = {
+	0x02EC, 0x02ED, 0x02EE, 0x02EF, 0x027D, 0x027D };
+    const	u16	ClearXoffsetDT[6] = {
+	0x000, 0x008, 0x008, 0x008, 0x00A, 0x005 };
+    commonDT_c	data;
+    u8		i;
+
+    data.Shape = ST_OAM_V_RECTANGLE;
+    data.Size = 0x00;
+    data.Pltt = 0x0A;
+    data.HFlip = 0;
+    data.VFlip = 0;
+    data.Pri = 0;
+    data.ObjMode = ST_OAM_OBJ_NORMAL;
+    data.Xpos = 0x060;
+    data.Ypos = 0x040;
+    for( i = 0; i < 7; i++ ){
+	data.Xpos += ClearXoffsetDT[i];
+	data.chrNO = ClearDispData[i];
+	mGm_OamOtherSet(&data);
+    }
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	"？Ｐまけ"文字表示
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	BattleLoseDisp(playerDT_c *pl)
+{
+    s32		Ypos, Yspd;
+
+    if( play_mode == PLAY_CLSS ){	// クラシック？
+	if( aP_TBLNO(pl) == mGm_AGBNO ){
+	    if( aP_STAMINA(pl) ){
+		if( aP_LastKickFG(pl) ){
+		    ClearDisp();
+		}
+	    }
+	}
+	return;
+    }
+    if( mGm_GMMODE >= GMPL_WININIT )
+	return;
+    if( mGm_PAUSEFG )			// ポーズ？
+	return;
+
+    if( (aP_MODE(pl) == PL_SLCTOUT) || (aP_LoseSelectFG(pl) == 3) ){
+	Ypos = aP_GMOV_Y(pl);
+	Yspd = aP_GMOV_YSPD(pl);
+	Ypos += Yspd;
+	aP_GMOV_Y(pl) = Ypos;
+	Yspd += 0x00000014;
+	aP_GMOV_YSPD(pl) = Yspd;
+    }
+
+    Ypos = (aP_GMOV_Y(pl) >> 8) - (s32)aP_SCCV(pl);
+    if( Ypos < -32 )
+	return;
+    if( Ypos > 160 )
+	return;
+
+    BattleLoseUpDown(pl);
+    BattleLoseMyDisp(pl);
+////////    BattleSelectWinDisp(pl);
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	登場デモ中に残り人数を表示
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	PlayerCountDisp(playerDT_c *pl)
+{
+    u8		PLcount[2];
+    s32		Ypos;
+    commonDT_c	data;
+
+    if( !((play_mode == PLAY_CLSS) && (aP_CHRNO(pl) == 0x01D)) )
+	return;
+
+    Ypos = ((aP_YPOS(pl) >> 8) - mGm_VSCROLL1) + 0x0028;
+    if( Ypos < -32 )
+	return;
+    if( Ypos > 160 )
+	return;
+
+    PLcount[1] = mGm_PLCOUNT(aP_TBLNO(pl)) / 10;
+    PLcount[0] = mGm_PLCOUNT(aP_TBLNO(pl)) % 10;
+
+////////    data.Xpos = ((aP_XPOS(pl) >> 8) - mGm_HSCROLL1) - 0x0008;
+////////    if( PLcount[1] )
+////////	data.Xpos -= 0x0004;
+    data.Xpos = (((aP_XPOS(pl) >> 8) - mGm_HSCROLL1) - 0x0008) - 0x0004;
+    data.Ypos = Ypos;
+    data.HFlip = 0x00;
+    data.VFlip = 0x00;
+    data.Pltt = aP_PLTT(pl);
+    data.chrNO = 0x0228;
+    data.Pri = 0x00;
+    data.ObjMode = ST_OAM_OBJ_NORMAL;
+    data.Shape = ST_OAM_H_RECTANGLE;
+    data.Size = 0x00;
+    mGm_OamOtherSet(&data);
+
+    data.Shape = ST_OAM_SQUARE;
+    data.Xpos += 0x10;
+    data.chrNO = 0x0227;
+    mGm_OamOtherSet(&data);
+
+    data.Pltt = 0x0C;
+    data.Xpos += 0x08;
+    if( PLcount[1] ){
+	data.chrNO = 0x0240 + PLcount[1];
+	mGm_OamOtherSet(&data);
+    }
+    data.Xpos += 0x08;
+    data.chrNO = 0x0240 + PLcount[0];
+    mGm_OamOtherSet(&data);
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	ＯＡＭセット処理
+ ＲＡＭ実行している為、ここから別の場所に移動する時は、注意が必要
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+void	player_OamSet(playerDT_c *pl)
+{
+    s32		Xpos = (aP_XPOS(pl) >> 8) - mGm_HSCROLL1;
+    s32		Ypos;
+    u32		HFlip;
+    u32		ObjMode = 0;
+    u16		Pltt = aP_PLTT(pl);
+    u8		Priority, i, j;
+    u8		stamina = aP_STAMINA(pl);
+    u8		mode = aP_MODE(pl);
+    u8		chrNO = aP_CHRNO(pl);
+    u8		TBLNo = aP_TBLNO(pl);
+    OamData	*Pattern;
+    OamData	*Oam;
+
+    /******** スコアに死に顔表示 ********/
+    if( !stamina ){
+////////	Ypos = 0x0088;
+	Ypos = 0x0080;
+	if( Ypos < 160 ){
+	    Oam = &OamBak[mGm_OAMIDX++];
+	    Oam->VPos = Ypos;
+	    Oam->AffineMode = ST_OAM_AFFINE_NONE;
+	    Oam->ObjMode = ST_OAM_OBJ_NORMAL;
+	    Oam->Mosaic = 0;
+	    Oam->ColorMode = ST_OAM_COLOR_16;
+	    Oam->Shape = ST_OAM_SQUARE;
+	    if( play_mode == PLAY_CLSS )
+		Oam->HPos = DeathXposDT[TBLNo];
+	    else
+		Oam->HPos = BattleDeathXposDT[TBLNo];
+	    Oam->AffineParamNo_L = 0x00;
+	    Oam->VFlip = 0x00;
+	    Oam->HFlip = 0x00;
+	    Oam->Size = 0x01;
+	    Oam->CharNo = 0x01F6;
+	    Oam->Priority = 0;
+	    Oam->Pltt = Pltt;
+	}
+    }
+
+    /******** 昇天デモ中チェック ********/
+    if( !stamina ){
+	if( TBLNo != mGm_AGBNO ){
+	    if( chrNO != 0x06 )
+		return;
+	}
+    }
+////////    if( !stamina ){
+////////	if( TBLNo == mGm_AGBNO ){
+////////	    ObjMode = 1;
+////////	} else {
+////////	    if( chrNO != 0x06 )
+////////		return;
+////////	}
+////////    }
+
+////////    if( aP_SafetyFG(pl) ){	// 半透明設定
+////////	ObjMode = 1;
+////////    }
+
+    Ypos = (aP_YPOS(pl) >> 8) - mGm_VSCROLL1;
+    if( Ypos < -32 )
+	return;
+    if( Ypos > 160 )
+	return;
+
+    Priority = aP_PRIORITY(pl);
+    HFlip = aP_HFLIP(pl);
+
+    if( aP_BucketINFG(pl) )		// バケツの中？
+	return;				//	YES --> return
+
+    /******** "まけ"文字表示(自分のモニターだけ表示) ********/
+    if( aP_BattleLoseFG(pl) ){
+	if( !(aP_LoseSelectFG(pl) & 0x01) )
+	    return;
+    }
+
+    if( (stamina <= SMALL_STAMINA) ||
+	((play_mode == PLAY_CLSS)  && (mGm_GMMODE < GMBNS_DISPSET)) )
+	Pattern = PatternBData[chrNO];
+    else
+	Pattern = PatternAData[chrNO];
+
+    Oam = &OamBak[mGm_OAMIDX++];
+    while( Pattern->AffineParam != 0xFFFF ){
+	Oam->VPos = (u32)Ypos + Pattern->VPos;
+	Oam->AffineMode = Pattern->AffineMode;
+////////	Oam->ObjMode = Pattern->ObjMode;
+	Oam->ObjMode = ObjMode;
+	Oam->Mosaic = Pattern->Mosaic;
+	Oam->ColorMode = Pattern->ColorMode;
+	Oam->Shape =  Pattern->Shape;
+
+	Oam->HPos = (u32)Xpos + Pattern->HPos;
+	if( (Pattern->CharNo == 0x0C) && HFlip )
+	    Oam->HPos += 2;
+	Oam->AffineParamNo_L = Pattern->AffineParamNo_L;
+	Oam->VFlip = Pattern->VFlip;
+	if( (chrNO < 0x14) || (chrNO > 0x17) )
+	    Oam->HFlip = HFlip;
+	else
+	    Oam->HFlip = Pattern->HFlip;
+	Oam->Size = Pattern->Size;
+
+	Oam->CharNo = Pattern->CharNo;
+	Oam->Priority = Priority;
+	Oam->Pltt = Pltt;
+	Oam++;
+	mGm_OAMIDX++;
+	Pattern++;
+    }
+
+    if( play_mode == PLAY_BATL ) {	// バトル？
+    /******** "リーチ"文字セット ********/
+	if( aP_COINCOUNT(pl) == 4 ){	// コイン四枚？
+	    if( stamina >= MAX_STAMINA )
+		Ypos -= 0x00000008;
+	    if( !chrNO || (chrNO == 0x03))
+		Ypos -= 0x01;
+	    Ypos -= 0x02;
+	    for( i = j = 0; i < 0x003; i++ ){
+		Oam = &OamBak[mGm_OAMIDX++];
+		Oam->VPos = (u32)Ypos + ReachPlacardData[j++];
+		Oam->AffineMode = ST_OAM_AFFINE_NONE;
+		Oam->ObjMode = ObjMode;
+		Oam->Mosaic = 0;
+		Oam->ColorMode = ST_OAM_COLOR_16;
+		Oam->Shape = ReachPlacardData[j++];
+		Oam->HPos = (u32)Xpos + ReachPlacardData[j++];
+		Oam->AffineParamNo_L = 0x00;
+		Oam->VFlip = 0x00;
+		Oam->HFlip = 0x00;
+		Oam->Size = 0x00;
+		Oam->CharNo = ReachPlacardData[j++];
+		Oam->Priority = Priority;
+		Oam->Pltt = ReachPlacardData[j++];
+	    }
+////////	    Oam = &OamBak[mGm_OAMIDX++];
+////////	    Oam->VPos = (u32)Ypos;
+////////	    Oam->AffineMode = ST_OAM_AFFINE_NONE;
+////////	    Oam->ObjMode = ObjMode;
+////////	    Oam->Mosaic = 0;
+////////	    Oam->ColorMode = ST_OAM_COLOR_16;
+////////	    Oam->Shape = ST_OAM_H_RECTANGLE;
+////////
+////////	    Oam->HPos = (u32)Xpos;
+////////	    Oam->AffineParamNo_L = 0x00;
+////////	    Oam->VFlip = 0x00;
+////////	    Oam->HFlip = 0x00;
+////////	    Oam->Size = 0x00;
+////////
+////////	    Oam->CharNo = 0x0032;
+////////	    Oam->Priority = Priority;
+////////	    Oam->Pltt = 4;
+////////
+////////	    Oam = &OamBak[mGm_OAMIDX++];
+////////	    Oam->VPos = (u32)Ypos + 0x08;
+////////	    Oam->AffineMode = ST_OAM_AFFINE_NONE;
+////////	    Oam->ObjMode = ObjMode;
+////////	    Oam->Mosaic = 0;
+////////	    Oam->ColorMode = ST_OAM_COLOR_16;
+////////	    Oam->Shape = ST_OAM_SQUARE;
+////////
+////////	    Oam->HPos = (u32)Xpos + 0x04;
+////////	    Oam->AffineParamNo_L = 0x00;
+////////	    Oam->VFlip = 0x00;
+////////	    Oam->HFlip = 0x00;
+////////	    Oam->Size = 0x00;
+////////
+////////	    Oam->CharNo = 0x0354;
+////////	    Oam->Priority = Priority;
+////////	    Oam->Pltt = 0x03;
+	}
+    }
+
+////////    if( stamina || (chrNO == 0x06) )	// 死んでいる？
+////////	return;				//	NO --> return;
+////////
+////////    /******** 天使の輪 ********/
+////////    Ypos += 0x04;
+////////    if( !chrNO || (chrNO == 0x03))
+////////	Ypos -= 0x01;
+////////    if( (chrNO == 0x09) || (chrNO == 0x0B) ||
+////////	(chrNO == 0x14) || (chrNO == 0x17) ||
+////////	(chrNO == 0x15) || (chrNO == 0x16) ||
+////////	(chrNO == 0x1D) )
+////////	Xpos--;
+////////
+////////    if( (chrNO == 0x09) || (chrNO == 0x0B) ){
+////////	Ypos += 0x04;
+////////    }
+////////    if( (chrNO == 0x14) || (chrNO == 0x17) ){
+////////	Ypos -= 0x05;
+////////    }
+////////    if( chrNO == 0x15 ){
+////////	Ypos += 0x0C;
+////////    }
+////////    if( chrNO == 0x16 ){
+////////	Ypos -= 0x0B;
+////////    }
+////////    Oam = &OamBak[mGm_OAMIDX++];
+////////    Oam->VPos = (u32)Ypos;
+////////    Oam->AffineMode = ST_OAM_AFFINE_NONE;
+////////    Oam->ObjMode = ObjMode;
+////////    Oam->Mosaic = 0;
+////////    Oam->ColorMode = ST_OAM_COLOR_16;
+////////    Oam->Shape = ST_OAM_SQUARE;
+////////
+////////    Oam->HPos = (u32)Xpos + 0x05;
+////////    Oam->AffineParamNo_L = 0x00;
+////////    Oam->VFlip = 0x00;
+////////    Oam->HFlip = 0x00;
+////////    Oam->Size = 0x00;
+////////
+////////    Oam->CharNo = 0x0153;
+////////    Oam->Priority = Priority;
+////////    Oam->Pltt = Pltt;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	メイン処理
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	player_main(void)
+{
+    playerDT_c	*pl;
+    u8		i = 0;
+    u8		AGBNo = 0;	// 自分が親子のどちらなのか？
+    u8		QuakeTM;
+
+    if( mGm_PLTYPE ){
+	AGBNo = mGm_AGBNO;
+////////	if( mGm_EnmyTest) {
+////////	    if( mGm_TRG == L_BUTTON ){
+////////		AGBNo++;
+////////		if( AGBNo >= (mGm_PLTYPE + 1) )
+////////		    AGBNo = 0;
+////////		mGm_AGBNO = AGBNo;
+////////	    }
+////////	    mGm_KEYBUF(AGBNo,0) = mGm_TRG;
+////////	    mGm_KEYBUF(AGBNo,1) = mGm_CONT;
+////////	}
+	for( ; i < MAX_PLAYER; i++ ){
+	    pl = mGm_PLAYER(i);
+	    if( aP_MODE(pl) != PL_NOT ){
+		mGm_TRG = mGm_KEYBUF(i,0);
+		mGm_CONT = mGm_KEYBUF(i,1);
+		QuakeTM = aP_QuakeTM(pl);
+		if( QuakeTM ){
+		    QuakeTM--;
+		    if( QuakeTM ){
+			if( mGm_TRG & (R_KEY | L_KEY) )
+			    QuakeTM--;
+		    }
+		    aP_QuakeTM(pl) = QuakeTM;
+		    mGm_CONT = mGm_TRG = 0;
+////////		    if( (QuakeTM == 0) || (QuakeTM & 0x80) ){
+////////			SizeChange(pl, 0);
+////////		    }
+		}
+		if( !(aP_LoseSelectFG(pl) & 0x01) ){	// 勝ちを譲るかの選択待ち？
+		    player_menu[aP_MODE(pl)](pl);
+		    ScoreCoinFlash(pl);
+		    if( aP_MODE(pl) < PL_STOP ){
+			player_anime(pl);
+		    }
+		}
+	    }
+	}
+	mGm_TRG = mGm_KEYBUF(AGBNo,0);
+	mGm_CONT = mGm_KEYBUF(AGBNo,1);
+	pl = mGm_PLAYER(AGBNo);
+	aP_SCCV(pl) = KeyDispMV(aP_YPOS(pl), aP_SCCV(pl), pl);
+	*(vu16 *)REG_IE &= ~V_BLANK_INTR_FLAG;	//V_BLANK割込不許可
+	mGm_HSCROLL1 = aP_SCCH(pl);
+	mGm_VSCROLL1 = aP_SCCV(pl);
+	mGm_HSCROLL3 = aP_SCCH(pl) >> 1;
+	mGm_VSCROLL3 = aP_SCCV(pl) >> 1;
+	*(vu16 *)REG_IE |= V_BLANK_INTR_FLAG;	//V_BLANK割込許可
+	for( i = 0; i < MAX_PLAYER; i++ ){
+	    pl = mGm_PLAYER(i);
+	    if( aP_MODE(pl) != PL_NOT ){
+		mGm_player_OamSet(pl);
+		PlayerCountDisp(pl);
+		if( aP_PlacardTM(pl) && !aP_HandsUpFG(pl) ){
+		    aP_PlacardTM(pl)--;
+		    PlacardOamSet(pl, 0);
+		}
+		BattleLoseDisp(pl);
+	    }
+	}
+    } else {
+	pl = mGm_PLAYER(i);
+	player_menu[aP_MODE(pl)](pl);
+	ScoreCoinFlash(pl);
+	aP_SCCV(pl) = KeyDispMV(aP_YPOS(pl), aP_SCCV(pl), pl);
+	mGm_HSCROLL1 = aP_SCCH(pl);
+	mGm_VSCROLL1 = aP_SCCV(pl);
+	mGm_HSCROLL3 = aP_SCCH(pl) >> 1;
+	mGm_VSCROLL3 = aP_SCCV(pl) >> 1;
+	if( aP_MODE(pl) < PL_STOP ){
+	    player_anime(pl);
+	}
+	if( aP_MODE(pl) != PL_NOT ){
+	    mGm_player_OamSet(pl);
+	    PlayerCountDisp(pl);
+	}
+    }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4852 1
+a4854 4
+    data->Shape = ST_OAM_V_RECTANGLE;
+    data->Size = 0x00;
+    data->chrNO = 0x0168;
+    mGm_OamOtherSet(data);
+a4855 1
+    data->Xpos += 0x006;
+d4857 1
+a4857 1
+    data->chrNO = 0x0162;
+d4859 1
+a4859 3
+    data->Shape = ST_OAM_SQUARE;
+    data->Xpos += 0x00D;
+    data->Size = 0x01;
+d5039 5
+a5043 4
+    const	u16	ClearDispData[7] = {
+	0x0273, 0x0274, 0x02F3, 0x02F1, 0x02A5, 0x027D, 0x027D };
+    const	u16	ClearXoffsetDT[7] = {
+	0x000, 0x008, 0x008, 0x008, 0x009, 0x00A, 0x005 };
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

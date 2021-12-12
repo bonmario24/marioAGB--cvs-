@@ -1,0 +1,280 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_KUPPA_DEAD_grp, voicegroup000
+	.equ	sn_KUPPA_DEAD_pri, 200
+	.equ	sn_KUPPA_DEAD_rev, 0
+	.equ	sn_KUPPA_DEAD_mvl, 50
+	.equ	sn_KUPPA_DEAD_key, 0
+	.equ	sn_KUPPA_DEAD_tbs, 1
+	.equ	sn_KUPPA_DEAD_exg, 0
+	.equ	sn_KUPPA_DEAD_cmp, 1
+
+	.section .rodata
+	.global	sn_KUPPA_DEAD
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_KUPPA_DEAD_1:
+	.byte	KEYSH , sn_KUPPA_DEAD_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_KUPPA_DEAD_tbs/2
+	.byte		VOICE , 1
+	.byte		VOL   , 127*sn_KUPPA_DEAD_mvl/mxv
+	.byte		BENDR , 16
+	.byte		LFODL , 2
+	.byte		LFOS  , 42
+	.byte		MOD   , 48
+	.byte		BEND  , c_v+0
+	.byte		N96   , As5 , v127
+	.byte	W01
+	.byte		BEND  , c_v+0
+	.byte	W01
+	.byte		        c_v-1
+	.byte	W01
+	.byte		        c_v-2
+	.byte	W01
+	.byte		        c_v-2
+	.byte	W01
+	.byte		        c_v-3
+	.byte	W01
+	.byte		        c_v-4
+	.byte	W01
+	.byte		        c_v-4
+	.byte	W01
+	.byte		        c_v-5
+	.byte	W01
+	.byte		        c_v-6
+	.byte	W01
+	.byte		        c_v-7
+	.byte	W01
+	.byte		        c_v-7
+	.byte	W01
+	.byte		LFOS  , 34
+	.byte		BEND  , c_v-8
+	.byte	W01
+	.byte		        c_v-8
+	.byte	W01
+	.byte		        c_v-9
+	.byte	W01
+	.byte		        c_v-10
+	.byte	W01
+	.byte		        c_v-11
+	.byte	W01
+	.byte		        c_v-11
+	.byte	W01
+	.byte		        c_v-12
+	.byte	W01
+	.byte		        c_v-13
+	.byte	W01
+	.byte		        c_v-13
+	.byte	W01
+	.byte		        c_v-14
+	.byte	W01
+	.byte		        c_v-15
+	.byte	W01
+	.byte		        c_v-15
+	.byte	W01
+	.byte		LFOS  , 26
+	.byte		BEND  , c_v-16
+	.byte	W01
+	.byte		        c_v-17
+	.byte	W01
+	.byte		        c_v-18
+	.byte	W01
+	.byte		        c_v-18
+	.byte	W01
+	.byte		        c_v-19
+	.byte	W01
+	.byte		        c_v-19
+	.byte	W01
+	.byte		        c_v-20
+	.byte	W01
+	.byte		        c_v-21
+	.byte	W01
+	.byte		        c_v-22
+	.byte	W01
+	.byte		        c_v-22
+	.byte	W01
+	.byte		        c_v-23
+	.byte	W01
+	.byte		        c_v-24
+	.byte	W01
+	.byte		LFOS  , 20
+	.byte		BEND  , c_v-24
+	.byte	W01
+	.byte		        c_v-25
+	.byte	W01
+	.byte		        c_v-25
+	.byte	W01
+	.byte		        c_v-26
+	.byte	W01
+	.byte		        c_v-27
+	.byte	W01
+	.byte		        c_v-28
+	.byte	W01
+	.byte		        c_v-29
+	.byte	W01
+	.byte		        c_v-29
+	.byte	W01
+	.byte		        c_v-30
+	.byte	W01
+	.byte		        c_v-30
+	.byte	W01
+	.byte		        c_v-31
+	.byte	W01
+	.byte		        c_v-32
+	.byte	W01
+	.byte		LFOS  , 14
+	.byte		BEND  , c_v-33
+	.byte	W01
+	.byte		        c_v-33
+	.byte	W01
+	.byte		        c_v-34
+	.byte	W01
+	.byte		        c_v-35
+	.byte	W01
+	.byte		        c_v-35
+	.byte	W01
+	.byte		        c_v-36
+	.byte	W01
+	.byte		        c_v-36
+	.byte	W01
+	.byte		        c_v-37
+	.byte	W01
+	.byte		        c_v-38
+	.byte	W01
+	.byte		        c_v-39
+	.byte	W01
+	.byte		        c_v-40
+	.byte	W01
+	.byte		        c_v-40
+	.byte	W01
+	.byte		        c_v-41
+	.byte	W01
+	.byte		        c_v-41
+	.byte	W01
+	.byte		        c_v-42
+	.byte	W01
+	.byte		        c_v-43
+	.byte	W01
+	.byte		        c_v-44
+	.byte	W01
+	.byte		        c_v-44
+	.byte	W01
+	.byte		        c_v-45
+	.byte	W01
+	.byte		        c_v-46
+	.byte	W01
+	.byte		        c_v-46
+	.byte	W01
+	.byte		        c_v-47
+	.byte	W01
+	.byte		        c_v-47
+	.byte	W01
+	.byte		        c_v-48
+	.byte	W01
+	.byte		LFOS  , 10
+	.byte		BEND  , c_v-49
+	.byte	W01
+	.byte		        c_v-50
+	.byte	W01
+	.byte		        c_v-50
+	.byte	W01
+	.byte		        c_v-51
+	.byte	W01
+	.byte		        c_v-52
+	.byte	W01
+	.byte		        c_v-52
+	.byte	W01
+	.byte		        c_v-53
+	.byte	W01
+	.byte		        c_v-54
+	.byte	W01
+	.byte		        c_v-55
+	.byte	W01
+	.byte		        c_v-55
+	.byte	W01
+	.byte		        c_v-56
+	.byte	W01
+	.byte		        c_v-57
+	.byte	W01
+	.byte		        c_v-57
+	.byte	W01
+	.byte		        c_v-58
+	.byte	W01
+	.byte		        c_v-58
+	.byte	W01
+	.byte		        c_v-59
+	.byte	W01
+	.byte		        c_v-60
+	.byte	W01
+	.byte		        c_v-61
+	.byte	W01
+	.byte		        c_v-61
+	.byte	W01
+	.byte		        c_v-62
+	.byte	W01
+	.byte		        c_v-63
+	.byte	W01
+	.byte		        c_v-63
+	.byte	W01
+	.byte		        c_v-64
+	.byte	W01
+	.byte		        c_v-64
+	.byte	W01
+@@ 001   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_KUPPA_DEAD:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_KUPPA_DEAD_pri	@@ Priority
+	.byte	sn_KUPPA_DEAD_rev	@@ Reverb.
+
+	.word	sn_KUPPA_DEAD_grp
+
+	.word	sn_KUPPA_DEAD_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

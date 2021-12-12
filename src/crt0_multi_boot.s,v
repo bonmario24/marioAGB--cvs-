@@ -1,0 +1,205 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@@======================================================
+@@    crt0_multi_boot.s (MultiBoot 対応 crt0.s)
+@@    AGBスタートアップルーチン
+@@
+@@    Copyright (C) 1999-2000 NINTENDO Co.,Ltd.
+@@======================================================
+
+	.INCLUDE	"AgbDefine.s"
+	.INCLUDE	"AgbMemoryMap.s"
+    .INCLUDE    "AgbSyscallDefine.s"
+	.INCLUDE	"AgbMacro.s"
+	.TEXT
+
+	.GLOBAL		_start
+_start:
+	.INCLUDE	"rom_header.s"
+
+	b	multiboot_handshake
+@@@@@@   	b	start_vector
+
+@@ C プログラムからは、以下の例のように宣言する。
+@@ extern u8 boot_method, boot_channel;
+@@
+@@ boot_method: 0=ROM起動
+@@              (1=予約)
+@@              (2=予約)
+@@              3=マルチプレイブート
+@@
+@@ boot_channel: 0=親機@ (シリアルブートでは、ありえない値)
+@@               1-3: 1-3番目の、子機@。
+
+	.globl	boot_method
+	.globl	boot_channel
+boot_method:	.byte	0	@@ 初期値 0 のままなら boot method = ROM
+boot_channel:	.byte	0
+
+	.byte	0	@@ reserved
+	.byte	0	@@ reserved
+
+@@ ホストからのパラメタ領域
+@@ C プログラムからは、以下の例のように宣言する。
+@@ extern u32 bootparam[6];
+@@
+@@ 実行時に決定される各種パラメタを、ここにセットして子機@に渡すことができる。
+@@ 実行時によって変化するパラメタがなければ、初期値のまま子機@に渡される。
+
+        .globl  bootparam
+bootparam:
+        .word   0	@@ bootparam[0]
+        .word   0	@@ bootparam[1]
+
+        .word   0
+        .word   0
+        .word   0
+        .word   0
+
+@@ ハンドシェイクのサブルーチン
+@@ 親機@からデータが送られてくるのを監視。
+@@ return: CPSR のフラグ bne ならエラー。
+	.CODE 32
+multiboot_handshake_poll:
+	ldrh	r1, [r0, #8]	@@ REG_SIOCNT
+	tst	r1, #SIO_START
+	beq	multiboot_handshake_poll
+1:
+	ldrh	r1, [r0, #8]	@@ REG_SIOCNT
+	tst	r1, #SIO_START
+	bne	1b
+
+	ldrh	r1, [r0, #8]	@@ REG_SIOCNT
+	tst	r1, #SIO_ERROR
+	bxne	lr	@@ エラーフラグが立っていたら エラー
+
+	ldrh	r1, [r0]
+	bx	lr
+
+@@ ハンドシェイク
+@@ (マルチプレイブート子機@として無事に起動したことを 親機@に知らせる手続き)
+@@ マルチプレイブートで起動した場合、SIO はマルチプレイブート 115200bps
+@@ モードになっている。
+@@ この時点では IME=0 なので割込みはかからない。
+	.CODE 32
+multiboot_handshake:
+	ldr	r0, =REG_SIOMLT_RECV
+
+@@ 親機@からデータが送られてくるのを監視
+@@ 最初は、子機@の起動のタイミングによって通信エラーフラグが立っているかも
+@@ しれないので、通信エラーフラグが立っていなくて、かつ親機@からの送信開始
+@@ を監視する。
+1:
+	bl	multiboot_handshake_poll
+	bne	1b	@@ エラー
+
+@@ 子機@の起動のサインとして、まず 0x0000 を返す。
+	mov	r2, #0
+	strh	r2, [r0, #0x0a] @@ REG_SIODATA8
+
+	cmp	r1, #0
+	bne	1b	@@ 最初のデータは 0x0000 でなければならない。
+
+	mov	r2, #0x8000	@@ r2: 親機@から来るべきデータ/子機@が返すデータ
+2:
+	mov	r1, #0
+@@ 親機@から来たデータを子機@も返す。
+3:
+	strh	r1, [r0, #0x0a]	@@ REG_SIODATA8
+	bl	multiboot_handshake_poll
+	bne	1b	@@ エラー
+
+	cmp	r1, r2
+	bne	2b	@@ エラー
+
+@@ 親機@から来るべきデータが来たので、子機@も同じものを返す。
+@@ 親機@は 0x8000, 0x0400, 0x0020, 0x0001, 0x0000 の順に来る。
+@@ 子機@は 0x8000, 0x0400, 0x0020, 0x0001 まで返す。
+@@ r1 が  0x8000, 0x0400, 0x0020, 0x0001, 0x0000 になっている。
+	mov	r2, r2, lsr #5
+	cmp	r1, #0
+	bne	3b
+
+@@ 以降、通信エラーやデータ不一致が発生したら子機@は停止(無限ループ)
+@@ この時点で、親機@から来たのは 0x0000.
+@@ 子機@は イニシャルコード low を返す。
+	ldr	r3, =0x020000ac
+	ldrh	r2, [r3]
+	strh	r2, [r0, #0x0a]	@@ REG_SIODATA8
+	bl	multiboot_handshake_poll
+5:
+	bne	5b	@@ エラー(無限ループ)
+
+	cmp	r1, r2
+	bne	5b	@@ エラー(無限ループ)
+
+@@ 親機@からも同じ イニシャルコード low が来た。
+@@ 子機@は イニシャルコード high を返す。
+	ldrh	r2, [r3, #2]
+	strh	r2, [r0, #0x0a]	@@ REG_SIODATA8
+	bl	multiboot_handshake_poll
+	bne	5b	@@ エラー(無限ループ)
+
+	cmp	r1, r2
+	bne	5b	@@ エラー(無限ループ)
+
+@@ ハンドシェイク完了。
+@@ 子機@出力データレジスタを 0 に初期化しておく
+@@ (ハンドシェイク手続きは完了したので 親機@はこのデータを受信しない)
+	mov	r1, #0
+	strh	r1, [r0, #0x0a]	@@ REG_SIODATA8
+
+@@--------------------------------------------------------------------
+@@-                          プログラム展開                          -
+@@--------------------------------------------------------------------
+    .EXTERN     _binary_child_LZ_bin_start
+    .GLOBAL     start_vector
+    .CODE 32
+start_vector:
+@@@@@@        ldr     r0, =_binary_child_LZ_bin_start
+@@@@@@        ldr     r1, =EX_WRAM + 0x02A0
+@@@@@@        swi     SWI_NO_LZ77_UNCOMP_WRAM << 16   @@ bl  LZ77UnCompWram
+
+        ldr     lr, =EX_WRAM + 0x02A0
+        bx      lr
+
+
+	.END
+
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,101 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UA_EFFECT_H_
+#define __UA_EFFECT_H_
+
+#define	EFFECT_MAX	0x20		// エフェクト表示最大数
+
+/*-------------------- スコア基本構造体  -----------------*/
+typedef struct{
+    s32 a_xpos;		/* Ｘ位置	*/
+    s32 a_ypos;		/* Ｙ位置	*/
+    s16 a_xposh;	/* Ｘ位置（Ｈ）	*/
+    s16 a_yposh;	/* Ｙ位置（Ｈ）	*/
+    s32 a_xspd;		/* Ｘスピード	*/
+    s32 a_yspd;		/* Ｙスピード	*/
+    u8	a_patrn;	/* パターン	*/
+    u8  a_scrtim;	/* タイマー	*/
+    u8  a_index;	/* 元になるOBJのインデックスナンバー */
+} aEf_effect_c;
+
+
+typedef struct{				/* スコア構造体 */
+    aEf_effect_c effect_base[EFFECT_MAX];
+    u8  effect_mode[EFFECT_MAX];// エフェクトのモード
+    u8  effect_no;		// 現在のエフェクトの数
+    u8  effect_num;		// 次に追加する配列の位置
+    u8  effect_oamno;		// エフェクトが入り出したOAMの番号
+    u8  effect_oampt;		// エフェクトに使用したOAMの数
+} aAll_eff_c;
+
+
+/*------------- マクロ定義 --------------------------------*/
+
+#define EFFECT_BASE(pt)	(((aAll_eff_c *)(pt)) -> effect_base)
+#define EFFECT_MODE(pt)	(((aAll_eff_c *)(pt)) -> effect_mode)
+#define EFFECT_NO	(p_eff -> effect_no)
+#define EFFECT_NUM	(p_eff -> effect_num)
+#define EFFECT_OAMPT	(p_eff -> effect_oampt)
+#define EFFECT_OAMNO	(p_eff -> effect_oamno)
+
+#define EFFECT_XPOS(pt)   (((aEf_effect_c *)(pt)) -> a_xpos)
+#define EFFECT_YPOS(pt)   (((aEf_effect_c *)(pt)) -> a_ypos)
+#define EFFECT_XPOSH(pt)  (((aEf_effect_c *)(pt)) -> a_xposh)
+#define EFFECT_YPOSH(pt)  (((aEf_effect_c *)(pt)) -> a_yposh)
+#define EFFECT_XSPD(pt)   (((aEf_effect_c *)(pt)) -> a_xspd)
+#define EFFECT_YSPD(pt)   (((aEf_effect_c *)(pt)) -> a_yspd)
+#define EFFECT_PTRN(pt)   (((aEf_effect_c *)(pt)) -> a_patrn)
+#define EFFECT_TIMER(pt)  (((aEf_effect_c *)(pt)) -> a_scrtim)
+#define EFFECT_INDEX(pt)  (((aEf_effect_c *)(pt)) -> a_index)
+
+/*------------- ＥＸＴＥＲＮ ------------------------------*/
+extern aAll_eff_c	*p_eff;
+
+/*** MALLOC & FREE ***/
+extern void mGm_MALLOC_p_eff(void);
+extern void mGm_FREE_p_eff(void);
+
+extern void Effect_Clear( u8 index );
+extern void All_Effect_Clear(void);
+extern void StarEffect_Set(aAC_base_c *abs_pt,u8 index);
+extern void CoinEffect_Set(aAC_base_c *abs_pt,u8 index);
+extern void StoneEffect_Set(s16 x_pos, s16 y_pos);
+extern void stareffect_main( void );
+
+#endif /* __UA_EFFECT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

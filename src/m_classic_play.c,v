@@ -1,0 +1,1807 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*
+ ****************************************************************
+ *              
+ *	ÇbÇkÇ`ÇrÇrÇhÇbÉQÅ[ÉÄÉÅÉCÉìèàóù
+ *
+ ****************************************************************
+ */
+#include "m_main.h"
+#include "m_bgcheck.h"
+#include "m_classic_sub.h"
+#include "m_game.h"
+#include "m_game_sub.h"
+#include "m_sub.h"
+#include "m_score.h"
+#include "ba_act.h"
+#include "ba_common.h"
+#include "ba_effect.h"
+#include "ba_player.h"
+#include "course_classic.h"
+#include "ba_enmy.h"
+#include "ua_save.h"
+
+#define	CLASSIC_SELECT_DEBUG	0	// ÉRÅ[ÉXÉZÉåÉNÉgÇÃÉfÉoÉbÉOÉÇÅ[Éh
+
+extern	u8	d_classic_bg_sch_Huff[0x42a4];
+extern	const	u16	d_classic_bg_sclDT[256];
+extern	u8	d_classic_obj_sch_Huff[0x545c];
+extern	const	u16	d_classic_obj_sclDT[256];
+extern	u8	d_classic_haikeiA_LZ[0x53c];
+extern	u8	d_classic_haikeiB_LZ[0x5a4];
+extern	u8	d_classic_haikeiC_LZ[0x560];
+extern	u8	d_classic_haikeiD_LZ[0x4cc];
+
+//extern	u8	d_classic_bonus2_LZ[0x758];
+extern	u8	classic_bonus2_1_Huff[0x1bc];
+extern	u8	classic_bonus2_2_Huff[0x1e8];
+extern	u8	classic_bonus2_3_Huff[0x214];
+extern	u8	classic_bonus2_4_Huff[0x23c];
+
+extern	void	game_play(void);
+
+/*
+ ================================================================
+	ÇÑÇÖÇÜÇâÇéÇÖ
+ ================================================================
+ */
+#define	BONUS_XSPD	0x2000		// É{Å[ÉiÉXï∂éöÇwÉXÉsÅ[Éh
+#define	BONUS_SOUND	(60 * 20)
+#define	BONUS_SOUND2	(60 * 15)
+/*
+ ================================================================
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÇaÇfèëÇ´Ç±Ç›ÉAÉhÉåÉXÉeÅ[ÉuÉã
+ ================================================================
+*/
+const	u16	PLNumAddressDT[4][MAX_PLAYER] = {
+    { (BG0_ADDRESS + 0x0800 + 0x18A), (BG0_ADDRESS + 0x0000 + 0x000),
+      (BG0_ADDRESS + 0x0000 + 0x000), (BG0_ADDRESS + 0x0000 + 0x000) },
+    { (BG0_ADDRESS + 0x0800 + 0x14A), (BG0_ADDRESS + 0x0800 + 0x28A),
+      (BG0_ADDRESS + 0x0000 + 0x000), (BG0_ADDRESS + 0x0000 + 0x000) },
+    { (BG0_ADDRESS + 0x0800 + 0x0CA), (BG0_ADDRESS + 0x0800 + 0x1CA),
+      (BG0_ADDRESS + 0x0800 + 0x2CA), (BG0_ADDRESS + 0x0000 + 0x000) },
+    { (BG0_ADDRESS + 0x0800 + 0x0CA), (BG0_ADDRESS + 0x0800 + 0x18A),
+      (BG0_ADDRESS + 0x0800 + 0x24A), (BG0_ADDRESS + 0x0800 + 0x30A) }
+};
+/*
+ ================================================================
+	É{Å[ÉiÉXÉ^ÉCÉ}Å[ÉJÉâÅ[ÉfÅ[É^
+ ================================================================
+*/
+const	u16	BonusColDT[3][3] = {
+    {0x7FFF,0x5AD6,0x318C},
+    {0x5AD6,0x318C,0x7FFF},
+    {0x318C,0x7FFF,0x5AD6}
+};
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É{Å[ÉiÉXÉ^ÉCÉ}Å[èëÇ´Ç±Ç›
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	BonusTimer(void)
+{
+    u8		i, idx;
+    u16		*Address = (u16 *)(BG_VRAM + BG0_ADDRESS + 0x085A);
+    u16		BonusTM = mGm_BONUSTM;
+    u16		work[3];
+	
+#if SOUND_ON
+    if( (BonusTM <= (BONUS_SOUND - 0x10)) && !(BonusTM & 7) )
+	m4aSongNumStart(s_b_BONUS);
+#endif
+    /******** É^ÉCÉ}Å[ÇÃêîéö ********/
+    work[0] = 0x1140;
+    while( BonusTM >= 600 ){
+		work[0]++;
+		BonusTM -= 600;
+    }
+    work[1] = 0x1140;
+    while( BonusTM >= 60 ){
+		work[1]++;
+		BonusTM -= 60;
+    }
+    work[2] = (BonusTM / 6) + 0x1140;
+    *(Address + 0x00) = work[0];
+    *(Address + 0x01) = work[1];
+    *(Address + 0x03) = work[2];
+    if( (mGm_FRAME_COUNT & 0x03) )
+		return;
+    idx = mGm_BNSCOLIDX;
+    mGm_ColBufBG[((6 * 0x10) + 0x08)] = BonusColDT[idx][0];
+    mGm_ColBufBG[((6 * 0x10) + 0x09)] = BonusColDT[idx][1];
+    mGm_ColBufBG[((6 * 0x10) + 0x0A)] = BonusColDT[idx][2];
+    idx++;
+    if( idx >= 0x03 )
+		idx = 0;
+    mGm_BNSCOLIDX = idx;
+    mGm_COLFLG |= BG_COL_TRANS;
+}
+/*
+ ****************************************************************
+ *     ÉCÉjÉVÉÉÉãèàóù
+ ****************************************************************
+ */
+const u16		WaKuDT0[6] = { 0x6150,0x6151,0x6151,0x6151,0x6151,0x6152 };
+const u16		WaKuDT1[6] = { 0x6155,0x6156,0x6156,0x6156,0x6156,0x6157 };
+static	void	game_play_init(void)
+{
+    u16		i, j, entrance;
+    u8		cnt, stage;
+    u8		Course = mGm_COURSE;
+    courseDT	*mapDT;
+    playerDT_c	*pl;
+    playDT_c	*pPlay;
+	u8		*pCourseDT;
+    u8		AGBNo = mGm_AGBNO;	// é©ï™Ç™êeéqÇÃÇ«ÇøÇÁÇ»ÇÃÇ©ÅH
+    u16		*Address, *ScrBase, BufBase, data, pt;
+    u8		*buf, code;
+    roundDT_c	*roundDT;
+
+    /******** ÇkÇbÇcÇbÅ@@ÇnÇeÇe ********/
+    lcdc_off();
+
+    /******* ÇkÇbÇcÇbê›íË ********/
+    mGm_DISPCNT = DISP_BG0_ON | DISP_BG1_ON | DISP_BG3_ON |
+	DISP_MODE_0 | DISP_OBJ_ON | DISP_OBJ_CHAR_2D_MAP;
+
+    /******* ÇlÇ`ÇoÉfÅ[É^ì«Ç›çûÇ› ********/
+    mapDT = MapClassic[Course];
+
+    /******** ÇuÇqÇ`Çlèâä˙èàóù ********/
+    VramInit(mapDT);
+
+    /******** âìåiÉXÉNÉäÅ[ÉìÉpÉâÉÅÅ[É^çƒê›íË ********/
+    *(vu16 *)REG_BG3CNT = BG_SCREEN_SIZE_3 | (22 << BG_SCREEN_BASE_SHIFT) |
+	BG_COLOR_16 | BG_MOS_OFF | (0 << BG_CHAR_BASE_SHIFT) | BG_PRIORITY_3;
+
+    /******** ÉLÉÉÉâÉNÉ^ÇcÇlÇ`ì]ëó ********/
+    if( !mGm_OBJchrFG ){
+	HuffUnComp(d_classic_bg_sch_Huff, (void *)BG_VRAM);
+	CpuFastCopy(BG_VRAM, (BG_VRAM + BG_CHR_ADDRESS), (0x20 * 0xC0));
+	HuffUnComp(d_classic_obj_sch_Huff, (void *)OBJ_MODE1_VRAM);
+	mGm_OBJchrFG = 1;
+    }
+
+    /******** ê∑ÇËè„Ç™ÇÈè∞ÇÃÉLÉÉÉâÉNÉ^ç∑Çµë÷Ç¶ ********/
+    DmaCopy(3, (BG_VRAM + BG_CHR_ADDRESS + MoveYuKaCHRDT1[mapDT->BackBGNo]),
+	    (BG_VRAM+0x020), 0x020, 32);
+    DmaCopy(3, (BG_VRAM + BG_CHR_ADDRESS + MoveYuKaCHRDT2[mapDT->BackBGNo]),
+	    (BG_VRAM+0x0200), 0x0240, 32);
+
+    /******** ÉJÉâÅ[ÉoÉbÉtÉ@@ÉZÉbÉg ********/
+    DmaArrayCopy(3, d_classic_bg_sclDT, mGm_ColBufBG, 16);
+    DmaArrayCopy(3, d_classic_obj_sclDT, mGm_ColBufOBJ, 16);
+
+    /******** ónä‚ÉJÉâÅ[ÉZÉbÉg ********/
+    if( mapDT->BackBGNo == BackBG1 ){
+	mGm_ColBufBG[((0x01 * 0x10) + 0x03)] = BrosRedColorDT[0];
+	mGm_ColBufBG[((0x01 * 0x10) + 0x04)] = BrosRedColorDT[1];
+	mGm_ColBufBG[((0x01 * 0x10) + 0x05)] = BrosRedColorDT[2];
+	mGm_ColBufBG[((0x01 * 0x10) + 0x06)] = BrosRedColorDT[3];
+	mGm_ColBufOBJ[((0x0C * 0x10) + 0x08)] = BrosRedColorDT[1];
+	mGm_ColBufOBJ[((0x0C * 0x10) + 0x09)] = BrosRedColorDT[2];
+	mGm_ColBufOBJ[((0x0C * 0x10) + 0x0B)] = BrosRedColorDT[3];
+    }
+
+    /******** ÉJÉâÅ[ÇcÇlÇ`ì]ëó ********/
+    DmaArrayCopy(3, mGm_ColBufBG, BG_PLTT, 16);
+    DmaArrayCopy(3, mGm_ColBufOBJ, OBJ_PLTT, 16);
+
+    /******* ÉXÉNÉäÅ[ÉìÅïÇaÇfÉ`ÉFÉbÉNÉoÉbÉtÉ@@ÉZÉbÉg ********/
+/*
+    pPlay = (playDT_c *)mGm_OTHER;
+    buf = pPlay->pBgBuf;
+    ScrBase = (u16 *)(BG_VRAM + BG1_ADDRESS);
+    BufBase = i = pt = 0;
+	pCourseDT = (u8 *)ClassicCourseTable[mGm_COURSE];
+    while( *pCourseDT != END_DT ){
+		if( *pCourseDT == NXT_DT ){
+			BufBase += 0x0020;
+			pt = 0;
+			if( !(BufBase & 0x0020) )
+				BufBase += 0x07C0;
+		} else {
+			code = *pCourseDT++;
+			data = CHR_DATA[code];
+			cnt = *pCourseDT;
+			for( j = 0; j < cnt; j++ ){
+				*ScrBase = data;
+				ScrBase++; 
+				buf[(BufBase + pt)] = code;
+				pt++;
+				if( !(pt & 0x001F) )
+					pt += 0x0020;
+			}
+		}
+		pCourseDT++;
+    }*/
+
+    pPlay = (playDT_c *)mGm_OTHER;
+    buf = pPlay->pBgBuf;
+    ScrBase = (u16 *)(BG_VRAM + BG1_ADDRESS);
+    BufBase = i = pt = 0;
+    pCourseDT = (u8 *)ClassicCourseTable[mGm_COURSE];
+    while( *pCourseDT != END_DT ){
+		if( *pCourseDT == NXT_DT ){
+			BufBase += 0x0020;
+			pt = 0;
+			if( !(BufBase & 0x0020) )
+				BufBase += 0x07C0;
+		} else{
+			code = *pCourseDT++;
+			if(code == POWBK00 || code == POWBK01 || code == POWBK02 || code == POWBK03){
+				if(!(mGm_COURSE == 0 || mGm_COURSE == 3 || mGm_COURSE == 8 || mGm_COURSE == 0x0F || mGm_COURSE == 0x16))
+					code = buf[(BufBase + pt)];
+			}
+			data = CHR_DATA[code];
+			cnt = *pCourseDT;
+			for( j = 0; j < cnt; j++ ){
+				*ScrBase = data;
+				ScrBase++; 
+				buf[(BufBase + pt)] = code;
+				pt++;
+				if( !(pt & 0x001F) )
+					pt += 0x0020;
+			}
+		}
+		pCourseDT++;
+    }
+	
+    /******** ÇaÇfÉRÉCÉìèëÇ´Ç±Ç› ********/
+    CoinWrite(mapDT->BGCoin);
+
+    /******** ÇoÇnÇvÉTÉCÉYïœçXèëÇ´Ç±Ç› ********/
+//    PowWrite();
+
+    /******** âìåiÇaÇfèëÇ´Ç±Ç› ********/
+    switch(mapDT->BackBGNo){
+    case BackBG0:
+	LZ77UnCompVram(d_classic_haikeiA_LZ, (void *)(BG_VRAM + BG3_ADDRESS));
+	break;
+    case BackBG1:
+	LZ77UnCompVram(d_classic_haikeiB_LZ, (void *)(BG_VRAM + BG3_ADDRESS));
+	break;
+    case BackBG2:
+	LZ77UnCompVram(d_classic_haikeiC_LZ, (void *)(BG_VRAM + BG3_ADDRESS));
+	break;
+    case BackBG3:
+	LZ77UnCompVram(d_classic_haikeiD_LZ, (void *)(BG_VRAM + BG3_ADDRESS));
+	break;
+    }
+
+////////    /******* ìyä«ÉXÉNÉäÅ[ÉìÉZÉbÉg ********/
+////////    ScrBase = (u16 *)(BG_VRAM + BG2_ADDRESS);
+////////    i = 0;
+////////    while( ClassicDokan[i] != END_DT ){
+////////	if( ClassicDokan[i] != NXT_DT ){
+////////	    code = ClassicDokan[i++];
+////////	    data = CHR_DATA[code];
+////////	    cnt = ClassicDokan[i];
+////////	    for( j = 0; j < cnt; j++ ){
+////////		*ScrBase = data;
+////////		ScrBase++;
+////////	    }
+////////	}
+////////	i++;
+////////    }
+
+    /******* ÉtÉâÉOä÷åWÇÃèâä˙ê›íË ********/
+    mGm_GMMODE = GMPL_ROUND;
+    mGm_V_BLKFLG = 1;
+    mGm_QUAKEFG = 0;
+    mGm_COLFLG = 0;
+    mGm_TIME = 0;
+    mGm_SCORECALC = 0;
+    mGm_ENMYSTOPFG = 0;
+    mGm_WINNERFG = 0;
+
+    mGm_BACKBGNO = mapDT->BackBGNo;
+    mGm_BGANIMEIDX = 0;
+    mGm_BGANIMETM = 0;
+
+    roundDT = mGm_ROUND_DISP;
+    mGS_BONUSXPOS(roundDT, 0) = (s32)0x00A800;
+    mGS_BONUSXPOS(roundDT, 1) = -((s32)0x00A800);
+    mGS_BONUSMUKI(roundDT) = 0x00;
+    mGS_BONUSTM(roundDT) = 0;
+    mGS_BONUSCOLTM(roundDT) = 0;
+    mGS_BONUSCOLIDX(roundDT) = 0;
+
+    mGm_YUKAFADETM = 0;
+
+    mGm_COINCNT = 0;
+    mGm_COINSTOK = 0;
+
+    /******* É}ÉãÉ`ÉvÉåÉCéûÇÃêeéqÉtÉâÉOÇÃèâä˙âª ********/
+//    mGm_AGBNO = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+
+    /******* ÉvÉåÉCÉÑÅ[ÇÃèâä˙âª ********/
+    mGm_PLTYPE = ConnectAGB - 1;
+    if( mGm_ROUND == 1 ){
+	mGm_CEDIT = ConnectAGB;
+	if( GAME_CLEAR && !mGm_PLTYPE )	// ÇtÇrÇ`Ç≈ÇVÅ|ÇQÇÉNÉäÉAÇµÇƒÇÈÅH
+	    mGm_CEDIT++;
+    }
+#if DEBUG
+    if( mGm_EnmyTest )
+	mGm_PLTYPE = 1;
+#endif
+    MakePlayer();
+
+    /******* ÉXÉRÉAÇÃèâä˙âª ********/
+    mGm_SCORECALC = 1;
+    ScoreMain();
+
+    /******* ÉAÉNÉ^Å[ÇÃèâä˙âª ********/
+    acter_init();
+    effectAct_init();
+#if 1	/*** é¿å± ***/
+////    if(Course < 18){
+////	stage = Course;
+////    }else{
+////	stage = (Course -13) % 5;
+////    }
+////    StageEnemy_SetInit(EnDtClassic[stage]);
+//    StageEnemy_SetInit(EnDtClassic[Course]);
+    StageEnemy_SetInit(mapDT->EnemyData);
+    FireBall_TimerSet();
+    pPlay->RFBallTarget = 0;
+    pPlay->GFBallTarget = 0;
+//    if(mGm_ROUND < 17){
+//	pPlay->IcicleTimer = 0;
+//    }else{
+//	pPlay->IcicleTimer = 2700;
+//    }
+    pPlay->IciclePlace = mGm_FRAME_COUNT & 0x1F;
+    Icicle_TimerSet();
+////    pPlay->FreezeFloor = 0;
+    mGm_ENMYCNT = mapDT->EnemyCNT;	// ìGÇÃêîÉZÉbÉg
+    mGm_BNSCOIN = 0;
+    mGm_BONUSTM = 0;
+    mGm_BNSCOLIDX = 0;
+    if( mapDT->BGCoin != NULL ){
+	mGm_BNSCOIN = mGm_ENMYCNT;
+	mGm_BONUSTM = BONUS_SOUND;
+	if( mGm_ROUND >= 15 )
+	    mGm_BONUSTM = BONUS_SOUND2;
+	Address = (u16 *)(BG_VRAM + BG0_ADDRESS + 0x0818);
+	/******** òg ********/
+	for( i = 0; i < (sizeof(WaKuDT0)>> 1); i++ ){
+	    *(Address + 0x00 + i) = WaKuDT0[i];
+	    *(Address + 0x40 + i) = WaKuDT1[i];
+	}
+	Address += 0x20;
+	*(Address + 0x00) = 0x6153;
+	*(Address + 0x03) = 0x1120;
+	*(Address + 0x05) = 0x6154;
+	BonusTimer();
+	mGm_COLFLG = 0;
+    }
+#else
+    j = 0;
+#if DEBUG
+    if( mGm_EnmyTest ){
+	cnt = mGm_ETC;
+	if( !cnt )
+	    cnt = 1;
+	mGm_ENMYCNT = cnt;
+	for( i = 0; i < (u16)cnt; i++, j++ ){
+		mGm_ActTBL(j) = j;
+		if( !(i & 0x01) ){
+		    mGm_ActID(j) = EN_NOKOKAME;
+		    mGm_ACTERID(j) = EN_NOKOKAME;
+		} else {
+		    mGm_ActID(j) = EN_KANI;
+		    mGm_ACTERID(j) = EN_KANI;
+		}
+	}
+    } else {
+#endif
+	for( i = 0, cnt = 0; i < MAX_ENTRANCE; i++, j++ ){
+	    entrance = mapDT->ActerData[i];
+	    if( entrance != NoActer ){
+		mGm_ActTBL(j) = j;
+		mGm_ActID(j) = entrance;
+		mGm_ACTERID(j) = entrance;
+		cnt++;
+	    }
+	}
+	mGm_ENMYCNT = cnt;
+#if DEBUG
+    }
+#endif
+#endif	/*** é¿å± ***/
+#if 0
+    i = MAX_ACTER - 1;
+    mGm_ActTBL(i) = i;
+    mGm_ActID(i) = EN_BUCKET;
+    mGm_ACTERID(i) = EN_BUCKET;
+#endif
+
+    /******* ÉXÉNÉçÅ[Éãèâä˙ílê›íË ********/
+    m_scrollInit();
+    pl = mGm_PLAYER(AGBNo);
+    mGm_VSCROLL0 = 0x0100;
+    mGm_HSCROLL1 = mGm_HSCROLL2 = aP_SCCH(pl);
+    mGm_VSCROLL1 = mGm_VSCROLL2 = aP_SCCV(pl);
+    mGm_HSCROLL3 = aP_SCCH(pl) >> 1;
+    mGm_VSCROLL3 = aP_SCCV(pl) >> 1;
+    scroll_set();
+
+////////    GetCoinBGWrite();
+
+    /******* ÇnÇaÇiîºìßñæÇÃèâä˙ê›íË ********/
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = BLD_A_BLEND_MODE |
+	 BLD_BG0_2ND | BLD_BG1_2ND | BLD_BG2_2ND | BLD_BG3_2ND;
+    *(vu16 *)REG_BLDALPHA = mGm_COLEV = 0x0B0B;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x000B;
+
+////////    /******* ÇaÇfÇlÉIÉì ********/
+////////#if SOUND_ON
+////////    m4aSoundVSyncOn();
+////////    mGm_INTRONO = mapDT->IntroNo;
+////////    mGm_BGMNO = mapDT->bgmNo;
+////////    if( mGm_INTRONO ){
+////////	m4aSongNumStart(mapDT->IntroNo);
+////////////////    } else {
+////////////////	m4aSongNumStart(mapDT->bgmNo);
+////////    }
+////////#endif
+
+    if(ConnectAGB > 1){
+	//ëŒêÌÉvÉåÉC
+	/****** í êMÉäÉZÉbÉg *******/
+	Ms.SendBufCounter = -1;
+	((SioMultiCnt *)REG_SIOCNT)->Data = MULTI_SIO_SYNC_DATA;
+	for(i=0; i<4; i++){
+	    Ms.RecvBufCounter[i] = -1;
+	    Ms.SyncRecvFlag[i] = 0;
+	    Ms.FrameEndRecv[i] = 0;
+	    if(ConnectFlg & (1 << i)){
+		*((u16 *)REG_SIOMLT_RECV + i) = MULTI_SIO_END_DATA;
+	    }
+	}
+	*(vu16 *)REG_IF  =  SIO_INTR_FLAG	// IF ÉäÉZÉbÉg
+	    |  MULTI_SIO_TIMER_INTR_FLAG;
+
+	/******* äÑçûãñâ¬ÉtÉâÉOÇÃÉZÉbÉg ********/
+	if(Ms.Type == SIO_MULTI_PARENT){
+	    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG |
+		CASSETTE_INTR_FLAG |
+		MULTI_SIO_TIMER_INTR_FLAG;//É^ÉCÉ}Å[äÑçûãñâ¬
+	}else{
+	    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG |
+		CASSETTE_INTR_FLAG |
+		SIO_INTR_FLAG; // ÇrÇhÇnäÑÇËçûÇ›ãñâ¬
+	}
+    }else{
+	//ÇPÇoÉvÉåÉC
+	/******* äÑçûãñâ¬ÉtÉâÉOÇÃÉZÉbÉg ********/
+	*(vu16 *)REG_IE   = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    }
+    /******* ÇuÉuÉâÉìÉNäÑçûãñâ¬ÉtÉâÉOÇÃÉZÉbÉg ********/
+    NMI_NO = nmi_bros;
+    *(vu16 *)REG_STAT  = STAT_V_BLANK_IF_ENABLE;
+
+    /******* ÇhÇlÇdÉZÉbÉg ******/
+    *(vu16 *)REG_IME = 1;
+
+    /******* ÇkÇbÇcÇbÅ@@ÇnÇm ********/
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;
+
+    // VÃﬁ◊›∏äÑçû¡™Ø∏•Ã◊∏ﬁÇÃ∏ÿ?
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    while (1) {
+	// VÃﬁ◊›∏äÑçûèàó?èIóπ
+	if (game.IntrCheck & V_BLANK_INTR_FLAG)
+	    break;
+    }
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    /******* ÇaÇfÇlÉIÉì ********/
+#if SOUND_ON
+    m4aSoundVSyncOn();
+    mGm_INTRONO = mapDT->IntroNo;
+    mGm_BGMNO = mapDT->bgmNo;
+    if( mGm_INTRONO ){
+	m4aSongNumStart(mapDT->IntroNo);
+////////    } else {
+////////	m4aSongNumStart(mapDT->bgmNo);
+    }
+#endif
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É{Å[ÉiÉXï∂éöï\é¶
+	  ï\é¶íÜÅFTRUE
+	ï\é¶èIóπÅFFALSE
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+const u16		BonusDT1[4] = { 0x0380,0x0384,0x0388,0x038C };
+const u8		ColTMDT[4] = { 6,8,15,8 };
+const u16		ColData[4] = { 0x63DF,0x371F,0x2A59,0x371F };
+static	u8	BonusDisp(void)
+{
+    roundDT_c	*roundDT = mGm_ROUND_DISP;
+    commonDT_c	data;
+    u32		Xpos;
+    s32		bXpos0, bXpos1;
+    u8		BonusTM = mGS_BONUSTM(roundDT);
+    u8		BonusColTM = mGS_BONUSCOLTM(roundDT);
+    u8		BonusColIDX = mGS_BONUSCOLIDX(roundDT);
+	
+    if( !mGm_BNSCOIN )
+		return FALSE;
+    if( mGm_TIME <= RoundTime1 )
+		return FALSE;
+    if( BonusTM == 0xFF )
+		return FALSE;
+	
+    BonusColTM++;
+    if( BonusColTM >= ColTMDT[BonusColIDX] ){
+		BonusColTM = 0;
+		BonusColIDX = (BonusColIDX + 1) & 0x03;
+		mGm_ColBufOBJ[(0xA0 + 0x0F)] = ColData[BonusColIDX];
+		mGm_COLFLG |= OBJ_COL_TRANS;
+    }
+    mGS_BONUSCOLTM(roundDT) = BonusColTM;
+    mGS_BONUSCOLIDX(roundDT) = BonusColIDX;
+	
+    Xpos = (u32)(mGS_BONUSXPOS(roundDT, 0) >> 8);
+    data.Xpos = (BaseRoundXpos - 0x018) + Xpos;
+    data.Ypos = BaseRoundYpos - 0x028;
+    data.Shape = ST_OAM_H_RECTANGLE;
+    data.HFlip = 0x00;
+    data.VFlip = 0x00;
+    data.Pltt = 0x0A;
+    data.Pri = 0x00;
+    data.ObjMode = ST_OAM_OBJ_NORMAL;
+    data.Size = 0x03;
+    data.chrNO = 0x0380;
+    mGm_OamOtherSet(&data);
+    data.Xpos += 0x40;
+    data.Shape = ST_OAM_SQUARE;
+    data.Size = 0x02;
+    data.chrNO = 0x0388;
+    mGm_OamOtherSet(&data);
+    data.Shape = ST_OAM_V_RECTANGLE;
+    data.Xpos += 0x20;
+    data.chrNO = 0x038C;
+    mGm_OamOtherSet(&data);
+//    data.Shape = ST_OAM_SQUARE;
+//    data.Size = 0x01;
+//    data.Xpos += 0x20;
+//    data.chrNO = 0x038C;
+//    mGm_OamOtherSet(&data);
+	
+//	Xpos = (u32)(mGS_BONUSXPOS(roundDT, 0) >> 8);
+//	data.Ypos += 0x10;
+//    data.Xpos = (BaseRoundXpos - 0x018) + Xpos;
+//    data.Shape = ST_OAM_H_RECTANGLE;
+//    data.Size = 0x02;
+//    data.chrNO = 0x03C0;
+//    mGm_OamOtherSet(&data);
+//    data.Xpos += 0x20;
+//    data.chrNO = 0x03C4;
+//    mGm_OamOtherSet(&data);
+//    data.Xpos += 0x20;
+//    data.chrNO = 0x03C8;
+//    mGm_OamOtherSet(&data);
+//    data.Shape = ST_OAM_SQUARE;
+//    data.Size = 0x01;
+//    data.Xpos += 0x20;
+//    data.chrNO = 0x03CC;
+//    mGm_OamOtherSet(&data);
+	
+    if( !mGS_BONUSMUKI(roundDT) ){
+		bXpos0 = mGS_BONUSXPOS(roundDT, 0);
+		if( bXpos0 ){
+			bXpos0 -= BONUS_XSPD;
+			if( bXpos0 <= 0 )
+				bXpos0 = 0;
+		}
+		mGS_BONUSXPOS(roundDT, 0) = bXpos0;
+//		bXpos1 = mGS_BONUSXPOS(roundDT, 1);
+//		if( bXpos1 ){
+//			bXpos1 += BONUS_XSPD;
+//			if( bXpos1 >= 0 )
+//				bXpos1 = 0;
+//		}
+//		mGS_BONUSXPOS(roundDT, 1) = bXpos1;
+		if( !(bXpos0/* | bXpos1*/) )
+			mGS_BONUSMUKI(roundDT) = 1;
+    } else {
+		BonusTM++;
+		if( BonusTM >= 120){
+			bXpos0 = mGS_BONUSXPOS(roundDT, 0);
+			bXpos0 -= BONUS_XSPD;
+			if( bXpos0 <= -0xA800 )
+				bXpos0 = -0xA800;
+			mGS_BONUSXPOS(roundDT, 0) = bXpos0;
+//			bXpos1 = mGS_BONUSXPOS(roundDT, 1);
+//			bXpos1 += BONUS_XSPD;
+//			if( bXpos1 >= 0xA800 )
+//				bXpos1 = 0xA800;
+//			mGS_BONUSXPOS(roundDT, 1) = bXpos1;
+			if( (bXpos0 <= -0xA800)/* && (bXpos1 >= 0xA800)*/ )
+				mGS_BONUSTM(roundDT) = 0xFF;
+		} else {
+			mGS_BONUSTM(roundDT) = BonusTM;
+		}
+    }
+    mGm_TIME--;
+    return TRUE;
+}
+/*
+ ****************************************************************
+ *     ÉâÉEÉìÉhêîï\é¶èàóù
+ ****************************************************************
+ */
+static	void	game_roundDisp(void)
+{
+    u16		time = mGm_TIME;
+////////    SongHeader	*whatsong;
+
+    time++;
+    mGm_TIME = time;
+	BrosBGYukaFadeOut();
+    BonusDisp();
+    RoundDispSUB(time, BaseRoundXpos, BaseRoundYpos);
+
+    if( mGm_PLTYPE )
+	PLNumPlacard();
+    game_OAMSET();
+
+////////    if( time <= ROUND_DISP_TM )
+////////	return;
+    mGm_TIME = ROUND_DISP_TM + 1;
+
+////////    (SongHeader *)whatsong = m4a_mplay030.song;
+////////    if( (whatsong == sn_STAGE1) || (whatsong == sn_STAGE2) ){
+	if ( (m4a_mplay030.stat & MUSICPLAYER_STATUS_PAUSE) ){
+#if SOUND_ON
+	    m4aSongNumStart(mGm_BGMNO);
+#endif
+	    mGm_ENMYSTOPFG = 0;
+	    if( mGm_CLASSICOUT )
+		mGm_GMMODE = GMPL_GMOVR;
+	    else
+		mGm_GMMODE = GMPL_MOVE;
+	}
+////////    }
+}
+/*
+ ****************************************************************
+	ÉÅÉCÉìèàóù
+ ****************************************************************
+ */
+static	void	game_play_main(void)
+{
+#if CLASSIC_SELECT_DEBUG
+    u8		i;
+    u16		TrgKey = mGm_TRG;
+#endif
+////////////    u16	ContKey = mGm_CONT;
+
+    if( mGm_BNSCOIN && !mGm_PAUSEFG ){
+	mGm_BONUSTM--;
+	BonusTimer();
+	if( !mGm_BONUSTM ){
+	    mGm_TIME = 0;
+	    mGm_ENMYSTOPFG = 0x01;
+	    mGm_GMMODE = GMBNS_CLINIT;
+	}
+    }
+    if( !mGm_PAUSEFG ){
+	effectAct_main();
+	player_main();
+	acter_main();
+    }
+    ScoreMain();
+    if( !mGm_ENMYSTOPFG && !mGm_BNSCOIN ){
+	StageEnemy_SetMain();	//ìGÉZÉbÉg
+	FireBall_Set();		//ÉtÉ@@ÉCÉAÉ{Å[ÉãÉZÉbÉg
+#if ICICLEFG
+	Icicle_Set();		//Ç¬ÇÁÇÁÉZÉbÉg
+#endif
+    }
+#if CLASSIC_SELECT_DEBUG
+    if( mGm_PLTYPE ){
+	TrgKey = 0;
+	for( i = 0; i <= mGm_PLTYPE; i++ ){
+	    TrgKey |= mGm_KEYBUF(i, 0);
+	}
+    }
+    if( (TrgKey & SELECT_BUTTON) ){		//
+	mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;	// ÉfÉoÉbÉOÉÇÅ[Éh
+	mGm_GMMODE = GMPL_NEXT;			// è¡ÇµñYÇÍÇ…íçà”ÅI
+    }						//
+#endif
+#if DEBUG
+    if( (mGm_CONT & L_BUTTON) && (mGm_TRG & R_BUTTON) ){
+	mGm_GMMODE++;
+	mGm_WINNERFG = 0x01;
+	mGm_ENMYSTOPFG = 0x01;
+    }
+#endif
+}
+/*
+ ----------------------------------------------------------------
+	ÇfÇ`ÇlÇd ÇnÇuÇdÇqÉIÉuÉWÉFï\é¶
+ ----------------------------------------------------------------
+*/
+// modified by Yu Ting
+const u16		StartChrDT[13] = {
+	0x0399,0x039A,0x03B9,0x03BA,0x03DA,0x03DB,0x03FA,0x03FB,
+	0x0318,0x02F6,0x02F7,0x0250,0x02F6 };
+static	void	GameOverOamSet(playerDT_c *pl)
+{
+    commonDT_c	data;
+    u8		i;
+    u8		TBLNo = aP_TBLNO(pl);
+    u16		Timer = aP_TIMER(pl);
+	
+    if( TBLNo == mGm_AGBNO ){
+	/******** äÓñ{ç¿ïWê›íË ********/
+	data.Xpos = 0x004C;
+	data.Ypos = 0x0030;
+	/******** ã§í ÇnÇ`ÇlÉZÉbÉgÉpÉâÉÅÅ[É^ê›íË ********/
+	data.HFlip = 0x00;
+	data.VFlip = 0x00;
+	data.Pltt = 0x0F;
+	data.Pri = 0x00;
+	data.ObjMode = ST_OAM_OBJ_NORMAL;
+	/******** "ÇfÇ`"ÉZÉbÉg ********/
+	data.Shape = ST_OAM_H_RECTANGLE;
+	data.Size = 0x02;
+	data.chrNO = 0x02E0;
+	mGm_OamOtherSet(&data);
+	/******** "ÇlÇd"ÉZÉbÉg ********/
+	data.Xpos += 0x20;
+	data.chrNO = 0x02E4;
+	mGm_OamOtherSet(&data);
+	/******** "ÇnÇu"ÉZÉbÉg ********/
+	data.Xpos += 0x20;
+	data.chrNO = 0x02E8;
+	mGm_OamOtherSet(&data);
+	/******** "ÇdÇq"ÉZÉbÉg ********/
+/*	data.Xpos += 0x20;
+	data.chrNO = 0x02EC;
+	mGm_OamOtherSet(&data);
+ */  }
+	////////    if( aP_MODE(pl) != PL_GAMEOVER )
+	////////	return;
+
+    if( !mGm_ENMYCNT )			// ìGÅAëSñ≈ÇµÇƒÇÈÅH
+	return;
+    if( Timer < CLASSIC_ALLGMOVTM ){	// "ÇoÇtÇrÇg ÇrÇsÇ`ÇqÇs"ï\é¶ÅH
+	return;
+    } else {
+	if( Timer == CLASSIC_ALLGMOVTM ){
+#if SOUND_ON
+	    m4aSongNumStart(s_b_PUSH);
+#endif
+	    return;
+	}
+    }
+	/******** ÉtÉFÅ[ÉYï\é¶ ********/
+   if( TBLNo == mGm_AGBNO ){
+		RoundDispSUB((RoundTime1 + 1), 0x58, 0x50);
+   }
+
+   if( (mGm_FRAME_COUNT & 0x010) )
+		return;
+	
+    if( TBLNo == mGm_AGBNO ){
+		data.Ypos = 0x0078;
+		data.Pltt = 0x0f;//0x09;
+		
+		/******** "ÇoÇqÇdÇrÇr"ÉZÉbÉg ********/
+/*		data.Xpos = 0x004C;
+		data.Shape = ST_OAM_SQUARE;
+		data.Size = 0x00;
+		for( i = 0; i < 5; i++ ){
+			data.chrNO = StartChrDT[i];
+			mGm_OamOtherSet(&data);
+			data.Xpos += 0x08;
+		}
+*/		
+		/******** "ÇrÇsÇ`ÇqÇs"ÉZÉbÉg ********/
+		data.Xpos = 0x0064;
+		data.Shape = ST_OAM_SQUARE;
+		data.Size = 0x00;
+		for( i = 8; i < (sizeof(StartChrDT) >> 1); i++ ){
+			data.chrNO = StartChrDT[i];
+			mGm_OamOtherSet(&data);
+			data.Xpos += 0x08;
+		}
+
+		data.Xpos = 0x0054;
+		data.Ypos = 0x0074;
+		data.Shape = ST_OAM_SQUARE;
+		data.Size = 0x00;
+		for( i = 0; i < 8 ; i++ ){
+			if (i==4)
+				data.Ypos = 0x0074;
+			if (i<4){  
+				if ( i%2 == 0)	data.Xpos = 0x0054;
+				if ( i==2 ) data.Ypos += 8;
+			}
+			else
+			{
+				if ( i%2 == 0)	data.Xpos = 0x008C;
+				if ( i==6 ) data.Ypos += 8;
+			}
+			data.chrNO = StartChrDT[i];
+			mGm_OamOtherSet(&data);
+			data.Xpos += 0x08;
+		}
+
+	}
+}
+/*
+ ----------------------------------------------------------------
+	äeÉvÉåÉCÉÑÅ[íPà ÇÃÇfÇ`ÇlÇd ÇnÇuÇdÇqÉIÉuÉWÉFï\é¶
+ ----------------------------------------------------------------
+*/	
+// modified by yu ting for Chiese version
+const u16		OverChrDT[2] = { 0x02F4,0x02F5};//,0x02F3,0x02A5 };
+const u16		ContinueChrDT[8] = {				
+	0x0365,0x0366,0x0367,0x036f, 0x0368,0x0369,0x036A, 0x38f
+};
+const u16		YesChrDT[2] = { 0x036B,0x036D };
+//const u16		NoChrDT[1] = { 0x036C};//,0x036E };
+const u16		CreditChrDT[4] = { 0x0398,0x03D8,0x03B8,0x03F8 };
+const u16 ContinueWakuObjChrDT[25] = {
+	0x370, 0x371, 0x371, 0x371, 0x370,
+	0x390, 0x391, 0x391, 0x391, 0x390,
+	0x390, 0x391, 0x391, 0x391, 0x390,
+	0x390, 0x391, 0x391, 0x391, 0x390,
+	0x3B0, 0x3B1, 0x3B1, 0x3B1, 0x3B0,
+};
+static	void	EveryoneGameOverOamSet(playerDT_c *pl)
+{
+    commonDT_c	data;
+    u8		i, j;
+    u8		TBLNo = aP_TBLNO(pl);
+    u8		GameOverSLCT = aP_GameOverSLCT(pl);
+    u16		Timer = aP_TIMER(pl);
+	
+    if( TBLNo == mGm_AGBNO ){
+	/******** äÓñ{ç¿ïWê›íË ********/
+	//	data.Xpos = 0x0040;
+	data.Xpos = 0x005C;
+	data.Ypos = 0x0030;
+
+	/******** ã§í ÇnÇ`ÇlÉZÉbÉgÉpÉâÉÅÅ[É^ê›íË ********/
+	data.HFlip = 0x00;
+	data.VFlip = 0x00;
+	data.Pri = 0x00;
+	data.ObjMode = ST_OAM_OBJ_NORMAL;
+		
+	/******** ÉvÉåÉCÉÑÅ[ÉiÉìÉoÅ[ÇπÇ¡Ç∆ ********/
+	/*
+	  data.Shape = ST_OAM_V_RECTANGLE;
+	  data.Size = 0x00;
+	  data.chrNO = 0x02A0 + aP_TBLNO(pl);
+	  mGm_OamOtherSet(&data);
+	  data.Xpos += 0x08;
+	  data.chrNO = 0x02A4;
+	  mGm_OamOtherSet(&data);
+	  data.Xpos += 0x08;
+	  data.Xpos += 0x08;
+	*/
+	/******** "ÇfÇ`ÇlÇd"ÉZÉbÉg ********/
+	data.Xpos += 4;
+	data.Pltt = 0x0C;
+	data.Shape = ST_OAM_H_RECTANGLE;
+	data.Size = 0x02;
+	data.chrNO = 0x02F0;
+	mGm_OamOtherSet(&data);
+	data.Xpos += 0x20;
+
+	/******** "ÇnÇuÇdÇq"ÉZÉbÉg ********/
+	data.Shape = ST_OAM_V_RECTANGLE;
+	data.Size = 0x00;
+	for( i = 0; i < (sizeof(OverChrDT) >> 1); i++ ){
+	    data.chrNO = OverChrDT[i];
+	    mGm_OamOtherSet(&data);
+	    data.Xpos += 0x08;
+	}
+    }
+
+    Timer++;
+    if( Timer < CLASSIC_ONE_GMOVTM ){	// ÉZÉåÉNÉgï\é¶ÅH
+	aP_TIMER(pl) = Timer;
+	return;
+    } else {
+	if( Timer == CLASSIC_ONE_GMOVTM ){
+	    if( mGm_DEADORDER(0) != (TBLNo + 1) )
+		return;
+	    aP_TIMER(pl) = Timer;
+#if SOUND_ON
+	    if( TBLNo == mGm_AGBNO ){
+		m4aSongNumStart(s_b_PUSH);
+	    }
+#endif
+	    return;
+	}
+    }
+////////    if( !mGm_CEDIT || !aP_STAMINA(pl) )
+    if( !mGm_CEDIT )
+	return;
+
+    if( TBLNo == mGm_AGBNO ){
+	/******** ÉRÉìÉeÉBÉjÉÖÅ[ï\é¶É`ÉFÉbÉN ********/
+	if( mGm_DEADORDER(0) != (TBLNo + 1) )
+	    return;
+
+	data.Pltt = 0x09;
+	data.Shape = ST_OAM_SQUARE;
+	data.Size = 0x00;
+	/******** "ÇbÇnÇmÇsÇhÇmÇtÇdÅH"ÉZÉbÉg ********/
+	data.Xpos = 0x0068;
+	data.Ypos = 0x0048;
+	data.Pltt = 0x0A;
+	for( i = 0; i < (sizeof(ContinueChrDT) >> 1); i++ ){
+		if (i==4)
+		{
+			data.Xpos = 0x0068;
+			data.Ypos = 0x0050;
+		}
+	    data.chrNO = ContinueChrDT[i];
+	    mGm_OamOtherSet(&data);
+	    data.Xpos += 0x08;
+	}
+
+	/******** "ÇxÇdÇr"ÉZÉbÉg ********/
+	data.Xpos = 0x0070;
+	data.Ypos = 0x0058;
+	data.Pltt = 0x0A + (GameOverSLCT ^ 1);
+	for( i = 0; i < (sizeof(YesChrDT) >> 1); i++ ){
+		data.chrNO = YesChrDT[i];
+	    mGm_OamOtherSet(&data);
+	    data.Ypos += 0x08;
+	}
+
+	/******** "ÇmÇn"ÉZÉbÉg ********/
+	data.Xpos = 0x0070;
+	data.Ypos = 0x0068;
+	data.Pltt = 0x0A + GameOverSLCT;
+    data.chrNO = 0x036C;
+    mGm_OamOtherSet(&data);
+
+/*	for( i = 0; i < (sizeof(NoChrDT) >> 1); i++ ){
+	    data.chrNO = NoChrDT[i];
+	    mGm_OamOtherSet(&data);
+	    data.Ypos += 0x08;
+	}
+*/
+	/******** éwÉJÅ[É\ÉãÉZÉbÉg ********/
+	if( (mGm_FRAME_COUNT & 0x010) ){
+	    data.Xpos = 0x0058;
+	    data.Ypos = 0x0053 + (GameOverSLCT << 4);
+	    data.Pltt = 0x0A;
+	    data.Shape = ST_OAM_SQUARE;
+	    data.Size = 0x01;
+	    data.chrNO = 0x0236;
+	    mGm_OamOtherSet(&data);
+	    data.Size = 0x00;
+	}
+
+	/******** "ÇbÇqÇdÇcÇhÇs"ÉZÉbÉg ********/
+	data.Xpos = 0x0068;
+	data.Ypos = 0x0074;
+	data.Pltt = 0x0C;
+	for( i = 0; i < (sizeof(CreditChrDT) >> 1); i++ ){
+		if (i==2)
+		{
+			data.Ypos += 0x0008;
+			data.Xpos = 0x0068;
+		}
+	    data.chrNO = CreditChrDT[i];
+	    mGm_OamOtherSet(&data);
+	    data.Xpos += 0x10;
+	}
+	data.Ypos -= 0x0008 ;
+	/******** ÉNÉåÉWÉbÉgêîÉZÉbÉg ********/
+	data.Xpos += 0x08;
+	data.chrNO = 0x0360 + mGm_CEDIT;
+	mGm_OamOtherSet(&data);
+	/******** ÉoÉbÉNÇÃòg ********/
+	data.Pltt = 0x00;
+	data.Pri = 0x00;
+	data.Size = 0x02;
+	data.Shape = ST_OAM_SQUARE;
+	data.Xpos = 0x50;
+	data.Ypos = 0x44;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+	data.Ypos = 0x64;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+	data.Xpos = 0x70;
+	data.Ypos = 0x44;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+	data.Ypos = 0x64;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+	data.Shape = ST_OAM_V_RECTANGLE;
+	data.Xpos = 0x90;
+	data.Ypos = 0x44;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+	data.Ypos = 0x64;
+	data.chrNO = 0x039C;
+	mGm_OamOtherSet(&data);
+    }
+}
+/*
+ ****************************************************************
+	ÇfÇ`ÇlÇd ÇnÇuÇdÇqèàóù
+ ****************************************************************
+ */
+static	void	game_over_main(void)
+{
+    u8		i, flag;
+    playerDT_c	*pl;
+
+    if( mGm_BNSCOIN && !mGm_PAUSEFG ){
+	mGm_BONUSTM--;
+	BonusTimer();
+	if( !mGm_BONUSTM ){
+	    mGm_TIME = 0;
+	    mGm_GMMODE = GMBNS_CLINIT;
+	}
+    }
+    if( !mGm_PAUSEFG ){
+	for( i = 0; i < MAX_PLAYER; i++ ){
+	    pl = mGm_PLAYER(i);
+	    if( aP_MODE(pl) == PL_GAMEOVER ){
+		EveryoneGameOverOamSet(pl);
+	    }
+////////	    if( aP_MODE(pl) == PL_ALLGAMEOVER ){
+	    if( (mGm_CLASSICOUT & WinBitDT[i]) ){
+			GameOverOamSet(pl);
+	    }
+	}
+	
+	effectAct_main();
+	player_main();
+	acter_main();
+    }
+    ScoreMain();
+    if( !mGm_ENMYSTOPFG || !mGm_PAUSEFG ){
+	StageEnemy_SetMain();	//ìGÉZÉbÉg
+	FireBall_Set();		//ÉtÉ@@ÉCÉAÉ{Å[ÉãÉZÉbÉg
+    }
+}
+/*
+ ****************************************************************
+	ÉRÅ[ÉXÉNÉäÉAèàóù
+ ****************************************************************
+ */
+static	void	game_couse_clear(void)
+{
+    u8		i;
+    u16		MaxTime = 180;
+    u16		time = mGm_TIME;
+    playerDT_c	*pl;
+
+    game_OAMSET();
+    if( !mGm_PAUSEFG ){
+	for( i = 0; i < MAX_PLAYER; i++ ){
+	    pl = mGm_PLAYER(i);
+////////	    if( aP_MODE(pl) == PL_ALLGAMEOVER ){
+	    if( (mGm_CLASSICOUT & WinBitDT[i]) ){
+		GameOverOamSet(pl);
+		MaxTime = CLASSIC_ALLGMOVTM;
+	    }
+	}
+    }
+
+    time++;
+    mGm_TIME = time;
+    if( time < MaxTime )
+	return;
+    mGm_TIME = 0;
+    mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+    mGm_GMMODE = GMPL_NEXT;
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXñ ÉNÉäÉAÉfÉÇÇÃÇvÇ`ÇhÇsÅïÉCÉjÉVÉÉÉã
+ ****************************************************************
+ */
+static	void	game_bonus_clearInit(void)
+{
+    u16		time = mGm_TIME;
+
+    game_OAMSET();
+
+    time++;
+    mGm_TIME = time;
+    if( time < 180 )
+	return;
+    mGm_TIME = 0;
+
+    /******* ÇaÇfÇOîºìßñæÇÃèâä˙ê›íË ********/
+    mGm_BLDMOD = BLD_A_BLEND_MODE | BLD_BD_1ST | BLD_BG1_1ST | BLD_BG3_2ND;
+    mGm_COLEV = 0x1010;
+    mGm_COLY = 0x0010;
+#if SOUND_ON
+    m4aMPlayAllStop();
+#endif
+    mGm_GMMODE++;
+}
+/*
+ ****************************************************************
+	ÉQÅ[ÉÄâÊñ ÇÃè¡ãé
+ ****************************************************************
+ */
+const s32		MarioYposDT[4][MAX_PLAYER] = {
+	{0x00002800,0x00000000,0x00000000,0x00000000},
+	{0x00002000,0x00004800,0x00000000,0x00000000},
+	{0x00001000,0x00003000,0x00005000,0x00000000},
+	{0x00001000,0x00002800,0x00004000,0x00005800}
+};
+static	void	game_bonus_dispCLS(void)
+{
+    u8		i;
+    s16		ColY = (s16)mGm_COLY;
+    u16		*Address;
+    playerDT_c	*pl;
+
+    mGm_COLEV -= 0x0001;
+    ColY--;
+    mGm_COLY = (u16)ColY;
+	if(ColY == 1){
+#if SOUND_ON
+		m4aMPlayAllStop();		// ÉTÉEÉìÉhÉXÉgÉbÉv
+//		VSYNC_OFF = 1;
+		//    m4aSoundVSyncOff();
+#endif
+	}
+	
+	if( ColY > 0 )
+	return;
+
+//    mGm_VSCROLL1 = (u16)((mGm_PLTYPE & 0x02) << 7);
+//    mGm_HSCROLL1 = (u16)((mGm_PLTYPE & 0x01) << 8);
+    mGm_VSCROLL1 = 0;
+    mGm_HSCROLL1 = 0;
+    mGm_COLY = 0;
+
+	if(mGm_PLTYPE == 0)
+	    HuffUnComp(classic_bonus2_1_Huff, (void *)(BG_VRAM + BG1_ADDRESS));
+	else if(mGm_PLTYPE == 1)
+	    HuffUnComp(classic_bonus2_2_Huff, (void *)(BG_VRAM + BG1_ADDRESS));
+	else if(mGm_PLTYPE == 2)
+	    HuffUnComp(classic_bonus2_3_Huff, (void *)(BG_VRAM + BG1_ADDRESS));
+	else
+	    HuffUnComp(classic_bonus2_4_Huff, (void *)(BG_VRAM + BG1_ADDRESS));
+
+    for( i = 0; i <= mGm_PLTYPE; i++ ){
+		Address = (u16 *)(BG_VRAM + PLNumAddressDT[mGm_PLTYPE][i]);
+		if( i != mGm_AGBNO ){
+			Address += 0x020;
+			*Address = 0x0130;
+			*(Address + 1) = 0x0111 + i;
+		} else {
+			*(Address + 0x00) = 0x014F;
+			*(Address + 0x20) = 0x015F;
+			*(Address + 0x40) = 0x016F;
+			Address++;
+			*(Address + 0x00) = 0x014B + i;
+			*(Address + 0x20) = 0x015B + i;
+			*(Address + 0x40) = 0x016B + i;
+		}
+		
+    }
+		/******** ï\é¶Ç∑ÇÈÉ}ÉäÉIÇÃç¿ïWê›íË ********/
+		pl = mGm_PLAYER(mGm_AGBNO);
+		if(aP_BattleLoseFG(pl) == 0){ 
+			aP_XPOS(pl) = 0x000C00 + (mGm_HSCROLL1 << 8);
+			aP_YPOS(pl) = MarioYposDT[mGm_PLTYPE][mGm_AGBNO] + (mGm_VSCROLL1 << 8);
+			aP_CHRNO(pl) = 0x01D;
+			aP_HFLIP(pl) = 0;
+			aP_VFLIP(pl) = 0;
+			MoToColorReset(aP_TBLNO(pl));
+		}
+
+#if SOUND_ON
+//    m4aSoundVSyncOff();
+//    m4aSoundVSyncOn();
+    m4aSongNumStart(s_b_battlekekka);
+#endif
+    mGm_GMMODE++;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	é©ï™ÇÃÉXÉRÉAÇ…ï\é¶Ç∑ÇÈÉ}ÉäÉIÇnÇ`ÇlÉZÉbÉg
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	MyMarioSet(void)
+{
+	u8 i;
+	playerDT_c	*pl;
+//		pl = mGm_PLAYER(mGm_AGBNO);
+
+	for(i = 0; i <= mGm_PLTYPE; i++){
+		pl = mGm_PLAYER(i);
+		if(i == mGm_AGBNO || aP_BattleLoseFG(pl) != 0 )
+		    mGm_player_OamSet(pl);
+	}
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃìoèÍ
+ ****************************************************************
+ */
+static	void	game_bonus_dispSet(void)
+{
+    s16		ColY = (s16)mGm_COLY;
+
+    MyMarioSet();
+    mGm_COLEV += 0x0001;
+    ColY++;
+    mGm_COLY = (u16)ColY;
+    if( ColY < 16 )
+	return;
+
+    mGm_GMMODE++;
+    mGm_BLDMOD = BLD_DOWN_MODE | BLD_BG1_1ST | BLD_BG3_1ST;
+    mGm_COLY = 0x05;
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgäJénÇvÇ`ÇhÇs
+ ****************************************************************
+ */
+static	void	game_bonusStartWait(void)
+{
+    u8		i;
+    u16		time = mGm_TIME;
+
+    MyMarioSet();
+    time++;
+    mGm_TIME = time;
+    if( time < 60 )
+	return;
+    for( i = 0; i < MAX_PLAYER; i++ ){
+	aP_ANIMEIDX(mGm_PLAYER(i)) = 0;
+    }
+    mGm_TIME = 0;
+    mGm_GMMODE++;
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉRÉCÉìÉJÉEÉìÉgäJén
+ ****************************************************************
+ */
+static	void	game_bonusCountStart(void)
+{
+    u8		CountNo = (mGm_GMMODE - GMBNS_COINCT1) >> 1;
+    u16		time = mGm_TIME;
+    u16		*Address;
+    playerDT_c	*pl = mGm_PLAYER(CountNo);
+    u8		AnimeIDX = aP_ANIMEIDX(pl);
+
+    MyMarioSet();
+    time++;
+    mGm_TIME = time;
+    if( time <= 10 )
+	return;
+    mGm_TIME = 0;
+    Address = (u16 *)(BG_VRAM + PLNumAddressDT[mGm_PLTYPE][CountNo]);
+    if( aP_COINCOUNT(pl) ){
+	*(Address + 0x003 + AnimeIDX) = 0x114A;
+	*(Address + 0x023 + AnimeIDX) = 0x115A;
+	*(Address + 0x043 + AnimeIDX) = 0x116A;
+	AnimeIDX++;
+	aP_COINCOUNT(pl)--;
+	aP_ANIMEIDX(pl) = AnimeIDX;
+	mGm_BNSCOIN--;
+	AddScore(CountNo, POINT_800);
+	ScoreMain();
+#if SOUND_ON
+	m4aSongNumStart(s_b_KEKKA);
+#endif
+    } else {
+	*(Address + 0x02E) = 0x0175;
+	*(Address + 0x030) = 0x0148;
+	*(Address + 0x031) = 0x0140;
+	*(Address + 0x032) = 0x0140;
+	mGm_TIME = 0;
+	aP_ANIMEIDX(pl) = 0;
+	if( CountNo >= mGm_PLTYPE )
+//	    if( !mGm_BNSCOIN )
+		mGm_GMMODE = GMBNS_PFCTWT;
+//	    else
+//		mGm_GMMODE = GMBNS_DISP;
+
+	else
+	    mGm_GMMODE++;
+    }
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgÇvÇ`ÇhÇs
+ ****************************************************************
+ */
+static	void	game_bonusCointWait(void)
+{
+    u16		time = mGm_TIME;
+
+    MyMarioSet();
+    time++;
+    mGm_TIME = time;
+    if( time < 30 )
+	return;
+    mGm_TIME = 0;
+    mGm_GMMODE++;
+}
+/*
+ ****************************************************************
+	ÉpÅ[ÉtÉFÉNÉgÇvÇ`ÇhÇs
+ ****************************************************************
+ */
+static	void	game_perfectWAIT(void)
+{
+    u16		time = mGm_TIME;
+
+    MyMarioSet();
+    time++;
+    mGm_TIME = time;
+    if( time < 45 )
+	return;
+    mGm_TIME = 0;
+    mGm_GMMODE++;
+}
+/*
+ ****************************************************************
+	ÉpÅ[ÉtÉFÉNÉgÉ`ÉFÉbÉN
+ ****************************************************************
+ */
+// modified by Yu Ting
+/*
+const	u16		PerfectDT[8] = {
+	0x6130,0x6125,0x6132,0x6126,0x6125,0x6123,0x6134,0x611B
+};
+const	u16		NoBonusDT[8] = {
+	0x512E,0x512F,0x5159,0x5122,0x512F,0x512E,0x5135,0x5133
+};
+*/
+const	u16		PerfectDT[6] = {
+	0x6136,0x6137,0x6138,0x6139,0x613A,0x611B
+};
+const	u16		NoBonusDT[5] = {
+	0x5122,0x5123,0x5124,0x5125,0x5126
+};
+const	u16		PerfectAddress[4] = {
+	(BG0_ADDRESS + 0x0B4E),(BG0_ADDRESS + 0x0C0E),
+		(BG0_ADDRESS + 0x0C0E),(BG0_ADDRESS + 0x0C0E)
+};
+
+const	u16		NoBunusAddress[4] = {
+	(BG0_ADDRESS + 0x0B56),(BG0_ADDRESS + 0x0C16),
+		(BG0_ADDRESS + 0x0C16),(BG0_ADDRESS + 0x0C16)
+};
+const u16		AllPoint3000DT[8] = {
+	0x0171,0x0172,0x0143,0x0140,0x0140,0x0140,0x0173,0x0174
+};
+const u16		AllPoint5000DT[8] = {
+	0x0171,0x0172,0x0145,0x0140,0x0140,0x0140,0x0173,0x0174
+};
+static	void	game_perfectCHK(void)
+{
+   u8		i;
+    u16		time = mGm_TIME;
+    u16		*Address;
+    playerDT_c	*pl;
+
+    MyMarioSet();
+    time++;
+    mGm_TIME = time;
+    time = time >> 1;
+    if(mGm_BNSCOIN ){
+		Address = (u16 *)(BG_VRAM + NoBunusAddress[mGm_PLTYPE]);
+		*(Address + time) = NoBonusDT[time];
+		*(Address + time-0x20) = NoBonusDT[time]+5;
+		if( time < (sizeof(NoBonusDT) >> 1) - 1)
+			return;
+#if SOUND_ON
+		m4aSongNumStart(s_b_NOBONUS);
+#endif
+	} else{
+		Address = (u16 *)(BG_VRAM + PerfectAddress[mGm_PLTYPE]);
+		*(Address + time) = PerfectDT[time];
+		if (time!=5)
+			*(Address + time-0x20) = PerfectDT[time]-5;
+		if( time < (sizeof(PerfectDT) >> 1) - 1)
+			return;
+		time += 0x02;
+		if( mGm_ROUND == 4){	//ÇSñ ÇÃÉ{Å[ÉiÉXÇÃÇ›ÇRÇOÇOÇOì_
+			if (mGm_PLTYPE == 0) i = 2;
+			else i = 0;
+			for(;  i < (sizeof(AllPoint3000DT) >> 1); i++ ){
+				*(Address + time + i) = AllPoint3000DT[i];
+			}
+			for( i = 0; i <= mGm_PLTYPE; i++ ){
+				pl = mGm_PLAYER(i);
+				if(aP_BattleLoseFG(pl) == 0){ 
+					if(i == mGm_AGBNO) aP_CHRNO(mGm_PLAYER(i)) = 0x018;
+					AddScore(i, POINT_1000);
+					AddScore(i, POINT_1000);
+					AddScore(i, POINT_1000);
+				}
+			}
+		}else{
+			if (mGm_PLTYPE == 0) i = 2;
+			else i = 0;
+			for(;  i < (sizeof(AllPoint5000DT) >> 1); i++ ){
+				*(Address + time + i) = AllPoint5000DT[i];
+			}
+			for( i = 0; i <= mGm_PLTYPE; i++ ){
+				pl = mGm_PLAYER(i);
+				if(aP_BattleLoseFG(pl) == 0){ 
+				if(i == mGm_AGBNO) aP_CHRNO(mGm_PLAYER(i)) = 0x018;
+				AddScore(i, POINT_1000);
+				AddScore(i, POINT_1600);
+				AddScore(i, POINT_2400);
+				}
+			}
+		}
+		ScoreMain();
+#if SOUND_ON
+		m4aSongNumStart(s_b_PERFECT);
+#endif
+	}
+    mGm_TIME = 0;
+    mGm_GMMODE = GMBNS_DISP;
+}
+/*
+ ****************************************************************
+	É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃï\é¶
+ ****************************************************************
+ */
+static	void	game_bonusDisp(void)
+{
+    u8		i;
+    u16		TrgKey = mGm_TRG;
+    u16		time = mGm_TIME;
+    commonDT_c	data;
+    playerDT_c	*pl;
+
+	if(time == 0){
+		if(mGm_BNSCOIN == 0){
+			for(i = 0; i <= mGm_PLTYPE; i++){
+				pl = mGm_PLAYER(i);
+				if(aP_BattleLoseFG(pl) != 0) continue; 
+				mGm_PLCOUNT(i)++;
+				if( mGm_PLCOUNT(i) > 99 )
+					mGm_PLCOUNT(i) = 99;
+			}
+#if SOUND_ON
+			m4aSongNumStart(s_b_PAUSE1UP);
+#endif
+		}else {
+			time = 100;
+		}
+	}
+
+    MyMarioSet();
+    if(!mGm_BNSCOIN ){
+		data.HFlip = 0x00;
+		data.VFlip = 0x00;
+		data.Pri = 0x00;
+		data.ObjMode = ST_OAM_OBJ_NORMAL;
+		data.Shape = ST_OAM_H_RECTANGLE;
+		data.Size = 0x02;
+		data.Xpos = 0x00C8;
+		data.chrNO = 0x02B8;
+		data.Pltt = 0x0B;
+		for(i = 0; i <= mGm_PLTYPE; i++){
+			pl = mGm_PLAYER(i);
+			if(aP_BattleLoseFG(pl) != 0) continue; 
+			data.Ypos = (MarioYposDT[mGm_PLTYPE][i] >> 8) + 0x0C;
+			mGm_OamOtherSet(&data);
+		}
+	}
+
+	if(time > 150){
+		if( mGm_PLTYPE ){
+			TrgKey = 0;
+			for( i = 0; i <= mGm_PLTYPE; i++ ){
+				TrgKey |= mGm_KEYBUF(i, 0);
+			}
+		}
+		if( (TrgKey & (A_BUTTON | START_BUTTON)) ){
+#if SOUND_ON
+			m4aSongNumStart(s_b_HEART_GET);
+#endif
+			time = 300;
+		}
+	}
+    time++;
+    mGm_TIME = time;
+    if( time < 300)
+	return;
+    mGm_TIME = 0;
+    mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+    mGm_GMMODE = GMPL_NEXT;
+}
+/*
+ ****************************************************************
+ *	É^ÉCÉgÉãÇ÷ÇÃÉzÉèÉCÉgÉAÉEÉgèàóù
+ ****************************************************************
+ */
+static	void	game_title_WhiteOUT(void)
+{
+    u8		fg;
+
+    m_WhiteOUT(BROS_TITLE_MODE);
+    if( mGm_COLY == 0x01F )
+	VSYNC_OFF = 1;
+    if( mGm_SLMODE == BROS_TITLE_MODE ){
+	fg = 0;
+	if( B_HI_SCORE < mGm_TOPSCORE ){
+	    fg++;
+	    B_HI_SCORE = mGm_TOPSCORE;
+	}
+	if( BROS_MAX < mGm_ROUND ){
+	    fg++;
+	    BROS_MAX = mGm_ROUND;
+	}
+	if( fg ){
+#if SOUND_ON
+	    *(vu16 *)REG_IME = 0;
+#endif
+	    hi_score_save();
+#if SOUND_ON
+	    *(vu16 *)REG_IME = 1;
+	    V_blank_wait();
+	    m4aSoundVSyncOn();
+#endif
+	}
+
+	mGm_COINFG = 0;
+	if( fg && (ERROR_NO != 0) ){		// ÉZÅ[ÉuÉGÉâÅ[ÅH
+	    mGm_BLDMOD = 0;			//
+	    BrosMemoryFree();			//
+	    return;				//	YES --> return
+	}
+	if( mGm_PLTYPE ){			// É}ÉãÉ`ÉQÅ[ÉÄÅH
+	    BRUSFG = MAIN_mode;
+	    mGm_SLMODE = 0;
+	}
+	mGm_GMMODE = 0;
+
+	BrosMemoryFree();
+
+#if SOUND_ON
+	m4aMPlayAllStop();
+	VSYNC_OFF = 1;
+////////	m4aSongNumStop(mGm_BGMNO);
+#endif
+    }
+}
+/*
+ ****************************************************************
+ *	éüÇ÷ÇÃÉzÉèÉCÉgÉAÉEÉgèàóù
+ ****************************************************************
+ */
+static	void	game_play_WhiteOUT(void)
+{
+    u8		Course;
+    scoreDT_c	*scoreDT = mGm_SCORE_DISP;
+	
+    m_WhiteOUT(mGm_SLMODE);
+    if( !mGm_GMMODE ){
+		Course = mGm_COURSE;
+		Course++;
+		//	if( Course >= 0x11 )
+		//	    Course = 0;
+		//	if(Course >= 18){
+		//	    Course = 13;
+		//	}
+		if(Course >= 24){
+			Course = 17;
+		}
+		mGm_COURSE = Course;
+		AllEraseEnemy();
+//	m4aMPlayAllStop();
+//	VSYNC_OFF = 1;
+    }else{
+		if(mGm_COLY == 0x1e) m4aMPlayAllStop();
+		if(mGm_COLY == 0x1f) VSYNC_OFF = 1;
+	}
+}
+/*
+ ****************************************************************
+ *     ÉÅÉjÉÖÅ[îzóÒ
+ ****************************************************************
+ */
+mfunc game_play_menu[] = {
+    game_play_init,		// ÉCÉjÉVÉÉÉãèàóù
+    game_roundDisp,		// ÉâÉEÉìÉhêîï\é¶èàóù
+    game_play_main,		// ÉÅÉCÉìèàóù
+    game_title_WhiteOUT,	// ÉzÉèÉCÉgÉAÉEÉgèàóù
+    game_play_WhiteOUT,		// éüÇ÷ÇÃÉzÉèÉCÉgÉAÉEÉgèàóù
+    game_over_main,		// ÇfÇ`ÇlÇd ÇnÇuÇdÇqèàóù
+    game_couse_clear,		// ÉRÅ[ÉXÉNÉäÉAèàóù
+    game_bonus_clearInit,	// É{Å[ÉiÉXñ ÉNÉäÉAÉfÉÇÇÃÉCÉjÉVÉÉÉã
+    game_bonus_dispCLS,		// ÉQÅ[ÉÄâÊñ ÇÃè¡ãé
+    game_bonus_dispSet,		// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃìoèÍ
+    game_bonusStartWait,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgäJénÇvÇ`ÇhÇs
+    game_bonusCountStart,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉRÉCÉìÉJÉEÉìÉgäJénÇP
+    game_bonusCointWait,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgÇvÇ`ÇhÇs
+    game_bonusCountStart,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉRÉCÉìÉJÉEÉìÉgäJénÇQ
+    game_bonusCointWait,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgÇvÇ`ÇhÇs
+    game_bonusCountStart,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉRÉCÉìÉJÉEÉìÉgäJénÇR
+    game_bonusCointWait,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgÇvÇ`ÇhÇs
+    game_bonusCountStart,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉRÉCÉìÉJÉEÉìÉgäJénÇS
+    game_bonusCointWait,	// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃÉJÉEÉìÉgÇvÇ`ÇhÇs
+    game_perfectWAIT,		// ÉpÅ[ÉtÉFÉNÉgÇvÇ`ÇhÇs
+    game_perfectCHK,		// ÉpÅ[ÉtÉFÉNÉgÉ`ÉFÉbÉN
+    game_bonusDisp,		// É{Å[ÉiÉXÉNÉäÉAâÊñ ÇÃï\é¶
+};
+/*
+ ****************************************************************
+ *     ÉÇÅ[ÉhÉZÉåÉNÉg
+ ****************************************************************
+ */
+void	game_play(void)
+{
+
+    game_play_menu[mGm_GMMODE]();
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d25 1
+a25 1
+extern	u8	d_classic_bg_sch_Huff[0x41c0];
+d491 1
+a491 1
+    // VÃﬁ◊›∏äÑçû¡™Ø∏•Ã◊∏ﬁÇÃ∏ÿ±
+d494 1
+a494 1
+	// VÃﬁ◊›∏äÑçûèàóù èIóπ
+d731 3
+a733 2
+const u16		StartChrDT[10] = {
+	0x0316,0x0250,0x02F8,0x0318,0x0318,
+d744 1
+a744 1
+	data.Xpos = 0x0034;
+d762 1
+a762 1
+	data.Xpos += 0x26;
+d766 1
+a766 1
+	data.Xpos += 0x20;
+d769 1
+a769 1
+    }
+d795 1
+a795 1
+		data.Pltt = 0x09;
+d798 1
+a798 1
+		data.Xpos = 0x004C;
+d806 1
+a806 1
+		
+d808 1
+a808 1
+		data.Xpos = 0x007C;
+d811 1
+a811 1
+		for( i = 5; i < (sizeof(StartChrDT) >> 1); i++ ){
+d816 23
+a838 1
+    }
+d844 5
+a848 4
+*/
+const u16		OverChrDT[4] = { 0x02F4,0x02F5,0x02F3,0x02A5 };
+const u16		ContinueChrDT[9] = {
+	0x0365,0x0366,0x0367,0x0368,0x0369,0x0367,0x036A,0x036B,0x0288
+d850 3
+a852 3
+const u16		YesChrDT[3] = { 0x036C,0x036B,0x036D };
+const u16		NoChrDT[2] = { 0x0367,0x0366 };
+const u16		CreditChrDT[6] = { 0x0365,0x036E,0x036B,0x036F,0x0369,0x0368 };
+d871 1
+a871 1
+	data.Xpos = 0x0054;
+d893 1
+d899 1
+a899 1
+	data.Xpos += 0x28;
+d941 1
+a941 1
+	data.Xpos = 0x0054;
+d945 5
+d960 1
+a960 1
+	    data.chrNO = YesChrDT[i];
+d962 1
+a962 1
+	    data.Xpos += 0x08;
+d969 4
+a972 1
+	for( i = 0; i < (sizeof(NoChrDT) >> 1); i++ ){
+d975 1
+a975 1
+	    data.Xpos += 0x08;
+d977 1
+a977 1
+
+d991 2
+a992 2
+	data.Xpos = 0x0058;
+	data.Ypos = 0x0078;
+d995 5
+d1002 1
+a1002 1
+	    data.Xpos += 0x08;
+d1004 1
+a1004 1
+
+d1010 1
+a1010 1
+	data.Pltt = 0x0A;
+d1365 2
+d1373 7
+d1384 1
+d1409 1
+d1418 2
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

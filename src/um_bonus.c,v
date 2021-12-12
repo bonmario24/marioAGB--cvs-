@@ -1,0 +1,1066 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*	マリオＵＳＡ　@ボーナス画面プログラム			*/
+/****************************************************************/
+#include "ua_common.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_game.h"
+#include "ud_cad.h"
+#include "uca_act.h"
+#include "um_select_sub.h"
+#include "um_bonus.h"
+#include "ua_score.h"
+#include "ua_stareffect.h"
+
+#if DEBUG
+#define BONUS_DEBUG	1
+#else
+#define BONUS_DEBUG     0
+#endif
+
+enum { // スロット結果用
+    HAZURE,
+    PL1UP,
+    PL2UP,
+    PL3UP,
+    PL5UP,
+    NOBONUS,
+};
+enum { // スロットドラムステータス
+    START,
+    SLOW,
+    SOUND,
+    STOP,
+};
+
+Slot_c *SlotDt;
+
+static u8 char_no[6] = {
+    0x00/* dummy */, 0x10, 0x00, 0x20, 0x30, 0x40
+};
+static u8 slot_no[3][8] = {
+    { 1, 2, 3, 4, 1, 5, 3, 4},
+    { 5, 4, 3, 2, 1, 4, 3, 2},
+    { 1, 3, 2, 4, 5, 3, 2, 4},
+};
+
+#define KEKKA    (SlotDt->kekka)
+#define COINUPFG (SlotDt->coinupfg)
+#define HITFLG   (SlotDt->hitfg)
+#define TIMER    (SlotDt->etctimer)
+#define WTTIMER  (SlotDt->waittimer)
+#define EGARA	 (SlotDt->egara)
+#define FLASH	 (SlotDt->flash)
+#define SUBERIFG (SlotDt->suberifg)
+#define SUBERI	 (SlotDt->suberi)
+#define BET	 (SlotDt->bet)
+#define SLOT	 (SlotDt->Slot)
+#define EFFTIME	 (SlotDt->effect_timer)
+
+#define SLTMOVE(pt)	(((Slot_Param_c *)(pt))->move)
+#define SLTSPED(pt)	(((Slot_Param_c *)(pt))->speed)
+#define SLTNO(pt)	(((Slot_Param_c *)(pt))->slot_no)
+#define SLTSTPFG(pt)	(((Slot_Param_c *)(pt))->stop_flag)
+#define SLTTIME(pt)	(((Slot_Param_c *)(pt))->timer)
+#define SLTSNDTM(pt)	(((Slot_Param_c *)(pt))->sound_timer)
+
+#define ARROWTIMER	(game.title_work[0])
+#define	ARROWPTRN	(game.title_work[1])
+
+static u8 ArrwTim_Tbl[4] = {
+    16, 10, 10, 10
+};
+
+/****************プロトタイプ宣言********************************/
+static void Set_OAM(u8 i_dram);
+static void Dram_init(void);
+static void Stop_check(u8 i_no);
+static void Decele(u8 i_slot_no);
+static void Suberi_check(void);
+static void Speed_control(void);
+static void Coin_3up(void);
+static void bonus_effect(void);
+static void bet_set(void);
+static void slot_param_init(void);
+static void slot_init(void);
+static void leach_col(void);
+static void atari_col(void);
+static void atari_message(void);
+static void stop_flag_set(void);
+static void slot_move(void);
+static void end_or_cont(void);
+
+static void bonus_init(void);
+static void bonus_disp(void);
+static void bonus_end(void);
+static void bonus_wait(void);
+/****************************************************************/
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面イニシャル処理				*/
+/*--------------------------------------------------------------*/
+static void bonus_init(void)
+{
+    u8 t_i;
+    u32 start, end;
+	u16*	ChangeTexLoc = NULL;	//Yu Ting
+	
+    
+    lcdc_off();			//強制ブランキング処理
+
+    mGm_SCCV1 = 0x0;
+    mGm_SCCH1 = 0x0;
+    mGm_SCCV2 = 0x0;
+    mGm_SCCH2 = 0x0;
+    mGm_SCCV3 = 0x0;
+    mGm_SCCH3 = 0x0;
+    NMI_NO = nmi_bonus;
+    SORTFG = 0;
+
+    COS_CLEAR[WORDNO>>3] |= (1<<(WORDNO&7));
+    redcoin_flagset();
+    EGGFG_DTSV();	// ヨッシーの玉子データセーブ
+
+    REDCOIN = 0;
+
+    mGm_MALLOC_SlotDt();
+    slot_init();
+    
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_1;
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_2;
+    
+/*------------- ＢＧキャラクター転送 ---------------------------*/
+    DmaCopy(3, ud_waku_base_schDT, BG_VRAM, 0x1800, 32);
+    DmaCopy(3, ud_waku_tenso_schDT+0x200, 
+	    BG_VRAM+0x1800, 0x800, 32);
+    DmaCopy(3, ud_waku_base_schDT+0x600, 
+	    BG_VRAM+0x2000, 0x600, 32);
+    DmaCopy(3, ud_waku_tenso_schDT+0x600, 
+	    BG_VRAM+0x2600, 0xA00, 32);
+
+
+/*------------- ＢＧスクリーン転送 -----------------------------*/
+    TENKAI( &d_slot_sscDTCP[0], (u16 *)TENKAI_RAM );
+
+//  Modified by Yu Ting
+	ChangeTexLoc = (u16 *)TENKAI_RAM ;
+	ChangeTexLoc+=140;
+	*ChangeTexLoc=*(ChangeTexLoc-1)+3;
+////////////////////////////////////////	
+	
+    
+	DmaCopy(3, TENKAI_RAM, BG_VRAM+0xF800, 0x800, 16);
+    DmaArrayCopy(3, ud_slot_BG2_sscDT, BG_VRAM+0xF000, 16);
+// ドラム用スクリーン展開
+    start = BG_VRAM+0xE800;
+    end = BG_VRAM+0xEA00;
+    while( start < end ){
+	*(vu16 *)start = 0x00BF;
+	start += 2;
+    }
+    TENKAI( &d_slot_BG1_sscDTCP[0], (u16 *)TENKAI_RAM );
+    DmaCopy(3, TENKAI_RAM, BG_VRAM+0xEA00, 0x100, 16);
+    start = BG_VRAM+0xEB00;
+    end = BG_VRAM+0xF000;
+    while( start < end ){
+	*(vu16 *)start = 0x00BF;
+	start += 2;
+    }
+// 結果用スクリーン展開
+    TENKAI( &d_slot_effect_sscDTCP[0], (u16 *)TENKAI_RAM );
+
+	//  MODIFIED BY YU TING
+    DmaCopy(3, TENKAI_RAM+PLAY_PLSYNO*0x40,
+	    BG_VRAM+0xFB40, 0x40, 16);
+
+	DmaCopy(3, TENKAI_RAM+0x100+PLAY_PLSYNO*0x80,
+	    BG_VRAM+0xF940, 0x80, 16);
+    Drw_Number(mGm_PLCNT, BG_SCR_BASE_1F<<3, 0x1A4, 0x50C0, NUKI);
+
+	DmaCopy(3, TENKAI_RAM+0x300, BG_VRAM+0xFBC0, 0x80, 16);			// YU TING
+/*------------- ＢＧカラー転送 ---------------------------------*/
+    DmaCopy(3, title_sclDT, COL_BUF, 0x200, 16);
+    
+/*------------- ＯＢＪキャラクター転送 -------------------------*/
+    DmaArrayCopy(3, d_slot_obj_schDT, OBJ_MODE0_VRAM, 32);
+    
+/*------------- ＯＢＪカラー転送 ---------------------------------*/
+    DmaCopy(3, d_slot_obj_sclDT, COL_BUF+0x200, 0x200, 16);
+    COL_FLAG = 1;	
+    
+    if( !usa_game->COINCT ){
+	mGm_GMMODE = 3;
+	TIMER = 0;
+	FLASH = 0;
+	BET = 0;
+	KEKKA = NOBONUS;
+	EFFTIME = 0xA0;
+	DmaCopy(3, TENKAI_RAM+0x680,
+		BG_VRAM+0xFBC0, 0x80, 16);		//YU TING
+	ARROWTIMER = 0xFF;
+	ARROWPTRN = 0;
+    }
+    else{
+	BET = 1;
+	usa_game->COINCT--;
+	mGm_GMMODE++;
+	ARROWTIMER = ArrwTim_Tbl[0];
+	ARROWPTRN = 0;
+    }
+    Drw_Number(BET, BG_SCR_BASE_1F<<3, 0x3AA, 0x50C0, NUKI);
+    Drw_Number(usa_game->COINCT, BG_SCR_BASE_1F<<3,
+	       0x39A, 0x50C0, NUKI);
+    
+    DISPCNT = 0;
+    BLDCNT = 0x1044;
+    BLDALPHA = 0x0A07;
+
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+    DISPCNT = 
+	DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_OBJ_ON |
+	DISP_OBJ_CHAR_1D_MAP;
+
+    m4aSoundVSyncOn();
+    m4aSongNumStart(s_u_slot_start);
+}
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面メイン処理					*/
+/*--------------------------------------------------------------*/
+static void bonus_disp(void)
+{
+    u8 t_mask = 7; // スロット回転音の間隔用
+    
+    if( TIMER > 0 )
+	TIMER--;
+    
+    /* BET */
+    bet_set();
+    
+    if( SLOT[4].stop_flag == SLOW && SLOT[4].speed < 0x300 )
+	t_mask = 0xF; // スロット回転音の間隔広く
+    if( (mGm_FRAME_COUNT&t_mask) == 0 )
+	m4aSongNumStart(s_u_se_slotroll);  // スロットの回る音
+    
+    /* リーチ時のカラー転送処理 */
+    leach_col();
+    
+    /* AまたはBボタンでスロット停止フラグセット */
+    stop_flag_set();
+
+    /* スロットのスピード調節 */
+    Speed_control();
+
+    /* スロットの位置移動 */
+    slot_move();
+
+    /* →→→アニメーション */
+    if( usa_game->COINCT &&
+	SLOT[0].stop_flag == START ){
+	if( ARROWTIMER ){
+	    ARROWTIMER--;
+	}
+	else{
+	    ARROWPTRN++;
+	    if( ARROWPTRN == 4 )
+		ARROWPTRN = 0;
+	    ARROWTIMER = ArrwTim_Tbl[ARROWPTRN];
+	}
+    }
+    else{
+	ARROWPTRN = 0;
+    }
+
+    /* オールストップで次の処理に入る */
+    if( (SLOT[0].stop_flag == STOP) &&
+	(SLOT[2].stop_flag == STOP) &&
+	(SLOT[4].stop_flag == STOP) ){
+	mGm_GMMODE++;
+	bonus_effect();
+    }
+}
+/*--------------------------------------------------------------*/
+/*	ボーナス画面終了処理					*/
+/*--------------------------------------------------------------*/
+static void bonus_end(void)
+{
+    u8 t_i;
+
+    /* 当たりの時のカラー転送 */
+    atari_col();
+
+    /* 当たりの時のメッセージの表示（点滅） */
+    atari_message();
+
+    /* 終了か続くか判定 */
+    end_or_cont();
+}
+
+/*--------------------------------------------------------------*/
+/*	コイン０でボーナスに来たときの処理			*/
+/*--------------------------------------------------------------*/
+static void bonus_wait(void)
+{
+    if( TIMER == 0x80 ){
+	m4aSongNumStart(s_u_usa_dead);
+	DmaCopy(3, TENKAI_RAM+0x680,
+		BG_VRAM+0xFBC0, 0x80, 16);		// YU TING
+    }
+    else if( TIMER == 0xC0 ){
+	mGm_GMMODE = 2;
+	FLASH = 0;
+	TIMER = 0;
+    }
+    TIMER++;
+}
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面のモードサブルーチンテーブル		*/
+/*--------------------------------------------------------------*/
+mfunc bonus_menu[] = {
+    bonus_init,		//ボーナス画面表示イニシャル処理
+    bonus_disp,		//ボーナス画面表示処理
+    bonus_end,		//ボーナス画面終了処理
+    bonus_wait,		//コイン０でボーナスに来たときの処理
+};
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面メイン処理					*/
+/*--------------------------------------------------------------*/
+void M_game_bonus(void)
+{
+    u8 t_i;
+    
+    /* スロットの絵柄表示 */
+    for( t_i = 0; t_i < 6; t_i += 2 ){
+	Set_OAM( t_i );
+    }
+    bonus_menu[game.GMMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面ＯＢＪＯＡＭセット				*/
+/*--------------------------------------------------------------*/
+static void Set_OAM( u8 i_dram )
+{
+    Slot_Param_c *slt_pt;
+
+    if( KEKKA == NOBONUS ){
+	return;
+    }
+
+    slt_pt = &SLOT[i_dram];
+    
+    OamBak[i_dram].VPos = 0x20+(SLTMOVE(slt_pt)>>8);
+    OamBak[i_dram].Size = 2;
+    OamBak[i_dram].HPos = 0x38+i_dram*0x18;
+    OamBak[i_dram].Priority = 3;
+    OamBak[i_dram].CharNo = 
+	char_no[slot_no[i_dram>>1][SLTNO(slt_pt)&0x7]];
+    if( OamBak[i_dram].CharNo == 0x30 ){
+	OamBak[i_dram].Pltt = 4;
+    }
+    else{
+	OamBak[i_dram].Pltt = 1;
+    }
+    
+    slt_pt = &SLOT[i_dram+1];
+    
+    OamBak[i_dram+1].VPos = 0x20+(SLTMOVE(slt_pt)>>8);
+    OamBak[i_dram+1].Size = 2;
+    OamBak[i_dram+1].HPos = 0x38+i_dram*0x18;
+    OamBak[i_dram+1].Priority = 3;
+    OamBak[i_dram+1].CharNo = 
+	char_no[slot_no[i_dram>>1][SLTNO(slt_pt)&0x7]];
+    if( OamBak[i_dram+1].CharNo == 0x30 ){
+	OamBak[i_dram+1].Pltt = 4;
+    }
+    else{
+	OamBak[i_dram+1].Pltt = 1;
+    }
+}
+/*--------------------------------------------------------------*/
+/*	スロットドラムイニシャライズ				*/
+/*--------------------------------------------------------------*/
+static void Dram_init( void )
+{
+    u8 t_i;
+    Slot_Param_c *slt_pt;
+    
+    for( t_i = 0; t_i < 6; t_i++ ){
+	slt_pt = &SLOT[t_i];
+	
+	SLTSPED(slt_pt) = 0x400;
+	SLTSTPFG(slt_pt) = START;
+	SLTTIME(slt_pt) = 0x14;
+    }
+    HITFLG = 0;
+    SUBERIFG = 0;
+}
+/*--------------------------------------------------------------*/
+/*	停止チェック						*/
+/*--------------------------------------------------------------*/
+static void Stop_check( u8 i_no )
+{
+    Slot_Param_c *slt_pt;
+    Slot_Param_c *slt_pt2;
+
+    slt_pt  = &SLOT[i_no];
+    slt_pt2 = &SLOT[i_no+1];
+    
+    SLTSPED(slt_pt) -= 0x10;
+    SLTSPED(slt_pt2) = SLTSPED(slt_pt);
+    if( SLTSPED(slt_pt) <= 0x100 ){
+	SLTSPED(slt_pt)  = 0x100;
+	SLTSPED(slt_pt2) = 0x100;
+	if( !(SLTMOVE(slt_pt)&0x1F00) ){
+	    SLTSPED(slt_pt)   = 0x0;
+	    SLTSPED(slt_pt2)  = 0x0;
+	    SLTSTPFG(slt_pt)  = SOUND;
+	    SLTSTPFG(slt_pt2) = SOUND;
+	    //ひとつ前のドラムが止まってないときは止まらない
+	    if( i_no >= 2 && SLOT[i_no-2].stop_flag != STOP ){
+		SLTSPED(slt_pt)   = 0x100;
+		SLTSPED(slt_pt2)  = 0x100;
+		SLTSTPFG(slt_pt)  = SLOW;
+		SLTSTPFG(slt_pt2) = SLOW;
+	    }
+	    else{
+		SLTMOVE(slt_pt) -= SLTMOVE(slt_pt)&0x1FFF;
+		SLTMOVE(slt_pt2) -= SLTMOVE(slt_pt2)&0x1FFF;
+		if( SLTMOVE(slt_pt) == 0x2000 ){
+		    EGARA |= slot_no[i_no>>1][SLTNO(slt_pt)&0x7]<<(8-(i_no<<1));
+		}
+		else{
+		    EGARA |= slot_no[i_no>>1][SLTNO(slt_pt2)&0x7]<<(8-(i_no<<1));
+		}
+		if( i_no >= 4 ){
+		    SOUND_TIMER = 0;
+		    if( FLASH ){
+			m4aSongNumStart(s_u_se_slotdrum2);
+		    }
+		    SLTSTPFG(slt_pt) = STOP;
+		    SLTSTPFG(slt_pt2) = STOP;
+		}
+		else{
+		    m4aSongNumStart(s_u_se_chery);
+		    SLTSNDTM(slt_pt) = 0x8;
+		}
+	    }
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	減速処理						*/
+/*--------------------------------------------------------------*/
+static void Decele( u8 i_slot_no )
+{
+    Slot_Param_c *slt_pt;
+
+    slt_pt = &SLOT[i_slot_no];
+    
+    if( SLTTIME(slt_pt) ){
+	SLTTIME(slt_pt)--;
+    }
+    else{
+	if( SLTSPED(slt_pt) >= 0x180 ){
+	    Stop_check( i_slot_no );
+	}
+	else if( SUBERI ){
+	    COL_FLAG = 1;
+	    SUBERI--;
+	}
+	else{
+	    Stop_check( i_slot_no );
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	すべりチェック						*/
+/*--------------------------------------------------------------*/
+static void Suberi_check( void )
+{
+    u8 t_i;
+    Slot_Param_c *slt_pt;
+    Slot_Param_c *slt_pt2;
+    
+    slt_pt  = &SLOT[4];
+    slt_pt2 = &SLOT[5];
+    if( (mGm_PLCNT >= 0xA) && (mGm_FRAME_COUNT&0x3) ){
+	if( (EGARA&0xFF0) == 0x550 ){
+#if 0 // あり得ない？下のに変更
+	    if( (slot_no[2][SLTNO(slt_pt)&7]==3) &&
+		(slot_no[2][SLTNO(slt_pt2)&7]==4) &&
+		(SLTMOVE(slt_pt) >= 0x3900) ){
+		SUBERI = 0x17;
+	    }
+#endif
+	    if( (slot_no[2][SLTNO(slt_pt)&7]==5) &&
+		(slot_no[2][SLTNO(slt_pt2)&7]==3) &&
+		(SLTMOVE(slt_pt) >= 0x3900) ){
+		SUBERI = 0x17;
+	    }
+	    else if( (slot_no[2][SLTNO(slt_pt)&7] == 5) && 
+		     (slot_no[2][SLTNO(slt_pt2)&7] == 4) && 
+		     (SLTMOVE(slt_pt) < 0x3900) ){
+		SUBERI = 0x17;
+	    }
+	    else if( (slot_no[2][SLTNO(slt_pt)&7] == 2) && 
+		     (slot_no[2][SLTNO(slt_pt2)&7] == 4) ){
+		SLTSPED(slt_pt) = 0x140;
+		SLTSPED(slt_pt2) = 0x140;
+	    }
+	}
+	else if( (EGARA&0xFF0) == 0x110 ){
+	    if( (slot_no[2][SLTNO(slt_pt)&7]==1) &&
+		(slot_no[2][SLTNO(slt_pt2)&7]==3) &&
+		(SLTMOVE(slt_pt) >= 0x3900) ){
+		SUBERI = 0x17;
+	    }
+	    else if( (slot_no[2][SLTNO(slt_pt)&7] == 1) && 
+		     (slot_no[2][SLTNO(slt_pt2)&7] == 4) && 
+		     (SLTMOVE(slt_pt) < 0x3900) ){
+		SUBERI = 0x17;
+	    }
+	}
+    }
+    SUBERIFG = 1;
+}
+/*--------------------------------------------------------------*/
+/*	スロットスピードコントロール				*/
+/*--------------------------------------------------------------*/
+static void Speed_control( void )
+{
+    u8 t_i;
+    Slot_Param_c *slt_pt;
+    Slot_Param_c *slt_pt2;
+    
+    
+    for( t_i = 0; t_i < HITFLG; t_i++ ){
+	slt_pt  = &SLOT[t_i<<1];
+	slt_pt2 = &SLOT[(t_i<<1)+1];
+	if( SLTSNDTM(slt_pt) == 0 &&
+	    SLTSTPFG(slt_pt) == SOUND ){
+	    SLTSTPFG(slt_pt) = STOP;
+	    SLTSTPFG(slt_pt2) = STOP;
+	    if( (SLOT[0].stop_flag == STOP) && 
+		(SLOT[2].stop_flag == STOP) && 
+		(SLOT[4].stop_flag != STOP) ){
+		if( (EGARA&0xF00)>>8 == (EGARA&0xF0)>>4 ){
+		    FLASH = 1;
+		    m4aSongNumStart(s_u_se_slotdrum1);
+		    SOUND_TIMER = 0x80;
+		}
+	    }
+	}
+	else{
+	    SLTSNDTM(slt_pt)--;
+	}
+	if( SLTSTPFG(slt_pt) == SLOW ){
+	    Decele( t_i<<1 );
+	}
+	if( SLTSPED(slt_pt) < 0x180 && 
+	    SLTSPED(slt_pt) >= 0x100 &&
+	    FLASH == 1 && !SUBERIFG ){
+	    Suberi_check();
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	コイン３ＵＰ処理					*/
+/*--------------------------------------------------------------*/
+static void Coin_3up(void)
+{
+    if( mGm_SCCV1 > 0 ){
+	IRQ_NO = irq_coinup;
+	NMI_NO = nmi_coinup;
+	*(vu16 *)REG_IE = 
+	     V_COUNT_INTR_FLAG | V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+	*(vu16 *)REG_STAT = 
+	     (0xA8<<8) |
+	     STAT_V_COUNT_IF_ENABLE |
+	     STAT_V_BLANK_IF_ENABLE;
+    }
+
+    if( TIMER == EFFTIME+0x5E ){
+	COINUPFG++;
+	IRQ_NO = irq_dummy;
+	NMI_NO = nmi_title;
+    }
+    else{
+	IRQ_NO = irq_coinup;
+	NMI_NO = nmi_coinup;
+	if( (TIMER == EFFTIME+0x2F) && (COINUPFG < 4) ){
+	    COINUPFG++;
+	    TIMER = EFFTIME;
+	    usa_game->COINCT++;
+	    m4aSongNumStart(s_u_se_coin);
+	    Drw_Number(usa_game->COINCT, BG_SCR_BASE_1F<<3,
+		       0x39A, 0x50C0, NUKI);
+	}
+	DmaCopy(3, TENKAI_RAM+0x580,
+		BG_VRAM+0xFBC0, 0x80, 16);		// YU TING
+    }
+}
+/*--------------------------------------------------------------*/
+/*	ボーナス画面結果処理					*/
+/*--------------------------------------------------------------*/
+static void bonus_effect(void)
+{
+    u8  t_i;
+    
+    FLASH = 2;
+
+    if( EGARA == 0x111 ){ /* チェリー・チェリー・チェリー */
+	m4aSongNumStart(s_u_suishou);
+	KEKKA = PL3UP;
+    }
+    else if( EGARA == 0x555 ){ /* ７・７・７ */
+	m4aSongNumStart(s_u_suishou);
+	KEKKA = PL5UP;
+    }
+    else if( EGARA == 0x155 ){ /* チェリー・７・７ */
+	m4aSongNumStart(s_u_suishou);
+	if( !COINUPFG ){
+	    COINUPFG++;
+	}
+	KEKKA = PL1UP;
+    }
+    else if( (EGARA == 0x222) ||
+	     (EGARA == 0x333) ||
+	     (EGARA == 0x444) ){ /* チェリー・７以外のゾロ目 */
+	m4aSongNumStart(s_u_suishou);
+	KEKKA = PL2UP;
+    }
+    else if( (EGARA&0xF00) == 0x100 ){
+	m4aSongNumStart(s_u_suishou);
+	if( (EGARA&0xF0) == 0x10 ){ /* チェリー・チェリー・○ */
+	    KEKKA = PL2UP;
+	}
+	else{ /* チェリー・○・△ */
+	    KEKKA = PL1UP;
+	}
+    }
+    else{ /* はずれ */
+	m4aSongNumStart(s_u_usa_dead);
+	KEKKA = HAZURE;
+	FLASH = 0;
+	EFFTIME = 0xA0;
+	COL_FLAG = 1;
+	DmaCopy(3, title_sclDT, COL_BUF, 0x200, 16);
+    }
+
+    EFFTIME = 0xA0+0x2F*KEKKA;
+    if( KEKKA == PL5UP ){
+	EFFTIME += 0x2F;
+    }
+
+    DmaCopy(3, TENKAI_RAM+0x300+0x80*KEKKA,
+	    BG_VRAM+0xFBC0, 0x80, 16);						// YU TING
+    TIMER = 0;
+}
+/*--------------------------------------------------------------*/
+/*	ベット用ＢＧセット処理					*/
+/*--------------------------------------------------------------*/
+static void bet_set(void)
+{
+    if( SLOT[0].stop_flag == START &&
+	(PLUS_KEY_MASK & mGm_TRG) ){
+	if( U_KEY_ON_T ){
+	    if( usa_game->COINCT != 0 )
+		m4aSongNumStart(s_u_se_coin);
+	    BET = (usa_game->COINCT)+BET;
+	    usa_game->COINCT = 0;
+	}
+	else if( D_KEY_ON_T ){
+	    if( BET > 1 ){
+		m4aSongNumStart(s_u_se_coin);
+		usa_game->COINCT += (BET-1);
+		BET = 1;
+	    }
+	}
+	else if( L_KEY_ON_T ){
+	    BET--;
+	    if( BET == 0 ){
+		BET = 1;
+	    }
+	    else{
+		m4aSongNumStart(s_u_se_coin);
+		usa_game->COINCT++;
+	    }
+	}
+	else{
+	    if( usa_game->COINCT > 0 ){
+		m4aSongNumStart(s_u_se_coin);
+		BET++;
+		usa_game->COINCT--;
+	    }
+	}
+	Drw_Number(BET, BG_SCR_BASE_1F<<3, 0x3AA, 0x50C0, NUKI);
+	Drw_Number(usa_game->COINCT, BG_SCR_BASE_1F<<3, 
+		   0x39A, 0x50C0, NUKI);
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	スロットドラム関係イニシャル処理			*/
+/*--------------------------------------------------------------*/
+static void slot_param_init(void)
+{
+    KEKKA = 0;
+    HITFLG = 0;
+    TIMER = 0;
+    WTTIMER = 0;
+    EGARA = 0;
+    FLASH = 0;
+    SUBERIFG = 0;
+    SUBERI = 0;
+    BET = 0;
+    ARROWTIMER = ArrwTim_Tbl[0];
+    ARROWPTRN = 0;
+}
+
+static void slot_init(void)
+{
+    u8 t_i;
+    Slot_Param_c *slt_pt;
+    Slot_Param_c *slt_pt2;
+
+    slot_param_init();
+    COINUPFG = 0;
+    Dram_init();		/* スロットドラムデータ初期化 */
+    for( t_i = 0; t_i < 6; t_i += 2 ){
+	slt_pt  = &SLOT[t_i];
+	slt_pt2 = &SLOT[t_i+1];
+	SLTMOVE(slt_pt)  = 0x2000;
+	SLTNO(slt_pt)    = 0;
+	SLTMOVE(slt_pt2) = 0;
+	SLTNO(slt_pt2)   = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	リーチ時のカラー転送処理				*/
+/*--------------------------------------------------------------*/
+static void leach_col(void)
+{
+    if( FLASH && !(mGm_FRAME_COUNT&0x7) ){
+	if( mGm_FRAME_COUNT&0x8 ){
+	    COL_FLAG = 1;
+	    DmaCopy(3, d_leach_sclDT, COL_BUF, 0x200, 16);
+	}
+	else{
+	    COL_FLAG = 1;
+	    DmaCopy(3, title_sclDT, COL_BUF, 0x200, 16);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	当たりの時のカラー転送処理				*/
+/*--------------------------------------------------------------*/
+static void atari_col(void)
+{
+    if( (FLASH == 2) && !(mGm_FRAME_COUNT&0x7) ){
+	if( mGm_FRAME_COUNT&0x8 ){
+	    COL_FLAG = 1;
+	    DmaCopy(3, d_atari_sclDT, COL_BUF, 0x200, 16);
+	}
+	else{
+	    COL_FLAG = 1;
+	    DmaCopy(3, title_sclDT, COL_BUF, 0x200, 16);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	当たりの時のメッセージの表示（点滅）			*/
+/*--------------------------------------------------------------*/
+static void atari_message(void)
+{
+    if( (FLASH == 2) && !(mGm_FRAME_COUNT&0xF) ){
+	if( mGm_FRAME_COUNT&0x10 ){
+	    DmaCopy(3, TENKAI_RAM+0x600,		
+		    BG_VRAM+0xFBC0, 0x80, 16);			// YU TING
+	}
+	else{
+	    DmaCopy(3, TENKAI_RAM+0x300+0x80*KEKKA,
+		    BG_VRAM+0xFBC0, 0x80, 16);			// YU TING
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	AまたはBボタンでスロット停止フラグセット		*/
+/*--------------------------------------------------------------*/
+static void stop_flag_set(void)
+{
+    if( WTTIMER == 0 ){
+	if( (A_BUTTON_ON_T || B_BUTTON_ON_T) && (HITFLG < 3) ){
+	    m4aSongNumStart(s_u_se_slotkettei);  // ストップ音
+	    WTTIMER = 0x10;
+	    SLOT[HITFLG<<1].stop_flag = SLOW;
+	    SLOT[(HITFLG<<1)+1].stop_flag = SLOW;
+	    HITFLG++;
+	}
+    }
+    else{
+	WTTIMER--;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	スロットの位置移動					*/
+/*--------------------------------------------------------------*/
+static void slot_move(void)
+{
+    u8 t_i;
+    Slot_Param_c *slt_pt;
+    Slot_Param_c *slt_pt2;
+
+    for( t_i = 0; t_i < 6; t_i += 2 ){
+	slt_pt = &SLOT[t_i];
+	slt_pt2 = &SLOT[t_i+1];
+	SLTMOVE(slt_pt) += SLTSPED(slt_pt);
+	SLTMOVE(slt_pt2) += SLTSPED(slt_pt2);
+	if( SLTMOVE(slt_pt) >= 0x4000 ){
+	    SLTMOVE(slt_pt) -= 0x4000;
+	    SLTNO(slt_pt) += 2;
+	}
+	if( SLTMOVE(slt_pt2) >= 0x4000 ){
+	    SLTMOVE(slt_pt2) -= 0x4000;
+	    SLTNO(slt_pt2) += 2;
+	}
+	Set_OAM( t_i );
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	終了か続くか判定					*/
+/*--------------------------------------------------------------*/
+static void end_or_cont(void)
+{
+    TIMER++;
+    if( TIMER > 0xA0 ){
+	if( TIMER < EFFTIME ){
+	    if( TIMER == 0xA1 ||
+		TIMER == 0xA0 + 0x2F ||
+		TIMER == 0xA0 + 0x5E ||
+		TIMER == 0xA0 + 0x8D ||
+		TIMER == 0xA0 + 0xBC ){
+		m4aSongNumStart(s_u_se_1up);
+		mGm_PLCNT += BET;
+		if( mGm_PLCNT > 99 ){
+		    mGm_PLCNT = 99;
+		}
+		Drw_Number(mGm_PLCNT, BG_SCR_BASE_1F<<3,
+			   0x1A4, 0x50C0, NUKI);
+	    }
+	    DmaCopy(3, TENKAI_RAM+0x700,
+		    BG_VRAM+0xFBC0, 0x80, 16);		// YU TING
+	    if( KEKKA != PL5UP ){
+		Drw_Number(KEKKA*BET, BG_SCR_BASE_1F<<3,
+			   0x420, 0x50C0, NUKI);
+	    }
+	    else{
+		Drw_Number(5*BET, BG_SCR_BASE_1F<<3,
+			   0x420, 0x50C0, NUKI);
+	    }
+	}
+	else if( (COINUPFG < 5) && (COINUPFG != 0) ){
+	    // コインアップ処理
+	    FLASH = 0;
+	    Coin_3up();
+	}
+	else{
+	    /* コインがあるときはスロット再始動 */
+	    if( usa_game->COINCT ){
+		NMI_NO = nmi_bonus;
+		mGm_GMMODE = 1;
+		slot_param_init();
+		COL_FLAG = 1;
+		DmaCopy(3, title_sclDT, COL_BUF, 0x200, 16);
+		DmaCopy(3, TENKAI_RAM+0x300,
+			BG_VRAM+0xFBC0, 0x80, 16);		// YU TING
+		usa_game->COINCT--;
+		BET = 1;
+		Drw_Number(BET, BG_SCR_BASE_1F<<3, 
+			   0x3AA, 0x50C0, NUKI);
+		Drw_Number(usa_game->COINCT, BG_SCR_BASE_1F<<3,
+			   0x39A, 0x50C0, NUKI);
+		Dram_init();
+	    }
+	    /* コインが無いときはプレイヤー選択画面にジャンプ */
+	    else{
+		if( WORDNO < 19 )
+		    WORDNO++;
+		else
+		    WORDNO = 19;
+		CHAPTN = WORDNO / 3;
+		FLGCLEAR();
+		save_push();
+		VSYNC_OFF = 1;
+		mGm_GMMODE = pl_sel_init;
+		mGm_SLMODE = select_mode;
+		mGm_FREE_SlotDt();
+		mGm_FREE_p_act();
+		mGm_FREE_p_scr();
+		mGm_FREE_p_eff();
+	    }
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*	レッドコインフラグセット				*/
+/*--------------------------------------------------------------*/
+void redcoin_flagset(void)
+{
+    u8 cosdt, bit, flag;
+
+    cosdt = WORDNO*5;
+    bit = cosdt&7;
+    flag = cosdt>>3;
+
+    RED_COIN[flag] |= (REDCOIN<<bit);
+    if( bit+5 > 8 ){
+	RED_COIN[flag+1] |= (REDCOIN>>(8-bit));
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	ボーナス画面用領域確保					*/
+/*--------------------------------------------------------------*/
+void mGm_MALLOC_SlotDt(void)
+{
+    if( SlotDt == NULL ){
+	SlotDt = (Slot_c *)mGm_MALLOC(sizeof(Slot_c));
+    }
+    DmaClear(3, 0, SlotDt, sizeof(Slot_c), 16);
+}
+/*--------------------------------------------------------------*/
+/*	ボーナス画面用領域開放					*/
+/*--------------------------------------------------------------*/
+void mGm_FREE_SlotDt(void)
+{
+    if( SlotDt != NULL ){
+	mGm_FREE(SlotDt);
+	SlotDt = NULL;
+    }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d106 2
+d145 4
+a148 1
+    
+d151 9
+a159 1
+    DmaCopy(3, TENKAI_RAM, BG_VRAM+0xF800, 0x800, 16);
+d178 2
+a180 2
+	    BG_VRAM+0xF980, 0x40, 16);
+    DmaCopy(3, TENKAI_RAM+0x100+PLAY_PLSYNO*0x40,
+d182 3
+d186 2
+a187 1
+    DmaCopy(3, TENKAI_RAM+0x200, BG_VRAM+0xFBC0, 0x40, 16);
+d205 2
+a206 2
+	DmaCopy(3, TENKAI_RAM+0x3C0,
+		BG_VRAM+0xFBC0, 0x40, 16);
+d319 2
+a320 2
+	DmaCopy(3, TENKAI_RAM+0x3C0,
+		BG_VRAM+0xFBC0, 0x40, 16);
+d614 2
+a615 2
+	DmaCopy(3, TENKAI_RAM+0x340,
+		BG_VRAM+0xFBC0, 0x40, 16);
+d671 2
+a672 2
+    DmaCopy(3, TENKAI_RAM+0x200+0x40*KEKKA,
+	    BG_VRAM+0xFBC0, 0x40, 16);
+d796 2
+a797 2
+	    DmaCopy(3, TENKAI_RAM+0x380,
+		    BG_VRAM+0xFBC0, 0x40, 16);
+d800 2
+a801 2
+	    DmaCopy(3, TENKAI_RAM+0x200+0x40*KEKKA,
+		    BG_VRAM+0xFBC0, 0x40, 16);
+d872 2
+a873 2
+	    DmaCopy(3, TENKAI_RAM+0x400,
+		    BG_VRAM+0xFBC0, 0x40, 16);
+d876 1
+a876 1
+			   0x3E0, 0x50C0, NUKI);
+d880 1
+a880 1
+			   0x3E0, 0x50C0, NUKI);
+d896 2
+a897 2
+		DmaCopy(3, TENKAI_RAM+0x200,
+			BG_VRAM+0xFBC0, 0x40, 16);
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

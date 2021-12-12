@@ -1,0 +1,1137 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#ifndef __M_MAIN_H_
+#define __M_MAIN_H_
+
+//#include "s_mallo.h"
+#include <agb.h>
+#include "ba_act.h"
+#include "ba_common.h"
+#include "ba_effect.h"
+#include "ba_player.h"
+#include "ud_unit.h"
+#include "um_ram.h"
+#include "m_game_sub.h"
+#include "m_mini_malloc.h"
+#include "sound/m4aLib.h"
+#include "m_MultiSio.h"
+#include "m_scroll.h"
+//#include "s_print_val.h"
+
+//#include "ca_acters.h"
+
+/*--------------------- 定数 ---------------------------------------*/
+#define BG_SCR_SIZE_0		0x0000
+#define BG_SCR_SIZE_1		0x4000
+#define BG_SCR_SIZE_2		0x8000
+#define BG_SCR_SIZE_3		0xc000
+
+#define BG_SCR_BASE_00		0x0000
+#define BG_SCR_BASE_01		0x0100
+#define BG_SCR_BASE_02		0x0200
+#define BG_SCR_BASE_03		0x0300
+#define BG_SCR_BASE_04		0x0400
+#define BG_SCR_BASE_05		0x0500
+#define BG_SCR_BASE_06		0x0600
+#define BG_SCR_BASE_07		0x0700
+#define BG_SCR_BASE_08		0x0800
+#define BG_SCR_BASE_09		0x0900
+#define BG_SCR_BASE_0A		0x0a00
+#define BG_SCR_BASE_0B		0x0b00
+#define BG_SCR_BASE_0C		0x0c00
+#define BG_SCR_BASE_0D		0x0d00
+#define BG_SCR_BASE_0E		0x0e00
+#define BG_SCR_BASE_0F		0x0f00
+#define BG_SCR_BASE_10		0x1000
+#define BG_SCR_BASE_11		0x1100
+#define BG_SCR_BASE_12		0x1200
+#define BG_SCR_BASE_13		0x1300
+#define BG_SCR_BASE_14		0x1400
+#define BG_SCR_BASE_15		0x1500
+#define BG_SCR_BASE_16		0x1600
+#define BG_SCR_BASE_17		0x1700
+#define BG_SCR_BASE_18		0x1800
+#define BG_SCR_BASE_19		0x1900
+#define BG_SCR_BASE_1A		0x1a00
+#define BG_SCR_BASE_1B		0x1b00
+#define BG_SCR_BASE_1C		0x1c00
+#define BG_SCR_BASE_1D		0x1d00
+#define BG_SCR_BASE_1E		0x1e00
+#define BG_SCR_BASE_1F		0x1f00
+
+#define BG_COL_MODE_16		0x0000
+#define BG_COL_MODE_256		0x0080
+
+#define BG_MOSAIC_OFF		0x0000
+#define BG_MOSAIC_ON		0x0040
+
+#define BG_CHR_BASE_0		0x0000
+#define BG_CHR_BASE_1		0x0004
+#define BG_CHR_BASE_2		0x0008
+#define BG_CHR_BASE_3		0x000c
+
+#define BG_PRIORITY_0		0x0000
+#define BG_PRIORITY_1		0x0001
+#define BG_PRIORITY_2		0x0002
+#define BG_PRIORITY_3		0x0003
+
+/*------------- コース定数 -------------*/
+#define C_OBJ_COL0		0x0000
+#define C_OBJ_COL1		0x0001
+#define C_OBJ_COL2		0x0002
+#define C_OBJ_COL3		0x0003
+
+#define C_BG_COL0		0x0000
+#define C_BG_COL1		0x0004
+#define C_BG_COL2		0x0008
+#define C_BG_COL3		0x000c
+#define C_BG_COL4		0x0010
+#define C_BG_COL5		0x0014
+#define C_BG_COL6		0x0018
+#define C_BG_COL7		0x001c
+
+#define C_V_scroll		0x0000		//縦スクロール
+#define C_H_scroll		0x0020		//横スクロール
+
+#define C_BGM_0			0x0000		//外
+#define C_BGM_1			0x0040		//中
+#define C_BGM_2			0x0080		//ボス
+#define C_BGM_3			0x00c0		//マムー
+
+#define C_SCR2_0		0x0000		//１/２
+#define C_SCR2_1		0x0100		//ＢＧ１と同期
+
+#define C_SCR3_0		0x0000		//１/４
+#define C_SCR3_1		0x0200		//ＢＧ１と同期
+#define C_SCR3_2		0x0400		//ＢＧ３表示しない
+#define C_SCR3_3		0x0600		//ダミー
+
+#define C_MAX_0			0x0000		//１画面
+#define C_MAX_1			0x1000		//２画面
+#define C_MAX_2			0x2000		//３画面
+#define C_MAX_3			0x3000		//４画面
+#define C_MAX_4			0x4000		//５画面
+#define C_MAX_5			0x5000		//６画面
+#define C_MAX_6			0x6000		//７画面
+#define C_MAX_7			0x7000		//８画面
+#define C_MAX_8			0x8000		//９画面
+#define C_MAX_9			0x9000		//１０画面
+#define C_MAX_a			0xa000		//１１画面
+#define C_MAX_b			0xb000		//１２画面
+#define C_MAX_c			0xc000		//１３画面
+#define C_MAX_d			0xd000		//１４画面
+#define C_MAX_e			0xe000		//１５画面
+#define C_MAX_f			0xf000		//１６画面
+
+#define COS_MAX			11
+
+/* 下の数行はs_com.h の一部をコピー＆ペーストしたもの。 */
+/* "2,4,8,64byte単位",の境界調整を行う */
+#define sCo_2BYTE_ALIGN(v)   ((((unsigned int)(v) + 1U) >> 1) << 1)
+#define sCo_4BYTE_ALIGN(v)   ((((unsigned int)(v) + 3U) >> 2) << 2)
+#define sCo_8BYTE_ALIGN(v)   ((((unsigned int)(v) + 7U) >> 3) << 3)
+#define sCo_16BYTE_ALIGN(v)  ((((unsigned int)(v) + 15U) >> 4) << 4)
+#define sCo_64BYTE_ALIGN(v)  (((((unsigned int)(v)) + 63U) >> 6) << 6)
+#define sCo_KBYTE(v)         ((v) << 11)
+/* mini malloc 関連 */
+/* mini malloc は本来ヒープ領域を複数持てますが、今回は1つのみ(sMl_HEAP)
+   とします。なもんで、それ用のマクロ定義。mini malloc については、
+   m_mmalloc.[ch] 参照 */
+#define mGm_HEAP_SIZE        sCo_KBYTE(7/*5*/)  /* mallocのヒープ領域サイズ(n*2KB) */
+#define mGm_HEAP             (game.mallocHeap)  /* ヒープ領域 */
+#define mGm_INITIAL(s)       cMml_Init((mGm_HEAP),(s))
+#define mGm_MALLOC(s)        cMml_Malloc((mGm_HEAP),(s))
+#define mGm_FREE(p)          cMml_Free((mGm_HEAP),(p))
+#define mGm_GC()             cMml_GarbageCollection(mGm_HEAP);  /* 強制ガベージコレクションであってガードキャンセルではない。 */
+#define mMml_class_t		cMml_block_t
+
+/* ＣＰＵ外部ＲＡＭに対してのmalloc */
+/* mallocのヒープ領域サイズ(n*2KB) */
+#define mGm_HEAP_SIZE_EXRAM		sCo_KBYTE(32)
+/* ヒープ領域 */
+/* ＣＰＵ外部ＲＡＭの先頭に設定 */
+#define mGm_HEAP_EXRAM			((mMml_class_t *)(EX_WRAM))
+#define mGm_INITIAL_EXRAM(s)		cMml_Init((mGm_HEAP_EXRAM),(s))
+#define mGm_MALLOC_EXRAM(s)		cMml_Malloc((mGm_HEAP_EXRAM),(s))
+#define mGm_FREE_EXRAM(p)		cMml_Free((mGm_HEAP_EXRAM),(p))
+/* 強制ガベージコレクションであってガードキャンセルではない。 */
+#define mGm_GC_EXRAM			cMml_GarbageCollection(mGm_HEAP_EXRAM);
+
+/*--------------------- 型定義 -------------------------------------*/
+typedef void (*mfunc)(void);
+typedef void (*IntrFuncp)(void);
+
+/*--------------------- 構造体 -------------------------------------*/
+/*----------------- ブロス構造体  -------------------*/
+typedef struct{
+    u16		ColBufBG[0x100];	// カラーバッファ@(ＢＧ)
+    u16		ColBufOBJ[0x100];	// カラーバッファ@(ＯＢＪ)
+
+    u8		QuakeFG:2;		// 地震発生中フラグ
+					//	(０=無:１=上昇中:２=下降中)
+    u8		PauseFG:2;		// ポーズフラグ
+    u8		EnmyStopFG:1;		// 敵ストップフラグ
+    u8		scoreCalc:1;		// スコア計算フラグ
+    u8		OBJchrFG:1;		// オブジェクトキャラクタ転送済みフラグ
+    u8		EnmyTest:1;		// 敵の出現数変更フラグ
+
+    u8		EnmyTestCount;		// 敵の出現数変更
+    u8		EnmyCNT;		// 敵の存在してる数
+    u8		BonusCoinCNT;		// セットしているＢＧコインの枚数
+    u8		Course;			// コースナンバー
+    u16		Time;			// タイマー
+    u8		WinCNT[MAX_PLAYER];	// 勝ち数カウンタ
+    u8		IntroNo;		// イントロＢＧＭナンバー
+    u16		bgmNo;			// ＢＧＭナンバー
+    u16		Round;			// ラウンドナンバー
+    u16		BonusTM;		// ボーナス面のタイマー
+    u8		BonusColIDX;		// ボーナス面のカラーインデックス
+
+    u8		CoinFG;			// ＢＧコインキャラクタ転送開始フラグ
+    u8		CoinIDX;		// ＢＧコインキャラクタ転送インデックス
+    u8		CoinTM;			// ＢＧコインキャラクタ転送タイマー
+
+    u8		WaterFaceIDX;		// ＢＧ水面インデックス
+    u8		WaterFaceTM;		// ＢＧ水面タイマー
+
+    u8		YukaFadeTM;	// 床フェードアウト転送タイマー
+
+    u8		PlayType:2;		// ゲームプレイタイプ
+    u8		AGBNo:2;		// 親子フラグ
+    u8		WinnerFG:4;		// 勝者フラグ
+
+    u8		BackBGNo;		// 背景ＢＧナンバー
+    u8		BGAnimeIDX;		// 背景ＢＧアニメーションインデックス
+    u8		BGAnimeTM;		// 背景ＢＧアニメーションタイマー
+
+    u8		ClassicOut:4;		// 各プレイヤーのおまめフラグ
+    u8		Difficulty:2;		// コース難易度
+    u8		FireballFlag:1;	// ファ@イアボール出現ON,OFF
+    u8		NoUsed:1;		// 未使用
+    u8		Handicap[MAX_PLAYER];	// ハンディキャップ
+
+    u32		score[MAX_PLAYER];	// スコア
+    u32		OneUpScore[MAX_PLAYER];	// １アップカウントダウンスコア
+    u32		TopScore;		// ハイスコア
+    u8		Credit;			// コンティニュー回数
+    u8		PLCount[MAX_PLAYER];	// 残機@数
+    u8		DeadOrder[MAX_PLAYER];	// 死んだ順番(１～４)
+    u8		AcceptLose;		// 負けを認めた人数
+	u8		StripeCount;	//総合成績画面の縞模様転送カウンター
+
+    /******** ラウンド表示用 ********/
+    roundDT_c	*roundDT;
+
+    /******** スコア表示用 ********/
+    scoreDT_c	*scoreDT;
+
+    /******** ＲＡＭ実行用ポインタ登録 ********/
+    u8		(*EnEn_hitchk)(struct act *);
+    u8		(*bgbuf_check)(s16, s16);
+    u8		(*PLEnemyHitCheck)(playerDT_c *);
+    void	(*OamOtherSet)(commonDT_c *);
+    void	(*player_OamSet)(playerDT_c *);
+} brosDT_c;
+
+/*--------------------- ゲームメイン構造体 -------------------------*/
+typedef struct{
+/*    u8		header[4];		// ＵＳＡセーブ用バッファ@チェック
+    u16		cassette_sum;		// ＵＳＡセーブ用ハイスコアチェックサム
+    u16		file_sum[3];		// ＵＳＡセーブ用セーブファ@イル１のチェックサム
+    u8		reserve[4];		// ＵＳＡセーブ用予備
+    u32		u_hi_score;		// ＵＳＡのハイスコア
+    u32		b_hi_score;		// ブロスのハイスコア
+    u8		reserve1[32];		// 予備
+    u8		eggfg[5];		// ＵＳＡセーブ用ヨッシーの玉子
+    u8		lucky[3];		// ＵＳＡセーブ用ラッキーペアフラグ
+    u8		pldown[4];		// ＵＳＡセーブ用コースクリア回数
+    u8		world_play[4];		// ＵＳＡセーブ用ワールド毎のプレイ回数
+    u32		score;			// ＵＳＡセーブ用得点ラム
+    u8		wordno;			// ＵＳＡセーブ用コースＮｏ．
+    u8		PLCNT;			// ＵＳＡセーブ用プレイヤー人数
+    u8		game_clear;		// ＵＳＡセーブ用ゲームクリアフラグ
+    u8		file_reserve[9];	// ＵＳＡセーブ用ファ@イルの予備*/
+
+    u8		header[4];		// ＵＳＡセーブ用バッファ@チェック
+    u16		cassette_sum;		// ＵＳＡセーブ用ハイスコアチェックサム
+    u16		file_sum[3];		// ＵＳＡセーブ用セーブファ@イル１のチェックサム
+    u8		reserve[4];		// ＵＳＡセーブ用予備
+    u32		u_hi_score;		// ＵＳＡのハイスコア
+    u32		b_hi_score;		// ブロスのハイスコア
+    u8		bros_max;		// ブロスの最高画面数
+    u8		reserve1[7];		// 予備
+    u8		eggfg[5];		// ＵＳＡセーブ用ヨッシーの玉子
+    u8		lucky[3];		// ＵＳＡセーブ用ラッキーペアフラグ
+    u8		pldown[4];		// ＵＳＡセーブ用コースクリア回数
+    u32		score;			// ＵＳＡセーブ用得点ラム
+    u8		red_coin[13];		// ＵＳＡセーブ用赤コインフラグ
+    u8		cos_clear[3];		// ＵＳＡセーブ用コースクリアビット
+    u8		wordno;			// ＵＳＡセーブ用コースＮｏ．
+    u8		PLCNT;			// ＵＳＡセーブ用プレイヤー人数
+    u8		game_clear;		// ＵＳＡセーブ用ゲームクリアフラグ
+    u8		file_reserve[5];	// ＵＳＡセーブ用ファ@イルの予備
+
+/*	スクロール構造体		*/
+    u16		scch1,sccv1;
+    u16		scch2,sccv2;
+    u16		scch3,sccv3;
+    u16		scch4,sccv4;
+    vu16	IntrCheck;		// 割り込み ﾁｪｯｸ
+    u16		Cont, Trg;		// ｷｰ入力
+    u16		KeyBuf[4][2];		// マルチプレイ用キーバッファ@
+    u32		IntrMainBuf[0x200];
+    u8		nmiflg;
+    u8		SLMODE,GMMODE,frameCnt;
+    u8		V_BLKFLG,H_BLKFLG,V_CNTFLG;
+    u8		irq_no,nmi_no;
+    u16		bldcnt,bldalpha,bldy;
+    u16		win0h,win1h,win0v,win1v;
+    u16		winin,winout;
+    u16		dispcnt;
+    u8		fade_flag;
+    u8		col_flag;		// カラー書き換えフラグ
+    u8		brusfg;
+    u8		main_select;
+    u8		SOUNDFG;		// サウンドプログラムキャンセルフラグ
+    u8		OamIDX;			// ＯＡＭセットインデックス
+    u8		nrnd[2];		// ランダム
+    u8		enrnd[2];		// 敵用ランダム
+    u16		sound_timer;		// サウンド待ちタイマー
+    u8		vs_flag;		// 通信対戦フラグ(０:なし　@１:通信中）
+    u8		timer_set;		// ＥＥＰＲＯＭのタイマーセットフラグ
+
+	s32		title_work[4];	//ゲーム選択でのワークラム
+    u8		file_no;		// セーブファ@イルＮｏ．
+    u8		title_flag;		// オープニングに来たかどうかフラグ
+    u8		title_world[3];		// タイトル選択画面でのワールドセレクト用フラグ
+    u8		max_wordno[3];		// 最高コースＮｏ．
+    u8		power_down;		// パワーダウンフラグ
+    u16		erase_timer;		// ＥＥＰＲＯＭ全消去タイマー
+    u8		error_flag;		// エラーフラグ
+    u8		error_no;		// エラーＮｏ．
+    u8		NoReset;		// ソフトリセット禁止フラグ
+    u8		NoSleep;		// スリープ禁止フラグ
+    u8		vsync_off;		// ＶシンクＯＦＦフラグ
+    u8		save_on;		// セーブフラグ
+    u8		erase_point;		// 消去カーソル
+
+/* mallocのヒープ領域 */
+    mMml_class_t    mallocHeap[mGm_HEAP_SIZE / sizeof(mMml_class_t)];
+
+/* ブロスで使用しているＲＡＭ */
+    brosDT_c	*bros;
+    void	*other;
+    playerDT_c	*player[4];
+    u16		acterID[MAX_ACTER];
+    acterDT_c	*acter[MAX_ACTER];
+    effectDT_c	*effect[MAX_EFFECT];
+    u8		Coin_Cnt;		// 画面中のコインの数
+    u8		Coin_Stok;		// ストック中のコインの数
+} gameDT_c;
+
+
+typedef struct{
+////    u8		eggfg[5];		// ＵＳＡセーブ用ヨッシーの玉子
+//    u8		lucky[3];		// ＵＳＡセーブ用ラッキーペアフラグ
+//    u8		pldown[4];		// ＵＳＡセーブ用コースクリア回数
+//    u8		world_play[4];		// ＵＳＡセーブ用ワールド毎のプレイ回数
+//    u32		score;			// ＵＳＡセーブ用得点ラム
+//    u8		wordno;			// ＵＳＡセーブ用コースＮｏ．
+//    u8		PLCNT;			// ＵＳＡセーブ用プレイヤー人数
+//    u8		file_reserve[10];	// ＵＳＡセーブ用ファ@イルの予備
+
+    u8		scroll_type;		// スクロール方向（０：縦、１：横）
+    u8		bg2_scroll_type;
+    u8		bg3_scroll_type;
+    u16		scch1_chk,sccv1_chk;
+    u16		scch2_chk,sccv2_chk;
+    u16		scch3_chk,sccv3_chk;
+    u16		chaptn,cosuno;
+    u16		bg_xpos,bg_ypos;
+    u16		unit_no;
+
+    u8		max_disp;
+    u8		COINCT;
+//    u8		CoinNum[3];		// 各コースで取ったコインの数
+    u8		intgano;		// イニシャル画面Ｎｏ．
+    u16		bgchdat[10];		// ＥＮＸＴバッファ@
+    u8		work[2];		// 任意の作業用
+    u8		scrstp;			// スクロール停止フラグ
+    s8		scrmvx;			// Ｈスクロール移動値
+    s8		scrmvy;			// Ｖスクロール移動値
+    s8		scrmvy2;		// Ｖスクロール移動値（横画面用）
+    u8		skflg;			// スクロールフラグ
+    u8		scnt;			// 縦スクロール用カウンタ
+    u8		crycnt;			// チェリーカウント
+//    u8		crycnt2;		// チェリーカウント（累計）
+//    u8		CryNum[3];		// 各コースで取ったチェリーの数
+    u8		kabuct;			// かぶカウント
+    u8		bgchgfg;		// ＢＧ画面切り替えフラグ
+    u8		tsbofg;			// つぼ種別
+    u8		tsbin;			// つぼ／裏画面 切り替えフラグ
+    u8		tubono;			// つぼＮｏ．
+    u8		tubofg;			// つぼフラグ
+    u8		tbinfg;			// 固定つぼＩＮフラグ
+    u16		stwrdno;		// ＳＡＶＥワールドＮｏ．
+    u16		stcosno;		// 　@”　@　@コースＮｏ．
+    u8		stingno;		// 　@”　@　@イニシャル画面Ｎｏ．
+    u8		plstdsn;		// 　@”　@　@プレイヤー表示位置フラグ
+    u8		savept;
+    u8		pastim;
+    u8		key0fg;			// 鍵ドア開けたフラグ
+    u16		basecl;			// 抜きカラー
+    u16		bgbgm;			// ＢＧＭ　@Ｎｏ．
+    u8		coinfg;			// コインフラグ
+    u8		coino;			// コインＮｏ．
+    u8		oneupfg;		// １ＵＰフラグ
+    u8		hat0fg;			// ハート０出現フラグ
+    u8		hat1fg;			// ハート１　@　@”
+    u8		hat2fg;			// ハート２　@　@”
+//    u8		HatNum[3];		// 各コースで取ったキノコの数
+    u8		failct;			// 敵やられカウント
+    u8		cointm;			// コインタイマー
+    u16		tiltfg;			// 地震フラグ（ドット数）
+    u16		bosstiltfg;		// ボス地震フラグ
+    u8		bgmcltm;		// 水晶サウンドタイマー
+    u8		jutanfg;		// 絨毯乗りフラグ
+    u8		keysccv;		// キー入力Ｖスクロール値補正フラグ
+    u8		iwacfg;			// ＢＧの岩フラグ
+    u16		mvscch;			// scch1 保存
+    u16		mvsccv;			// sccv1 保存
+    u16		mvcosuno;		// cosuno 保存
+    u8		sttsbin;		// つぼ／裏画面 切り替えフラグ 保存
+    u8		pldspno;		// プレイヤー表示位置フラグ
+    u8		rketfg;			// ロケットフラグ
+    u8		tkcron;			// ENDTSV 処理ＯＫフラグ
+    u8		hosifg;			// 星フラグ
+    u8		icerflg;		// 氷の面フラグ
+    u8		takiflg;		// 滝フラグ
+    u8		icetim1;		// 氷の面タイマー１
+    u8		icetim2;		// 氷の面タイマー１
+    u8		tourfg;			// 灯篭フラグ
+    u8		toutim1;		// 灯篭タイマー
+    u16		unit_no_1st;		// ユニットＮｏ．（１回目）
+    u16		warptm;			// ワープ画面表示タイマー
+    u8		pause_tim;		// ポーズ用カーソルタイマー
+    u8		pause_cur;		// ポーズ用カーソル
+    u8		pause_gmmode;		// ポーズ用ＧＭＭＯＤＥ退避
+    u8		sort_flag;		// OBJソート用フラグ
+    u16		bigpwflg;		// POW(大)取得フラグ
+    u16		hdmabf4[0xa0];		// ラスターデータバッファ@
+    u8		wnhk10;			// ラスター半径
+    u8		wnhnki;			//
+    u16		waphba;			// ラスター半径の加減算値
+    u16		warpct;			//
+    u8		wnstat;			//
+    u8		wnsta1;			//
+    u8		pldowna[4];		//
+    u8		codsno[4];		//
+    u8		cotrcnt;		// エンディング用
+    u8		cotrcnt1;		// エンディング用
+    s8		cofrcnt;		// エンディング用
+    u8		democt;			// エンディング用
+    u8		banzai_time;		// エンディング用
+    u8		kujipt;			// エンディング用
+    u8		spplcnt;		// エンディング用
+    u8		spdmcnt;		// エンディング用
+    u8		spplflg;		// エンディング用
+    u8		spram1;			// エンディング用
+    u8		spram;			// エンディング用
+    u8		endsfg;			// エンディング用
+    u8		ttltm;			// エンディング用
+    u8		fdipt;			// エンディング用
+    u8		dsfcdt[0x40];		// エンディング用
+    u8		cfrcnt;			// エンディング用
+    u8		csslfg;			// エンディング用
+    u8		scfcnt;			// エンディング用
+    u8		cypos1[3];		// エンディング用
+    u8		cypos2[5];		// エンディング用
+    u8		cypos3[3];		// エンディング用
+    u8		dsplyfg1;		// エンディング用
+    u8		dsplyfg2;		// エンディング用
+    u8		dsplyfg3;		// エンディング用
+    u8		dsfcnt1;		// エンディング用
+    u8		dsfcnt2;		// エンディング用
+    u8		dsfcnt3;		// エンディング用
+    u8		hebiflg;		// エンディング用
+    u8		castfg;			// エンディング用
+    u8		dsppt1;			// エンディング用
+    u8		pstsnd;			// エンディング用
+    u8		endwat;			// エンディング用
+    u8		mamufg;			// エンディング用
+    u8		mufcnt;			// エンディング用
+    u8		muloop;			// エンディング用
+    u8		endtpt;			// エンディング用
+    u8		dsenflg;		// エンディング用
+    u8		spwork;			// エンディング用
+    u8		dswrcnt;		// エンディング用
+    u8		capflg;			//カプセル出現フラグ
+    u8		ballflg;		//アイテム玉出現フラグ
+    s8		scrmvx_add;		// Ｈスクロール移動値加算
+    u8		scrmvx_flag;		// Ｈスクロール移動値フラグ
+    u8		boss_demofg;		// ボスデモフラグ
+    u8		scrmvx_center;		// Ｈスクロール移動値中心
+    u8		keyscch;		// キー入力Ｈスクロール値補正フラグ
+    u8		scrmvx_pos;		// Ｈスクロール中心位置
+    u8		vgamen_pos;		// 縦画面スクロール開始位置
+    u8		kamtim1;		// 仮面の目フラッシュ用タイマー
+    u8		kamtim2;		// 仮面の目フラッシュ用タイマー
+    u8		mosaic_timer;	//モザイク処理タイマー
+    u16		mosaic_data;	//モザイクの値
+    u8		vgamen_pos_sv;		// 縦画面スクロール開始位置（保存）
+    u8		redcoin;		// 赤コイン獲得フラグ（コース内）
+    u8		redcoin_buf;		// 赤コイン獲得フラグセーブデータ
+    u8		yoshi_egg;		// ヨッシー玉子フラグ
+    u8		yoshi_egg_buf;		// ヨッシー玉子フラグセーブデータ
+    u8		hi_flag;		// ハイスコアフラグ
+    u8		atscr_time;		// オートスクロールキー入力タイマー
+    u16		atscr_key;		// オートスクロールキー入力種別
+    u8		hgamen_pos;		// 横画面スクロール開始位置
+    u16		old_scch1;		// scch1 保存（スクロール向き用）
+    u8		boss_scrfg;		// BOSS用スクロールフラグ
+    u8		perfect_flag;		// ヨッシー卵全取得フラグ
+
+} usa_gameDT_c;
+
+/*--------- グローバル変数 ---------------------------------*/
+//OamData	OamBak[128];
+//OamData OAMTEMP[128];			// 並び替え用OAM
+
+/*--------- EXTERN -----------------------------------------*/
+extern	OamData	OamBak[128];
+extern	OamData OAMTEMP[128];			// 並び替え用OAM
+extern gameDT_c game;
+extern usa_gameDT_c *usa_game;
+extern char string[20];
+extern u16 t_TENKAI[0x400];
+
+extern void intr_main(void);
+extern void mgm_boot(void);
+extern void ObjVanishAll(void);
+extern void ObjVanishTemp(void);
+extern void KeyRead(void);
+
+extern	u16	UsrSendBuf[MULTI_SIO_BLOCK_SIZE];    // ユーザ送信バッファ@
+extern	u16	UsrRecvBuf[4][MULTI_SIO_BLOCK_SIZE]; // ユーザ受信バッファ@
+extern	u32	SioFlags;	// 通信状態
+extern	u8	SioModeFlg;	// 通信モード
+extern	u8	ConnectAGB;	// 接続台数(親機@を含む)
+extern	u8	ConnectFlg;	// 接続フラグ
+extern	u8	vs_mode;	// 対戦動作モード
+extern	u8	play_mode;	// 対戦ゲームモード
+
+extern void mGm_MALLOC_usa_game(void);
+extern void mGm_FREE_usa_game(void);
+
+/*-------------------- その他定義  -----------------------------*/
+#define SOUND_ON		1
+#define POLGON_ON		1
+#define ESECALC_ON		1
+#define DEBUG			0
+#define RamRomFG		1
+#define	SOUNDVSYNC_ON		1
+
+/*------------ カラーデータ転送要求ＢＩＴフラグ定義 ------------*/
+#define	BG_COL_TRANS		0x01
+#define	OBJ_COL_TRANS		0x02
+#define	COL_TRANS		0x03
+
+
+#define SinTbl(No)		Sin256Tbl[(u8 )(No)]
+#define CosTbl(No)		Sin256Tbl[(u8 )(No+64)]
+
+#define AtanTbl(YNo,XNo)        AtanTbl[(u16 )(YNo)][(u16 )(XNo)]
+#define SinTbl_s16(No)          SinTbl_s16[(u8 )(No)]
+#define CosTbl_s16(No)          SinTbl_s16[(u8 )(No+64)]
+#define TanTbl(No)              Tan256Tbl[(u8 )(No)]
+
+#define SinTblss16(No)          Sin0x10000Tbl[(u16 )(No)]
+#define CosTblss16(No)          Sin0x10000Tbl[(u16 )(No+16384)]
+
+/*#define HEADER			(game.header)
+#define CASSETTE_SUM		(game.cassette_sum)
+#define FILE_SUM		(game.file_sum)
+#define RESERVE			(game.reserve)
+#define U_HI_SCORE		(game.u_hi_score)
+#define B_HI_SCORE		(game.b_hi_score)
+#define RESERVE1		(game.reserve1)
+#define EGGFG			(game.eggfg)
+#define LUCKY			(game.lucky)
+#define PLDOWN			(game.pldown)
+#define WORLD_PLAY		(game.world_play)
+#define SCORE			(game.score)
+#define WORDNO			(game.wordno)
+#define mGm_PLCNT		(game.PLCNT)
+#define GAME_CLEAR		(game.game_clear)
+#define FILE_RESERVE		(game.file_reserve)*/
+
+#define HEADER			(game.header)
+#define CASSETTE_SUM		(game.cassette_sum)
+#define FILE_SUM		(game.file_sum)
+#define RESERVE			(game.reserve)
+#define U_HI_SCORE		(game.u_hi_score)
+#define B_HI_SCORE		(game.b_hi_score)
+#define BROS_MAX		(game.bros_max)
+#define RESERVE1		(game.reserve1)
+#define EGGFG			(game.eggfg)
+#define LUCKY			(game.lucky)
+#define PLDOWN			(game.pldown)
+#define RED_COIN		(game.red_coin)
+#define COS_CLEAR		(game.cos_clear)
+#define SCORE			(game.score)
+#define WORDNO			(game.wordno)
+#define mGm_PLCNT		(game.PLCNT)
+#define GAME_CLEAR		(game.game_clear)
+#define FILE_RESERVE		(game.file_reserve)
+
+#define mGm_FRAME_COUNT         (game.frameCnt)
+#define mGm_FRAME_COUNTER()     (game.frameCnt++)
+
+#define mGm_SLMODE		(game.SLMODE)
+#define mGm_GMMODE		(game.GMMODE)
+#define mGm_CONT		(game.Cont)
+#define mGm_TRG			(game.Trg)
+#define	mGm_KEYBUF(i,j)		(game.KeyBuf[(i)][(j)])
+#define mGm_V_BLKFLG		(game.V_BLKFLG)
+#define mGm_H_BLKFLG		(game.H_BLKFLG)
+#define mGm_V_CNTFLG		(game.V_CNTFLG)
+#define mGm_PARTYPS		(game.parts_yps)
+#define mGm_WINDYPS		(game.window_yps)
+#define mGm_SCCH1		(game.scch1)
+#define mGm_SCCH2		(game.scch2)
+#define mGm_SCCH3		(game.scch3)
+#define mGm_SCCH4		(game.scch4)
+#define mGm_SCCV1		(game.sccv1)
+#define mGm_SCCV2		(game.sccv2)
+#define mGm_SCCV3		(game.sccv3)
+#define mGm_SCCV4		(game.sccv4)
+#define mGm_HSCROLL0		mGm_SCCH1
+#define mGm_HSCROLL1		mGm_SCCH2
+#define mGm_HSCROLL2		mGm_SCCH3
+#define mGm_HSCROLL3		mGm_SCCH4
+#define mGm_VSCROLL0		mGm_SCCV1
+#define mGm_VSCROLL1		mGm_SCCV2
+#define mGm_VSCROLL2		mGm_SCCV3
+#define mGm_VSCROLL3		mGm_SCCV4
+#define mGm_DISPCNT		(game.dispcnt)
+#define mGm_VRFLG		(game.vrflg)
+#define mGm_VSCOUNTER		(game.vscount)
+#define mGm_VSCONT		(game.vsCont)
+#define mGm_VSTRG		(game.vsTrg)
+#define mGm_DEBFLAG		(game.debflg)
+#define mGm_DSPDBGF		(game.disp_debugf)
+#define mGm_RAMRUNBF		(game.Ramrunbf)
+#define mGm_PYBIGF		(game.py_bigf)
+#define mGm_SZBIGF		(game.size_bigf)
+#define IRQ_NO			(game.irq_no)
+#define NMI_NO			(game.nmi_no)
+#define BLDCNT			(game.bldcnt)
+#define BLDALPHA		(game.bldalpha)
+#define BLDY			(game.bldy)
+#define mGm_BLDMOD		BLDCNT
+#define mGm_COLEV		BLDALPHA
+#define mGm_COLY		BLDY
+#define WIN0H			(game.win0h)
+#define WIN1H			(game.win1h)
+#define WIN0V			(game.win0v)
+#define WIN1V			(game.win1v)
+#define WININ			(game.winin)
+#define WINOUT			(game.winout)
+#define DISPCNT			(game.dispcnt)
+#define COL_FLAG		(game.col_flag)
+#define BRUSFG			(game.brusfg)
+#define MAIN_SELECT		(game.main_select)
+#define mGm_SOUNDFG		(game.SOUNDFG)
+#define mGm_OAMIDX		(game.OamIDX)
+#define NRND			(game.nrnd)
+#define ENRND			(game.enrnd)
+#define SOUND_TIMER		(game.sound_timer)
+#define VS_flag			(game.vs_flag)
+#define TIMER_SET		(game.timer_set)
+#define	TITLE_WORK32(i)		(game.title_work[(i)])
+#define FILE_NO			(game.file_no)
+#define TITLE_FLAG		(game.title_flag)
+#define TITLE_WORLD		(game.title_world)
+#define MAX_WORDNO		(game.max_wordno)
+#define POWER_DOWN		(game.power_down)
+#define ERASE_TIMER		(game.erase_timer)
+#define ERROR_FLAG		(game.error_flag)
+#define ERROR_NO		(game.error_no)
+#define NO_RESET		(game.NoReset)
+#define NO_SLEEP		(game.NoSleep)
+#define VSYNC_OFF		(game.vsync_off)
+#define SAVE_ON			(game.save_on)
+#define ERASE_POINT		(game.erase_point)
+//#define COL_BUF			(game.col_buf)
+#define mGm_OTHER		(game.other)
+#define mGm_BROS		(game.bros)
+#define mGm_PLAYER(i)		(game.player[(i)])
+#define mGm_ACTERID(i)		(game.acterID[(i)])
+#define mGm_ACTER(i)		(game.acter[(i)])
+#define	mGm_ACTER_p(i)		(game.acter[(i)])
+#define	mGm_EFFECTACT(i)	(game.effect[(i)])
+#define	mGm_EFFECTACTID(i)	(game.effect[(i)]->effectID)
+#define mGm_COINCNT		(game.Coin_Cnt)
+#define mGm_COINSTOK		(game.Coin_Stok)
+
+
+//ＵＳＡ用
+//#define EGGFG			(usa_game->eggfg)
+//#define LUCKY			(usa_game->lucky)
+//#define PLDOWN			(usa_game->pldown)
+//#define WORLD_PLAY		(usa_game->world_play)
+//#define SCORE			(usa_game->score)
+//#define WORDNO			(usa_game->wordno)
+//#define mGm_PLCNT		(usa_game->PLCNT)
+//#define FILE_RESERVE		(usa_game->file_reserve)
+
+#define mGm_SCRCTL		(usa_game->scroll_type)
+#define BG2_scroll_type		(usa_game->bg2_scroll_type)
+#define BG3_scroll_type		(usa_game->bg3_scroll_type)
+#define SCCH1_CHK		(usa_game->scch1_chk)
+#define SCCV1_CHK		(usa_game->sccv1_chk)
+#define SCCH2_CHK		(usa_game->scch2_chk)
+#define SCCV2_CHK		(usa_game->sccv2_chk)
+#define SCCH3_CHK		(usa_game->scch3_chk)
+#define SCCV3_CHK		(usa_game->sccv3_chk)
+#define CHAPTN			(usa_game->chaptn)
+#define COSUNO			(usa_game->cosuno)
+#define BG_Xpos			(usa_game->bg_xpos)
+#define BG_Ypos			(usa_game->bg_ypos)
+#define unit_No			(usa_game->unit_no)
+#define MAX_disp		(usa_game->max_disp)
+#define INTGANO			(usa_game->intgano)
+#define BGCHDAT			(usa_game->bgchdat)
+#define SCRSTP			(usa_game->scrstp)
+#define SCRMVX			(usa_game->scrmvx)
+#define SCRMVY			(usa_game->scrmvy)
+#define SCRMVY2			(usa_game->scrmvy2)
+#define SKFLG			(usa_game->skflg)
+#define SCNT			(usa_game->scnt)
+#define CRYCNT			(usa_game->crycnt)
+#define CRYCNT2			(usa_game->crycnt2)
+#define KABUCT			(usa_game->kabuct)
+#define BGCHGFG			(usa_game->bgchgfg)
+#define TSBOFG			(usa_game->tsbofg)
+#define TSBIN			(usa_game->tsbin)
+#define TUBONO			(usa_game->tubono)
+#define TUBOFG			(usa_game->tubofg)
+#define TBINFG			(usa_game->tbinfg)
+#define STWRDNO			(usa_game->stwrdno)
+#define STCOSNO			(usa_game->stcosno)
+#define STINGNO			(usa_game->stingno)
+#define PLSTDSN			(usa_game->plstdsn)
+#define SAVEPT			(usa_game->savept)
+#define PASTIM			(usa_game->pastim)
+#define KEY0FG			(usa_game->key0fg)
+#define BASECL			(usa_game->basecl)
+#define BGBGM			(usa_game->bgbgm)
+#define COINFG			(usa_game->coinfg)
+#define COINO			(usa_game->coino)
+#define ONEUPFG			(usa_game->oneupfg)
+#define HAT0FG			(usa_game->hat0fg)
+#define HAT1FG			(usa_game->hat1fg)
+#define HAT2FG			(usa_game->hat2fg)
+#define FAILCT			(usa_game->failct)
+#define	COINTM			(usa_game->cointm)
+#define TILTFG			(usa_game->tiltfg)
+#define BOSSTILTFG		(usa_game->bosstiltfg)
+#define BGMCLTM			(usa_game->bgmcltm)
+#define JUTANFG			(usa_game->jutanfg)
+#define KEYSCCV			(usa_game->keysccv)
+#define IWACFG			(usa_game->iwacfg)
+#define MVSCCH			(usa_game->mvscch)
+#define MVSCCV			(usa_game->mvsccv)
+#define MVCOSUNO		(usa_game->mvcosuno)
+#define STTSBIN			(usa_game->sttsbin)
+#define PLDSPNO			(usa_game->pldspno)
+#define RKETFG			(usa_game->rketfg)
+#define TKCRON			(usa_game->tkcron)
+#define HOSIFG			(usa_game->hosifg)
+#define ICERFLG			(usa_game->icerflg)
+#define TAKIFLG			(usa_game->takiflg)
+#define	ICETIM1			(usa_game->icetim1)
+#define	ICETIM2			(usa_game->icetim2)
+#define TOURFG			(usa_game->tourfg)
+#define TOUTIM1			(usa_game->toutim1)
+#define unit_No_1ST		(usa_game->unit_no_1st)
+#define WARPTM			(usa_game->warptm)
+#define PAUSE_TIM		(usa_game->pause_tim)
+#define PAUSE_CUR		(usa_game->pause_cur)
+#define PAUSE_GMMODE		(usa_game->pause_gmmode)
+#define SORTFG			(usa_game->sort_flag)
+#define BIGPWFG			(usa_game->bigpwflg)
+#define HDMABF4			(usa_game->hdmabf4)
+#define WNHK10			(usa_game->wnhk10)
+#define WNHNKI			(usa_game->wnhnki)
+#define WAPHBA			(usa_game->waphba)
+#define WARPCT			(usa_game->warpct)
+#define WNSTAT			(usa_game->wnstat)
+#define WNSTA1			(usa_game->wnsta1)
+#define PLDOWNA			(usa_game->pldowna)
+#define CODSNO			(usa_game->codsno)
+#define COTRCNT			(usa_game->cotrcnt)
+#define COTRCNT1		(usa_game->cotrcnt1)
+#define COFRCNT			(usa_game->cofrcnt)
+#define DEMOCT			(usa_game->democt)
+#define BANZAI_TIME		(usa_game->banzai_time)
+#define KUJIPT			(usa_game->kujipt)
+#define SPPLCNT			(usa_game->spplcnt)
+#define SPDMCNT			(usa_game->spdmcnt)
+#define SPPLFLG			(usa_game->spplflg)
+#define SPRAM1			(usa_game->spram1)
+#define SPRAM			(usa_game->spram)
+#define ENDSFG			(usa_game->endsfg)
+#define TTLTM			(usa_game->ttltm)
+#define FDIPT			(usa_game->fdipt)
+#define DSFCDT			(usa_game->dsfcdt)
+#define CFRCNT			(usa_game->cfrcnt)
+#define CSSLFG			(usa_game->csslfg)
+#define SCFCNT			(usa_game->scfcnt)
+#define CYPOS1			(usa_game->cypos1)
+#define CYPOS2			(usa_game->cypos2)
+#define CYPOS3			(usa_game->cypos3)
+#define DSPLYFG1		(usa_game->dsplyfg1)
+#define DSPLYFG2		(usa_game->dsplyfg2)
+#define DSPLYFG3		(usa_game->dsplyfg3)
+#define DSFCNT1			(usa_game->dsfcnt1)
+#define DSFCNT2			(usa_game->dsfcnt2)
+#define DSFCNT3			(usa_game->dsfcnt3)
+#define HEBIFLG			(usa_game->hebiflg)
+#define CASTFG			(usa_game->castfg)
+#define DSPPT1			(usa_game->dsppt1)
+#define PSTSND			(usa_game->pstsnd)
+#define ENDWAT			(usa_game->endwat)
+#define MAMUFG			(usa_game->mamufg)
+#define MUFCNT			(usa_game->mufcnt)
+#define MULOOP			(usa_game->muloop)
+#define ENDTPT			(usa_game->endtpt)
+#define DSENFLG			(usa_game->dsenflg)
+#define SPWORK			(usa_game->spwork)
+#define DSWRCNT			(usa_game->dswrcnt)
+#define CAPFLG			(usa_game->capflg)
+#define BALLFLG			(usa_game->ballflg)
+#define SCRMVX_ADD		(usa_game->scrmvx_add)
+#define SCRMVX_FLAG		(usa_game->scrmvx_flag)
+#define BOSS_DEMOFG		(usa_game->boss_demofg)
+#define SCRMVX_CENTER		(usa_game->scrmvx_center)
+#define KEYSCCH			(usa_game->keyscch)
+#define SCRMVX_POS		(usa_game->scrmvx_pos)
+#define VGAMEN_POS		(usa_game->vgamen_pos)
+#define KAMTIM1			(usa_game->kamtim1)
+#define KAMTIM2			(usa_game->kamtim2)
+#define MOSAIC_TIM		(usa_game->mosaic_timer)
+#define MOSAIC_DATA		(usa_game->mosaic_data)
+#define VGAMEN_POS_SV		(usa_game->vgamen_pos_sv)
+#define REDCOIN			(usa_game->redcoin)
+#define REDCOIN_BUF		(usa_game->redcoin_buf)
+#define YOSHI_EGG		(usa_game->yoshi_egg)
+#define YOSHI_EGG_BUF		(usa_game->yoshi_egg_buf)
+#define HI_FLAG			(usa_game->hi_flag)
+#define ATSCR_TIME		(usa_game->atscr_time)
+#define ATSCR_KEY		(usa_game->atscr_key)
+#define HGAMEN_POS		(usa_game->hgamen_pos)
+#define OLD_SCCH1		(usa_game->old_scch1)
+#define BOSS_SCRFG		(usa_game->boss_scrfg)
+#define	PERFECT_FLAG		(usa_game->perfect_flag)
+
+/**** ブロスで使用しているＲＡＭの参照define ****/
+#define mGm_QUAKEFG		(game.bros->QuakeFG)
+#define mGm_COLFLG		COL_FLAG
+#define mGm_PAUSEFG		(game.bros->PauseFG)
+#define	mGm_ENMYSTOPFG		(game.bros->EnmyStopFG)
+#define	mGm_EnEn_hitchk		(game.bros->EnEn_hitchk)
+#define	mGm_bgbuf_check		(game.bros->bgbuf_check)
+#define	mGm_PLEnemyHitCheck	(game.bros->PLEnemyHitCheck)
+#define	mGm_OamOtherSet		(game.bros->OamOtherSet)
+#define	mGm_player_OamSet	(game.bros->player_OamSet)
+#define	mGm_SCORECALC		(game.bros->scoreCalc)
+#define	mGm_EnmyTest		(game.bros->EnmyTest)
+#define mGm_ETC			(game.bros->EnmyTestCount)
+#define mGm_ENMYCNT		(game.bros->EnmyCNT)
+#define mGm_BNSCOIN		(game.bros->BonusCoinCNT)
+#define mGm_COURSE		(game.bros->Course)
+#define mGm_TIME		(game.bros->Time)
+#define mGm_WINCNT		(game.bros->WinCNT)
+#define mGm_INTRONO		(game.bros->IntroNo)
+#define mGm_BGMNO		(game.bros->bgmNo)
+#define mGm_ROUND		(game.bros->Round)
+#define mGm_BONUSTM		(game.bros->BonusTM)
+#define mGm_BNSCOLIDX		(game.bros->BonusColIDX)
+#define mGm_COINFG		(game.bros->CoinFG)
+#define mGm_COINIDX		(game.bros->CoinIDX)
+#define mGm_COINTM		(game.bros->CoinTM)
+#define mGm_WATERFACEIDX	(game.bros->WaterFaceIDX)
+#define mGm_WATERFACETM		(game.bros->WaterFaceTM)
+#define mGm_YUKAFADETM		(game.bros->YukaFadeTM)
+#define	mGm_PLTYPE		(game.bros->PlayType)
+#define	mGm_AGBNO		(game.bros->AGBNo)
+#define	mGm_OBJchrFG		(game.bros->OBJchrFG)
+#define	mGm_WINNERFG		(game.bros->WinnerFG)
+#define	mGm_BACKBGNO		(game.bros->BackBGNo)
+#define	mGm_BGANIMEIDX		(game.bros->BGAnimeIDX)
+#define	mGm_BGANIMETM		(game.bros->BGAnimeTM)
+#define	mGm_CLASSICOUT		(game.bros->ClassicOut)
+#define mGm_ColBufBG		(game.bros->ColBufBG)
+#define mGm_ColBufOBJ		(game.bros->ColBufOBJ)
+#define	mGm_SCORE(i)		(game.bros->score[(i)])
+#define	mGm_ONEUPSCORE(i)	(game.bros->OneUpScore[(i)])
+#define	mGm_TOPSCORE		(game.bros->TopScore)
+#define	mGm_CEDIT		(game.bros->Credit)
+#define	mGm_PLCOUNT(i)		(game.bros->PLCount[(i)])
+#define	mGm_DEADORDER(i)	(game.bros->DeadOrder[(i)])
+#define	mGm_AcceptLose		(game.bros->AcceptLose)
+#define	mGm_STRIPECOUNT		(game.bros->StripeCount)
+#define	mGm_ROUND_DISP		(game.bros->roundDT)
+#define	mGm_SCORE_DISP		(game.bros->scoreDT)
+
+#define	mGm_DIFFICULTY		(game.bros->Difficulty)
+#define	mGm_FIREBALLFLAG	(game.bros->FireballFlag)
+#define	mGm_HANDICAP(i)		(game.bros->Handicap[i])
+
+/* テーブルＮＯ.によるアクターのメンバ参照方法@ */
+#define mGm_ActID(i)	(mGm_ACTER(i)->acterID)
+#define mGm_ActTBL(i)	(mGm_ACTER(i)->TBLNo)
+#define mGm_ActMODE(i)	(mGm_ACTER(i)->mode)
+#define mGm_ActCHRNO(i)	(mGm_ACTER(i)->chrNO)
+#define mGm_ActDIREC(i)	(mGm_ACTER(i)->Direction)
+#define mGm_ActXpos(i)	(mGm_ACTER(i)->Xpos)
+#define mGm_ActYpos(i)	(mGm_ACTER(i)->Ypos)
+#define mGm_ActJmpFG(i)	(mGm_ACTER(i)->JumpFG)
+#define mGm_ActHitFG(i)	(mGm_ACTER(i)->HitFG)
+#define mGm_ActXcntr(i)	(mGm_ACTER(i)->XCenter)
+#define mGm_ActYcntr(i)	(mGm_ACTER(i)->YCenter)
+#define mGm_ActXsize(i)	(mGm_ACTER(i)->XSize)
+#define mGm_ActYsize(i)	(mGm_ACTER(i)->YSize)
+#define mGm_ActOther(i)	(mGm_ACTER(i)->other)
+#define mGm_ActDOKAN(i)	(mGm_ACTER(i)->DokanBak)
+
+// キー入力（レベル）
+#define	U_KEY_ON_C		(game.Cont & U_KEY) 
+#define	D_KEY_ON_C		(game.Cont & D_KEY) 
+#define	L_KEY_ON_C		(game.Cont & L_KEY) 
+#define	R_KEY_ON_C		(game.Cont & R_KEY) 
+#define	A_BUTTON_ON_C		(game.Cont & A_BUTTON) 
+#define	B_BUTTON_ON_C		(game.Cont & B_BUTTON) 
+#define	L_BUTTON_ON_C		(game.Cont & L_BUTTON) 
+#define	R_BUTTON_ON_C		(game.Cont & R_BUTTON) 
+// キー入力（トリガ）
+#define	U_KEY_ON_T		(game.Trg & U_KEY) 
+#define	D_KEY_ON_T		(game.Trg & D_KEY) 
+#define	L_KEY_ON_T		(game.Trg & L_KEY) 
+#define	R_KEY_ON_T		(game.Trg & R_KEY) 
+#define	A_BUTTON_ON_T		(game.Trg & A_BUTTON) 
+#define	B_BUTTON_ON_T		(game.Trg & B_BUTTON) 
+#define	L_BUTTON_ON_T		(game.Trg & L_BUTTON) 
+#define	R_BUTTON_ON_T		(game.Trg & R_BUTTON) 
+#define	SELECT_BUTTON_ON	(game.Trg & SELECT_BUTTON) 
+#define	START_BUTTON_ON		(game.Trg & START_BUTTON) 
+
+#define FRCNT			(game.frameCnt)
+
+#define	V_SCROLL	0	// (game.scroll_type）Ｖスクロール
+#define	H_SCROLL	1	// 　@　@　@　@”　@　@　@　@ Ｈスクロール
+
+/*------------- モード定義 -------------------------------------*/
+enum {
+    select_mode,
+    game_mode,
+    bonus_mode,
+    warp_mode,
+    ending_mode,
+    result_mode,
+    yossy_mode,
+};
+
+/*------------- セレクトモード -------------*/
+enum {
+    pl_sel_init,
+    pl_sel_disp,
+    pl_sel_off,
+    cs_sel_init,
+    cs_sel_disp,
+    open_init,
+    open_disp,
+};
+
+/*------------- ゲームモード -------------*/
+enum {
+    gm_init,
+    gm_move,
+//    gm_fade_in,
+    gm_next_init,
+    gm_mode_check,
+//    gm_over_fade_out,
+    gm_over_init,
+    gm_over_fade_in,
+    gm_over_disp,
+    gm_over_open,
+    gm_over_key_wait,
+
+    gm_tsubo_init,
+    gm_tsubo_move,
+    gm_tsubo_out_init,
+
+    gm_pause_open,
+    gm_pause,
+    gm_pause_timer,
+    gm_pause_close,
+    gm_pause_fade_out,
+};
+
+/*------------- ボーナスモード -------------*/
+enum {
+    bn_init,
+    bn_move,
+};
+
+/*-------------	ワープモード -------------*/
+enum {
+    wp_ura,
+    wp_init,
+    wp_warp,
+    wp_move,
+    wp_fade_out,
+};
+
+/*------------- イレース＆エラーモード -------------*/
+enum {
+    era_time,
+    era_init,
+    era_chexk,
+    era_disp,
+
+    err_init,
+    err_disp,
+};
+
+/*-------------	リザルトモード -------------*/
+enum {
+    rs_init,
+    rs_move,
+};
+/*-------------	ヨッシーモード -------------*/
+enum {
+    ys_init,
+    ys_move,
+};
+
+/*------------- Ｖカウント割り込みＮｏ． -------------*/
+enum {
+    irq_dummy,
+    irq_title,
+    irq_coinup,
+    irq_game,
+};
+
+/*------------- Ｖブランク割り込みＮｏ． -------------*/
+enum {
+    nmi_title,
+    nmi_game,
+    nmi_divide,
+    nmi_hajimari,
+    nmi_coinup,
+    nmi_bros,
+    nmi_titleselect,
+    nmi_opening,
+    nmi_bonus,
+};
+
+/*---------------- ブロスゲームモード定義  ------------------*/
+enum {       // ＢＧモード
+	BROS_TITLE_MODE,
+	BROS_GAME_MODE,
+	BROS_ERROR_MODE,
+};
+/*------------- ブロスゲームモード定義  ------------------*/
+enum {	// play_mode
+    PLAY_CLSS,	// CLASSIC
+    PLAY_BATL,	// BATTLE
+};
+/*------------- ブロス対戦モード定義  ------------------*/
+enum {	// vs_mode
+    VS_ROM,	// ＲＯＭ
+    VS_MULTI,	// マルチブート
+};
+/*------------- 対戦ブロス通信モード定義  ------------------*/
+enum {	// SioModeFlg
+    COM_NONE,	//0 未通信
+    COM_SYNC,	//1 同期中
+    COM_START,	//2 ゲーム開始信号送信
+    COM_GAME,	//3 ゲーム中(キーデータ)
+    COM_ERROR,	//4 非通信(通信断絶)
+};
+
+/*------------- ＵＳＡエンディングモード -------------*/
+enum {
+    ue_fade_out,
+    ue_end_init1,
+    ue_fade_in,
+    ue_end_demo1,
+};
+
+/*------------- メイン処理モード -------------*/
+enum {
+	IQUE_mode,  // Yu Ting
+    ERASE_mode,
+    SIO_mode,
+    MAIN_mode,
+    USA_mode,
+    BROS_mode,
+};
+
+/*------------- ＥＸＴＥＲＮ -----------------------------------*/
+extern const u16 TILTDT[];
+
+
+#endif /* __M_MAIN_H_ */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1073 1
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

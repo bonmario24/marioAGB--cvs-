@@ -1,0 +1,777 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*
+ ****************************************************************
+	転送中画面プレーヤー表示処理
+
+	client_player.c		2000/11/16
+ ****************************************************************
+*/
+#include "client_main.h"
+#include "client_sub.h"
+#include "client_player.h"
+
+
+playerDT_c	pl;		//プレーヤー表示用ＲＡＭ
+u16		ScrollEnd;
+u8		ErrorFlg;
+#if SOUND_ON
+u16		sound;
+#endif
+
+/*
+ ================================================================
+	プレイヤー初期データ
+ ================================================================
+*/
+const	playerDT_c	playerInitDT = {
+    0,0,0,
+    1,0,1,//0,
+    0,0,0,0,
+    0,0,
+    0,
+};
+/*
+ ================================================================
+	プレイヤーＯＡＭデータ
+ ================================================================
+ */
+PLOamData d_player_sob_00[] = {	/* 歩き */
+    {
+	0x11, 0x0, 0x004
+    },
+    {
+	0x1, 0x0, 0x000
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_01[] = {	/* 歩き */
+    {
+	0x10, 0x0, 0x008
+    },
+    {
+	0x0, 0x0, 0x000
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_02[] = {	/* 歩き */
+    {
+	0x10, 0x0, 0x00C
+    },
+    {
+	0x0, 0x0, 0x000
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_03[] = {	/* ジャンプ! */
+    {
+	0x10, 0x0, 0x0040
+    },
+    {
+	0x0, 0x0, 0x03C
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+//PLOamData d_player_sob_04[] = {	/* びっくり */
+//    {
+//	0x10, 0x0, 0x0058
+//    },
+//    {
+//	0x0, 0x0, 0x054
+//    },
+//    {
+//	PLSOBDATAENDCODE, 0x0, 0x0
+//    },
+//};
+PLOamData d_player_sob_05[] = {	/* あぁ～れぇ～ */
+    {
+	0x18, 0x0, 0x0014
+    },
+    {
+	0x08, 0x0, 0x010
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_06[] = {	/* 水飛沫 */
+    {
+	0x0, 0x0, 0x0016
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_07[] = {	/* 水飛沫 */
+    {
+	0x0, 0x0, 0x001A
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_08[] = {	/* 水飛沫 */
+    {
+	0x0, 0x0, 0x0020
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+PLOamData d_player_sob_09[] = {	/* 水飛沫 */
+    {
+	0x0, 0x0, 0x0024
+    },
+    {
+	PLSOBDATAENDCODE, 0x0, 0x0
+    },
+};
+//PLOamData d_player_sob_10[] = {	/* なし */
+//    {
+//	PLSOBDATAENDCODE, 0x0, 0x0
+//    },
+//};
+PLOamData *PatternData[9] = {
+	d_player_sob_00, d_player_sob_01, 
+	d_player_sob_02, d_player_sob_03,
+//	d_player_sob_04, 
+	d_player_sob_05,
+	d_player_sob_06, d_player_sob_07,
+	d_player_sob_08, d_player_sob_09,
+//	d_player_sob_10,
+    };
+
+/*
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	メーター移動(自機@X方向移動)処理
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ */
+static	void	PlayerXMove()
+{
+    u32 length;
+    u32	oldx, move, meter, tmp;
+#if SOUND_ON
+    u8	id;
+#endif
+
+    /***** 自機@Ｘ方向移動処理(メーター) *****/
+    oldx = aP_XPOS(pl) & 0xFFFFFF00;
+    tmp = aP_XPOS(pl) & 0x000000FF;
+//    length = (192 * ((u32)RecvAddress - VS_START) << 4) / TransSize;
+    length = (193 * ReceiveSize << 4) / TransSize;
+    meter = (length << 4) & 0xFFFFFF00;
+    move = aP_XSPD(pl) - (meter - oldx) + tmp;
+    aP_XPOS(pl) = meter | (move & 0x000000FF);
+    mGm_HSCROLL += (move >> 8);
+    meter = meter >> 8;
+    aP_XSPD(pl) = meter * 2 + 0x0080;
+
+#if SOUND_ON
+    /***** 声セット *****/
+    if(meter >= sound){
+	switch(PlayNum){
+	case 1:
+	    id = ((sound / 47) - 1) & 0x01;
+	    sound += 47;
+	    break;
+	case 2:
+	    id = ((sound / 31) - 1) % 3;
+	    sound += 31;
+	    break;
+	case 3:
+	default:
+	    id = ((sound / 23) - 1) & 0x03;
+	    sound += 23;
+	}
+	if(id == aP_TBLNO(pl)){
+	    m4aSongNumStart(1);
+	}
+    }
+#endif
+}
+/*
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	自機@走るアニメ処理
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ */
+static	void	PlayerAnime()
+{
+    u8	index = aP_ANIMEIDX(pl);
+    u8	time = aP_ANIMETM(pl);
+    static u8	WalkAnimeDT[3] = {PLCHR_RUN2, PLCHR_RUN0, PLCHR_RUN1};
+
+    aP_CHRNO(pl) = WalkAnimeDT[index];
+    time++;
+    if( time >= 0x04 ){
+	time = 0;
+	index++;
+	if( index >= sizeof(WalkAnimeDT) )
+	    index = 0;
+    }
+    aP_ANIMEIDX(pl) = index;
+    aP_ANIMETM(pl) = time;
+}
+/*
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	土管ＢＧ描きこみ処理
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ */
+static	void	PipeWrite()
+{
+    u16	*vram;
+    u16	xpos, scr;
+
+    xpos = mGm_HSCROLL + 0xF8;
+    scr = (xpos & 0x0100) * 8;
+    xpos = (xpos & 0x00F8) >> 2;
+    vram = (u16 *)(BG0ADDRESS + scr + xpos + 0x0300);
+    *vram = 0x1008;
+    vram += 0x0020;
+    *vram = 0x100A;
+    vram += 0x0020;
+    *vram = 0x180A;
+    vram += 0x0020;
+    *vram = 0x1808;
+    vram -= 0x005F;
+    if(!((u32)vram & 0x003F)){
+	vram -= 0x0020;
+	vram = (u16 *)((u32)vram ^ 0x0800);
+    }
+    *vram = 0x1009;
+    vram += 0x0020;
+    *vram = 0x100B;
+    vram += 0x0020;
+    *vram = 0x180B;
+    vram += 0x0020;
+    *vram = 0x1809;
+    vram -= 0x005F;
+    if(!((u32)vram & 0x003F)){
+	vram -= 0x0020;
+	vram = (u16 *)((u32)vram ^ 0x0800);
+    }
+    *vram = 0x1009;
+    vram += 0x0020;
+    *vram = 0x100B;
+    vram += 0x0020;
+    *vram = 0x180B;
+    vram += 0x0020;
+    *vram = 0x1809;
+}
+/*
+ ****************************************************************
+	自機@登場落下処理
+ ****************************************************************
+ */
+static	void	player_fall()
+{
+    s32	ypos = aP_YPOS(pl);
+    s32	yspd = aP_YSPD(pl);
+
+    if(yspd < 0x0300){
+	yspd += 0x0020;
+    }
+    ypos += yspd;
+
+    if(ypos >= 0x006000){
+	ypos = 0x006000;
+	yspd = 0x000000;
+	aP_MODE(pl)++;
+    }
+
+    aP_YPOS(pl) = ypos;
+    aP_YSPD(pl) = yspd;
+
+    PlayerXMove();
+}
+/*
+ ****************************************************************
+	自機@走る処理
+ ****************************************************************
+ */
+static	void	player_run()
+{
+    PlayerXMove();
+    PlayerAnime();
+
+    if(aP_XPOS(pl) >= 0xC000){
+	PipeWrite();
+	ScrollEnd = (mGm_HSCROLL + 0x18) & 0xFFF8;
+	aP_MODE(pl) = LDPL_STOP;
+    }
+}
+/*
+ ****************************************************************
+	土管登場処理
+ ****************************************************************
+ */
+static	void	player_stop()
+{
+    u32	oldx, move, tmp;
+
+    PlayerAnime();
+
+    oldx = aP_XPOS(pl) & 0xFFFFFF00;
+    tmp = aP_XPOS(pl) & 0x000000FF;
+    move = aP_XSPD(pl) + tmp;
+    aP_XPOS(pl) = oldx | (move & 0x000000FF);
+    mGm_HSCROLL += (move >> 8);
+    if(mGm_HSCROLL > ScrollEnd){
+	aP_TIMER(pl) = 16;
+	aP_MODE(pl) = LDPL_OUT;
+    }
+}
+/*
+ ****************************************************************
+	土管に入る処理
+ ****************************************************************
+ */
+static	void	player_out()
+{
+    aP_XPOS(pl) += aP_XSPD(pl);
+    PlayerAnime();
+    
+    if(aP_TIMER(pl)){
+	aP_TIMER(pl)--;
+    }else{
+	// 転送終了チェック
+	if(SioSuccess){
+	    if(ID_No == 0){
+		mGm_TIME = 4;
+	    }else{
+		mGm_TIME = 1;
+	    }
+	    mGm_GMMODE++;
+	}
+    }
+}
+/*
+ ****************************************************************
+	エラー自機@死亡処理
+ ****************************************************************
+ */
+static	void	player_miss()
+{
+//    u16	timer = aP_TIMER(pl);
+    s32	ypos, yspd;
+
+//    if(timer > 0){
+//	timer--;
+//	aP_TIMER(pl) = timer;
+//	if(timer == 0){
+//	    aP_CHRNO(pl) = PLCHR_MISS;
+//	    aP_YSPD(pl) = - 0x0400;
+//	}
+//    }else{
+	ypos = aP_YPOS(pl);
+	if(ypos < 0xA000){
+	    yspd = aP_YSPD(pl);
+	    yspd += 0x0020;
+	    ypos += yspd;
+	    aP_YPOS(pl) = ypos;
+	    aP_YSPD(pl) = yspd;
+	}else{
+	    aP_YPOS(pl) = 0x9000;
+	    aP_CHRNO(pl) = PLCHR_SPLH0;
+	    aP_PLTT(pl) = 4;
+	    aP_HFLIP(pl) = 0;
+	    aP_ANIMEIDX(pl) = 0;
+	    aP_ANIMETM(pl) = 0;
+	    aP_MODE(pl) = LDPL_SPLASH;
+	}
+//    }
+}
+/*
+ ****************************************************************
+	水飛沫表示処理
+ ****************************************************************
+ */
+static	void	player_splash()
+{
+    u8	index = aP_ANIMEIDX(pl);
+    u8	time = aP_ANIMETM(pl);
+    static u8	AnimeDT[4] = {PLCHR_SPLH0, PLCHR_SPLH1, 
+			      PLCHR_SPLH2, PLCHR_SPLH3};
+
+    time++;
+    if( time >= 8 ){
+	time = 0;
+	index++;
+	if(index < 4){
+	    aP_ANIMEIDX(pl) = index;
+	    aP_CHRNO(pl) = AnimeDT[index];
+	}else{
+	    ErrorFlg = ON;
+	}
+    }
+    aP_ANIMETM(pl) = time;
+}
+/*
+ ****************************************************************
+ *	転送中画面自機@処理メニュー配列
+ ****************************************************************
+ */
+mfunc player_move[] = {
+    player_fall,
+    player_run,
+    player_stop,
+    player_out,
+    player_miss,
+    player_splash,
+};
+/*
+ ****************************************************************
+	自機@ＯＡＭセット処理
+ ****************************************************************
+ */
+static	void	player_OamSet()
+{
+    u32		Xpos = (u32)aP_XPOS(pl) >> 8;
+    u32		Ypos = (u32)aP_YPOS(pl) >> 8;
+    u32		HFlip, VFlip;
+    u16		Pltt;
+    u8		Priority;
+    PLOamData	*Pattern;
+    OamData	*Oam;
+    u8		i;
+
+    Priority = aP_PRIORITY(pl);
+    Pltt = aP_PLTT(pl);
+    HFlip = aP_HFLIP(pl);
+//    VFlip = aP_VFLIP(pl);
+    Pattern = PatternData[aP_CHRNO(pl)];
+
+    while( Pattern->Ypos != PLSOBDATAENDCODE ){
+//    for(i=0; i<2; i++){
+	Oam = &OamBak[mGm_OAMIDX++];
+	Oam->VPos = Ypos + Pattern->Ypos;
+	Oam->AffineMode = ST_OAM_AFFINE_NONE;
+	Oam->ObjMode = ST_OAM_OBJ_NORMAL;
+	Oam->Mosaic = 0;
+	Oam->ColorMode = ST_OAM_COLOR_16;
+	Oam->Shape = ST_OAM_SQUARE;
+
+	Oam->HPos = Xpos + Pattern->Xpos;
+	Oam->AffineParamNo_L = 0;
+	Oam->VFlip = 0;//VFlip;
+	Oam->HFlip = HFlip;
+	Oam->Size = 0x01;
+
+	Oam->CharNo = Pattern->chrNO;
+	Oam->Priority = Priority;
+	Oam->Pltt = Pltt;
+	Pattern++;
+    }
+}
+/*
+ ****************************************************************
+	｢？Ｐ｣表示処理
+ ****************************************************************
+ */
+static	void	PlNum_OamSet()
+{
+    static	u16	zoom = 0x0100;
+    static	u16	param = 0xFFF8;
+    OamData	*Oam;
+
+    zoom = zoom + param;
+    if((zoom <= 0x00C0) || (zoom >= 0x0140)){
+	param = (~param) + 1;
+    }
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = 0x0010;
+    Oam->AffineMode = ST_OAM_AFFINE_TWICE;
+    Oam->ObjMode = ST_OAM_OBJ_NORMAL;
+    Oam->Mosaic = 0;
+    Oam->ColorMode = ST_OAM_COLOR_16;
+    Oam->Shape = ST_OAM_SQUARE;
+    Oam->HPos = 0x00C0;
+    Oam->AffineParamNo_L = 7;//0;
+    Oam->VFlip = 1;//0;
+    Oam->HFlip = 1;//0;
+    Oam->Size = 0x01;
+    Oam->CharNo = 0x0044 + aP_TBLNO(pl) * 4;
+    Oam->Priority = 0;
+    Oam->Pltt = 5;
+
+    Oam = &OamBak[124];//[0];
+    Oam->AffineParam = zoom;
+    Oam = &OamBak[127];//[3];
+    Oam->AffineParam = zoom;
+}
+/*
+ ****************************************************************
+	｢LOADING...｣表示処理
+ ****************************************************************
+ */
+static	void	LoadWrite()
+{
+    OamData	*Oam;
+    u8		i, j;
+
+    for(i=0; i<2; i++){
+	for(j=0; j<2; j++){
+	    Oam = &OamBak[mGm_OAMIDX++];
+	    Oam->VPos = 0x0040 + i * 0x08;
+	    Oam->Shape = 1;
+	    Oam->HPos = 0x0050 + j * 0x20;
+	    Oam->Size = 1;
+	    Oam->Pltt = 5;
+	    Oam->CharNo = 0x0058 + (i * 2 + j) * 4;
+	}
+    }
+    for(i=0; i<2; i++){
+	Oam = &OamBak[mGm_OAMIDX++];
+	Oam->VPos = 0x0048;
+	Oam->Shape = 0;
+	Oam->HPos = 0x0090 + i * 8;
+	Oam->Size = 0;
+	Oam->Pltt = 5;
+	Oam->CharNo = 0x0067;
+    }
+}
+/*
+ ****************************************************************
+	｢ＥＲＲＯＲ！｣表示処理
+ ****************************************************************
+ */
+#if 0
+u16 ErrorData[][2] = {
+    { 0x00, 0x00,},{ 0x00, 0x08,},{ 0x00, 0x10,},{ 0x00, 0x18,},//E
+    { 0x08, 0x00,},{ 0x10, 0x00,},{ 0x18, 0x00,},{ 0x20, 0x00,},
+    { 0x28, 0x00,},{ 0x30, 0x00,},{ 0x18, 0x08,},{ 0x18, 0x10,},
+    { 0x30, 0x08,},{ 0x30, 0x10,},{ 0x30, 0x18,},
+    { 0x00, 0x28,},{ 0x00, 0x30,},{ 0x00, 0x38,},{ 0x08, 0x28,},//R
+    { 0x10, 0x28,},{ 0x18, 0x28,},{ 0x20, 0x28,},{ 0x28, 0x28,},
+    { 0x30, 0x28,},{ 0x08, 0x40,},{ 0x10, 0x40,},{ 0x18, 0x30,},
+    { 0x18, 0x38,},{ 0x20, 0x38,},{ 0x28, 0x40,},{ 0x30, 0x40,},
+    { 0x00, 0x50,},{ 0x00, 0x58,},{ 0x00, 0x60,},{ 0x08, 0x50,},//R
+    { 0x10, 0x50,},{ 0x18, 0x50,},{ 0x20, 0x50,},{ 0x28, 0x50,},
+    { 0x30, 0x50,},{ 0x08, 0x68,},{ 0x10, 0x68,},{ 0x18, 0x58,},
+    { 0x18, 0x60,},{ 0x20, 0x60,},{ 0x28, 0x68,},{ 0x30, 0x68,},
+    { 0x08, 0x78,},{ 0x10, 0x78,},{ 0x18, 0x78,},{ 0x20, 0x78,},//O
+    { 0x28, 0x78,},{ 0x08, 0x90,},{ 0x10, 0x90,},{ 0x18, 0x90,},
+    { 0x20, 0x90,},{ 0x28, 0x90,},{ 0x00, 0x80,},{ 0x00, 0x88,},
+    { 0x30, 0x80,},{ 0x30, 0x88,},
+    { 0x00, 0xA0,},{ 0x00, 0xA8,},{ 0x00, 0xB0,},{ 0x08, 0xA0,},//R
+    { 0x10, 0xA0,},{ 0x18, 0xA0,},{ 0x20, 0xA0,},{ 0x28, 0xA0,},
+    { 0x30, 0xA0,},{ 0x08, 0xB8,},{ 0x10, 0xB8,},{ 0x18, 0xA8,},
+    { 0x18, 0xB0,},{ 0x20, 0xB0,},{ 0x28, 0xB8,},{ 0x30, 0xB8,},
+    { 0x00, 0xC8,},{ 0x08, 0xC8,},{ 0x10, 0xC8,},{ 0x18, 0xC8,},//!
+    { 0x20, 0xC8,},{ 0x30, 0xC8,},
+    { 0xFFFF, 0, },
+};
+#else
+/*
+u16 ErrorData[][2] = {
+    { 0x00, 0x00,},{ 0x00, 0x06,},{ 0x00, 0x0C,},{ 0x00, 0x12,},//E
+    { 0x06, 0x00,},{ 0x0C, 0x00,},{ 0x12, 0x00,},{ 0x18, 0x00,},
+    { 0x1E, 0x00,},{ 0x24, 0x00,},{ 0x12, 0x06,},{ 0x12, 0x0C,},
+    { 0x24, 0x06,},{ 0x24, 0x0C,},{ 0x24, 0x12,},
+    { 0x00, 0x24,},{ 0x00, 0x2A,},{ 0x00, 0x30,},{ 0x06, 0x24,},//R
+    { 0x0C, 0x24,},{ 0x12, 0x24,},{ 0x18, 0x24,},{ 0x1E, 0x24,},
+    { 0x24, 0x24,},{ 0x06, 0x36,},{ 0x0C, 0x36,},{ 0x12, 0x2A,},
+    { 0x12, 0x30,},{ 0x18, 0x30,},{ 0x1E, 0x36,},{ 0x24, 0x36,},
+    { 0x00, 0x48,},{ 0x00, 0x4E,},{ 0x00, 0x54,},{ 0x06, 0x48,},//R
+    { 0x0C, 0x48,},{ 0x12, 0x48,},{ 0x18, 0x48,},{ 0x1E, 0x48,},
+    { 0x24, 0x48,},{ 0x06, 0x5A,},{ 0x0C, 0x5A,},{ 0x12, 0x4E,},
+    { 0x12, 0x54,},{ 0x18, 0x54,},{ 0x1E, 0x5A,},{ 0x24, 0x5A,},
+    { 0x06, 0x6C,},{ 0x0C, 0x6C,},{ 0x12, 0x6C,},{ 0x18, 0x6C,},//O
+    { 0x1E, 0x6C,},{ 0x06, 0x7E,},{ 0x0C, 0x7E,},{ 0x12, 0x7E,},
+    { 0x18, 0x7E,},{ 0x1E, 0x7E,},{ 0x00, 0x72,},{ 0x00, 0x78,},
+    { 0x24, 0x72,},{ 0x24, 0x78,},
+    { 0x00, 0x90,},{ 0x00, 0x96,},{ 0x00, 0x9C,},{ 0x06, 0x90,},//R
+    { 0x0C, 0x90,},{ 0x12, 0x90,},{ 0x18, 0x90,},{ 0x1E, 0x90,},
+    { 0x24, 0x90,},{ 0x06, 0xA2,},{ 0x0C, 0xA2,},{ 0x12, 0x96,},
+    { 0x12, 0x9C,},{ 0x18, 0x9C,},{ 0x1E, 0xA2,},{ 0x24, 0xA2,},
+    { 0x00, 0xB4,},{ 0x06, 0xB4,},{ 0x0C, 0xB4,},{ 0x12, 0xB4,},//!
+    { 0x18, 0xB4,},{ 0x24, 0xB4,},
+    { 0xFFFF, 0, },
+*/
+u16 ErrorData[][2] = {
+	{0,2,},{0,6,},{0,8,},{0,16,},{0,17,},{0,18,},{0,19,},{0,20,},
+	{1,1,},{1,2,},{1,3,},{1,5,},{1,6,},{1,7,},{1,8,},{1,9,},{1,13,},{1,14,},{1,16,},{1,20,},{1,25,},
+	{2,0,},{2,6,},{2,8,},{2,16,},{2,17,},{2,18,},{2,19,},{2,20,},{2,25,},
+	{3,1,},{3,2,},{3,3,},{3,5,},{3,6,},{3,7,},{3,8,},{3,9,},{3,12,},{3,13,},{3,14,},{3,25,},
+	{4,2,},{4,13,},{4,16,},{4,17,},{4,18,},{4,19,},{4,20,},{4,25,},
+	{5,1,},{5,2,},{5,3,},{5,5,},{5,6,},{5,7,},{5,8,},{5,9,},{5,13,},{5,18,},{5,25,},
+	{6,2,},{6,5,},{6,9,},{6,13,},{6,16,},{6,17,},{6,18,},{6,19,},{6,20,},{6,25,},
+	{7,2,},{7,5,},{7,6,},{7,7,},{7,8,},{7,9,},{7,13,},{7,17,},{7,18,},{7,19,},{7,25,},
+	{8,2,},{8,5,},{8,9,},{8,13,},{8,16,},{8,17,},{8,19,},{8,20,},
+	{9,2,},{9,3,},{9,5,},{9,6,},{9,7,},{9,8,},{9,9,},{9,13,},{9,14,},{9,15,},{9,16,},{9,20,},{9,21,},{9,25,},
+	{ 0xFFFF, 0, },
+
+};
+#endif 
+// modified by yu ting
+static	void	Error_OamSet()
+{
+    static u16	Xpos = 0x002A;//1B;
+    static u16	Ypos = 0x00A0;
+    OamData	*Oam;
+    u8		i;
+
+    if(Ypos > 0x0036){
+	Ypos -= 0x01;
+    }
+
+    i = 0;
+    while( ErrorData[i][0] != 0xFFFF ){
+	if(mGm_OAMIDX < 127){
+	    Oam = &OamBak[mGm_OAMIDX++];
+	    Oam->VPos = Ypos + ErrorData[i][0]*6;
+	    Oam->AffineMode = ST_OAM_AFFINE_NONE;
+	    Oam->ObjMode = ST_OAM_OBJ_NORMAL;
+	    Oam->Mosaic = 0;
+	    Oam->ColorMode = ST_OAM_COLOR_16;
+	    Oam->Shape = ST_OAM_SQUARE;
+
+	    Oam->HPos = Xpos + ErrorData[i][1]*6;
+	    Oam->AffineParamNo_L = 0;
+	    Oam->VFlip = 0;
+	    Oam->HFlip = 0;
+	    Oam->Size = 0;
+
+	    Oam->CharNo = 0x03A;
+	    Oam->Priority = 0;
+	    Oam->Pltt = 4;
+	}
+	i++;
+    }
+}
+
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	イニシャル処理
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+void	player_init()
+{
+    pl = playerInitDT;
+
+    /******* ＩＤナンバーセット *******/
+//    aP_TBLNO(pl) = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+//    /** ↑↑ この方法@はローダー転送後、ブート時に ↑↑ **/
+//    /** ＳＩＯのレジスタをリセットしていないことが前提 **/
+////    aP_TBLNO(pl) = *(u8 *)0x020000D3;
+    aP_TBLNO(pl) = ID_No;
+
+    /******* アニメーション関係の初期化 ********/
+    aP_CHRNO(pl) = PLCHR_JUMP;
+
+    /******* アトリビュート設定 ********/
+    aP_PLTT(pl) = aP_TBLNO(pl);
+//    aP_PLTT(pl) = (*(vu16 *)REG_SIOCNT & 0x0030) >> 4;
+
+    /******* 初期ポジション設定 ********/
+    aP_XPOS(pl) = 0x000000;
+    aP_YPOS(pl) = - 0x001800;
+
+    /******* 初期スピード設定 ********/
+    aP_XSPD(pl) = 0x00C0;
+    aP_YSPD(pl) = 0;
+#if SOUND_ON
+    switch(PlayNum){
+    case 1:
+	sound = 47;break;
+    case 2:
+	sound = 31;break;
+    case 3:
+    default:
+	sound = 23;
+    }
+#endif
+    ErrorFlg = OFF;
+}
+/*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	メイン処理
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+void	player_main(void)
+{
+    if(!ErrorFlg){
+	/***** 自機@表示 *****/
+	player_move[aP_MODE(pl)]();
+	player_OamSet();
+	LoadWrite();
+    }else{
+	/***** ｢ERROR!｣表示 *****/
+	Error_OamSet();
+    }
+
+    /***** １Ｐ/２Ｐ/３Ｐ/４Ｐ表示 *****/
+    PlNum_OamSet();
+}
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d570 1
+d595 14
+d611 1
+d614 1
+a614 1
+    static u16	Xpos = 0x001B;
+d619 1
+a619 1
+    if(Ypos > 0x0038){
+d627 1
+a627 1
+	    Oam->VPos = Ypos + ErrorData[i][0];
+d634 1
+a634 1
+	    Oam->HPos = Xpos + ErrorData[i][1];
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

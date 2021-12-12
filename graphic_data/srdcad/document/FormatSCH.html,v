@@ -1,0 +1,212 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+   <meta name="GENERATOR" content="Mozilla/4.7 [ja] (Win98; I) [Netscape]">
+   <title>キャラクタファ@イルフォーマット</title>
+</head>
+<body>
+&nbsp;
+<br><b><font size=+2>キャラクタ（．ＳＣＨ）ファ@イル</font></b>
+<br>
+<hr WIDTH="100%">
+<p>ヘッダー情報
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th ALIGN=LEFT NOWRAP>アドレス</th>
+
+<th ALIGN=LEFT NOWRAP>説明</th>
+</tr>
+
+<tr>
+<td>00000 - 00003</td>
+
+<td>ﾌｧｲﾙﾀｲﾌﾟ&nbsp; "SCH"</td>
+</tr>
+
+<tr>
+<td>00004 - 00008</td>
+
+<td>ﾋﾞｯﾄﾓｰﾄﾞ&nbsp; "?BIT"</td>
+</tr>
+
+<tr>
+<td>00009 - 00013</td>
+
+<td>ﾊﾞｰｼﾞｮﾝﾅﾝﾊﾞｰ "Ver-????\n"</td>
+</tr>
+
+<tr>
+<td>00014 - 00017</td>
+
+<td>ﾍｯﾀﾞｰｻｲｽﾞ</td>
+</tr>
+
+<tr>
+<td>00018 - 0001B</td>
+
+<td>ﾊｰﾄﾞ名&nbsp; "SFC" or "CGB" or "GB"</td>
+</tr>
+
+<tr>
+<td>0001C - 0001C</td>
+
+<td>BG/OBJﾌﾗｸﾞ(AGBの時)</td>
+</tr>
+
+<tr>
+<td>0001D - 0001D</td>
+
+<td>Color Pallette Number</td>
+</tr>
+
+<tr>
+<td>0001D - 000FF</td>
+
+<td>予約</td>
+</tr>
+
+<tr>
+<td>00100 - 001FF</td>
+
+<td>Color Path</td>
+</tr>
+</table>
+
+<br>&nbsp;
+<br>&nbsp;
+<li>
+２ビットモード</li>
+
+<p><br>キャラクタデータは、１キャラクタあたり１０Ｈバイトで総計４０００Ｈバイトです。
+<br>アトリビュートデータは、１キャラクタあたり１バイトで、キャラクタナンバー順に入っており、４００Ｈバイトの大きさです。
+<p>ＡＧＢモードには２ビットモードはありません。
+<p>アドレス
+<p><tt>00000&nbsp; ┏━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@ヘッダー情報　@　@　@┃</tt>
+<br><tt>001FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>00200&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@キャラクタデータ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>041FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>04200&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート情報　@　@┃</tt>
+<br><tt>045FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━┛</tt>
+<br>　@
+<p>　@アトリビュートデータ（１バイトの内容）
+<p><tt>&nbsp;D7&nbsp; D6&nbsp; D5 D4&nbsp; D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃０┃０┃０┃０┃０┃　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>　@ｄ２～ｄ０　@：　@アトリビュートデータ
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<li>
+４ビットモード</li>
+
+<p><br>キャラクタデータは、１キャラクタあたり２０Ｈバイトで総計８０００Ｈバイトです。
+<br>アトリビュートデータは、１キャラクタあたり１バイトで、キャラクタナンバー順に入っており、４００Ｈバイトの大きさです。
+<p>アドレス
+<p><tt>00000&nbsp; ┏━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@ヘッダー情報　@　@　@┃</tt>
+<br><tt>001FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>00200&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@キャラクタデータ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>081FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>08200&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート情報　@　@┃</tt>
+<br><tt>085FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━┛</tt>
+<br>&nbsp;
+<p>　@アトリビュートデータ（１バイトの内容）
+<p>　@CGB/GB/SFCモード
+<br><tt>&nbsp;D7&nbsp; D6&nbsp; D5 D4&nbsp; D3&nbsp; D2&nbsp; D1&nbsp;
+D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃０┃０┃０┃０┃０┃　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>　@ｄ２～ｄ０　@：　@アトリビュートデータ
+<p><tt>&nbsp;AGBモード</tt>
+<br><tt>&nbsp;D7&nbsp; D6&nbsp; D5 D4&nbsp; D3&nbsp; D2&nbsp; D1&nbsp;
+D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃０┃０┃０┃０┃　@　@　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>　@ｄ３～ｄ０　@：　@アトリビュートデータ
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<li>
+８ビットモード</li>
+
+<p><br>キャラクタデータは、１キャラクタあたり４０Ｈバイトで総計１００００Ｈバイトです。
+<p>アドレス
+<p><tt>00000&nbsp; ┏━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@ヘッダー情報　@　@　@　@┃</tt>
+<br><tt>001FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>00200&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@キャラクタデータ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>101FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━┛</tt>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

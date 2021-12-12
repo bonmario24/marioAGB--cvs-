@@ -1,0 +1,487 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*								*/
+/*      	プレイヤーヘッダーファ@イル			*/
+/*								*/
+/****************************************************************/
+#ifndef __UP_PLAYER_H_
+#define __UP_PLAYER_H_
+
+
+/*------------- プレイヤーセレクトデータ構造体 -----------------*/
+typedef struct{
+    u8	p_KTTMDT[6];	/* katsugi change timer	   */
+    s8	p_PLYSPDT;	/* normal Y speed     [00] */
+    s8	p_PLKTYSP;	/* katsugi    "       [01] */
+    s8	p_PLPOWYSP;	/* power jump	      [02] */
+    s8	p_PLPWKTYS;	/* 		      [03] */
+    s8	p_PLXSPYSP;	/* X speed power jump [04] */
+    s8	p_PLXSKTYS;	/* 		      [05] */
+    s8	p_PLSNDYSP;	/* sand in small jump [06] */
+    u8	p_FLYTIMER;	/* flying timer		   */
+    s8	p_PLGPOWDT;	/* normal G power	   */
+    s8	p_PLBIGGDT;	/* big G power		   */
+    s8	p_PLSNDGDT;	/* sand in G power	   */
+    s8	p_PLXSPMAX;	/* normal X speed max	   */
+    s8	p_PLKTXMAX;	/* katsugi	"	   */
+    s8	p_PLSNDXMX;	/* sand in	"	   */
+    s8	p_PLXSPMIN;	/* normal X speed min	   */
+    s8	p_PLKTXMIN;	/* katsugi	"	   */
+    s8	p_PLSNDXMN;	/* sand in	"	   */
+}aPL_select_c;
+
+/*------------- プレイヤー基本構造体 ---------------------------*/
+typedef struct{
+    s32 p_xpos;		/* Ｘ位置	*/
+    s32 p_ypos;		/* Ｙ位置	*/
+    s32 p_zpos;		/* Ｚ位置	*/
+    s32 p_xspd;		/* Ｘスピード	*/
+    s32 p_yspd;		/* Ｙスピード	*/
+    s32 p_zspd;		/* Ｚスピード	*/
+    s16 p_xposh;	/* Ｘ位置（Ｈ）	*/
+    s16 p_yposh;	/* Ｙ位置（Ｈ）	*/
+    s16 p_zposh;	/* Ｚ位置（Ｈ）	*/
+    s16	p_hsize;	/* Ｈサイズ	*/
+    s16	p_vsize;	/* Ｖサイズ	*/
+    s8	p_angle;	/* アングル	*/
+    u8	p_patrn;	/* パターン	*/
+    u8	p_ptcont;	/* パターンカウント */
+    u8	p_ptflem;	/* パターンフレーム */
+    u8	p_PLCMKI;	/* 向き		*/
+    u8	p_PLCMOD;	/* 処理内容	*/
+    u8	p_PLSYNO;	/* 種類 0:マリオ 1:ピーチ 2:キノピオ 3:ルイージ */
+    u8	p_PLJUMP;	/* ジャンプフラグ */
+    u8	p_PLSIT;	/* 座りフラグ */
+    s8	p_PLWALK;	/* 歩きフラグ */
+    u8	p_PLKATSG;	/* かつぎフラグ */
+    u8	p_PLCHRNO;	/* キャラＮｏ． */
+    u8	p_PLLIFE;	/* ハートの数 */
+    u8	p_PLLIFEB;	/* ハートの器 */
+    u8	p_PLSAND;	/* 流砂入りフラグ */
+    u8	p_PLICE;	/* 氷上フラグ */
+    u8	p_PLWKTIM;	/* かつぎキャラチェンジタイマー ━━━┳━━━ */
+    u8	p_PLSTTM;	/* デモタイマー                 この４つは     */
+    u8	p_PLTIM;	/* 歩きキャラチェンジタイマー   アドレス固定   */
+    u8	p_PLSAFT;	/* セーフタイマー               ━━━┻━━━ */
+    u8	p_PLFLYTIM;	/* 空中歩行タイマー */
+    u8	p_PLPWJPTM;	/* 溜めジャンプタイマー */
+    s32	p_PLMVXSP;	/* 他からの力によるＸ方向スピード */
+    s32	p_PLMVYSP;	/* 　@　@　@”　@　@　@　@Ｙ方向スピード */
+    u8	p_KENSHIRO;	/* 無敵タイマー */
+    u8	p_PLCRFG;	/* 衝突フラグ */
+    u8	p_PLMMKI;	/* 移動方向 */
+    u8	p_PLOBJX;	/* ＯＢＪＸ位置      */
+    u8	p_PLOBJYL;	/* 　@”　@Ｙ位置（Ｌ）*/
+    s8	p_PLOBJYH;	/* 　@”　@　@　@　@（Ｈ）*/
+    s8	p_PLSTFG;	/* ＳＴＯＰフラグ */
+    s16	p_PLSTX;	/* Ｘ位置 保存 */
+    s16	p_PLSTY;	/* Ｙ位置 保存 */
+    u8	p_PLSTOX;	/* ＯＢＪＸ位置 保存 */
+    u8	p_PLSTOY;	/* ＯＢＪＹ位置 保存 */
+    s32	p_PLSTYSP;	/* Ｙスピード 保存 */
+    u8	p_PLSTCMD;	/* 処理内容 保存 */
+    u8	p_PLGMOD;	/* モードチェック用 */
+    u8	p_PLSMAL;	/* ちっちゃいフラグ */
+    u8	p_PLCLOR;	/* ＢＧに対する優先指定 */
+    u8	p_PLSLIP;	/* スリップフラグ */
+
+    s8	p_RUNTIM;	/* 走りパターン */
+    u8	p_RUNFLG;	/* 走りフラグ */
+    u8	p_RUNCLR;	/* 走り？ */
+    u8  p_ONENMY;	/* 担がれた敵、ブロック、アイテムのインデックス */
+    u8	p_STCLCG;	/* 溜めジャンプカラーフラグ */
+    s8	p_DRINFG;	/* ドアＩＮフラグ */
+    u8	p_DRMODE;	/* ドアモード */
+    u8	p_DRCNT;	/* ドアカウント */
+    u8	p_DORPTN;	/* ドア開閉パターン */
+    u8	p_DORTIM;	/* ドア開閉タイム */
+    s8  p_DRWATM;	/* ドアウェイトタイマー */
+    u8	p_WATCHTM;	/* ストップウォッチタイマー */
+    u8	p_WATMWK;	/* 　@　@　@　@　@”　@　@　@　@保存 */
+    u8	p_ENSTOP;	/* 敵ストップフラグ */
+    s8	p_CROSSX;	/* Ｘ方向ＯＢＪ食い込み量 */
+    s8	p_CROSSY;	/* Ｙ方向　@　@”　@　@　@　@　@ */
+    s16	p_WKATYAD[0x0e];/* 持ち上げ時敵ＯＢＪ補正値 */
+    u8	p_ENKTFG;	/* 敵かつがれフラグ（イニシャル用）*/
+    u8	p_DRCLTM;	/* ドアカラータイム */
+    u8	p_SNDFG;	/* 流砂ワークフラグ */
+    s16	p_MVPLXP;	/* Ｘ位置 保存（ドア）*/
+    s16	p_MVPLYP;	/* Ｙ位置 保存（ドア）*/
+    u8	p_XSPCLR;	/* Ｘスピードクリアフラグ */
+    u8	p_YSPCLR;	/* Ｙスピードクリアフラグ */
+    u8	p_OBJONFG;	/* ＯＢＪ乗りフラグ */
+    u8	p_NOKTTM;	/* かつげないタイマー(bit7：パターンＮｏ．) */
+    u8	p_BGNOKTFG;	/* ＢＧかつげないフラグ */
+    u8	p_BJUMP:3;	/* バック転：フラグ＆パターン */
+    u8	p_BJTIME:5;	/* 　@　@”　@：タイマー */
+    u8	p_FRONTTM;	/* 正面向きタイマー（裏画面から戻る時）*/
+
+    u8	ex_EXCONT;	/* 効果ＯＡＭカウンタ    */
+    u8	ex_SMMODE[12];	/* 効果：モード（Ｎｏ．）*/
+    s32	ex_SMXPOS[12];	/* 　@”　@Ｘ位置          */
+    s32	ex_SMYPOS[12];	/* 　@”　@Ｙ位置          */
+    u8	ex_SMCONT[12];	/* 　@”　@カウンタ        */
+    s16	ex_SMXSPD[12];	/* 　@”　@スピード        */
+    s16	ex_SMYSPD[12];	/* 　@”　@Ｙスピード      */
+    u8	ex_SMINDX[12];	/* 　@”　@インデックス    */
+    u8	ex_SMCOLR[12];	/* 　@”　@カラー          */
+
+    u8	p_FADEFG:1;	/* フェード：フラグ   */
+    u8	p_FADECT:5;	/* 　@　@”　@：タイマー */
+    u8	p_FADESL:2;	/* 　@　@”　@：種類     */
+
+// フラグ（０）
+    u8	p_URADOOR:1;	/* ビット０　@　@：プレイヤーがドアを使って裏から戻る？ */
+    u8	p_ENSCROLL:2;	/* 　@”　@１・２：敵オートスクロール		      */
+    u8	p_SPSCROLL:1;	/* 　@”　@３　@　@：スペシャルスクロール		      */
+    u8	p_SCRLOCK:1;	/* 　@”　@４　@　@：横画面 Ｖスクロール固定	      */
+    u8	p_SCRLOCK_H:1;	/* 　@”　@５　@　@：縦画面 Ｈスクロール固定	      */
+    u8	p_SCRMUKI:1;	/* 　@”　@６　@　@：Ｈスクロール向き		      */
+    u8	p_KTUGROUND:1;	/* 　@”　@７　@　@：地中から大きな敵を抜いた	      */
+
+    u8	p_PLTILT;	/* プレイヤー揺れフラグ */
+    s32	p_PLMVXSP_SV;	/* 他からの力によるＸ方向スピード（保存）*/
+    u16	p_OBJONNO;	/* ＯＢＪ乗り敵ＮＯ． */
+    u8	p_OBJONIX;	/* ＯＢＪ乗り敵インデックス */
+    s32	p_PLMVYSP_SV;	/* 他からの力によるＹ方向スピード（保存）*/
+    u8	p_FAILTM;	/* プレイヤー死亡タイマー */
+    u8	p_VSCRWID;	/* 縦画面自動スクロール移動幅 */
+    u8	p_CENTER;	/* 横画面プレイヤー中心位置 */
+
+// フラグ（１）
+    u8	p_ENONSCR:2;	/* ビット０・１：横画面 Ｈスクロール 敵乗りスクロール */
+    u8	p_ENSCRSEL:1;	/* 　@”　@２　@　@：敵オートスクロール種別（縦画面のみ） */
+    u8	flag3:1;	/* 　@”　@３ */
+    u8	flag4:1;	/* 　@”　@４ */
+    u8	flag5:1;	/* 　@”　@５ */
+    u8	flag6:1;	/* 　@”　@６ */
+    u8	flag7:1;	/* 　@”　@７ */
+
+    aPL_select_c p_select;	/* セレクトデータ 構造体 */
+}aPL_base_c;
+
+
+/*------------- マクロ定義 -------------------------------------*/
+#define PLAY_PLXPOSL	(((aPL_base_c *)(p_ply))->p_xpos)
+#define PLAY_PLYPOSL	(((aPL_base_c *)(p_ply))->p_ypos)
+#define PLAY_PLZPOSL	(((aPL_base_c *)(p_ply))->p_zpos)
+#define PLAY_PLXSPED	(((aPL_base_c *)(p_ply))->p_xspd)
+#define PLAY_PLYSPED	(((aPL_base_c *)(p_ply))->p_yspd)
+#define PLAY_PLZSPED	(((aPL_base_c *)(p_ply))->p_zspd)
+#define PLAY_PLXPOSH	(((aPL_base_c *)(p_ply))->p_xposh)
+#define PLAY_PLYPOSH	(((aPL_base_c *)(p_ply))->p_yposh)
+#define PLAY_PLZPOSH	(((aPL_base_c *)(p_ply))->p_zposh)
+#define PLAY_HSIZE	(((aPL_base_c *)(p_ply))->p_hsize)
+#define PLAY_VSIZE	(((aPL_base_c *)(p_ply))->p_vsize)
+#define PLAY_ANGL	(((aPL_base_c *)(p_ply))->p_angle)
+#define PLAY_PTRN	(((aPL_base_c *)(p_ply))->p_patrn)
+#define PLAY_PCOT	(((aPL_base_c *)(p_ply))->p_ptcont)
+#define PLAY_PFLM	(((aPL_base_c *)(p_ply))->p_ptflem)
+#define PLAY_PLCMKI	(((aPL_base_c *)(p_ply))->p_PLCMKI)
+#define PLAY_PLCMOD	(((aPL_base_c *)(p_ply))->p_PLCMOD)
+#define PLAY_PLSYNO	(((aPL_base_c *)(p_ply))->p_PLSYNO)
+#define PLAY_PLJUMP	(((aPL_base_c *)(p_ply))->p_PLJUMP)
+#define PLAY_PLSIT	(((aPL_base_c *)(p_ply))->p_PLSIT)
+#define PLAY_PLWALK	(((aPL_base_c *)(p_ply))->p_PLWALK)
+#define PLAY_PLKATSG	(((aPL_base_c *)(p_ply))->p_PLKATSG)
+#define PLAY_PLCHRNO	(((aPL_base_c *)(p_ply))->p_PLCHRNO)
+#define PLAY_PLLIFE	(((aPL_base_c *)(p_ply))->p_PLLIFE)
+#define PLAY_PLLIFEB	(((aPL_base_c *)(p_ply))->p_PLLIFEB)
+#define PLAY_PLSAND	(((aPL_base_c *)(p_ply))->p_PLSAND)
+#define PLAY_PLICE	(((aPL_base_c *)(p_ply))->p_PLICE)
+#define PLAY_PLWKTIM	(((aPL_base_c *)(p_ply))->p_PLWKTIM)
+#define PLAY_PLSTTM	(((aPL_base_c *)(p_ply))->p_PLSTTM)
+#define PLAY_PLTIM	(((aPL_base_c *)(p_ply))->p_PLTIM)
+#define PLAY_PLSAFT	(((aPL_base_c *)(p_ply))->p_PLSAFT)
+#define PLAY_PLFLYTIM	(((aPL_base_c *)(p_ply))->p_PLFLYTIM)
+#define PLAY_PLPWJPTM	(((aPL_base_c *)(p_ply))->p_PLPWJPTM)
+#define PLAY_PLMVXSP	(((aPL_base_c *)(p_ply))->p_PLMVXSP)
+#define PLAY_PLMVYSP	(((aPL_base_c *)(p_ply))->p_PLMVYSP)
+#define PLAY_KENSHIRO	(((aPL_base_c *)(p_ply))->p_KENSHIRO)
+#define PLAY_PLCRFG	(((aPL_base_c *)(p_ply))->p_PLCRFG)
+#define PLAY_PLMMKI	(((aPL_base_c *)(p_ply))->p_PLMMKI)
+#define PLAY_PLOBJX	(((aPL_base_c *)(p_ply))->p_PLOBJX)
+#define PLAY_PLOBJYL	(((aPL_base_c *)(p_ply))->p_PLOBJYL)
+#define PLAY_PLOBJYH	(((aPL_base_c *)(p_ply))->p_PLOBJYH)
+#define PLAY_PLSTFG	(((aPL_base_c *)(p_ply))->p_PLSTFG)
+#define PLAY_PLSTX	(((aPL_base_c *)(p_ply))->p_PLSTX)
+#define PLAY_PLSTY	(((aPL_base_c *)(p_ply))->p_PLSTY)
+#define PLAY_PLSTOX	(((aPL_base_c *)(p_ply))->p_PLSTOX)
+#define PLAY_PLSTOY	(((aPL_base_c *)(p_ply))->p_PLSTOY)
+#define PLAY_PLSTYSP	(((aPL_base_c *)(p_ply))->p_PLSTYSP)
+#define PLAY_PLSTCMD	(((aPL_base_c *)(p_ply))->p_PLSTCMD)
+#define PLAY_PLGMOD	(((aPL_base_c *)(p_ply))->p_PLGMOD)
+#define PLAY_PLSMAL	(((aPL_base_c *)(p_ply))->p_PLSMAL)
+#define PLAY_PLCLOR	(((aPL_base_c *)(p_ply))->p_PLCLOR)
+#define PLAY_PLSLIP	(((aPL_base_c *)(p_ply))->p_PLSLIP)
+
+#define PLAY_RUNTIM	(((aPL_base_c *)(p_ply))->p_RUNTIM)
+#define PLAY_RUNFLG	(((aPL_base_c *)(p_ply))->p_RUNFLG)
+#define PLAY_RUNCLR	(((aPL_base_c *)(p_ply))->p_RUNCLR)
+#define PLAY_ONENMY	(((aPL_base_c *)(p_ply))->p_ONENMY)
+#define PLAY_STCLCG	(((aPL_base_c *)(p_ply))->p_STCLCG)
+#define PLAY_DRINFG	(((aPL_base_c *)(p_ply))->p_DRINFG)
+#define PLAY_DRMODE	(((aPL_base_c *)(p_ply))->p_DRMODE)
+#define PLAY_DRCNT	(((aPL_base_c *)(p_ply))->p_DRCNT)
+#define PLAY_DORPTN	(((aPL_base_c *)(p_ply))->p_DORPTN)
+#define PLAY_DORTIM	(((aPL_base_c *)(p_ply))->p_DORTIM)
+#define PLAY_DRWATM	(((aPL_base_c *)(p_ply))->p_DRWATM)
+#define PLAY_WATCHTM	(((aPL_base_c *)(p_ply))->p_WATCHTM)
+#define PLAY_WATMWK	(((aPL_base_c *)(p_ply))->p_WATMWK)
+#define PLAY_ENSTOP	(((aPL_base_c *)(p_ply))->p_ENSTOP)
+#define PLAY_CROSSX	(((aPL_base_c *)(p_ply))->p_CROSSX)
+#define PLAY_CROSSY	(((aPL_base_c *)(p_ply))->p_CROSSY)
+#define PLAY_WKATYAD	(((aPL_base_c *)(p_ply))->p_WKATYAD)
+#define PLAY_ENKTFG	(((aPL_base_c *)(p_ply))->p_ENKTFG)
+#define PLAY_DRCLTM	(((aPL_base_c *)(p_ply))->p_DRCLTM)
+#define PLAY_SNDFG	(((aPL_base_c *)(p_ply))->p_SNDFG)
+#define PLAY_MVPLXP	(((aPL_base_c *)(p_ply))->p_MVPLXP)
+#define PLAY_MVPLYP	(((aPL_base_c *)(p_ply))->p_MVPLYP)
+#define PLAY_XSPCLR	(((aPL_base_c *)(p_ply))->p_XSPCLR)
+#define PLAY_YSPCLR	(((aPL_base_c *)(p_ply))->p_YSPCLR)
+#define PLAY_OBJONFG	(((aPL_base_c *)(p_ply))->p_OBJONFG)
+#define PLAY_NOKTTM	(((aPL_base_c *)(p_ply))->p_NOKTTM)
+#define PLAY_BGNOKTFG	(((aPL_base_c *)(p_ply))->p_BGNOKTFG)
+#define PLAY_BJUMP	(((aPL_base_c *)(p_ply))->p_BJUMP)
+#define PLAY_BJTIME	(((aPL_base_c *)(p_ply))->p_BJTIME)
+#define PLAY_FRONTTM	(((aPL_base_c *)(p_ply))->p_FRONTTM)
+
+#define EX_EXCONT	(((aPL_base_c *)(p_ply))->ex_EXCONT)
+#define EX_SMMODE	(((aPL_base_c *)(p_ply))->ex_SMMODE)
+#define EX_SMXPOS	(((aPL_base_c *)(p_ply))->ex_SMXPOS)
+#define EX_SMYPOS	(((aPL_base_c *)(p_ply))->ex_SMYPOS)
+#define EX_SMCONT	(((aPL_base_c *)(p_ply))->ex_SMCONT)
+#define EX_SMXSPD	(((aPL_base_c *)(p_ply))->ex_SMXSPD)
+#define EX_SMYSPD	(((aPL_base_c *)(p_ply))->ex_SMYSPD)
+#define EX_SMINDX	(((aPL_base_c *)(p_ply))->ex_SMINDX)
+#define EX_SMCOLR	(((aPL_base_c *)(p_ply))->ex_SMCOLR)
+
+#define PLAY_FADEFG	(((aPL_base_c *)(p_ply))->p_FADEFG)
+#define PLAY_FADECT	(((aPL_base_c *)(p_ply))->p_FADECT)
+#define PLAY_FADESL	(((aPL_base_c *)(p_ply))->p_FADESL)
+
+#define PLAY_URADOOR	(((aPL_base_c *)(p_ply))->p_URADOOR)
+#define ENSCROLL	(((aPL_base_c *)(p_ply))->p_ENSCROLL)
+#define SPSCROLL	(((aPL_base_c *)(p_ply))->p_SPSCROLL)
+#define SCRLOCK		(((aPL_base_c *)(p_ply))->p_SCRLOCK)
+#define SCRLOCK_H	(((aPL_base_c *)(p_ply))->p_SCRLOCK_H)
+#define SCRMUKI		(((aPL_base_c *)(p_ply))->p_SCRMUKI)
+#define KTUGROUND	(((aPL_base_c *)(p_ply))->p_KTUGROUND)
+
+#define PLAY_PLTILT	(((aPL_base_c *)(p_ply))->p_PLTILT)
+#define PLAY_PLMVXSP_SV	(((aPL_base_c *)(p_ply))->p_PLMVXSP_SV)
+#define PLAY_OBJONNO	(((aPL_base_c *)(p_ply))->p_OBJONNO)
+#define PLAY_OBJONIX	(((aPL_base_c *)(p_ply))->p_OBJONIX)
+#define PLAY_PLMVYSP_SV	(((aPL_base_c *)(p_ply))->p_PLMVYSP_SV)
+#define PLAY_FAILTM	(((aPL_base_c *)(p_ply))->p_FAILTM)
+#define PLAY_VSCRWID	(((aPL_base_c *)(p_ply))->p_VSCRWID)
+#define PLAY_CENTER	(((aPL_base_c *)(p_ply))->p_CENTER)
+
+#define ENONSCR		(((aPL_base_c *)(p_ply))->p_ENONSCR)
+
+#define PLAY_KTTMDT	(((aPL_select_c *)(p_select))->p_KTTMDT)
+#define PLAY_PLYSPDT	(((aPL_select_c *)(p_select))->p_PLYSPDT)
+#define PLAY_PLKTYSP	(((aPL_select_c *)(p_select))->p_PLKTYSP)
+#define PLAY_PLPOWYSP	(((aPL_select_c *)(p_select))->p_PLPOWYSP)
+#define PLAY_PLPWKTYS	(((aPL_select_c *)(p_select))->p_PLPWKTYS)
+#define PLAY_PLXSPYSP	(((aPL_select_c *)(p_select))->p_PLXSPYSP)
+#define PLAY_PLXSKTYS	(((aPL_select_c *)(p_select))->p_PLXSKTYS)
+#define PLAY_PLSNDYSP	(((aPL_select_c *)(p_select))->p_PLSNDYSP)
+#define PLAY_FLYTIMER	(((aPL_select_c *)(p_select))->p_FLYTIMER)
+#define PLAY_PLGPOWDT	(((aPL_select_c *)(p_select))->p_PLGPOWDT)
+#define PLAY_PLBIGGDT	(((aPL_select_c *)(p_select))->p_PLBIGGDT)
+#define PLAY_PLSNDGDT	(((aPL_select_c *)(p_select))->p_PLSNDGDT)
+#define PLAY_PLXSPMAX	(((aPL_select_c *)(p_select))->p_PLXSPMAX)
+#define PLAY_PLKTXMAX	(((aPL_select_c *)(p_select))->p_PLKTXMAX)
+#define PLAY_PLSNDXMX	(((aPL_select_c *)(p_select))->p_PLSNDXMX)
+#define PLAY_PLXSPMIN	(((aPL_select_c *)(p_select))->p_PLXSPMIN)
+#define PLAY_PLKTXMIN	(((aPL_select_c *)(p_select))->p_PLKTXMIN)
+#define PLAY_PLSNDXMN	(((aPL_select_c *)(p_select))->p_PLSNDXMN)
+
+/*------------- キャラＮｏ．(PLAY_PLSYNO) ----------------------*/
+#define	MARIO	0	// マリオ
+#define	PEACH	1	// ピーチ
+#define	KINOPIO	2	// キノピオ
+#define	LUIJI	3	// ルイージ
+
+/*------------- キャラＮｏ．(PLAY_PLCHRNO) ---------------------*/
+#if 0	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#define	WALK11	0
+#define	WALK21	2
+#define	SIT	4
+#define	JUMP	6
+#define	GIVE	7
+#define	HIKU	8
+#define	NAGE	9
+#define	TSRU	10
+#else	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#define	WALK11	1		// 歩き（足上げ 大）
+#define	WALK31	2		// 歩き（足上げ 小）
+#define	WALK21	0		// 停止
+#define	SIT	9		// 座り
+#define	JUMP	0x10		// ジャンプ
+#define	GIVE	0x0b		// 死亡
+#define	HIKU	7		// 引く
+#define	NAGE	8		// 投げ
+#define	TSRU	6		// つる
+#define	HIKU2	0x0c		// 引く２
+#define	DRIN	0x0d		// ドアＩＮ
+#define	SLIP	0x0e		// スリップ
+#define	DROUT	0x0f		// ドアＯＵＴ
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+/*------------- モード(PLAY_PLCMOD) ----------------------------*/
+#define	PLMV		0	// ノーマル移動
+#define	PLTR		1	// つる
+#define	PLKT		2	// かつぎ
+#define	PLSTMV		PLKT
+#define	PLTA		3	// つる自動移動
+#define	PLTI		4	// つぼＩＮ
+#define	PLTO		5	// つぼＯＵＴ
+#define	PLWK		6	// 自動歩き
+#define	PLFL		7	// ギブアップ
+#define	PLCH		8	// チェンジ
+#define	PLNOKT		9	// かつげない！
+#define	PLDRIN		10	// ドアＩＮ
+#define	PLDROUT		11	// ドアＯＵＴ
+
+/*------------- キャラ向き(PLAY_PLCMKI) ------------------------*/
+#define	PLCMKI_LEFT	0
+#define	PLCMKI_RIGHT	1
+
+/*------------- キャラ移動方向(PLAY_PLMMKI) --------------------*/
+#define	PLMMKI_LEFT	2
+#define	PLMMKI_RIGHT	1
+
+/*------------- スタート位置(PLDSPNO) --------------------------*/
+#define	STPS		0	// スタート位置
+#define	DRPS		1	// ドア
+#define	TBPS		2	// つぼ
+#define	TRPS		3	// つる
+#define	ODPS		4	// ＯＢＪドア
+#define	RKPS		5	// ロケット
+
+/*------------- モードチェック(PLAY_PLGMOD) --------------------*/
+#define	PLGM_DOWN	1	// プレイヤーやられ
+#define	PLGM_CONT	2	// コンティニュー
+#define	PLGM_CSCL	3	// コースクリアー
+#define	PLGM_WARP	4	// プレイヤーワープ
+#define	PLGM_CACL	5	// ゲームキャンセル
+
+/*------------- その他データ定義 -------------------------------*/
+#define XSPJPMAX	8
+#define POWJMPTM	60
+#define	MAXYSP		0x39		// 下降最大スピード 
+#define	STOPX		8		// Ｘ停止位置
+#define	TSRLOW		(0xB8-0x40)	// つる自動移動開始下限
+#define	GIVEYSP		-0x40		// 死亡時ジャンプスピード
+#define	GIVETIME	32		// 死亡時タイマー
+#define	GVNAGYSP	-0x20
+#define	CRTIMER		0x10		// 
+#define	NATIMER		10		// 投げタイマー
+#define	NAGXMAX		8		// 投げＯＲ下ろし チェックスピード
+
+/*------------- ＢＧユニット -----------------------------------*/
+#define	HAPMIN		CIN1
+#define	HAPMAX		(BKD2+1)
+#define	HNO1		SPA1
+#define	MBLKNO		((DAIY-SPAE)+1)
+#define	BLKNO		((POW1-SPAE)+1)		// +MBLKNO+1
+#define	ALLKTNO		(HAPMAX-HAPMIN+BLKNO)
+#define	BLKMIN		SPAE			// katsugi brock
+#define	BLKMAX		(POW1+1)
+
+/*------------- ＢＧチェック位置 -------------------------------*/
+#define	BGCK_HEAD	0	// 頭
+#define	BGCK_FOOT	1	// 足
+#define	BGCK_LEFT	2	// 左
+#define	BGCK_RIGHT	3	// 右
+#define	BGCK_TSURU	4	// つる
+#define	BGCK_FRONT	5	// 足元
+
+/*------------- 衝突フラグ(PLAY_PLCRCK) ------------------------*/
+#define	HEDCR		0x08	// 頭
+#define	FOOTCR		0x04	// 足
+#define	LEFTCR		0x02	// 左
+#define	RIGHTCR		0x01	// 右
+
+/*------------- 流砂スピード -----------------------------------*/
+#define	SNDYSP1		1	// 遅い
+#define	SNDYSP2		8	// 速い
+
+/*------------- スクロール値補正 -------------------------------*/
+// 縦スクロール
+#define SCCH_OFFSET_CNT		1	// 補正カウンタ
+#define SCCH_OFFSET_VAL		0x10	// Ｈスクロール補正値
+#define SCCH_OFSET_POSL		0x30	// 補正開始プレイヤー位置（左）
+#define SCCH_OFSET_POSR		0xc0	// 補正開始プレイヤー位置（右）
+// 横スクロール
+#define SCCV_OFFSET_CNT		2	// 補正カウンタ
+#define SCCV_OFFSET_CNT_UP	2	// 補正カウンタ（上）
+#define SCCV_OFFSET_CNT_DOWN	4	// 補正カウンタ（下）
+#define SCCV_OFFSET_VAL		0x40	// Ｖスクロール補正値
+//#define SCCV_OFFSET_POS_UP	0x50	// 補正開始プレイヤー位置
+#define SCCV_OFFSET_POS_UP	0x50	// 補正開始プレイヤー位置（上）
+#define SCCV_OFFSET_POS_DOWN	0x30	// 補正開始プレイヤー位置（下:yscrで使用）
+
+#define	SCCH_Center		0x70	// イニシャル中心位置
+
+/*------------- 縦画面スクロールモード(VGAMEN_POS) -------------*/
+#define	UE_MODE		0		// 上モード（上方向が見やすい）
+#define	SHITA_MODE	1		// 下モード（下方向　@　@”　@　@）
+
+
+/*------------- ＥＸＴＥＲＮ -----------------------------------*/
+extern	aPL_base_c	*p_ply;
+extern	aPL_select_c	*p_select;
+
+extern	void player_WKSET(void);
+extern  void player_YSPSET(void);
+
+extern  void ply_maloc_set(void);
+extern  void ply_free_set(void);
+extern  void player_init(void);
+extern  void u_player_main(void);
+
+extern  void DRSONDST(void);
+
+extern	void player_BGCHECK(u8);	// (ＮＥＳ版：2001/03/23)
+
+#endif /* __UP_PLAYER_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

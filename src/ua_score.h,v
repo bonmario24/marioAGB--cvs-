@@ -1,0 +1,216 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UA_SCORE_H_
+#define __UA_SCORE_H_
+
+#include "m_main.h"
+#include "ua_act.h"
+#include "ua_common.h"
+#include "uca_acters.h"
+#include "ua_effectdt.h"
+#include "up_player.h"
+
+extern void u_score_disp(void);
+
+/*** MALLOC & FREE ***/
+extern void mGm_MALLOC_p_scr(void);
+extern void mGm_FREE_p_scr(void);
+
+#define	SCORE_MAX	0x18		// スコア表示最大数
+#define	HANABI_MAX	0x8		// 花火表示最大数
+#define	PWHTCT_FST	0xFF	
+#define	PWHTCT_SM1	0xFE	
+#define	PWHTCT_SM2	0xFD	
+
+/*-------------------- スコア基本構造体  -----------------*/
+typedef struct{
+    s32 a_xpos;		/* Ｘ位置	*/
+    s32 a_ypos;		/* Ｙ位置	*/
+    s32 a_xspd;		/* Ｘスピード	*/
+    s32 a_yspd;		/* Ｙスピード	*/
+    s16 a_xposh;	/* Ｘ位置（Ｈ）	*/
+    s16 a_yposh;	/* Ｙ位置（Ｈ）	*/
+    u8  a_hmuki;	/* Ｈ向き	*/
+    u8  a_vmuki;	/* Ｖ向き	*/
+    s16	a_hsize;	/* Ｈサイズ	*/
+    s16	a_vsize;	/* Ｖサイズ	*/
+    s8	a_angle;	/* アングル	*/
+    u8	a_patrn;	/* パターン	*/
+    u8  a_scrtim;	/* タイマー	*/
+    u8  a_work1;	/* ワークラム */
+    u8  a_work2;	/* ワークラム */
+    u16 a_worka;	/* ワークラム */
+}aSc_score_c;
+
+
+typedef struct{				/* スコア構造体 */
+    aSc_score_c score_base[SCORE_MAX];
+    u8	score_name[SCORE_MAX];
+    u8	score_table[SCORE_MAX];
+    u8  score_oampt;
+    u8  a_hitcnt;
+    u8	a_powhitcnt;
+    u8  hanabi_no[HANABI_MAX];
+    u8	hanabi_affin[HANABI_MAX];
+    u8  index_dt;
+    u8  hanabi_setfg;
+    u8  shock_setfg;
+}aAll_scr_c;
+
+extern  aSc_score_c score_clear;
+
+/*------------- マクロ定義 --------------------------------*/
+
+#define SCORE_BASE(pt)	(((aAll_scr_c *)(pt)) -> score_base)
+#define SCORE_CMOD(pt)	(((aAll_scr_c *)(pt)) -> score_table)
+#define SCORE_SYNO(pt)	(p_scr -> score_name)
+#define SCORE_OAMPT	(p_scr -> score_oampt)
+#define HITCNT          (p_scr -> a_hitcnt)
+#define PWHTCT          (p_scr -> a_powhitcnt)
+#define HANABI_NO	(p_scr -> hanabi_no)
+#define HANABI_AFFIN	(p_scr -> hanabi_affin)
+#define INDEX_DT	(p_scr -> index_dt )
+#define HANABI_SETFG	(p_scr -> hanabi_setfg )
+#define SHOCK_SETFG	(p_scr -> shock_setfg )
+
+#define SCORE_XPOS(pt)	(((aSc_score_c *)(pt)) -> a_xpos)
+#define SCORE_YPOS(pt)  (((aSc_score_c *)(pt)) -> a_ypos)
+#define SCORE_XSPD(pt)  (((aSc_score_c *)(pt)) -> a_xspd)
+#define SCORE_YSPD(pt)  (((aSc_score_c *)(pt)) -> a_yspd)
+#define SCORE_XPOSH(pt)	(((aSc_score_c *)(pt)) -> a_xposh)
+#define SCORE_YPOSH(pt) (((aSc_score_c *)(pt)) -> a_yposh)
+#define SCORE_PTRN(pt)  (((aSc_score_c *)(pt)) -> a_patrn)
+#define SCORE_TIMER(pt) (((aSc_score_c *)(pt)) -> a_scrtim)
+#define SCORE_HMUKI(pt) (((aSc_score_c *)(pt)) -> a_hmuki)
+#define SCORE_VMUKI(pt) (((aSc_score_c *)(pt)) -> a_vmuki)
+#define SCORE_HSIZE(pt) (((aSc_score_c *)(pt)) -> a_hsize)
+#define SCORE_VSIZE(pt) (((aSc_score_c *)(pt)) -> a_vsize)
+#define SCORE_ANGL(pt)  (((aSc_score_c *)(pt)) -> a_angle)
+#define SCORE_WORK1(pt)  (((aSc_score_c *)(pt)) -> a_work1)
+#define SCORE_WORK2(pt)  (((aSc_score_c *)(pt)) -> a_work2)
+#define SCORE_WORKA(pt)  (((aSc_score_c *)(pt)) -> a_worka)
+
+/*** スコア構造体用 OBJ NAME ***/
+#define	SCORE_100	0			// (0)
+#define	SCORE_200	(SCORE_100+1)		// (1)
+#define SCORE_400	(SCORE_200+1) 		// (2)
+#define SCORE_800 	(SCORE_400+1)		// (3)
+#define	SCORE_1000	(SCORE_800+1)		// (4)
+#define	SCORE_2000	(SCORE_1000+1)		// (5)
+#define SCORE_4000	(SCORE_2000+1) 		// (6)
+#define SCORE_8000 	(SCORE_4000+1)		// (7)
+#define SCORE_1UP 	(SCORE_8000+1)		// (8)
+
+#define SCORE_SHOCK 	(SCORE_1UP+1)		// (9)
+#define SCORE_HAHEN	(SCORE_SHOCK+1)		// (A)
+#define SCORE_HANABI	(SCORE_HAHEN+1)		// (B)
+#define SCORE_BIGSHOCK	(SCORE_HANABI+1)	// (C)
+#define SCORE_BIGHAHEN	(SCORE_BIGSHOCK+1)	// (D)
+#define SCORE_10000	(SCORE_BIGHAHEN+1)	// (E)
+#define SCORE_BSEFT	(SCORE_10000+1)		// (F)
+#define SCORE_BIGBSEFT	(SCORE_BSEFT+1)		// (10)
+#define SCORE_10	(SCORE_BIGBSEFT+1)	// (11)
+#define SCORE_40	(SCORE_10+1)		// (12)
+#define SCORE_BUBBLE	(SCORE_40+1)		// (13)
+
+/*------------- ＥＸＴＥＲＮ ------------------------------*/
+extern aAll_scr_c	*p_scr;
+extern u8 tokuten_table[];
+extern void m_score_clear(void);
+
+/* ua_score.c */
+extern void score_check(u8 index1, u8 index2);
+extern void pl_score_check(u8 index1 );
+extern void EGGSCORE_SET(aAC_base_c *abs_pt);
+extern void ONEUP_SET(s32 XPOSH, s32 YPOSH);
+extern void POINT100_SET(s32 XPOSH, s32 YPOSH);
+extern void SPOINT_SET(s32 XPOSH, s32 YPOSH, u8 name);
+
+/* ua_shock.c */
+extern void shock_check(u8 index1, u8 index2);
+extern void pl_shock_check(u8 index1);
+
+/* ua_effect.c */
+extern void scr_maloc_set(void);
+extern void score_posclc(aSc_score_c *scr_pt);
+extern u8 EFFECT_SET(u8 name);
+extern void PL_EFFECT_SET( u8 index );  
+extern void SCORE_CLEAR( u8 index );
+extern void scroe_main(void);	
+
+/* ua_bosseffect.c */
+extern void BOSS_EFCTSET(aAC_base_c *abs_pt);
+
+/* EFFECT MOVE */
+extern void shock_move(aSc_score_c *scr_pt, u8 index);
+extern void hahen_move(aSc_score_c *scr_pt, u8 index);
+extern void spoint_move(aSc_score_c *scr_pt, u8 index);
+extern void bpoint_move(aSc_score_c *scr_pt, u8 index);
+extern void oneup_move(aSc_score_c *scr_pt, u8 index);
+extern void hanabi_move(aSc_score_c *scr_pt, u8 index);
+extern void bseft_move(aSc_score_c *scr_pt, u8 index);
+extern void bubble_move(aSc_score_c *scr_pt, u8 index);
+
+/* EFFECT MOVE TABLE */
+static void (*efctmv_menu[])(aSc_score_c *, u8) = {
+    spoint_move,			// (0)	100pt
+    spoint_move,			// (1)	200pt
+    spoint_move,			// (2)	400pt
+    spoint_move,			// (3)	800pt
+    bpoint_move,			// (4)	1000pt
+    bpoint_move,			// (5)	2000pt
+    bpoint_move,			// (6)	4000pt
+    bpoint_move,			// (7)	8000pt
+    oneup_move,				// (8)	1UP
+    
+    shock_move,				// (9)	衝突エフェクト
+    hahen_move,				// (A)	破片
+    hanabi_move,			// (B)	花火
+    shock_move,				// (C)	でか衝突エフェクト
+    hahen_move,				// (D)	でか破片
+
+    bpoint_move,			// (E)	10000pt
+    bseft_move,				// (F) キャサリン登場EFT
+    bseft_move,				// (10) キャサリン登場EFT
+    spoint_move,			// (11)	10pt
+    spoint_move,			// (12)	40pt
+    bubble_move,			// (13)	ボスエフェクト泡
+};
+
+#endif /* __UA_SCORE_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

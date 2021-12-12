@@ -1,0 +1,67 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*==============================================================*/
+/*      Enemy Move＆Init　@データ　@　@　@　@　@			*/
+/*==============================================================*/
+#ifndef __UA_EFFECTDT_H_
+#define __UA_EFFECTDT_H_
+
+#include "agb.h"
+
+/*===スターエフェクトデータ===*/
+extern u8 stareft_plttdt[];
+
+/*===当り破片データ===*/
+extern s16 hahen_psdt[];
+extern s16 bighahen_psdt[];
+
+/*===スコアデータ===*/
+extern u8 score_point_talbe[];
+extern u8 score_pwpit_talbe[];
+extern u16 score_addpoint_table[];
+
+/*===花火データ===*/
+extern s16 hanabi_dt[];
+
+/*===でぶキャサリンエフェクトデータ===*/
+extern s16 bseft_xspd_dt[];
+extern s16 bseft_yspd_dt[];
+
+
+#endif /* __UA_EFFECTDT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

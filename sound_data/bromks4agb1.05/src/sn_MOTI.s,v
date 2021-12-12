@@ -1,0 +1,106 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_MOTI_grp, voicegroup000
+	.equ	sn_MOTI_pri, 150
+	.equ	sn_MOTI_rev, 0
+	.equ	sn_MOTI_mvl, 120
+	.equ	sn_MOTI_key, 0
+	.equ	sn_MOTI_tbs, 1
+	.equ	sn_MOTI_exg, 0
+	.equ	sn_MOTI_cmp, 1
+
+	.section .rodata
+	.global	sn_MOTI
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_MOTI_1:
+	.byte	KEYSH , sn_MOTI_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_MOTI_tbs/2
+	.byte		VOICE , 15
+	.byte		VOL   , 70*sn_MOTI_mvl/mxv
+	.byte		BENDR , 14
+	.byte		BEND  , c_v+0
+	.byte		N13   , En3 , v127
+	.byte	W01
+	.byte		BEND  , c_v-2
+	.byte	W01
+	.byte		        c_v-4
+	.byte	W01
+	.byte		        c_v-6
+	.byte	W01
+	.byte		        c_v-8
+	.byte	W01
+	.byte		        c_v-10
+	.byte	W01
+	.byte		VOL   , 127*sn_MOTI_mvl/mxv
+	.byte		BEND  , c_v+0
+	.byte	W01
+	.byte		        c_v+10
+	.byte	W01
+	.byte		        c_v+21
+	.byte	W01
+	.byte		        c_v+32
+	.byte	W01
+	.byte		        c_v+42
+	.byte	W01
+	.byte		        c_v+53
+	.byte	W01
+	.byte		        c_v+63
+	.byte	W01
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_MOTI:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_MOTI_pri	@@ Priority
+	.byte	sn_MOTI_rev	@@ Reverb.
+
+	.word	sn_MOTI_grp
+
+	.word	sn_MOTI_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

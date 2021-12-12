@@ -1,0 +1,53 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+#ifndef __UM_MATH_H_
+#define __UM_MATH_H_
+
+#include <agb.h>
+
+const s16 SinTbl_s16[0x10000];
+#define Sin16(kakudo)		SinTbl_s16[(kakudo & 0xffff)]
+#define Cos16(kakudo)		SinTbl_s16[((kakudo+ 0x4000) & 0xffff)]
+s16 fix_mul( s16 a , s16 b );
+u32 fabs32(s32 number);
+s16 distance(s32 x1, s32 y1, s32 x2, s32 y2);
+
+#endif /* __UM_MATH_H_ */
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

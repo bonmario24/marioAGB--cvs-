@@ -1,0 +1,358 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ヘッダーファ@イル				*/
+/****************************************************************/
+#ifndef __UD_UNIT_H_
+#define __UD_UNIT_H_
+
+/*------------- EXTERN -----------------------------------------*/
+//extern u16 unit_teble[3];
+extern u16 unit_data0[];
+extern u16 unit_data1[];
+extern u16 unit_data2[];
+
+/*------------- a_unit2.c -------------*/
+extern u16 *unit2_table[14];
+extern u8 cos_unit2_dat[];
+
+/*------------- a_unit3.c -------------*/
+extern u16 *unit3_table[4];
+extern u8 unit3_table_COSDAT3[];
+
+/*------------- 定数 -------------------------------------------*/
+/*------------- 当たり無し -------------*/
+#define SPA0	0x0000		//000 space
+#define KMO1	(SPA0 + 1)	//001 KUMO 1
+#define KMO2	(KMO1 + 1)	//002 KUMO 2
+#define KMO3	(KMO2 + 1)	//003 KUMO 3
+#define TKI1	(KMO3 + 1)	//004 TAKI1
+#define TKI2	(TKI1 + 1)	//005 TAKI2
+#define TKI3	(TKI2 + 1)	//006 TAKI3 SIBUKI
+#define KSRI	(TKI3 + 1)	//007 KUSARI
+#define UMI1	(KSRI + 1)	//008 UMI 1
+#define KS44	(UMI1 + 1)	//009 UMI 1
+#define UMI2	(KS44 + 1)	//00a UMI 2
+#define KS55	(UMI2 + 1)	//00b UMI 2
+#define UMI3	(KS55 + 1)	//00c UMI 3
+#define KS66	(UMI3 + 1)	//00d UMI 3
+#define KS77	(KS66 + 1)	//00e KSA44 kage unit
+#define KS88	(KS77 + 1)	//00f KSA55 kage unit
+#define KS99	(KS88 + 1)	//010 KSA66 kage unit
+#define KGR6	(KS99 + 1)	//011 KUGIRA 6 (Shippo no shita)
+#define KG12	(KGR6 + 1)	//012 KUGIRA 12
+#define KG13	(KG12 + 1)	//013 KUGIRA 13
+#define KG14	(KG13 + 1)	//014 KUGIRA 14
+#define KG15	(KG14 + 1)	//015 KUGIRA 15
+#define UMI4	(KG15 + 1)	//016 UMI 4	Kujira shita hidari
+#define UMI5	(UMI4 + 1)	//017 UMI 5	Kujira shita migi
+#define KSR3	(UMI5 + 1)	//018 Kusari shita
+#define KSR4	(KSR3 + 1)	//019 Kusari ue
+#define SI02	(KSR4 + 1)	//01a 02
+#define SI03	(SI02 + 1)	//01b 03
+#define SI04	(SI03 + 1)	//01c 04
+#define SI05	(SI04 + 1)	//01d 05
+#define SI06	(SI05 + 1)	//01e 06
+#define SI07	(SI06 + 1)	//01f 07
+#define SI08	(SI07 + 1)	//020 08
+#define SI09	(SI08 + 1)	//021 09
+#define SPA1	(SI09 + 1)	//022 space
+#define HAT1	(SPA1 + 1)	//023 heart 1
+#define HAT2	(HAT1 + 1)	//024 heart 2
+#define CIN1	(HAT2 + 1)	//025 hattpa
+#define KBRA	(CIN1 + 1)	//026 
+#define HZRE	(KBRA + 1)	//027 
+#define ROKT	(HZRE + 1)	//028 
+#define FEIS	(ROKT + 1)	//029 
+#define BKD1	(FEIS + 1)	//02a 
+#define RANP	(BKD1 + 1)	//02b 
+#define ONUP	(RANP + 1)	//02c 
+#define POWB	(ONUP + 1)	//02d 
+#define BKD2	(POWB + 1)	//02e 
+//ダミー
+#define CDIK	(BKD2 + 2)	//030 CHERRY
+#define CHRY	CDIK		//030
+#define DOA1	(CHRY + 1)	//031 DOWA1
+#define DOA2	(DOA1 + 1)	//032 DOWA2 keydoor
+#define DOA3	(DOA2 + 1)	//033 DOWA3 door
+#define DOA5	(DOA3 + 1)	//034 DORA A 1
+#define DOA6	(DOA5 + 1)	//035 DORA A 2 hikari no moretel door
+#define DOA7	(DOA6 + 1)	//036 DORA A 3
+#define DOA8	(DOA7 + 1)	//037 DOWA
+#define DOA9	(DOA8 + 1)	//038 end door
+#define DOAA	(DOA9 + 1)	//039 DOOR key door 2
+#define TURI	(DOAA + 1)	//03a TURIGANE HASI
+#define KGR4	(TURI + 1)	//03b KUGIRA 4
+#define KGR7	(KGR4 + 1)	//03c KUGIRA 7
+#define KAOB	(KGR7 + 1)	//03d KAO BLOCK
+#define HSG1	(KAOB + 1)	//03e HASIGO 1
+#define HSG2	(HSG1 + 1)	//03f HASIGO 2
+#define YSI2	(HSG2 + 1)	//040 YASI NO KI2
+#define DOA4	(YSI2 + 1)	//041 NUKI DOOR
+#define PMT1	(DOA4 + 1)	//042 PRMIT 1
+#define PMT2	(PMT1 + 1)	//043 PRMIT 2
+#define PMT3	(PMT2 + 1)	//044 PRMIT 3
+#define PMT4	(PMT3 + 1)	//045 PRMIT 4
+#define PMT5	(PMT4 + 1)	//046 PRMIT 5
+#define PMT6	(PMT5 + 1)	//047 PRMIT 6
+#define PMT7	(PMT6 + 1)	//048 PRMIT 7
+#define PMT8	(PMT7 + 1)	//049 PRMIT 8
+#define PMT9	(PMT8 + 1)	//04a PRMIT 9
+#define PMTA	(PMT9 + 1)	//04b PRMIT A
+#define PMTB	(PMTA + 1)	//04c PRMIT B
+#define PMTC	(PMTB + 1)	//04d PRMIT C
+#define ODR1	(PMTC + 1)	//04e open door (ue)
+#define ODR2	(ODR1 + 1)	//04f open door (shita)
+#define SNA1	(ODR2 + 1)	//050 SABAKU 1
+#define SNA2	(SNA1 + 1)	//051 SABAKU 2
+#define DRM0	(SNA2 + 1)	//052 00 dream machine
+#define DRM1	(DRM0 + 1)	//053 01
+#define DRM2	(DRM1 + 1)	//054 02
+#define DRM3	(DRM2 + 1)	//055 03
+#define DRM4	(DRM3 + 1)	//056 04
+#define DRM5	(DRM4 + 1)	//057 05
+#define TOU1	(DRM5 + 1)	//058 TOU 1 surinuke
+#define YSI1	(TOU1 + 1)	//059 YASI NO KI1
+#define TUR1	(YSI1 + 1)	//05a TURU1
+#define TUR2	(TUR1 + 1)	//05b TURU2
+#define TUR4	(TUR2 + 1)	//05c TURU4
+#define TUR5	(TUR4 + 1)	//05d 
+#define SPA3	(TUR5 + 1)	//05e SPACE
+#define SPA5	(SPA3 + 1)	//05f SPACE (Tubo naka mawari)
+#define KSA4	(SPA5 + 1)	//060 KUSA4
+#define KSA5	(KSA4 + 1)	//061 KUSA5
+#define KSA6	(KSA5 + 1)	//062 KUSA6
+#define BGD2	(KSA6 + 1)	//063 28 (44)
+#define BGD3	(BGD2 + 1)	//064 29 (45)
+#define BGD4	(BGD3 + 1)	//065 2A (46)
+#define BGD5	(BGD4 + 1)	//066 2B (47)
+
+#define HAT3	(BGD5 + 0x2d)	//093 heart 3
+#define YOSI	(HAT3 + 1)	//094 ヨッシー卵１(裏出現用)
+#define YEGG	(YOSI + 1)	//095 ヨッシー卵(草)
+#define HATD	(YEGG + 1)	//096 ハート大根
+#define BGDI	(HATD + 1)	//097 デカ大根
+#define BGPW	(BGDI + 1)	//098 デカＰＯＷ
+#define BGHI	(BGPW + 1)	//099 デカヘイホー（赤）
+#define BGSP	(BGHI + 1)	//09A デカスペシャル１
+#define BHEI	(BGSP + 1)	//09B ハックンＢ
+#define BGHB	(BHEI + 1)	//09C デカヘイホー（青）
+#define THT3	(BGHB + 1)	//09D 滝 heart 3
+#define YOS2	(THT3 + 1)	//09E ヨッシー卵２(裏出現用)
+
+/*------------- 半当たり -------------*/
+#define TET1	0x0100		//100 TETU 1
+#define NKM1	(TET1 + 1)	//101 NORERU KUMO 1
+#define NKM2	(NKM1 + 1)	//102 NORERU KUMO 2
+#define NKM3	(NKM2 + 1)	//103 NORERU KUMO 3
+#define ICE0	(NKM3 + 1)	//104 ICE
+#define KSR2	(ICE0 + 1)	//105 KUSARI 2
+#define SI0A	(KSR2 + 1)	//106 0A
+#define SI0B	(SI0A + 1)	//107 0B
+#define SI0C	(SI0B + 1)	//108 0C
+#define SI0D	(SI0C + 1)	//109 0D
+#define KGR2	(SI0D + 1)	//10a KUGIRA 2 (temae)
+#define OWBL	(KGR2 + 1)	//10b OW NO BLOCK
+#define BRG1	(OWBL + 1)	//10c BRIGI1
+#define BRG2	(BRG1 + 1)	//10d BRIGI2
+#define ERVL	(BRG2 + 1)	//10e Beltconbere (right move)
+#define ERVR	(ERVL + 1)	//10f Beltconbere (left move)
+#define TOU5	(ERVR + 1)	//110 TOU 5 wehaers (han-atari hidari)
+#define TOU6	(TOU5 + 1)	//111 TOU 6 wehaers (han-atari migi)
+#define CHY0	(TOU6 + 1)	//112 SITA YUKA
+#define MRKI	(CHY0 + 1)	//113 MARUKI
+#define SAND	(MRKI + 1)	//114 NUKERU SUNA
+#define HSG3	(SAND + 1)	//115 HASIGO 1
+#define HSG4	(HSG3 + 1)	//116 HASIGO 4
+#define YUK1	(HSG4 + 1)	//117 YUKA 1
+#define TOU3	(YUK1 + 1)	//118 TOU 3 wehaers
+#define DRM6	(TOU3 + 1)	//119 06 dream machine
+#define DRM7	(DRM6 + 1)	//11a 07
+#define WKS1	(DRM7 + 1)	//11b mizu oka (hidari)
+#define WKS2	(WKS1 + 1)	//11c mizu oka (migi)
+#define KSA1	(WKS2 + 1)	//11d KUSA1
+#define KS11	(KSA1 + 1)	//11e KUSA1
+#define KSA2	(KS11 + 1)	//11f KUSA2
+#define KS22	(KSA2 + 1)	//120 KUSA2
+#define KSA3	(KS22 + 1)	//121 KUSA3
+#define KS33	(KSA3 + 1)	//122 KUSA3
+#define KSA7	(KS33 + 1)	//123 KUSA7
+#define KSA8	(KSA7 + 1)	//124 KUSA8
+#define KSA9	(KSA8 + 1)	//125 KUSA9
+#define KSAA	(KSA9 + 1)	//126 KUSAA
+#define TUR3	(KSAA + 1)	//127 TURU3
+#define DRM8	(TUR3 + 1)	//128 08 dream machine
+#define DRM9	(DRM8 + 1)	//129 09
+#define DRMA	(DRM9 + 1)	//12a 0A
+#define DRMB	(DRMA + 1)	//12b 0B
+#define DRMC	(DRMB + 1)	//12c 0C
+#define DRMD	(DRMC + 1)	//12d 0D
+
+#define NKM4	(DRMD + 1)	//12e 乗れる雲(草置き用)
+
+/*------------- 全当たり -------------*/
+#define REG1	0x0200		//200 RENGA 1
+#define RE11	(REG1 + 1)	//201 CAPT 7 RENGA
+#define HARI	(RE11 + 1)	//202 HARI col (2)->(6)
+#define REG5	(HARI + 1)	//203 RENGA 5
+#define TET2	(REG5 + 1)	//204 TETU 2
+#define SBT1	(TET2 + 1)	//205 SABOTEN 1
+#define SBT2	(SBT1 + 1)	//206 SABOTEN 2
+#define HYO1	(SBT2 + 1)	//207 HYOUUGA
+#define KOR1	(HYO1 + 1)	//208 KORI 1
+#define KOR2	(KOR1 + 1)	//209 KORI 2
+#define KANI	(KOR2 + 1)	//20a KANI BLOCK
+#define YKD0	(KANI + 1)	//20b Yuka kado hidari
+#define YKD1	(YKD0 + 1)	//20c Yuka kado migi
+#define SKD0	(YKD1 + 1)	//20d Yukashita kado hidari
+#define SKD1	(SKD0 + 1)	//20e Yukashita kado migi
+#define IWA4	(SKD1 + 1)	//20f Iwa kabe kado migi
+#define SI00	(IWA4 + 1)	//210 00
+#define SI01	(SI00 + 1)	//211 01
+#define SI0E	(SI01 + 1)	//212 0E
+#define SI0F	(SI0E + 1)	//213 0F
+#define SPAE	(SI0F + 1)	//214 SPEAD BLOCK[A]
+#define KURO	(SPAE + 1)	//215 KUROUBA BLOCK
+#define DAIY	(KURO + 1)	//216 DAIYA BLOCK
+#define POW1	(DAIY + 1)	//217 POWER 1
+#define DRBK	(POW1 + 1)	//218 DOOR BLOCK
+#define REG2	(DRBK + 1)	//219 RENGA 2
+#define TUB1	(REG2 + 1)	//21a TUBO1
+#define TUB2	(TUB1 + 1)	//21b TUBO2
+#define TUB3	(TUB2 + 1)	//21c TUBO3
+#define TUB4	(TUB3 + 1)	//21d TUBO4
+#define TUB5	(TUB4 + 1)	//21e TUBO5
+#define TUB6	(TUB5 + 1)	//21f TUBO6
+#define MRT1	(TUB6 + 1)	//220 MARUTA1
+#define MRT2	(MRT1 + 1)	//221 MARUTA2
+#define MRT3	(MRT2 + 1)	//222 MARUTA3
+#define MRT4	(MRT3 + 1)	//223 MARUTA4
+#define KIR1	(MRT4 + 1)	//224 KIRIKAB
+#define KIR2	(KIR1 + 1)	//225 KIRIKAB
+#define SI10	(KIR2 + 1)	//226 10
+#define WOD0	(SI10 + 1)	//227 
+#define WOD1	(WOD0 + 1)	//228 
+#define WOD2	(WOD1 + 1)	//229 
+#define WOD3	(WOD2 + 1)	//22a 
+#define WOD4	(WOD3 + 1)	//22b 
+#define WOD5	(WOD4 + 1)	//22c 
+#define WOD6	(WOD5 + 1)	//22d 
+#define WOD7	(WOD6 + 1)	//22e 
+#define WOD8	(WOD7 + 1)	//22f 
+#define CHY6	(WOD8 + 1)	//230 STOP BLOCK
+#define CHY1	(CHY6 + 1)	//231 SITA YUKA
+#define KAB1	(CHY1 + 1)	//232 KABE 1
+#define REG3	(KAB1 + 1)	//233 RENGA 3
+#define REG7	(REG3 + 1)	//234 CAPT 7 RENGA
+#define BLK1	(REG7 + 1)	//235 WARERU BLOCK
+#define SPA6	(BLK1 + 1)	//236 WARENAI BLOCK
+#define IWA1	(SPA6 + 1)	//237 IWABL 1 (kado hidari)
+#define IWA2	(IWA1 + 1)	//238 IWABL 2
+#define IWA3	(IWA2 + 1)	//239 IWABL 3
+#define TOU4	(IWA3 + 1)	//23a TOU 4 atari
+#define TOU2	(TOU4 + 1)	//23b TOU 2
+#define MRT6	(TOU2 + 1)	//23c ki no eda (nemoto)
+#define IWD1	(MRT6 + 1)	//23d 
+#define IWD2	(IWD1 + 1)	//23e 
+#define IWD3	(IWD2 + 1)	//23f 
+#define SRDW	(IWD3 + 1)	//240 
+#define WID1	(SRDW + 1)	//241 WINDOW
+#define HSR1	(WID1 + 1)	//242 
+#define HSR2	(HSR1 + 1)	//243 
+#define REGA	(HSR2 + 1)	//244 mouse boss block (Red-Left)
+#define REGB	(REGA + 1)	//245 mouse boss block (R-Right)
+#define REGC	(REGB + 1)	//246 mouse boss block (Green-L)
+#define REGD	(REGC + 1)	//247 mouse boss block (G-R)
+#define REGE	(REGD + 1)	//248 mouse boss block (Blue-L)
+#define REGF	(REGE + 1)	//249 mouse boss block (B-R)
+#define SITA	(REGF + 1)	//24a SITA
+#define REG4	(SITA + 1)	//24b RENGA 4
+#define RE44	(REG4 + 1)	//24c CAPT 7 RENGA
+#define REG6	(RE44 + 1)	//24d RENGA 5
+#define KGR1	(REG6 + 1)	//24e KUGIRA 1
+#define KGR3	(KGR1 + 1)	//24f KUGIRA 3
+#define KGR5	(KGR3 + 1)	//250 KUGIRA 5 (shippo)
+#define KGR8	(KGR5 + 1)	//251 KUGIRA 8 tsuika unit
+#define KGR9	(KGR8 + 1)	//252 KUGIRA 9
+#define KGRA	(KGR9 + 1)	//253 KUGIRA A
+#define KGRB	(KGRA + 1)	//254 KUGIRA B
+#define KGRC	(KGRB + 1)	//255 KUGIRA C
+#define KGRD	(KGRC + 1)	//256 KUGIRA D
+#define KGRE	(KGRD + 1)	//257 KUGIRA E
+#define KGRF	(KGRE + 1)	//258 KUGIRA F
+#define KG10	(KGRF + 1)	//259 KUGIRA 10
+#define KG11	(KG10 + 1)	//25a KUGIRA 11 (medama 2)
+#define SIT2	(KG11 + 1)	//25b SITA1
+#define YKD2	(SIT2 + 1)	//25c CYKD0
+#define YKD3	(YKD2 + 1)	//25d CYKD1
+#define DB10	(YKD3 + 1)	//25e 10
+#define DB11	(DB10 + 1)	//25f 11
+#define DB12	(DB11 + 1)	//260 12
+#define DB13	(DB12 + 1)	//261 13
+#define DB14	(DB13 + 1)	//262 14
+#define DB15	(DB14 + 1)	//263 15
+#define MRT5	(DB15 + 1)	//264 maruta kirikabu hidari
+#define WOD9	(MRT5 + 1)	//265 
+#define WODA	(WOD9 + 1)	//266 
+#define WODB	(WODA + 1)	//267 
+#define WODC	(WODB + 1)	//268 
+#define WODD	(WODC + 1)	//269 
+#define WODE	(WODD + 1)	//26a 
+#define WODF	(WODE + 1)	//26b 
+#define MRT7	(WODF + 1)	//26c 
+#define MRT8	(MRT7 + 1)	//26d 
+
+#define BGD0	0x0294		//294
+#define BGD1	(BGD0 + 1)	//295
+
+#define TUB7	0x02c6		//2C6 TUBO7 空洞つぼ
+#define SPAX	(TUB7 + 1)	//2C7 全当たり抜き
+
+/*------------- ＢＧ３　@ユニットＮｏ．名 -------------*/
+#define DOR30	0000
+#define DOR31	(DOR30+1)
+#define DOR32	(DOR31+1)
+#define DOR33	(DOR32+1)
+#define DOR34	(DOR33+1)
+#define DOR35	(DOR34+1)
+#define DOR36	(DOR35+1)	// 33 reverse
+#define DOR37	(DOR36+1)	// big door left
+#define DOR38	(DOR37+1)	// big door right
+
+#endif /* __UD_UNIT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,108 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *              
+ *	敵ヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __BA_ENMY_H_
+#define __BA_ENMY_H_
+
+//#define		GRAVITY		0x0020		/* 重力 */
+#define		GRAVITY		0x0018		/* 重力 */
+#define		ENPRION		2		/* 敵の表示優先　@前 */
+#define		ENPRIOFF	3		/* 敵の表示優先　@後 */
+#define		DEADLINE	0x01F000	/* 水面の座標 */
+#define		KICKEDSPD	0x0280		/* 蹴られたときの初速度 */
+#define		AIRRESIST	0x0008		/* 空気抵抗 */
+#define		RESETTIME	300		/* バトル時復活タイマー */
+#define		WAKETIME	480		/* 起き上がりタイマー */
+#define		WAKEFLASH	120		/* 起き上がり前点滅タイマー */
+#define		RFIREBST	2400		/* 赤ファ@イアボール出現タイマー */
+#define		GFIREBST	2400		/* 緑ファ@イアボール出現タイマー */
+
+#define		PIPEXSPD	0x0000005B	/* 土管から出るＸ速度 */
+
+
+/*----------- デバッグ用定義 ---------------------*/
+#define		ICICLEFG	0	//つららのセット方法@
+// 0 : 各面開始時に必要数セットして、面クリアまで消さない方法@
+// 1 : プレイ構造体の中にタイマーを４つ持ち、つららは１回ごとに消す方法@
+
+
+/*-------------------- EXTURN  ----------------------*/
+extern	void	EnReturnWait(acterDT_c *);
+extern	void	EnPosSet(acterDT_c *);
+extern	void	Enemy_Ready(acterDT_c *en);
+///extern	u8	StageOnCheck(s32);
+extern	u8	StageOnCheck(acterDT_c *en);
+extern	s32	EnXmove(s32, s32);
+extern	u8	EnEn_hitchk(acterDT_c *);
+extern	void	Enemy_PowJump(acterDT_c *, u8);
+extern	void	EnAddPoint(acterDT_c *en, u8);
+extern	void	Enemy_PLTurn(playerDT_c *, acterDT_c *);
+extern	void	Enemy_PLKick(u8, u8);
+extern	void	Enemy_Kick(acterDT_c *, u8);
+extern	void	EnemyAnime_Kick(acterDT_c *);
+extern	void	EnDead_OamSet(acterDT_c *);
+extern	void	EnAnime_NoChange(acterDT_c *en);
+extern	u8	Enemy_OutCheck(acterDT_c *);
+extern	void	Enemy_LastSearch(void);
+////////extern	void	Create_Point(s32, s32, u16);
+extern	void	Create_Point(s32, s32, u16, u8);
+extern	void	Create_Splash(acterDT_c *);
+extern	u8	DakanInCheck(acterDT_c *);
+extern	void	StageEnemy_SetInit(StageEnTbl_c	*);
+extern	void	StageEnemy_SetMain(void);
+extern	void	FireBall_TimerSet(void);
+extern	void	FireBall_Set(void);
+extern	void	Icicle_TimerSet(void);
+#if ICICLEFG
+extern	void	Icicle_Set(void);
+#endif
+extern	void	Make_Freezer(void);
+extern	void	Kuppa_OopsInit(acterDT_c *);
+
+extern	const u8 Icicle_Xpos[8];
+extern	const u16 Icicle_Ypos[8];
+extern	const u8 Icicle_SetTable[32];
+
+#endif /* __BA_ENMY_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

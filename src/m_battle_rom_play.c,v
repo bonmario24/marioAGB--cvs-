@@ -1,0 +1,461 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ ****************************************************************
+ *
+ *	マルチブートのＢＡＴＴＬＥゲームメイン処理
+ *
+ ****************************************************************
+ */
+#include "m_main.h"
+#include "m_bgcheck.h"
+#include "m_game_sub.h"
+#include "m_sub.h"
+#include "ba_act.h"
+#include "ba_bucket.h"
+#include "ba_common.h"
+#include "ba_effect.h"
+#include "ba_enmy.h"
+#include "ba_player.h"
+#include "ba_kuppa.h"
+
+//u16	RecvData[2][3];//仮
+
+extern void multi_play(void);
+
+/*
+ ****************************************************************
+ *     イニシャル処理
+ ****************************************************************
+ */
+static	void	BattleRom_play_init(void)
+{
+    u16		i, j, entrance;
+    u8		cnt;
+    u8		Course = mGm_COURSE;
+    courseDT	*mapDT;
+    playerDT_c	*pl;
+    u8		AGBNo = mGm_AGBNO;	// 自分が親子のどちらなのか？
+    u16		*ScrBase, BufBase, data, pt;
+    u8		*buf, code;
+    playDT_c	*pPlay;
+	u8		*pCourseDT;
+	u8		SetPowFlag;
+
+    /******** ＬＣＤＣ　@ＯＦＦ ********/
+    lcdc_off();
+
+    /******* ＬＣＤＣ設定 ********/
+    mGm_DISPCNT = DISP_BG0_ON | DISP_BG1_ON | DISP_BG2_ON | DISP_BG3_ON |
+	DISP_MODE_0 | DISP_OBJ_ON | DISP_OBJ_CHAR_2D_MAP;
+
+    /******* ＭＡＰデータ読み込み ********/
+    mapDT = MapDataTBL[Course];
+
+    /******** ＶＲＡＭ初期処理 ********/
+    VramInit(mapDT);
+
+    /******** キャラクタＤＭＡ転送 ********/
+    if( !mGm_OBJchrFG ){
+	CpuFastCopy(BG_VRAM, (BG_VRAM + BG_CHR_ADDRESS), (0x20 * 0xC0));
+	mGm_OBJchrFG = 1;
+    }
+
+    /******** 盛り上がる床のキャラクタ差し替え ********/
+    DmaCopy(3, (BG_VRAM + BG_CHR_ADDRESS + MoveYuKaCHRDT1[mapDT->BackBGNo]),
+	    (BG_VRAM+0x020), 0x020, 32);
+    DmaCopy(3, (BG_VRAM + BG_CHR_ADDRESS + MoveYuKaCHRDT2[mapDT->BackBGNo]),
+	    (BG_VRAM+0x0200), 0x0240, 32);
+
+    /******* スクリーン＆ＢＧチェックバッファ@セット ********/
+    pPlay = (playDT_c *)mGm_OTHER;
+    buf = pPlay->pBgBuf;
+    ScrBase = (u16 *)(BG_VRAM + BG1_ADDRESS);
+    BufBase = i = pt = 0;
+	pCourseDT = (u8 *)BrosCourseTable[mGm_COURSE];
+	SetPowFlag = 0;
+    while( *pCourseDT != END_DT ){
+	if( *pCourseDT == NXT_DT ){
+	    BufBase += 0x0020;
+	    pt = 0;
+	    if( !(BufBase & 0x0020) )
+		BufBase += 0x07C0;
+	} else {
+		if(mGm_PLTYPE < 0x02){//２人
+			if(*pCourseDT == POWBK00 || *pCourseDT == POWBK01 || *pCourseDT == POWBK02 || *pCourseDT == POWBK03){
+				if(SetPowFlag == 1){
+					code = BG_NONE;
+				}else{
+					if(*pCourseDT == POWBK03) SetPowFlag = 1;
+					code = *pCourseDT;
+				} 
+			} else {
+				code = *pCourseDT;
+			}
+		}else{	//３、４人
+			code = *pCourseDT;
+		}
+		pCourseDT++;
+	    data = CHR_DATA[code];
+	    cnt = *pCourseDT;
+	    for( j = 0; j < cnt; j++ ){
+		*ScrBase = data;
+		ScrBase++;
+		buf[(BufBase + pt)] = code;
+		pt++;
+		if( !(pt & 0x001F) )
+		    pt += 0x0020;
+	    }
+	}
+	pCourseDT++;
+    }
+
+    /******** ＢＧコイン書きこみ ********/
+    CoinWrite(mapDT->BGCoin);
+
+////////    /******* 土管スクリーンセット ********/
+////////    ScrBase = (u16 *)(BG_VRAM + BG2_ADDRESS);
+////////    i = 0;
+////////    while( BrosDoKaNData[i] != END_DT ){
+////////	if( BrosDoKaNData[i] != NXT_DT ){
+////////	    code = BrosDoKaNData[i++];
+////////	    data = CHR_DATA[code];
+////////	    cnt = BrosDoKaNData[i];
+////////	    for( j = 0; j < cnt; j++ ){
+////////		*ScrBase = data;
+////////		ScrBase++;
+////////	    }
+////////	}
+////////	i++;
+////////    }
+
+    /******* フラグ関係の初期設定 ********/
+    mGm_GMMODE = GMPL_ROUND;
+    mGm_V_BLKFLG = 1;
+    mGm_QUAKEFG = 0;
+    mGm_COLFLG = 0;
+    mGm_TIME = 0;
+    mGm_SCORECALC = 0;
+    mGm_ENMYSTOPFG = 0;
+    mGm_WINNERFG = 0;
+
+    mGm_BACKBGNO = mapDT->BackBGNo;
+    mGm_BGANIMEIDX = 0;
+    mGm_BGANIMETM = 0;
+
+    mGm_COINCNT = 0;
+    mGm_COINSTOK = 0;
+
+////////    /******* スコアの初期化 ********/
+////////    mGm_SCORECALC = 1;
+////////    ScoreMain();
+
+    /******* プレイヤーの初期化 ********/
+    mGm_PLTYPE = ConnectAGB - 1;
+    GetCoinBGWrite();
+    MakePlayer();
+	for(i = 0; i <= mGm_PLTYPE; i++){
+	    pl = mGm_PLAYER(i);
+		aP_COINCOUNT(pl) = mGm_HANDICAP(i);
+		player_coinGet(pl);
+	}
+
+    /******* アクターの初期化 ********/
+    acter_init();
+    effectAct_init();
+#if 1	/*** 実験 ***/
+    StageEnemy_SetInit(mapDT->EnemyData);
+    FireBall_TimerSet();
+    pPlay->RFBallTarget = 0;
+    pPlay->GFBallTarget = 0;
+/////    pPlay->IcicleTimer = 0;
+    pPlay->IciclePlace = mGm_FRAME_COUNT & 0x1F;
+    Icicle_TimerSet();
+///    pPlay->FreezeFloor = 0;
+    if((Course == 3) || (Course == 7) || (Course == 11)){
+	//クッパセット
+	i = MakeEnemy(EN_KUPPA, 0, 0);
+	Kuppa_main(mGm_ACTER_p(i));
+    }
+#else
+    j = 0;
+    for( i = 0, cnt = 0; i < MAX_ENTRANCE; i++, j++ ){
+	entrance = mapDT->ActerData[i];
+	if( entrance != NoActer ){
+	    mGm_ActTBL(j) = j;
+	    mGm_ActID(j) = entrance;
+	    mGm_ACTERID(j) = entrance;
+	    cnt++;
+	}
+    }
+    mGm_ENMYCNT = cnt;
+#endif	/*** 実験 ***/
+
+    mGm_ENMYSTOPFG = 1;
+
+    /******** バケツセット ********/
+    if( mGm_PLTYPE < 0x02 ){
+	i = MAX_ACTER - 1;
+	mGm_ActTBL(i) = i;
+	mGm_ActID(i) = EN_BUCKET;
+	mGm_ACTERID(i) = EN_BUCKET;
+	bucket_init(mGm_ACTER(i));
+    }
+
+    /******* スクロール初期値設定 ********/
+    m_scrollInit();
+    pl = mGm_PLAYER(AGBNo);
+    mGm_VSCROLL0 = 0x0100;
+    mGm_HSCROLL1 = aP_SCCH(pl);
+    mGm_VSCROLL1 = aP_SCCV(pl);
+    mGm_VSCROLL2 = 0x0100;
+    mGm_HSCROLL3 = aP_SCCH(pl) >> 1;
+    mGm_VSCROLL3 = aP_SCCV(pl) >> 1;
+    scroll_set();
+
+    /******* ＯＢＪ半透明の初期設定 ********/
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = BLD_A_BLEND_MODE |
+	 BLD_BG0_2ND | BLD_BG1_2ND | BLD_BG2_2ND | BLD_BG3_2ND;
+    *(vu16 *)REG_BLDALPHA = mGm_COLEV = 0x0B0B;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x000B;
+
+////////    /******* ＢＧＭオン ********/
+////////#if SOUND_ON
+////////    m4aSoundVSyncOn();
+////////    mGm_INTRONO = mapDT->IntroNo;
+////////    mGm_BGMNO = mapDT->bgmNo;
+////////    if( mGm_INTRONO ){
+////////	m4aSongNumStart(mapDT->IntroNo);
+////////    } else {
+////////	m4aSongNumStart(mapDT->bgmNo);
+////////    }
+////////#endif
+
+    /****** 通信リセット *******/
+    Ms.SendBufCounter = -1;
+    ((SioMultiCnt *)REG_SIOCNT)->Data = MULTI_SIO_SYNC_DATA;
+    for(i=0; i<4; i++){
+//    for(i=0; i<ConnectAGB; i++){
+	Ms.RecvBufCounter[i] = -1;
+	Ms.SyncRecvFlag[i] = 0;
+	Ms.FrameEndRecv[i] = 0;
+//	if(SioFlags & (1 << i)){
+	if(ConnectFlg & (1 << i)){
+	    *((u16 *)REG_SIOMLT_RECV + i) = MULTI_SIO_END_DATA;
+	}
+    }
+    *(vu16 *)REG_IF  =  SIO_INTR_FLAG	// IF リセット
+	|  MULTI_SIO_TIMER_INTR_FLAG;
+
+    /******* Ｖブランク割込許可フラグのセット ********/
+    if(Ms.Type == SIO_MULTI_PARENT){
+	*(vu16 *)REG_IE = V_BLANK_INTR_FLAG |
+	    CASSETTE_INTR_FLAG |
+	    MULTI_SIO_TIMER_INTR_FLAG;	//タイマー割込許可
+    }else{
+	*(vu16 *)REG_IE = V_BLANK_INTR_FLAG |
+	    CASSETTE_INTR_FLAG |
+	    SIO_INTR_FLAG;		// ＳＩＯ割り込み許可
+    }
+    *(vu16 *)REG_STAT  = STAT_V_BLANK_IF_ENABLE;
+
+    /******* ＩＭＥセット ******/
+    *(vu16 *)REG_IME   = 1;
+
+    /******* ＬＣＤＣ　@ＯＮ ********/
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;
+
+    // Vﾌﾞﾗﾝｸ割込ﾁｪｯｸ･ﾌﾗｸﾞのｸﾘｱ
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    while (1) {
+	// Vﾌﾞﾗﾝｸ割込処理 終了
+	if (game.IntrCheck & V_BLANK_INTR_FLAG)
+	    break;
+    }
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    /******* ＢＧＭオン ********/
+#if SOUND_ON
+    m4aSoundVSyncOn();
+    mGm_INTRONO = mapDT->IntroNo;
+    mGm_BGMNO = mapDT->bgmNo;
+    if( mGm_INTRONO ){
+	m4aSongNumStart(mapDT->IntroNo);
+    } else {
+	m4aSongNumStart(mapDT->bgmNo);
+    }
+#endif
+}
+/*
+ ****************************************************************
+ *	タイトルへのホワイトアウト処理
+ ****************************************************************
+ */
+static	void	BattleRom_title_WhiteOUT(void)
+{
+////////    m_WhiteOUT(BROS_TITLE_MODE);
+////////    if( mGm_SLMODE == BROS_TITLE_MODE ){
+////////	AllEraseEnemy();
+////////	bgbuf_free();			// ＢＧバッファ@開放
+////////	if(mGm_OTHER != NULL){
+////////	    mGm_FREE(mGm_OTHER);	// プレイ用メモリ開放
+////////	    mGm_OTHER = NULL;
+////////	}
+////////    }
+}
+/*
+ ****************************************************************
+ *	次へのホワイトアウト処理
+ ****************************************************************
+*/
+static	void	BattleRom_play_WhiteOUT(void)
+{
+	u8	i;
+    u8	WinCNT;
+    scoreDT_c	*scoreDT = mGm_SCORE_DISP;
+	/*    if( mGm_WINNERFG ){
+	RoundDispSUB((RoundTime1 + 1), BaseRoundXpos, mGS_ROUNDYPOS(scoreDT));
+	TotalScoreOAM(0x00, 1);
+    }
+	*/
+    WinCNT = 0;
+    if( mGm_WINNERFG ){
+		RoundDispSUB((RoundTime1 + 1), BaseRoundXpos, mGS_ROUNDYPOS(scoreDT));
+		for( i = 0; i <= mGm_PLTYPE; i++ ){	//５勝している？
+			if( WinCNT < mGm_WINCNT[i] )
+				WinCNT = mGm_WINCNT[i];
+		}
+		if(WinCNT < 5){
+			TotalScoreOAM(0x00, 6);
+		} else {
+			TotalScoreOAM(0x00, 7);
+		}
+    }
+    m_WhiteOUT(mGm_SLMODE);
+    if( !mGm_GMMODE ){
+		if(WinCNT >= 5)HajimekaraRamReset();
+		mGm_COURSE++;
+		if((mGm_COURSE & 3) == 0){
+			if(mGm_DIFFICULTY == 0){
+				mGm_COURSE = 0;
+			} else if(mGm_DIFFICULTY == 1){
+				mGm_COURSE = 4;
+			} else{
+				mGm_COURSE = 8;
+			}
+		}
+		CpuFastClear(0,(u16 *)(BG_VRAM+(0x007 * 0x20)), 0x20);
+		AllEraseEnemy();
+		//	m4aMPlayAllStop();
+		//	VSYNC_OFF = 1;
+    }else{
+		if(mGm_COLY == 0x1e) m4aMPlayAllStop();
+		if(mGm_COLY == 0x1f) VSYNC_OFF = 1;
+	}
+}
+/*
+ ****************************************************************
+ *     メニュー配列
+ ****************************************************************
+ */
+mfunc cgame_play_menu[] = {
+    BattleRom_play_init,		// イニシャル処理
+    BattleGame_roundDisp,		// ラウンド数表示処理
+    BattleGame_play_main,		// メイン処理
+    BattleRom_title_WhiteOUT,		// ホワイトアウト処理
+    BattleRom_play_WhiteOUT,			// 次へのホワイトアウト処理
+    BattleGame_play_winInit,		// 勝者表示イニシャル
+    BattleGame_play_winPLNumbarDisp,	// 勝者プレイヤーナンバー表示ＷＡＩＴ
+    BattleGame_play_Vscroll,		// ゲーム画面の縦スクロール処理
+    BattleGame_play_winPLNumbarOut,	// 勝者プレイヤーナンバー退場
+    BattleGame_play_winFace,		// 勝者顔表示
+    BattleGame_play_winMoji,		// 勝者文字表示
+    BattleGame_play_winWait,		// "WINNER"表示ＷＡＩＴ
+    BattleGame_play_score,		// スコア処理
+    BattleGame_play_Hscroll,		// 画面横移動処理
+    BattleGame_play_TotalScoreWait,	// 総合成績画面ＷＡＩＴ
+    BattleGame_play_RoundOut,		// ラウンドナンバー退出
+    BattleGame_play_TotalIn,		// ＴＯＴＡＬ登場
+    BattleGame_play_WinCountUP,		// 勝者の勝ち数カウントアップ
+    BattleGame_play_TotalWait,		// 勝ち負け顔でウエイト
+    BattleGame_play_TotalScore,		// 普通顔でウェイト(スタート待ち)
+    BattleGame_play_TotalScore_Win,		// 総合成績画面処理(誰かが５勝したとき)
+    BattleGame_play_WinLose,		// 何勝かした時の区切り
+};
+/*
+ ****************************************************************
+ *     モードセレクト
+ ****************************************************************
+ */
+void multi_play(void)
+{
+    u16	x;
+
+    cgame_play_menu[mGm_GMMODE]();
+    if( mGm_SLMODE == BROS_GAME_MODE ){
+#if DEBUG
+	if(mGm_KEYBUF(0,0) & L_BUTTON){
+	    x = numchange((UsrRecvBuf[0][1] & 0xF0)>>4);
+	    *(vu16 *)(BG_VRAM + 0x58C8) = x;
+	    x = numchange(UsrRecvBuf[0][1] & 0x0F);
+	    *(vu16 *)(BG_VRAM + 0x58CA) = x;
+	    x = numchange((UsrRecvBuf[1][1] & 0xF0)>>4);
+	    *(vu16 *)(BG_VRAM + 0x58D0) = x;
+	    x = numchange(UsrRecvBuf[1][1] & 0x0F);
+	    *(vu16 *)(BG_VRAM + 0x58D2) = x;
+	    x = numchange((UsrRecvBuf[2][1] & 0xF0)>>4);
+	    *(vu16 *)(BG_VRAM + 0x58D8) = x;
+	    x = numchange(UsrRecvBuf[2][1] & 0x0F);
+	    *(vu16 *)(BG_VRAM + 0x58DA) = x;
+	    x = numchange((UsrRecvBuf[3][1] & 0xF0)>>4);
+	    *(vu16 *)(BG_VRAM + 0x58E0) = x;
+	    x = numchange(UsrRecvBuf[3][1] & 0x0F);
+	    *(vu16 *)(BG_VRAM + 0x58E2) = x;
+	    x = numchange((UsrSendBuf[1] & 0xF0)>>4);
+	    *(vu16 *)(BG_VRAM + 0x58EC) = x;
+	    x = numchange(UsrSendBuf[1] & 0x0F);
+	    *(vu16 *)(BG_VRAM + 0x58EE) = x;
+	}
+
+	x = numchange((mGm_FRAME_COUNT & 0xF0)>>4);
+	*(vu16 *)(BG_VRAM + 0x58F8) = (x | 0x0100);
+	x = numchange(mGm_FRAME_COUNT & 0x0F);
+	*(vu16 *)(BG_VRAM + 0x58FA) = (x | 0x0100);
+#endif
+    }
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

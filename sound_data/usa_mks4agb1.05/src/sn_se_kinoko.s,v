@@ -1,0 +1,137 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_se_kinoko_grp, voicegroup000
+	.equ	sn_se_kinoko_pri, 150
+	.equ	sn_se_kinoko_rev, 0
+	.equ	sn_se_kinoko_mvl, 100
+	.equ	sn_se_kinoko_key, 0
+	.equ	sn_se_kinoko_tbs, 1
+	.equ	sn_se_kinoko_exg, 0
+	.equ	sn_se_kinoko_cmp, 1
+
+	.section .rodata
+	.global	sn_se_kinoko
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_se_kinoko_1:
+	.byte	KEYSH , sn_se_kinoko_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_se_kinoko_tbs/2
+	.byte		VOICE , 108
+	.byte		VOL   , 127*sn_se_kinoko_mvl/mxv
+	.byte		N01   , Cn3 , v127
+	.byte	W02
+	.byte		        En3 
+	.byte	W02
+	.byte		        Gn3 
+	.byte	W02
+	.byte		        Cn4 
+	.byte	W02
+	.byte		        Gn3 
+	.byte	W02
+	.byte		        Cn4 
+	.byte	W02
+	.byte		        En4 
+	.byte	W02
+	.byte		        Gn4 
+	.byte	W02
+	.byte		        Cn5 
+	.byte	W02
+	.byte		        Gn4 
+	.byte	W02
+	.byte		        Gs3 
+	.byte	W02
+	.byte		        Cn4 
+	.byte	W02
+	.byte		        Ds4 
+	.byte	W02
+	.byte		        Gs4 
+	.byte	W02
+	.byte		        Ds4 
+	.byte	W02
+	.byte		        Gs4 
+	.byte	W02
+	.byte		        Cn5 
+	.byte	W02
+	.byte		        Ds5 
+	.byte	W02
+	.byte		        Gs5 
+	.byte	W02
+	.byte		        Ds5 
+	.byte	W02
+	.byte		        As3 
+	.byte	W02
+	.byte		        Dn4 
+	.byte	W02
+	.byte		        Fn4 
+	.byte	W02
+	.byte		        As4 
+	.byte	W02
+	.byte		        Fn4 
+	.byte	W02
+	.byte		        As4 
+	.byte	W02
+	.byte		        Dn5 
+	.byte	W02
+	.byte		        Fn5 
+	.byte	W02
+	.byte		        As5 
+	.byte	W02
+	.byte		        Fn5 
+	.byte	W01
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_se_kinoko:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_se_kinoko_pri	@@ Priority
+	.byte	sn_se_kinoko_rev	@@ Reverb.
+
+	.word	sn_se_kinoko_grp
+
+	.word	sn_se_kinoko_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

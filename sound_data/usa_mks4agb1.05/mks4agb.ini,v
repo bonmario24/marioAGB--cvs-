@@ -1,0 +1,1111 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@;************************************************************************************
+;リビルドスイッチ（通常は 0、再構築する場合は 1 にする）
+rebuild = 0
+
+;波形データ入力ディレクトリ（.AIFファ@イルのある場所）
+aif_dir = aiff\
+
+;ソングデータ入力ディレクトリ（.MIDファ@イルのある場所）
+mid_dir = midi\
+
+;ソースファ@イルディレクトリ（.sファ@イル等が出力される場所）
+src_dir = src\
+
+;出力ディレクトリ（.oファ@イル等が出力される場所）
+out_dir = out\
+
+;ＡＧＢシステムのライブラリファ@イルのディレクトリ
+agb_lib = C:\agb\lib
+
+;実行パス
+cmd_path = C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin;
+cmd_path = C:\Program Files\Cygnus\native-99r1\H-i686-cygwin32\bin;
+
+;************************************************************************************
+
+;各種サウンドモードの初期設定値
+;	poly,vol,  freq, D/Abit(good CGB 6<-->9 good PCM)
+mode_i =   6, 15, 10512,      8
+
+
+;音色設定（Ｐ：音程重視、Ｑ：音質重視）
+
+vgroup = 0
+p000 = P, sc2dt12,        99,  00,  35,  50		;(タイトル用)
+p001 = P, sc2dt50,        99,  99,  99,  99
+p002 = P, sc1dt50,        99,  99,  99,  99,,,,8	;(完全伸ばし用)
+p003 = P, sc4st15,        99,  99,  99,  99
+p004 = P, sc1dt12,        99,  00,  35,  50,,,,8
+p005 = P, sc1dt50,        99,  99,  99,  99,,,,8	;(主に効果音)
+
+p006 = P, sc1dt50,        99,  99,  99,  99,,,,16
+p007 = P, sc1dt50,        99,  99,  99,  99,,,,2B
+p008 = P, sc1dt50,        99,  00,  35,  50,,,,8	;(タイトル用)
+p009 = P, sc1dt50,        99,  20,  00,  99,,,,3F	;ドボン音
+p010 = P, sc1dt12,        99,  99,  99,  99,,,,3F
+
+p011 = P, sc3w001,        99,  20,  99,  90		;(タイトル用)
+p012 = P, sc3w002,        99,  99,  99,  99
+p013 = P, sc3w003,        99,  99,  99,  99
+p014 = P, sc3w004,        99,  60,  99,  90
+p015 = P, sc3w005,        99,  99,  99,  99		;(ブロス専用投げ・持ち)
+
+p016 = P, sc4st07,        99,  99,  99,  99
+
+p017 = P, sc1dt50,        99,  10,  35,  50,,,,8	;(80%伸ばし用)
+p018 = P, sc2dt50,        99,  20,  00,  99		;ブロスポーズ音(エコー有りサウンド２)
+
+p019 = P, sc1dt50,        90,  40,   0,  99,,,,8	;(エンディング用ゲート短い)
+p020 = P, sc2dt50,        99,  40,   0,  99		;(エンディング用ゲート短い)
+
+p021 = P, sc4st15,        42,  99,  99,  99		;効果音用（クッパの炎）
+p022 = P, sc4st15,        99,  56,   0,  99		;効果音用（クッパの炎）
+
+p023 = P, sc1dt50,        99,  70,  20,  60,,,,8	;(転送・バトルＢＧＭ用)
+p024 = P, sc2dt12,        99,  70,  20,  60		;(バトルＢＧＭ用)
+
+p025 = P, sc1dt12,        99,  20,  00,  99,,,,8	;コイン出現
+p026 = P, sc1dt50,        99,  80,  00,  99,,,,8	;カニ出現
+p027 = P, sc1dt12,        99,  20,  00,  99,,,,3F	;カメ出現
+
+p028 = P, sc2dt50,        99,  00,  20,  99		;対戦自機@昇天音用
+p029 = P, sc2dt25,        99,  99,  99,  99		;自機@大きくなる音用
+
+p030 = P, sc1dt12,        99,  70,  20,  60,,,,8	;ハートで復活音用
+p031 = P, sc2dt12,        10,  99,  99,  99		;顔拡大音用
+
+p032 = P, sc2dt50,        99,  10,  35,  50		;(ボーナス結果コインカウント用)
+
+
+
+
+
+p085 = A, sn_g_cork.aif,       99,  99,  99,  99,60
+p086 = A, sn_g_fletbass.aif,   99,  60,   0,  90,60	;ＢＧＭ用(無敵slbass7の代わり）
+p087 = A, sn_g_brass3.aif,     96,  40,  15,  90,60	;総合タイトルＢＧＭメロ用
+p088 = A, sn_g_brass3.aif,     10,  10,  12,  99,60	;総合タイトルＢＧＭベース用
+p089 = A, sn_g_kusa.aif,       99,  99,  99,  99,60
+p090 = A, sn_g_yoshi.aif,      99,  99,  99,  99,60
+p091 = A, sn_g_steeldr.aif,    99,  70,   0,  90,60
+p092 = A, sn_g_kon.aif,        99,  99,  99,  99,60	;ＢＧＭ用(コン！）
+;p093 = A, sn_g_boyon.aif,      99,  99,  99,  99,60	;ＢＧＭ用(ぼよよん）
+
+p094 = A, sn_g_hits.aif,       99,  99,  99,  70,60	;ＢＧＭ用(マムー）
+p095 = A, sn_g_hits.aif,       99,  54,   6,  99,60	;ＢＧＭ用(マムー）
+p096 = A, sn_g_oud.aif,        99,  54,   6,  99,60	;ＢＧＭ用(地上＆無敵）
+p097 = A, sn_g_timp1g_f.aif,   99,  99,  99,  99,60	;ＢＧＭ用(水晶）
+p098 = A, sn_g_slbass7.aif,    99,  54,  12,  90,60	;ＢＧＭ用(マムー）
+p099 = A, sn_g_fantasy.aif,    99,  99,  99,  99,60	;効果音用（プレイヤーダウン）
+
+p100 = A, sn_g_brass3.aif,     85,  50,  60,  90,60	;ＢＧＭ用(地下)
+p101 = A, sn_g_steeldr.aif,    99,  99,  99,  99,60
+p102 = A, sn_g_brass3.aif,     96,  54,  12,  60,60	;(E0)
+p103 = A, sn_g_brass3.aif,     96,  54,  99,  60,60	;地上ベースピッチ伸ばし用
+p104 = A, sn_g_brass3.aif,     88,  54,   6,  60,60	;メロ用（アタック遅い）
+p105 = A, sn_g_panflute.aif,   88,  80,  40,  50,60	;(E4)
+p106 = A, sn_g_s5honky_3.aif,  96,  90,  99,  80,60	;(F#5)
+p107 = A, sn_g_fantasy.aif,    99,  10,   3,  60,60	;(E5)伸ばし用
+p108 = A, sn_g_marimba3.aif,   99,  96,   0,  99,60	;(E4+0.75)
+p109 = A, sn_g_slbass7.aif,    96,  70,   0,  90,60	;ＢＧＭ用（オプション）
+p110 = A, sn_g_brass3.aif,     96,  99,  99,  99,60	;効果音用
+p111 = A, sn_g_fantasy.aif,    96,  99,  90,  90,60	;効果音用
+p112 = A, sn_g_hits.aif,       99,  99,  99,  99,60	;効果音用（草抜き音など）
+p113 = A, sn_g_pisnare.aif,    99,  99,  99,  99,60	;効果音用（扉など）
+p114 = A, sn_g_cannon.aif,     99,  99,  99,  99,60	;効果音用（爆発など）
+p115 = A, sn_g_marimba3.aif,   99,  40,   0,  99,60	;効果音用（コインなど）
+p116 = A, sn_g_clarinet.aif,   99,  99,  99,  99,60	;効果音用（ボス攻撃音など）
+p117 = A, sn_g_panflute.aif,   10,  80,  40,  50,60	;効果音用（落下音などアタック弱い）
+p118 = A, sn_g_panflute.aif,   99,  99,  99,  99,60	;効果音用（ボスやられなど）
+p119 = A, sn_g_panflute.aif,   90,  95,  65,  75,60	;効果音用（ジャンプなど）
+
+p120 = A, sn_g_trumpet.aif,    99,  99,  90,  80,60	;(D4+0.75)
+
+p121 = A, sn_g_clarinet.aif,   96,  70,  90,  50,60	;ＢＧＭ用
+p122 = A, sn_g_heavyguitar.aif,99,  99,  99,  99,60	;ＢＧＭ用
+p123 = A, sn_g_fletbass.aif,   99,  54,  40,  80,60	;ＢＧＭ用
+p124 = A, sn_g_lowcg.aif,      99,  99,  99,  99,60	;ＢＧＭ用
+p125 = A, sn_g_stringsd5.aif,  85,  99,  90,  90,60	;ＢＧＭ用
+p126 = A, sn_g_clhihat2.aif,   99,  99,  99,  90,60	;ＢＧＭ用
+
+p127 = R, 1 ,c1
+
+
+vgroup = 1
+
+p000 = F, sn_g_bsdrum.aif,     99,  99,  99,  99,60	;C1
+p001 = F, sn_g_rvsnare.aif,    99,  99,  99,  99,60	;C#1
+p002 = F, sn_g_pisnare.aif,    99,  99,  99,  99,60	;D1
+p003 = F, sn_g_clhihat2.aif,   99,  99,  99,  99,60	;D#1
+
+
+
+
+
+
+;*************** （音声グループ  vgroup = 2） *******************
+vgroup = 2
+
+;（共通の合成音声）
+p000 = F,sn_o_usa_00.aif,       99,  99,  99,  99  ;４人で「super mario usa」   
+p004 = F,sn_o_br_01.aif,        99,  99,  99,  99  ;マリオとルイージで「mariobros」
+
+
+
+
+						   ;●マリオのボイス●
+;p000 = F,sn_o_ma_01.aif,        99,  99,  99,  99  ;mario_smario_usa_advance.aif,  
+;p001 = F,sn_o_ma_02.aif,        99,  99,  99,  99  ;mario_smario_usa.aif,          
+;p002 = F,sn_o_ma_03.aif,        99,  99,  99,  99  ;mario_smario_bros_deluxe2.aif, 
+;p003 = F,sn_o_ma_04.aif,        99,  99,  99,  99  ;mario_smario_bros2_deluxe.aif, 
+;p004 = F,sn_o_ma_05.aif,        99,  99,  99,  99  ;mario_mariobros.aif,           
+;p005 = F,sn_o_ma_06.aif,        99,  99,  99,  99  ;mario_here_we_go.aif,          
+p006 = F,sn_o_ma_07.aif,        99,  99,  99,  99  ;mario_here_i_come.aif,          
+p007 = F,sn_o_ma_08.aif,        99,  99,  99,  99  ;mario_lets_go.aif,              
+
+
+
+;（マリオゲーム中）
+p008 = F,sn_o_ma_09.aif,        99,  99,  99,  99  ;mario_yahoo.aif,                
+p009 = F,sn_o_ma_10.aif,        99,  99,  99,  99  ;mario_wah_hah.aif,              
+p010 = F,sn_o_ma_11.aif,        99,  99,  99,  99  ;mario_yah.aif,                  
+p011 = F,sn_o_ma_12.aif,        99,  99,  99,  99  ;mario_hah.aif,                  
+;p012 = F,sn_o_ma_13.aif,        99,  99,  99,  99  ;mario_ai_ee.aif,               
+p013 = F,sn_o_ma_14.aif,        99,  99,  99,  99  ;mario_ya.aif,                   
+;p014 = F,sn_o_ma_15.aif,        99,  99,  99,  99  ;mario_heave_ho.aif,            
+p015 = F,sn_o_ma_16.aif,        99,  99,  99,  99  ;mario_ohmm_hmm.aif,             
+p016 = F,sn_o_ma_17.aif,        99,  99,  99,  99  ;mario_eeee_yah.aif,分離後「いー」
+;p017 = F,sn_o_ma_18.aif,        99,  99,  99,  99  ;mario_grunt.aif,               
+p018 = F,sn_o_ma_19.aif,        99,  99,  99,  99  ;mario_what_a_tasty_treat.aif,   
+p019 = F,sn_o_ma_20.aif,        99,  99,  99,  99  ;mario_ow.aif,                   
+p020 = F,sn_o_ma_21.aif,        99,  99,  99,  99  ;mario_oof.aif,                  
+p021 = F,sn_o_ma_22.aif,        99,  99,  99,  99  ;mario_mamma_mia.aif,            
+p022 = F,sn_o_ma_23.aif,        99,  99,  99,  99  ;mario_oh_no.aif,                
+p023 = F,sn_o_ma_24.aif,        99,  99,  99,  99  ;mario_ah_cha_cha.aif,           
+p024 = F,sn_o_ma_25.aif,        99,  99,  99,  99  ;mario_gotcha.aif,               
+p025 = F,sn_o_ma_26.aif,        99,  99,  99,  99  ;mario_thank_you.aif,            
+p026 = F,sn_o_ma_27.aif,        99,  99,  99,  99  ;mario_lacky.aif,                
+;p027 = F,sn_o_ma_28.aif,        99,  99,  99,  99  ;mario_lacky_me.aif,            
+p028 = F,sn_o_ma_29.aif,        99,  99,  99,  99  ;mario_just_what_i_needed.aif,   
+p029 = F,sn_o_ma_30.aif,        99,  99,  99,  99  ;mario_here_i_go.aif,            
+p030 = F,sn_o_ma_31.aif,        99,  99,  99,  99  ;mario_duh_da_da_dum.aif,        
+p031 = F,sn_o_ma_32.aif,        99,  99,  99,  99  ;mario_ha.aif,                   
+p032 = F,sn_o_ma_33.aif,        99,  99,  99,  99  ;mario_hoh.aif,                  
+p033 = F,sn_o_ma_34.aif,        99,  99,  99,  99  ;mario_bravo.aif,                
+p034 = F,sn_o_ma_35.aif,        99,  99,  99,  99  ;mario_a_crystal.aif,            
+p035 = F,sn_o_ma_36.aif,        99,  99,  99,  99  ;mario_im_moving_now.aif,        
+p036 = F,sn_o_ma_37.aif,        99,  99,  99,  99  ;mario_no_problem.aif,           
+;p037 = F,sn_o_ma_38.aif,        99,  99,  99,  99  ;mario_go_go.aif,               
+;p038 = F,sn_o_ma_39.aif,        99,  99,  99,  99  ;mario_ah_ahh_ah.aif,           
+;p039 = F,sn_o_ma_40.aif,        99,  99,  99,  99  ;mario_humming.aif,             
+;p040 = F,sn_o_ma_41.aif,        99,  99,  99,  99  ;mario_yawn.aif,                
+;p041 = F,sn_o_ma_42.aif,        99,  99,  99,  99  ;mario_laughing.aif,            
+;p042 = F,sn_o_ma_43.aif,        99,  99,  99,  99  ;mario_sneezing.aif,            
+;p043 = F,sn_o_ma_44.aif,        99,  99,  99,  99  ;mario_whistling.aif,           
+;p044 = F,sn_o_ma_45.aif,        99,  99,  99,  99  ;mario_help.aif,                
+
+						   ;●敵のボイス●
+p045 = F,sn_o_mo_01.aif,        99,  99,  99,  99  ;mouser_have_some_bombs.aif,     
+p046 = F,sn_o_mo_02.aif,        99,  99,  99,  99  ;mouser_ah_da_da.aif,            
+p047 = F,sn_o_mo_03.aif,        99,  99,  99,  99  ;mouser_no_way.aif,              
+p048 = F,sn_o_tr_01.aif,        99,  99,  99,  99  ;tryclyde_step_right_up.aif,     
+p049 = F,sn_o_tr_02.aif,        99,  99,  99,  99  ;tryclyde_ready_to_get.aif,      
+p050 = F,sn_o_tr_03.aif,        99,  99,  99,  99  ;tryclyde_toasted.aif,           
+p051 = F,sn_o_tr_04.aif,        99,  99,  99,  99  ;tryclyde_gyaoh.aif,             
+p052 = F,sn_o_tr_05.aif,        99,  99,  99,  99  ;tryclyde_impossible.aif,        
+p053 = F,sn_o_cl_01.aif,        99,  99,  99,  99  ;clawgrip_tasty_treat.aif,       
+p054 = F,sn_o_cl_02.aif,        99,  99,  99,  99  ;clawgrip_ow_wow.aif,            
+p055 = F,sn_o_cl_03.aif,        99,  99,  99,  99  ;clawgrip_you_got_me.aif,        
+p056 = F,sn_o_fl_01.aif,        99,  99,  99,  99  ;flyguy_im_too_hot_to_touch.aif, 
+p057 = F,sn_o_fl_02.aif,        99,  99,  99,  99  ;flyguy_woh_woh.aif,             
+p058 = F,sn_o_fl_03.aif,        99,  99,  99,  99  ;flyguy_too_hot_to_touch.aif,    
+p059 = F,sn_o_wa_01.aif,        99,  99,  99,  99  ;wart_im_great_wart.aif,         
+p060 = F,sn_o_wa_02.aif,        99,  99,  99,  99  ;wart_arrbbit.aif,               
+p061 = F,sn_o_wa_03.aif,        99,  99,  99,  99  ;wart_orrbbit.aif,               
+p062 = F,sn_o_wa_04.aif,        99,  99,  99,  99  ;wart_bbit_tough.aif,            
+p063 = F,sn_o_wa_05.aif,        99,  99,  99,  99  ;wart_nobbit_arrbbit.aif,        
+
+						   ;●ナビのボイス●
+p064 = F,sn_o_na_01.aif,        99,  99,  99,  99  ;navi_choose_a_game.aif,         
+p065 = F,sn_o_na_02.aif,        99,  99,  99,  99  ;navi_choose_a_player.aif,       
+;p066 = F,sn_o_na_03.aif,        99,  99,  99,  99  ;navi_how_many_players.aif,      
+p067 = F,sn_o_na_04.aif,        99,  99,  99,  99  ;navi_classic.aif,               
+p068 = F,sn_o_na_05.aif,        99,  99,  99,  99  ;navi_battle.aif,                
+;p069 = F,sn_o_na_06.aif,        99,  99,  99,  99  ;navi_ok.aif,                    
+;p070 = F,sn_o_na_07.aif,        99,  99,  99,  99  ;navi_round1.aif,                
+;p071 = F,sn_o_na_08.aif,        99,  99,  99,  99  ;navi_round2.aif,                
+;p072 = F,sn_o_na_09.aif,        99,  99,  99,  99  ;navi_round3.aif,                
+;p073 = F,sn_o_na_10.aif,        99,  99,  99,  99  ;navi_round4.aif,                
+;p074 = F,sn_o_na_11.aif,        99,  99,  99,  99  ;navi_round5.aif,                
+;p075 = F,sn_o_na_12.aif,        99,  99,  99,  99  ;navi_round6.aif,                
+;p076 = F,sn_o_na_13.aif,        99,  99,  99,  99  ;navi_round7.aif,                
+;p077 = F,sn_o_na_14.aif,        99,  99,  99,  99  ;navi_round8.aif,                
+;p078 = F,sn_o_na_15.aif,        99,  99,  99,  99  ;navi_round9.aif,                
+;p079 = F,sn_o_na_16.aif,        99,  99,  99,  99  ;navi_round10.aif,               
+;p080 = F,sn_o_na_17.aif,        99,  99,  99,  99  ;navi_round11.aif,               
+;p081 = F,sn_o_na_18.aif,        99,  99,  99,  99  ;navi_round12.aif,               
+;p082 = F,sn_o_na_19.aif,        99,  99,  99,  99  ;navi_round13.aif,               
+;p083 = F,sn_o_na_20.aif,        99,  99,  99,  99  ;navi_round14.aif,               
+;p084 = F,sn_o_na_21.aif,        99,  99,  99,  99  ;navi_round15.aif,               
+;p085 = F,sn_o_na_22.aif,        99,  99,  99,  99  ;navi_final_round.aif,           
+;p086 = F,sn_o_na_23.aif,        99,  99,  99,  99  ;navi_you_win.aif,               
+;p087 = F,sn_o_na_24.aif,        99,  99,  99,  99  ;navi_you_lose.aif,              
+;p088 = F,sn_o_na_25.aif,        99,  99,  99,  99  ;navi_player1_win.aif,           
+;p089 = F,sn_o_na_26.aif,        99,  99,  99,  99  ;navi_player2_win.aif,           
+;p090 = F,sn_o_na_27.aif,        99,  99,  99,  99  ;navi_player3_win.aif,           
+;p091 = F,sn_o_na_28.aif,        99,  99,  99,  99  ;navi_player4_win.aif,           
+;p092 = F,sn_o_na_29.aif,        99,  99,  99,  99  ;navi_mario.aif,                 
+;p093 = F,sn_o_na_30.aif,        99,  99,  99,  99  ;navi_luigi.aif,                 
+;p094 = F,sn_o_na_31.aif,        99,  99,  99,  99  ;navi_peach.aif,                 
+;p095 = F,sn_o_na_32.aif,        99,  99,  99,  99  ;navi_toad.aif,                  
+
+						   ;●雌敵のボイス●
+p096 = F,sn_o_pi_01.aif,        99,  99,  99,  99  ;pinkbirdo_hello_there.aif,      
+p097 = F,sn_o_pi_02.aif,        99,  99,  99,  99  ;pinkbirdo_you_go.aif,           
+p098 = F,sn_o_pi_03.aif,        99,  99,  99,  99  ;pinkbirdo_no.aif,               
+p099 = F,sn_o_pi_04.aif,        99,  99,  99,  99  ;pinkbirdo_remember_this.aif,    
+p100 = F,sn_o_re_01.aif,        99,  99,  99,  99  ;redbirdo_come_a_long_way.aif,   
+p101 = F,sn_o_re_02.aif,        99,  99,  99,  99  ;redbirdo_finish_you_off.aif,    
+p102 = F,sn_o_re_03.aif,        99,  99,  99,  99  ;redbirdo_aaa.aif,               
+p103 = F,sn_o_re_04.aif,        99,  99,  99,  99  ;redbirdo_how_could_you.aif,     
+p104 = F,sn_o_gr_01.aif,        99,  99,  99,  99  ;greenbirdo_lot_of_nerve.aif,    
+p105 = F,sn_o_gr_02.aif,        99,  99,  99,  99  ;greenbirdo_ready_for_you.aif,   
+p106 = F,sn_o_gr_03.aif,        99,  99,  99,  99  ;greenbirdo_wah.aif,             
+p107 = F,sn_o_gr_04.aif,        99,  99,  99,  99  ;greenbirdo_help.aif,            
+
+			 			   ;●ルイージのボイス●
+;p108 = F,sn_o_lu_01.aif,        99,  99,  99,  99  ;luigi_smario_usa_advance.aif,   
+;p109 = F,sn_o_lu_02.aif,        99,  99,  99,  99  ;luigi_smario_usa.aif,           
+;p110 = F,sn_o_lu_03.aif,        99,  99,  99,  99  ;luigi_smario_bros_deluxe2.aif,  
+;p111 = F,sn_o_lu_04.aif,        99,  99,  99,  99  ;luigi_smario_bros2_deluxe.aif,  
+;p112 = F,sn_o_lu_05.aif,        99,  99,  99,  99  ;luigi_mariobros.aif,            
+p113 = F,sn_o_lu_06.aif,        99,  99,  99,  99  ;luigi_here_we_go.aif,           
+;p114 = F,sn_o_lu_07.aif,        99,  99,  99,  99  ;luigi_here_i_come.aif,          
+p115 = F,sn_o_lu_08.aif,        99,  99,  99,  99  ;luigi_lets_go.aif,              
+
+
+;（ルイージゲーム中）
+p116 = F,sn_o_lu_09.aif,        99,  99,  99,  99  ;luigi_wah_hah.aif,              
+p117 = F,sn_o_lu_10.aif,        99,  99,  99,  99  ;luigi_yeaa.aif,                 
+p118 = F,sn_o_lu_11.aif,        99,  99,  99,  99  ;luigi_yah.aif,                  
+p119 = F,sn_o_lu_12.aif,        99,  99,  99,  99  ;luigi_hah.aif,                  
+;p120 = F,sn_o_lu_13.aif,        99,  99,  99,  99  ;luigi_ai_ee.aif,               
+p121 = F,sn_o_lu_14.aif,        99,  99,  99,  99  ;luigi_ya.aif,                   
+;p122 = F,sn_o_lu_15.aif,        99,  99,  99,  99  ;luigi_heave_ho.aif,            
+p123 = F,sn_o_lu_16.aif,        99,  99,  99,  99  ;luigi_oomm_hmm.aif,             
+p124 = F,sn_o_lu_17.aif,        99,  99,  99,  99  ;luigi_eeee_yah.aif,分離後「いー」
+;p125 = F,sn_o_lu_18.aif,        99,  99,  99,  99  ;luigi_grunt.aif,               
+p126 = F,sn_o_lu_19.aif,        99,  99,  99,  99  ;luigi_thats_delicious.aif,      
+p127 = F,sn_o_lu_20.aif,        99,  99,  99,  99  ;luigi_ow.aif,                   
+
+
+;*************** （音声グループ  vgroup = 3） *******************ルイージのボイス（続き）
+vgroup = 3
+
+p000 = F,sn_o_lu_21.aif,        99,  99,  99,  99  ;luigi_hyaaa.aif,                  
+p001 = F,sn_o_lu_22.aif,        99,  99,  99,  99  ;luigi_mamma_mia.aif,              
+p002 = F,sn_o_lu_23.aif,        99,  99,  99,  99  ;luigi_hyaaaoowao.aif,             
+p003 = F,sn_o_lu_24.aif,        99,  99,  99,  99  ;luigi_gwaaa.aif,                  
+p004 = F,sn_o_lu_25.aif,        99,  99,  99,  99  ;luigi_gotcha.aif,                 
+p005 = F,sn_o_lu_26.aif,        99,  99,  99,  99  ;luigi_thank_you.aif,              
+p006 = F,sn_o_lu_27.aif,        99,  99,  99,  99  ;luigi_lacky.aif,                  
+p007 = F,sn_o_lu_28.aif,        99,  99,  99,  99  ;luigi_just_what_i_needed.aif,     
+p008 = F,sn_o_lu_29.aif,        99,  99,  99,  99  ;luigi_here_i_go.aif,              
+p009 = F,sn_o_lu_30.aif,        99,  99,  99,  99  ;luigi_great.aif,                  
+p010 = F,sn_o_lu_31.aif,        99,  99,  99,  99  ;luigi_ha.aif,                     
+p011 = F,sn_o_lu_32.aif,        99,  99,  99,  99  ;luigi_hoh.aif,                    
+p012 = F,sn_o_lu_33.aif,        99,  99,  99,  99  ;luigi_bravo.aif,                  
+p013 = F,sn_o_lu_34.aif,        99,  99,  99,  99  ;luigi_im_moving_now.aif,          
+p014 = F,sn_o_lu_35.aif,        99,  99,  99,  99  ;luigi_piece_of_cake.aif,          
+p015 = F,sn_o_lu_36.aif,        99,  99,  99,  99  ;luigi_perfect.aif,                
+;p016 = F,sn_o_lu_37.aif,        99,  99,  99,  99  ;luigi_go_go.aif,                  
+;p017 = F,sn_o_lu_38.aif,        99,  99,  99,  99  ;luigi_ah_ahh_ah.aif,              
+;p018 = F,sn_o_lu_39.aif,        99,  99,  99,  99  ;luigi_humming.aif,                
+;p019 = F,sn_o_lu_40.aif,        99,  99,  99,  99  ;luigi_yawn.aif,                   
+;p020 = F,sn_o_lu_41.aif,        99,  99,  99,  99  ;luigi_laughing.aif,               
+;p021 = F,sn_o_lu_42.aif,        99,  99,  99,  99  ;luigi_sneezing.aif,               
+;p022 = F,sn_o_lu_43.aif,        99,  99,  99,  99  ;luigi_whistling.aif,              
+
+						   ;●ピーチのボイス●
+;p023 = F,sn_o_pe_01.aif,        99,  99,  99,  99  ;peach_smario_usa_advance.aif,  
+;p024 = F,sn_o_pe_02.aif,        99,  99,  99,  99  ;peach_smario_usa.aif,          
+;p025 = F,sn_o_pe_03.aif,        99,  99,  99,  99  ;peach_smario_bros_deruxe2.aif, 
+;p026 = F,sn_o_pe_04.aif,        99,  99,  99,  99  ;peach_smario_bros2_deruxe.aif, 
+;p027 = F,sn_o_pe_05.aif,        99,  99,  99,  99  ;peach_mario_bros.aif,          
+p028 = F,sn_o_pe_06.aif,        99,  99,  99,  99  ;peach_leave_it_to_me.aif,      
+;p029 = F,sn_o_pe_07.aif,        99,  99,  99,  99  ;peach_ok.aif,                  
+
+
+
+
+
+
+;（ピーチゲーム中）
+p030 = F,sn_o_pe_08.aif,        99,  99,  99,  99  ;peach_yahoo.aif,               
+p031 = F,sn_o_pe_09.aif,        99,  99,  99,  99  ;peach_hai_yah.aif,             
+p032 = F,sn_o_pe_10.aif,        99,  99,  99,  99  ;peach_ho_oh.aif,               
+p033 = F,sn_o_pe_11.aif,        99,  99,  99,  99  ;peach_yippee.aif,              
+;p034 = F,sn_o_pe_12.aif,        99,  99,  99,  99  ;peach_ai_ee.aif,              
+p035 = F,sn_o_pe_13.aif,        99,  99,  99,  99  ;peach_ya.aif,                  
+;p036 = F,sn_o_pe_14.aif,        99,  99,  99,  99  ;peach_heave_ho.aif,           
+p037 = F,sn_o_pe_15.aif,        99,  99,  99,  99  ;peach_ohmm_hmm.aif,            
+p038 = F,sn_o_pe_16.aif,        99,  99,  99,  99  ;peach_eeee_yah.aif,分離後「いー」
+;p039 = F,sn_o_pe_17.aif,        99,  99,  99,  99  ;peach_grunt_yah.aif,          
+p040 = F,sn_o_pe_18.aif,        99,  99,  99,  99  ;peach_fresh_garden.aif,        
+p041 = F,sn_o_pe_19.aif,        99,  99,  99,  99  ;peach_oof.aif,                 
+p042 = F,sn_o_pe_20.aif,        99,  99,  99,  99  ;peach_kya.aif,                 
+p043 = F,sn_o_pe_21.aif,        99,  99,  99,  99  ;peach_oh_no.aif,               
+p044 = F,sn_o_pe_22.aif,        99,  99,  99,  99  ;peach_too_bad.aif,             
+p045 = F,sn_o_pe_23.aif,        99,  99,  99,  99  ;peach_ahhhh.aif,               
+p046 = F,sn_o_pe_24.aif,        99,  99,  99,  99  ;peach_gotcha.aif,              
+p047 = F,sn_o_pe_25.aif,        99,  99,  99,  99  ;peach_thank_you.aif,           
+p048 = F,sn_o_pe_26.aif,        99,  99,  99,  99  ;peach_lacky.aif,               
+;p049 = F,sn_o_pe_27.aif,        99,  99,  99,  99  ;peach_lacky_me.aif,           
+p050 = F,sn_o_pe_28.aif,        99,  99,  99,  99  ;peach_just_what_i_needed.aif,  
+p051 = F,sn_o_pe_29.aif,        99,  99,  99,  99  ;peach_here_i_go.aif,           
+p052 = F,sn_o_pe_30.aif,        99,  99,  99,  99  ;peach_duh_da_da_dum.aif,       
+p053 = F,sn_o_pe_31.aif,        99,  99,  99,  99  ;peach_hee_ya.aif,              
+p054 = F,sn_o_pe_32.aif,        99,  99,  99,  99  ;peach_take_that.aif,           
+p055 = F,sn_o_pe_33.aif,        99,  99,  99,  99  ;peach_oh_yeah.aif,             
+p056 = F,sn_o_pe_34.aif,        99,  99,  99,  99  ;peach_a_crystal.aif,           
+p057 = F,sn_o_pe_35.aif,        99,  99,  99,  99  ;peach_i_got_it.aif,            
+p058 = F,sn_o_pe_36.aif,        99,  99,  99,  99  ;peach_oo_hoo_hoo.aif,          
+;p059 = F,sn_o_pe_37.aif,        99,  99,  99,  99  ;peach_go_go.aif,              
+;p060 = F,sn_o_pe_38.aif,        99,  99,  99,  99  ;peach_ah_ahh_ah.aif,          
+;p061 = F,sn_o_pe_39.aif,        99,  99,  99,  99  ;peach_humming.aif,            
+;p062 = F,sn_o_pe_40.aif,        99,  99,  99,  99  ;peach_yawn.aif,               
+;p063 = F,sn_o_pe_41.aif,        99,  99,  99,  99  ;peach_laughing.aif,           
+;p064 = F,sn_o_pe_42.aif,        99,  99,  99,  99  ;peach_sneezing.aif,           
+;p065 = F,sn_o_pe_43.aif,        99,  99,  99,  99  ;peach_whistling.aif,          
+
+						      ;●トード（キノピオ）のボイス●
+;p066 = F,sn_o_to_01.aif,        99,  99,  99,  99  ;toad_smario_usa_advance.aif,    
+;p067 = F,sn_o_to_02.aif,        99,  99,  99,  99  ;toad_smario_usa.aif,            
+;p068 = F,sn_o_to_03.aif,        99,  99,  99,  99  ;toad_smario_bros_deruxe2.aif,   
+;p069 = F,sn_o_to_04.aif,        99,  99,  99,  99  ;toad_smario_bros2_deruxe.aif,   
+;p070 = F,sn_o_to_05.aif,        99,  99,  99,  99  ;toad_mario_bros.aif,            
+p071 = F,sn_o_to_06.aif,        99,  99,  99,  99  ;toad_ok.aif,                    
+p072 = F,sn_o_to_07.aif,        99,  99,  99,  99  ;toad_hi_yah.aif,                
+
+
+
+
+;（キノピオゲーム中）
+p073 = F,sn_o_to_08.aif,        99,  99,  99,  99  ;toad_yeaa.aif,                  
+p074 = F,sn_o_to_09.aif,        99,  99,  99,  99  ;toad_hai_yah.aif,               
+p075 = F,sn_o_to_10.aif,        99,  99,  99,  99  ;toad_ho_oh.aif,                 
+p076 = F,sn_o_to_11.aif,        99,  99,  99,  99  ;toad_yippee.aif,                
+;p077 = F,sn_o_to_12.aif,        99,  99,  99,  99  ;toad_ai_ee.aif,                
+p078 = F,sn_o_to_13.aif,        99,  99,  99,  99  ;toad_ya.aif,                    
+;p079 = F,sn_o_to_14.aif,        99,  99,  99,  99  ;toad_heave_ho.aif,             
+p080 = F,sn_o_to_15.aif,        99,  99,  99,  99  ;toad_ohmm_hmm.aif,              
+p081 = F,sn_o_to_16.aif,        99,  99,  99,  99  ;toad_eeee_yah.aif,分離後「いー」
+;p082 = F,sn_o_to_17.aif,        99,  99,  99,  99  ;toad_grunt_yah.aif,            
+p083 = F,sn_o_to_18.aif,        99,  99,  99,  99  ;toad_all_vegies.aif,            
+p084 = F,sn_o_to_19.aif,        99,  99,  99,  99  ;toad_kya.aif,                   
+p085 = F,sn_o_to_20.aif,        99,  99,  99,  99  ;toad_hyaaa.aif,                 
+p086 = F,sn_o_to_21.aif,        99,  99,  99,  99  ;toad_hyaaa_aaa.aif,             
+p087 = F,sn_o_to_22.aif,        99,  99,  99,  99  ;toad_too_bad.aif,               
+p088 = F,sn_o_to_23.aif,        99,  99,  99,  99  ;toad_uh_wahh.aif,               
+p089 = F,sn_o_to_24.aif,        99,  99,  99,  99  ;toad_gotcha.aif,                
+p090 = F,sn_o_to_25.aif,        99,  99,  99,  99  ;toad_thank_you.aif,             
+p091 = F,sn_o_to_26.aif,        99,  99,  99,  99  ;toad_lacky.aif,                 
+;p092 = F,sn_o_to_27.aif,        99,  99,  99,  99  ;toad_lacky_me.aif,             
+p093 = F,sn_o_to_28.aif,        99,  99,  99,  99  ;toad_just_what_i_needed.aif,    
+p094 = F,sn_o_to_29.aif,        99,  99,  99,  99  ;toad_here_i_go.aif,             
+p095 = F,sn_o_to_30.aif,        99,  99,  99,  99  ;toad_great.aif,                 
+p096 = F,sn_o_to_31.aif,        99,  99,  99,  99  ;toad_hee_ya.aif,                
+p097 = F,sn_o_to_32.aif,        99,  99,  99,  99  ;toad_take_that.aif,             
+p098 = F,sn_o_to_33.aif,        99,  99,  99,  99  ;toad_oh_yeah.aif,               
+p099 = F,sn_o_to_34.aif,        99,  99,  99,  99  ;toad_i_got_it.aif,              
+p100 = F,sn_o_to_35.aif,        99,  99,  99,  99  ;toad_piece_of_cake.aif,         
+p101 = F,sn_o_to_36.aif,        99,  99,  99,  99  ;toad_yea_hay.aif,               
+;p102 = F,sn_o_to_37.aif,        99,  99,  99,  99  ;toad_go_go.aif,                
+;p103 = F,sn_o_to_38.aif,        99,  99,  99,  99  ;toad_ah_ahh_ah.aif,            
+;p104 = F,sn_o_to_39.aif,        99,  99,  99,  99  ;toad_humming.aif,              
+;p105 = F,sn_o_to_40.aif,        99,  99,  99,  99  ;toad_yawn.aif,                 
+;p106 = F,sn_o_to_41.aif,        99,  99,  99,  99  ;toad_laughing.aif,             
+;p107 = F,sn_o_to_42.aif,        99,  99,  99,  99  ;toad_sneezing.aif,             
+;p108 = F,sn_o_to_43.aif,        99,  99,  99,  99  ;toad_whistling.aif,            
+
+p109 = F,sn_o_me_01.aif,        99,  99,  99,  99  ;mekabirdo_come_a_long_way.aif,  
+p110 = F,sn_o_me_02.aif,        99,  99,  99,  99  ;mekabirdo_finish_you_off.aif,   
+p111 = F,sn_o_me_03.aif,        99,  99,  99,  99  ;mekabirdo_aaa.aif,              
+p112 = F,sn_o_me_04.aif,        99,  99,  99,  99  ;mekabirdo_how_could_you.aif,    
+
+p113 = F,sn_o_ma_17ya.aif,        99,  99,  99,  99  ;分離後マリオ  「やっ」
+p114 = F,sn_o_lu_17ya.aif,        99,  99,  99,  99  ;分離後ルイージ「やっ」
+p115 = F,sn_o_pe_16ya.aif,        99,  99,  99,  99  ;分離後ピーチ  「やっ」
+p116 = F,sn_o_to_16ya.aif,        99,  99,  99,  99  ;分離後キノピオ「やっ」
+
+
+;サウンド３の波形設定
+
+w000 = 0011235689ACDEEFFFEEDCA986532110, sinewave
+w001 = 148BCCCCCCCCCCCCB841000000000000, bros_title
+w002 = 1369AAAAAAAAAAAA9631000000000000, bros_start
+w003 = 88888888888888840000000000000004, bros_perf_over
+w004 = 00000000000369CFFFFFFFFFFFFC9630, bros_bonus_count
+w005 = 8FFFFFFFFFFFFFFF8000000000000000, bros_mrnext_fire
+
+
+
+
+;ミュージックプレイヤーの設定（トラック数）
+
+
+mp00 = 1;(優先援助)
+
+mp01 = 1;(FC&SFC port1)
+mp02 = 1;(FC&SFC port2)
+mp03 = 1;(FC&SFC port3)
+
+mp04 = 1;(SFC port3)
+mp05 = 1;(SFC port0)
+mp06 = 1;(SFC port 特別)
+
+mp07 = 1;(自機@音声)
+mp08 = 1;(ボス音声)
+
+mp09 = 6;(multi track SE)
+
+mp10 = 1;(優先援助)
+mp11 = 1;(優先援助)
+mp12 = 1;(優先援助)
+mp13 = 1;(優先援助)
+mp14 = 1;(優先援助)
+mp15 = 1;(優先援助)
+mp16 = 1;(優先援助)
+
+
+mp30 = 6;(FC&SFC bgm)
+mp31 = 8;(総合タイトル&クラシックゲームオーバー専用)
+
+
+;ソング設定
+
+;			        mp,vg,vol, pr,rev
+s000 = sn_TITLE.mid,		30,0, 100, 10,  0        ;マリオブラザーズ「タイトル画面」
+s001 = sn_STAGE1.mid,		30,0, 100, 10,  0        ;マリオブラザーズ「ステージ１スタート」
+s002 = sn_STAGE2.mid,		30,0, 100, 10,OFF        ;マリオブラザーズ「ステージ２スタート」
+s003 = sn_CLEAR.mid,		30,0, 100,250,OFF        ;マリオブラザーズ「ステージクリア」
+s004 = sn_GAMEOVER.mid,		30,0, 100,210,OFF        ;マリオブラザーズ「ゲームオーバー」
+s005 = sn_BONUS.mid,		 3,0, 100, 40,OFF        ;マリオブラザーズ「ボーナス面タイムカウント」
+s006 = sn_KEKKA.mid,		 3,0, 100, 50,OFF        ;マリオブラザーズ「結果コイン音（リーチ音）」
+s007 = sn_PERFECT.mid,		31,0, 100, 10,OFF        ;マリオブラザーズ「パーフェクト」
+
+s008 = sn_BATTLE_DEAD.mid,	 6,0, 100,200,OFF        ;マリオブラザーズ「自機@昇天音」
+s009 = sn_HEART.mid,		 7,0,  80,200,OFF        ;マリオブラザーズ「ハートで復活音」
+s010 = sn_COIN5.mid,		30,0, 120,250,OFF        ;マリオブラザーズ「コイン５枚音」
+
+s011 = sn_JUMP.mid,			11,0, 100,130,OFF        ;マリオブラザーズ「ジャンプ」
+s012 = sn_SLIP.mid,			 4,0,  60, 40,OFF        ;マリオブラザーズ「急ブレーキ」
+s013 = sn_WALK_C.mid,		 4,0,  60, 30,OFF        ;マリオブラザーズ「歩き音Ｃ」
+s014 = sn_WALK_E.mid,		 4,0,  60, 30,OFF        ;マリオブラザーズ「歩き音Ｅ」
+s015 = sn_WALK_G.mid,		 4,0,  60, 30,OFF        ;マリオブラザーズ「歩き音Ｇ」
+s016 = sn_MR_DEAD.mid,		 6,0, 100,200,OFF        ;マリオブラザーズ「マリオやられた」
+s017 = sn_MR_DOWN.mid,		 6,0, 100,160,OFF        ;マリオブラザーズ「マリオ落下」
+s018 = sn_MR_NEXT.mid,		 5,0, 100,250,OFF        ;マリオブラザーズ「マリオ復活」
+s019 = sn_POW.mid,			 8,0, 127,150,OFF        ;マリオブラザーズ「ＰＯＷ」
+s020 = sn_PAUSE1UP.mid,		 0,0,  80,250,OFF        ;マリオブラザーズ「ポーズ・１ＵＰ」
+
+s021 = sn_KAME.mid,			 1,0, 100, 60,OFF        ;マリオブラザーズ「カメ出現」
+s022 = sn_KANI.mid,			 1,0, 100, 60,OFF        ;マリオブラザーズ「カニ出現」
+s023 = sn_HAE.mid,			 1,0,  80, 60,OFF        ;マリオブラザーズ「ハエ出現」
+s024 = sn_COIN_OUT.mid,		 1,0, 100, 60,OFF        ;マリオブラザーズ「コイン・フリーザ出現」
+s025 = sn_TEKI_ATTACK.mid,	 1,0, 120, 80,OFF        ;マリオブラザーズ「敵ひっくりかえる」
+s026 = sn_TEKI_DEAD.mid,	13,0, 120,100,OFF        ;マリオブラザーズ「敵倒す」
+s027 = sn_DOBON.mid,		 1,0, 100, 60,OFF        ;マリオブラザーズ「ドボン」
+s028 = sn_COIN_GET.mid,		 9,0, 100,120,OFF        ;マリオブラザーズ「コイン取得」
+s029 = sn_FREEZER.mid,		15,0, 100,180,OFF        ;マリオブラザーズ「フリーザ凍結」
+s030 = sn_FREEZ_DEAD.mid,	12,0, 100,150,OFF        ;マリオブラザーズ「フリーザ倒す」
+s031 = sn_FIRE.mid,			 3,0,  80, 40,OFF        ;マリオブラザーズ「火の玉移動」
+
+
+s032 = sn_boss_bros.mid,	30,0,  90, 10,OFF        ;マリオブラザーズ「ボス面（ＰＣＭなし）」
+s033 = sn_star_bros.mid,	30,0, 100, 40,OFF        ;マリオブラザーズ「無敵ＢＧＭ（ＰＣＭ１音）」
+s034 = sn_KUPPA.mid,		30,0,  90, 10,OFF        ;マリオブラザーズ「クッパ城ＢＧＭ」
+s035 = sn_KUPPA_DOSIN.mid,	 8,0, 100,150,OFF        ;マリオブラザーズ「クッパのどっすん音」
+s036 = sn_win1.mid,			31,0, 100,210,OFF        ;マリオブラザーズ「勝ちＢＧＭ」
+s037 = sn_lose1.mid,		31,0, 100,210,OFF        ;マリオブラザーズ「負けＢＧＭ」
+s038 = sn_win2.mid,			31,0, 100,210,OFF        ;マリオブラザーズ「総合勝ちＢＧＭ」
+s039 = sn_lose2.mid,		31,0, 100,210,OFF        ;マリオブラザーズ「総合負けＢＧＭ」
+;s040 = sn_tenso.mid,		30,0, 100, 10,OFF        ;マリオブラザーズ「転送ＢＧＭ」
+s041 = sn_battle2.mid,		30,0, 100, 10,OFF        ;マリオブラザーズ「バトルＢＧＭ」
+s042 = sn_battlekekka.mid,	31,0, 100, 10,OFF        ;マリオブラザーズ「バトル結果ＢＧＭ」
+
+s043 = sn_zelda_fan.mid,	30,0, 100, 20,OFF        ;マリオブラザーズ「ゼルダ宝箱ファ@ンファ@ーレ」
+s044 = sn_KUPPAFIRE.mid,	 8,0, 100,200,OFF        ;マリオブラザーズ「クッパの吐く炎音」
+
+s045 = sn_BAKETU.mid,		14,0, 127, 50,OFF        ;マリオブラザーズ「バケツ叩@く音」
+s046 = sn_MOTI.mid,			 3,0, 120,150,OFF        ;マリオブラザーズ「自機@・ＰＯＷ持つ音」
+s047 = sn_NAGE.mid,			 3,0,  50,150,OFF        ;マリオブラザーズ「投げる音」
+s048 = sn_TAME.mid,			 2,0,  60, 60,OFF        ;マリオブラザーズ「自機@しゃがみため音」
+s049 = sn_DAMAGE.mid,		10,0, 120,130,OFF        ;マリオブラザーズ「自機@ダメージ音」
+s050 = sn_TIBI.mid,			10,0, 120,130,OFF        ;マリオブラザーズ「自機@小さくなる音」
+s051 = sn_NORI.mid,			 2,0,  60, 60,OFF        ;マリオブラザーズ「自機@乗っかり音」
+s052 = sn_BUTUKARI.mid,		 4,0,  60, 30,OFF        ;マリオブラザーズ「自機@ぶつかり音」
+s053 = sn_HEART_GET.mid,	 2,0,  60, 60,OFF        ;マリオブラザーズ「ハート取得音」
+s054 = sn_DEKA.mid,			10,0,  60,180,OFF        ;マリオブラザーズ「自機@大きくなる音」
+s055 = sn_KAO.mid,			 2,0,  60,100,OFF        ;マリオブラザーズ「顔が大きくなる音」
+s056 = sn_PUSH.mid,			 2,0, 100,140,OFF        ;マリオブラザーズ「結果のPUSH START音」
+s057 = sn_KUPPA_DAMAGE.mid,	 8,0,  90,150,OFF        ;マリオブラザーズ「クッパダメージ音」
+s058 = sn_KUPPA_DEAD.mid,	 5,0,  50,200,OFF        ;マリオブラザーズ「クッパやられ音」
+s059 = sn_SHIFT.mid,		10,0,  50, 50,OFF        ;マリオブラザーズ「画面スクロール音」
+s060 = sn_SAVE.mid,			 9,0,  60,255,OFF        ;マリオブラザーズ「セーブ終了音」
+s061 = sn_intro_battle.mid,	30,0, 100, 10,OFF        ;マリオブラザーズ「バトルＢＧＭ（イントロ）」
+
+s062 = sn_KAMEKERI1.mid,	 2,0, 100, 60,OFF        ;マリオブラザーズ「カメの甲羅蹴る音１」
+s063 = sn_KAMEKERI2.mid,	 2,0, 100, 60,OFF        ;マリオブラザーズ「カメの甲羅蹴る音２」
+s064 = sn_KAMEKERI3.mid,	 2,0, 100, 60,OFF        ;マリオブラザーズ「カメの甲羅蹴る音３」
+s065 = sn_KAMEKERI4.mid,	 2,0, 100, 60,OFF        ;マリオブラザーズ「カメの甲羅蹴る音４」
+
+s066 = sn_PINPON.mid,		 4,0,  90,250,OFF        ;マリオブラザーズ「ピンポーン音」
+s067 = sn_BUU.mid,			 4,0, 110,250,OFF        ;マリオブラザーズ「ブブー音」
+
+s068 = sn_battlekekka_intro.mid,31,0, 100, 10,OFF    ;マリオブラザーズ「バトル結果ＢＧＭイントロ」
+
+s069 = sn_FIREDEAD.mid,		 3,0,  80, 50,OFF        ;マリオブラザーズ「ファ@イア倒し音」
+s070 = sn_TURARA_DEAD.mid,	 3,0,  90, 50,OFF        ;マリオブラザーズ「つらら倒し音」
+
+
+
+;s071
+;s072
+;s073
+;s074
+;s075
+;s076 (予備)
+;s077
+;s078
+;s079
+;s080
+;s081
+;s082
+;s083
+;s084
+;s085
+;s086
+;s087
+;s088
+;s089
+;s090
+;s091
+;s092
+;s093
+;s094
+;s095
+;s096
+;s097
+;s098
+;s099
+;s100
+;s101
+;s102
+;s103
+;s104
+;s105
+;s106
+;s107
+;s108
+;s109
+;s110
+;s111
+;s112
+;s113
+;s114
+;s115
+;s116
+;s117
+;s118
+;s119
+
+
+
+;●クラシック専用●
+s120 = sn_battle3.mid,		30,0, 100, 10,OFF        ;マリオブラザーズ「クラシックBGM１（明るい）」
+s121 = sn_battle4.mid,		30,0, 100, 10,OFF        ;マリオブラザーズ「クラシックBGM２（地下面）」
+s122 = sn_bassdrum3.mid,	30,0, 100, 10,OFF        ;マリオブラザーズ「クラシックBGM３（Ｂ＆Ｄ）」
+s123 = sn_intro_bonus.mid,	30,0, 100, 10,OFF        ;マリオブラザーズ「クラシックBGM（イントロ）」
+s124 = sn_NOBONUS.mid,		31,0, 127, 50,OFF        ;マリオブラザーズ「ＮＯ ＢＯＮＵＳ音」
+
+
+;s125
+;s126
+;s127
+;s128
+;s129
+;s130 (予備)
+;s131
+;s132
+;s133
+;s134
+;s135
+;s136
+;s137
+;s138
+;s139
+;s140
+;s141
+;s142
+;s143
+;s144
+;s145
+;s146
+;s147
+;s148
+;s149
+;s150
+;s151
+;s152
+;s153
+;s154
+;s155
+;s156
+;s157
+;s158
+;s159
+;s160
+;s161
+;s162
+;s163
+;s164
+;s165
+;s166
+;s167
+;s168
+;s169
+
+
+
+
+
+s170 = sn_usa_title.mid,	31,0, 110, 10, 25        ;マリオＵＳＡ「総合タイトル画面」
+
+s171 = sn_tijou.mid,		30,0,  80, 10,  0        ;マリオＵＳＡ「地上面」
+s172 = sn_chika.mid,		30,0,  80, 10, 50        ;マリオＵＳＡ「地下面」
+s173 = sn_ura.mid,			30,0,  80, 10,OFF        ;マリオＵＳＡ「ボーナス面（裏側）」
+s174 = sn_select.mid,		30,0,  80, 10, 15        ;マリオＵＳＡ「キャラセレクト画面」
+s175 = sn_boss.mid,			30,0,  80, 10,  0        ;マリオＵＳＡ「ボス面（通常）」
+s176 = sn_boss_mamu.mid,	30,0,  80, 10, 50        ;マリオＵＳＡ「ボス面（最終面）」
+
+s177 = sn_boss_clear.mid,	30,0, 100, 10, 50        ;マリオＵＳＡ「ボス面クリア」
+s178 = sn_suishou.mid,		30,0,  70, 10,OFF        ;マリオＵＳＡ「水晶取得音、スロットで当たり」
+s179 = sn_game_over.mid,	30,0, 100, 10,  0        ;マリオＵＳＡ「ゲームオーバー」
+s180 = sn_slot_start.mid,	30,0, 100, 10,OFF        ;マリオＵＳＡ「スロットファ@ンファ@ーレ」
+s181 = sn_usa_dead.mid,		30,0, 100, 10,OFF        ;マリオＵＳＡ「プレイヤーダウン」
+s182 = sn_star.mid,			30,0,  90, 10,OFF        ;マリオＵＳＡ「プレイヤー無敵」
+s183 = sn_warp.mid,			30,0, 127, 10,OFF        ;マリオＵＳＡ「ワープＢＧＭ」
+s184 = sn_usa_ending.mid,	30,0, 110, 10, 35        ;マリオＵＳＡ「エンディング（一人）」
+;s185 = sn_yume_ending.mid,	30,0, 100, 10,OFF        ;夢工場      「エンディング（全員）」
+
+s186 = sn_se_final.mid,		 4,0,  80, 50,OFF        ;マリオＵＳＡ「最後のPUSH START音」
+
+s187 = sn_se_kettei.mid,	 5,0, 100, 50,OFF        ;マリオＵＳＡ「セレクト画面決定音」
+s188 = sn_se_nage.mid,		 5,0,  80, 50,OFF        ;マリオＵＳＡ「草、敵投げ音」
+s189 = sn_se_chery.mid,		 5,0,  80, 50,OFF        ;マリオＵＳＡ「チェリー取った音」
+s190 = sn_se_tekidead.mid,	 5,0, 100, 50,OFF        ;マリオＵＳＡ「敵倒した音」
+s191 = sn_se_hasigo.mid,	 1,0,  40, 30,OFF        ;マリオＵＳＡ「はしご登る音」
+s192 = sn_se_damage.mid,	 5,0,  85,150,OFF        ;マリオＵＳＡ「自機@ダメージ音」
+s193 = sn_se_moti1.mid,		 5,0,  80, 50,OFF        ;マリオＵＳＡ「草を抜く音」
+s194 = sn_se_moti2.mid,		 4,0,  60, 50,OFF        ;マリオＵＳＡ「敵を持つ音」
+s195 = sn_se_timer.mid,		 6,0, 110, 50,OFF        ;マリオＵＳＡ「タイマー取った音」
+s196 = sn_se_dooropen.mid,	 4,0,  80, 80,OFF        ;マリオＵＳＡ「ドア開ける音」
+s197 = sn_se_doorclose.mid,	 4,0, 100, 80,OFF        ;マリオＵＳＡ「ドア閉める音」
+s198 = sn_se_kamen.mid,		 4,0, 100, 50,OFF        ;マリオＵＳＡ「カメーン怒り音」
+s199 = sn_se_kujira.mid,	 3,0,  50, 50,OFF        ;マリオＵＳＡ「鯨潮ふき音」
+s200 = sn_se_bomb.mid,		 4,0, 127,100,OFF        ;マリオＵＳＡ「爆発音」
+s201 = sn_se_coin.mid,		 4,0,  80,130,OFF        ;マリオＵＳＡ「コイン取った音」
+s202 = sn_se_tame.mid,		 5,0, 100, 50,OFF        ;マリオＵＳＡ「しゃがみため音」
+s203 = sn_se_tuboin.mid,	 4,0, 110,120,OFF        ;マリオＵＳＡ「つぼに入る音」
+s204 = sn_se_tuboout.mid,	 4,0, 110,120,OFF        ;マリオＵＳＡ「つぼから出る音」
+s205 = sn_se_1up.mid,		 4,0, 100,150,OFF        ;マリオＵＳＡ「１ＵＰ音」
+s206 = sn_se_pow.mid,		 5,0, 127, 50,OFF        ;マリオＵＳＡ「ＰＯＷ音」
+s207 = sn_se_pause.mid,		10,0, 100,255,OFF        ;マリオＵＳＡ「ポーズ音」
+s208 = sn_se_toriopen.mid,	 5,0, 100,150,OFF        ;マリオＵＳＡ「鳥開く音」
+s209 = sn_se_toriclose.mid,	 5,0, 100,150,OFF        ;マリオＵＳＡ「鳥閉じる音」
+s210 = sn_se_kinoko.mid,	 4,0, 100,150,OFF        ;マリオＵＳＡ「自機@大きくなる音」
+s211 = sn_se_slotroll.mid,	 2,0,  30, 30,OFF        ;マリオＵＳＡ「スロット回ってる音」
+s212 = sn_se_slotkettei.mid, 6,0,  60, 50,OFF        ;マリオＵＳＡ「スロット決定音」
+s213 = sn_se_slotdrum1.mid,	 4,0, 127, 50,OFF        ;マリオＵＳＡ「スロットドラム音（始め）」
+s214 = sn_se_slotdrum2.mid,	 4,0, 127, 50,OFF        ;マリオＵＳＡ「スロットドラム音（終わり）」
+s215 = sn_se_bossdamage.mid, 4,0,  80,100,OFF        ;マリオＵＳＡ「ボスダメージ音」
+s216 = sn_se_bosshaku.mid,	 5,0,  80, 80,OFF        ;マリオＵＳＡ「ボス攻撃音」
+s217 = sn_se_rakka.mid,		 4,0,  60,200,OFF        ;マリオＵＳＡ「自機@落下音」
+s218 = sn_se_bossdead.mid,	 5,0,  70,150,OFF        ;マリオＵＳＡ「ボスやられ音」
+s219 = sn_se_kourakie.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「甲羅消え音」
+s220 = sn_se_jump.mid,		 1,0,  70,100,OFF        ;マリオＵＳＡ「ジャンプ音」
+s221 = sn_se_rocket.mid,	10,0,  80,200,OFF        ;マリオＵＳＡ「ロケット音」
+s222 = sn_se_tibi.mid,		 5,0, 100,150,OFF        ;マリオＵＳＡ「自機@小さくなる音」
+s223 = sn_se_slip.mid,		 1,0,  50, 20,OFF        ;マリオＵＳＡ「自機@スリップ音」
+
+s224 = sn_se_kamekeri0.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音０」
+s225 = sn_se_kamekeri1.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音１」
+s226 = sn_se_kamekeri2.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音２」
+s227 = sn_se_kamekeri3.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音３」
+s228 = sn_se_kamekeri4.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音４」
+s229 = sn_se_kamekeri5.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音５」
+s230 = sn_se_kamekeri6.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音６」
+s231 = sn_se_kamekeri7.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音７」
+s232 = sn_se_kamekeri8.mid,	 5,0,  60, 50,OFF        ;マリオＵＳＡ「カメ蹴り音８」
+
+s233 = sn_se_mamu.mid,		 6,0,  50,100,OFF        ;マリオＵＳＡ「マムー攻撃音」
+s234 = sn_se_mamudead.mid,	 6,0, 127,200,OFF        ;マリオＵＳＡ「マムー倒し音」
+s235 = sn_se_fire.mid,		 3,0,  50, 50,OFF        ;マリオＵＳＡ「植物の吐く炎の音」
+s236 = sn_se_mamukemuri.mid, 6,0, 100, 50,OFF        ;マリオＵＳＡ「マムーの吐く煙の音」
+s237 = sn_se_yoshi.mid,		 4,0, 100,150,OFF        ;マリオＵＳＡ「ヨッシーの鳴き声」
+s238 = sn_tubo.mid,			30,0,  80, 10,  0        ;マリオＵＳＡ「つぼ観覧車ＢＧＭ」
+s239 = sn_worldkekka.mid,	30,0,  90, 10,  0        ;マリオＵＳＡ「ワールド結果画面」
+s240 = sn_se_awa.mid,		 5,0,  80, 50,OFF        ;マリオＵＳＡ「泡の音」
+s241 = sn_se_big.mid,		 5,0,  80, 50,OFF        ;マリオＵＳＡ「カメーンの音」
+s242 = sn_se_tama.mid,		 5,0, 100,150,OFF        ;マリオＵＳＡ「赤玉・青玉出た音」
+s243 = sn_boss_mae.mid,		30,0,  80, 10,  0        ;マリオＵＳＡ「ボス前ＢＧＭ」
+s244 = sn_gamesel.mid,		30,0,  90, 10, 15        ;マリオＵＳＡ「ゲーム選択ＢＧＭ」
+s245 = sn_se_jampdai.mid,	 5,0,  80,100,OFF        ;マリオＵＳＡ「ジャンプ台」
+s246 = sn_se_bossbig.mid,	 5,0,  80,150,OFF        ;マリオＵＳＡ「ボス巨大化音」
+s247 = sn_se_bombfire.mid,	 4,0,  40, 50,OFF        ;マリオＵＳＡ「爆弾の火花音」
+s248 = sn_se_cansel.mid,	 4,0, 120, 50,OFF        ;マリオＵＳＡ「キャンセル、はねる音１回目」
+s249 = sn_se_heart.mid,		 9,0,  80,200,OFF        ;マリオＵＳＡ「ハート、スターファ@ンファ@ーレ」
+s250 = sn_se_biribiri.mid,	 9,0,  80, 80,OFF        ;マリオＵＳＡ「電気ビリビリ音」
+s251 = sn_tamago.mid,		30,0, 100, 20,OFF        ;マリオＵＳＡ「ヨッシー卵ファ@ンファ@ーレ」
+s252 = sn_se_shift.mid,		 4,0,  80,200,OFF        ;マリオＵＳＡ「画面スクロール音」
+s253 = sn_se_start.mid,		31,0,  80,200,  0        ;マリオＵＳＡ「総合タイトル決定音」
+s254 = sn_se_save.mid,		 9,0, 100,255,OFF        ;マリオＵＳＡ「セーブ終了音」
+s255 = sn_se_kamen_okori.mid,9,0,  60, 50,OFF        ;マリオＵＳＡ「背景カメーン怒り音」
+s256 = sn_se_kabe.mid,		 2,0,  60, 40,OFF        ;マリオＵＳＡ「甲羅が壁に当たる音」
+
+s257 = sn_se_titlemoti.mid,	 9,0, 120, 40,OFF        ;マリオＵＳＡ「タイトルを引き抜く音」
+s258 = sn_se_titledosun2.mid,4,0, 100, 40,OFF        ;マリオＵＳＡ「タイトルはねる音２回目」
+s259 = sn_se_titledosun3.mid,4,0,  80, 40,OFF        ;マリオＵＳＡ「タイトルはねる音３回目」
+s260 = sn_se_tamago.mid,	 2,0, 127, 40,OFF        ;マリオＵＳＡ「ヨッシーたまご割れる音」
+
+s261 = sn_boss_mae_r.mid,	30,0,  80, 10, 50        ;マリオＵＳＡ「ボス前ＢＧＭリバーブ」
+s262 = sn_boss_r.mid,		30,0,  80, 10, 50        ;マリオＵＳＡ「ボス面（通常）リバーブ」
+s263 = sn_se_kirakira.mid,	30,0,  50,240,  0        ;マリオＵＳＡ「クリア後の星きらきら音」
+
+s264 = sn_se_cork.mid,		 5,0, 100, 50,OFF        ;マリオＵＳＡ「デカ野菜を抜く音」
+
+;s265
+;s266 (予備)
+;s267
+;s268
+;s269
+
+
+
+
+
+
+
+
+;*****************  （音声ＭＩＤＩ）  *******************
+
+;（共通の合成音声）
+s270 = sn_v_usa_00.mid,      7,2, 70,250	;４人で「smario_usa_advance」   
+s271 = sn_v_br_01.mid,       7,2, 70,250	;マリオとルイージで「mariobros」
+
+
+						 ;●マリオのボイス●
+s272 = sn_v_ma_07.mid,       7,2, 80,250        ;mario_here_i_come.aif,          
+s273 = sn_v_ma_08.mid,       7,2, 80,250        ;mario_lets_go.aif,              
+
+
+
+;↓（４人共通並びはここから）
+s274 = sn_v_ma_09.mid,       7,2, 70,250        ;mario_yahoo.aif,                
+s275 = sn_v_ma_10.mid,       7,2, 70,250        ;mario_wah_hah.aif,              
+s276 = sn_v_ma_11.mid,       7,2, 70,250        ;mario_yah.aif,                  
+s277 = sn_v_ma_12.mid,       7,2, 80,250        ;mario_hah.aif,                  
+s278 = sn_v_ma_14.mid,       7,2, 80,250        ;mario_ya.aif,                   
+s279 = sn_v_ma_16.mid,       7,2, 80,250        ;mario_ohmm_hmm.aif,             
+s280 = sn_v_ma_17.mid,       7,2, 80,250        ;mario_eeee_yah.aif,分離後「いー」
+s281 = sn_v_ma_19.mid,       7,2, 80,250        ;mario_what_a_tasty_treat.aif,   
+s282 = sn_v_ma_20.mid,       7,2, 60,250        ;mario_ow.aif,                   
+s283 = sn_v_ma_21.mid,       7,2, 80,250        ;mario_oof.aif,                  
+s284 = sn_v_ma_22.mid,      16,2, 70,250        ;mario_mamma_mia.aif,            
+s285 = sn_v_ma_23.mid,       7,2, 70,250        ;mario_oh_no.aif,                
+s286 = sn_v_ma_24.mid,       7,2, 80,250        ;mario_ah_cha_cha.aif,           
+s287 = sn_v_ma_25.mid,       7,2, 80,250        ;mario_gotcha.aif,               
+s288 = sn_v_ma_26.mid,       7,2, 80,250        ;mario_thank_you.aif,            
+s289 = sn_v_ma_27.mid,       7,2, 80,250        ;mario_lacky.aif,                
+s290 = sn_v_ma_29.mid,       7,2, 80,250        ;mario_just_what_i_needed.aif,   
+s291 = sn_v_ma_30.mid,       7,2, 80,250        ;mario_here_i_go.aif,            
+s292 = sn_v_ma_31.mid,       7,2, 80,250        ;mario_duh_da_da_dum.aif,        
+s293 = sn_v_ma_32.mid,       7,2, 55,250        ;mario_ha.aif,                   
+s294 = sn_v_ma_33.mid,       7,2, 60,250        ;mario_hoh.aif,                  
+s295 = sn_v_ma_34.mid,       7,2, 80,250        ;mario_bravo.aif,                
+s296 = sn_v_ma_35.mid,       7,2, 80,250        ;mario_a_crystal.aif,            
+s297 = sn_v_ma_36.mid,       7,2, 80,250        ;mario_im_moving_now.aif,        
+s298 = sn_v_ma_37.mid,       7,2, 80,250        ;mario_no_problem.aif,           
+
+s299 = sn_v_ma_17ya.mid,     7,3, 80,250        ;mario_eeee_yah.aif,分離後「やっ」
+
+
+
+
+
+
+                                                ;●敵のボイス●
+s300 = sn_v_mo_01.mid,       8,2, 80,250        ;mouser_have_some_bombs.aif,     
+s301 = sn_v_mo_02.mid,       8,2, 80,250        ;mouser_ah_da_da.aif,            
+s302 = sn_v_mo_03.mid,       8,2, 70,250        ;mouser_no_way.aif,              
+s303 = sn_v_tr_01.mid,       8,2, 80,250        ;tryclyde_step_right_up.aif,     
+s304 = sn_v_tr_02.mid,       8,2, 80,250        ;tryclyde_ready_to_get.aif,      
+s305 = sn_v_tr_03.mid,       8,2, 80,250        ;tryclyde_toasted.aif,           
+s306 = sn_v_tr_04.mid,       8,2, 50,250        ;tryclyde_gyaoh.aif,             
+s307 = sn_v_tr_05.mid,       8,2, 70,250        ;tryclyde_impossible.aif,        
+s308 = sn_v_cl_01.mid,       8,2, 80,250        ;clawgrip_tasty_treat.aif,       
+s309 = sn_v_cl_02.mid,       8,2, 60,250        ;clawgrip_ow_wow.aif,            
+s310 = sn_v_cl_03.mid,       8,2, 70,250        ;clawgrip_you_got_me.aif,        
+s311 = sn_v_fl_01.mid,       8,2, 80,250        ;flyguy_im_too_hot_to_touch.aif, 
+s312 = sn_v_fl_02.mid,       8,2, 80,250        ;flyguy_woh_woh.aif,             
+s313 = sn_v_fl_03.mid,       8,2, 80,250        ;flyguy_too_hot_to_touch.aif,    
+s314 = sn_v_wa_01.mid,       8,2, 80,250        ;wart_im_great_wart.aif,         
+s315 = sn_v_wa_02.mid,       8,2, 65,250        ;wart_arrbbit.aif,               
+s316 = sn_v_wa_03.mid,       8,2, 65,250        ;wart_orrbbit.aif,               
+s317 = sn_v_wa_04.mid,       8,2, 80,250        ;wart_bbit_tough.aif,            
+s318 = sn_v_wa_05.mid,       8,2, 80,250        ;wart_nobbit_arrbbit.aif,        
+
+
+
+                                                ;●ナビのボイス●
+s319 = sn_v_na_01.mid,       7,2, 60,250        ;navi_choose_a_game.aif,         
+s320 = sn_v_na_02.mid,       7,2, 60,250        ;navi_choose_a_player.aif,       
+s321 = sn_v_na_04.mid,       7,2, 60,250        ;navi_classic.aif,               
+s322 = sn_v_na_05.mid,       7,2, 50,250        ;navi_battle.aif,                
+;s323 = sn_v_na_06.mid,       7,2, 70,250        ;navi_ok.aif,                    
+;s324 = sn_v_na_23.mid,       7,2, 60,250        ;navi_you_win.aif,               
+;s325 = sn_v_na_24.mid,       7,2, 60,250        ;navi_you_lose.aif,              
+;s326 = sn_v_na_29.mid,       7,2, 60,250        ;navi_mario.aif,                 
+;s327 = sn_v_na_30.mid,       7,2, 60,250        ;navi_luigi.aif,                 
+;s328 = sn_v_na_31.mid,       7,2, 60,250        ;navi_peach.aif,                 
+;s329 = sn_v_na_32.mid,       7,2, 60,250        ;navi_toad.aif,                  
+
+
+                                                ;●雌敵のボイス●
+s330 = sn_v_pi_01.mid,       8,2, 70,250        ;pinkbirdo_hello_there.aif,      
+s331 = sn_v_pi_02.mid,       8,2, 80,250        ;pinkbirdo_you_go.aif,           
+s332 = sn_v_pi_03.mid,       8,2, 60,250        ;pinkbirdo_no.aif,               
+s333 = sn_v_pi_04.mid,       8,2, 50,250        ;pinkbirdo_remember_this.aif,    
+s334 = sn_v_re_01.mid,       8,2, 80,250        ;redbirdo_come_a_long_way.aif,   
+s335 = sn_v_re_02.mid,       8,2, 80,250        ;redbirdo_finish_you_off.aif,    
+s336 = sn_v_re_03.mid,       8,2, 60,250        ;redbirdo_aaa.aif,               
+s337 = sn_v_re_04.mid,       8,2, 70,250        ;redbirdo_how_could_you.aif,     
+s338 = sn_v_gr_01.mid,       8,2, 80,250        ;greenbirdo_lot_of_nerve.aif,    
+s339 = sn_v_gr_02.mid,       8,2, 70,250        ;greenbirdo_ready_for_you.aif,   
+s340 = sn_v_gr_03.mid,       8,2, 60,250        ;greenbirdo_wah.aif,             
+s341 = sn_v_gr_04.mid,       8,2, 70,250        ;greenbirdo_help.aif,            
+
+
+						;●雌敵のメカボイス●(vgroup=3)
+s342 = sn_v_me_01.mid,       8,3, 80,250        ;mekabirdo_come_a_long_way.aif,  
+s343 = sn_v_me_02.mid,       8,3, 80,250        ;mekabirdo_finish_you_off.aif,   
+s344 = sn_v_me_03.mid,       8,3, 70,250        ;mekabirdo_aaa.aif,              
+s345 = sn_v_me_04.mid,       8,3, 80,250        ;mekabirdo_how_could_you.aif,    
+
+
+
+;s346
+;s347  (予備)
+;s348
+
+
+
+
+						;●ルイージのボイス●
+s349 = sn_v_lu_06.mid,       7,2, 70,250        ;luigi_here_we_go.aif,           
+s350 = sn_v_lu_08.mid,       7,2, 80,250        ;luigi_lets_go.aif,              
+
+
+
+;↓（４人共通並びはここから）
+s351 = sn_v_lu_10.mid,       7,2, 60,250        ;luigi_yeaa.aif   
+s352 = sn_v_lu_09.mid,       7,2, 60,250        ;luigi_wah_hah.aif
+s353 = sn_v_lu_11.mid,       7,2, 60,250        ;luigi_yah.aif,                  
+s354 = sn_v_lu_12.mid,       7,2, 70,250        ;luigi_hah.aif,                  
+s355 = sn_v_lu_14.mid,       7,2, 80,250        ;luigi_ya.aif,                   
+s356 = sn_v_lu_16.mid,       7,2, 80,250        ;luigi_oomm_hmm.aif,             
+s357 = sn_v_lu_17.mid,       7,2, 80,250        ;luigi_eeee_yah.aif,分離後「いー」
+s358 = sn_v_lu_19.mid,       7,2, 80,250        ;luigi_thats_delicious.aif,      
+s359 = sn_v_lu_20.mid,       7,2, 80,250        ;luigi_ow.aif,                   
+s360 = sn_v_lu_21.mid,       7,3, 60,250        ;luigi_hyaaa.aif,             000;ここからvgroup3使用
+s361 = sn_v_lu_22.mid,      16,3, 60,250        ;luigi_mamma_mia.aif,         001
+s362 = sn_v_lu_23.mid,       7,3, 60,250        ;luigi_hyaaaoowao.aif,        002
+s363 = sn_v_lu_24.mid,       7,3, 50,250        ;luigi_gwaaa.aif,             003
+s364 = sn_v_lu_25.mid,       7,3, 70,250        ;luigi_gotcha.aif,            004
+s365 = sn_v_lu_26.mid,       7,3, 70,250        ;luigi_thank_you.aif,         005
+s366 = sn_v_lu_27.mid,       7,3, 80,250        ;luigi_lacky.aif,             006
+s367 = sn_v_lu_28.mid,       7,3, 60,250        ;luigi_just_what_i_needed.aif,007
+s368 = sn_v_lu_29.mid,       7,3, 60,250        ;luigi_here_i_go.aif,         008
+s369 = sn_v_lu_30.mid,       7,3, 70,250        ;luigi_great.aif,             009
+s370 = sn_v_lu_31.mid,       7,3, 60,250        ;luigi_ha.aif,                010
+s371 = sn_v_lu_32.mid,       7,3, 60,250        ;luigi_hoh.aif,               011
+s372 = sn_v_lu_33.mid,       7,3, 70,250        ;luigi_bravo.aif,             012
+s373 = sn_v_lu_34.mid,       7,3, 70,250        ;luigi_im_moving_now.aif,     013
+s374 = sn_v_lu_35.mid,       7,3, 70,250        ;luigi_piece_of_cake.aif,     014
+s375 = sn_v_lu_36.mid,       7,3, 70,250        ;luigi_perfect.aif,           015
+
+s376 = sn_v_lu_17ya.mid,     7,3, 80,250        ;luigi_eeee_yah.aif,分離後「やっ」
+
+
+
+
+
+						 ;●ピーチのボイス●
+s377 = sn_v_pe_06.mid,       7,3, 70,250        ;peach_leave_it_to_me.aif,      028
+
+
+
+;↓（４人共通並びはここから）
+s378 = sn_v_pe_08.mid,       7,3, 70,250        ;peach_yahoo.aif,               030
+s379 = sn_v_pe_09.mid,       7,3, 70,250        ;peach_hai_yah.aif,             031
+s380 = sn_v_pe_10.mid,       7,3, 60,250        ;peach_ho_oh.aif,               032
+s381 = sn_v_pe_11.mid,       7,3, 70,250        ;peach_yippee.aif,              033
+s382 = sn_v_pe_13.mid,       7,3, 70,250        ;peach_ya.aif,                  035
+s383 = sn_v_pe_15.mid,       7,3, 70,250        ;peach_ohmm_hmm.aif,            037
+s384 = sn_v_pe_16.mid,       7,3, 70,250        ;peach_eeee_yah.aif,分離後「いー」038
+s385 = sn_v_pe_18.mid,       7,3, 60,250        ;peach_fresh_garden.aif,        040
+s386 = sn_v_pe_19.mid,       7,3, 70,250        ;peach_oof.aif,                 041
+s387 = sn_v_pe_20.mid,       7,3, 70,250        ;peach_kya.aif,                 042
+s388 = sn_v_pe_21.mid,      16,3, 70,250        ;peach_oh_no.aif,               043
+s389 = sn_v_pe_22.mid,       7,3, 70,250        ;peach_too_bad.aif,             044
+s390 = sn_v_pe_23.mid,       7,3, 60,250        ;peach_ahhhh.aif,               045
+s391 = sn_v_pe_24.mid,       7,3, 70,250        ;peach_gotcha.aif,              046
+s392 = sn_v_pe_25.mid,       7,3, 70,250        ;peach_thank_you.aif,           047
+s393 = sn_v_pe_26.mid,       7,3, 70,250        ;peach_lacky.aif,               048
+s394 = sn_v_pe_28.mid,       7,3, 70,250        ;peach_just_what_i_needed.aif,  050
+s395 = sn_v_pe_29.mid,       7,3, 60,250        ;peach_here_i_go.aif,           051
+s396 = sn_v_pe_30.mid,       7,3, 60,250        ;peach_duh_da_da_dum.aif,       022
+s397 = sn_v_pe_31.mid,       7,3, 50,250        ;peach_hee_ya.aif,              053
+s398 = sn_v_pe_32.mid,       7,3, 50,250        ;peach_take_that.aif,           054
+s399 = sn_v_pe_33.mid,       7,3, 70,250        ;peach_oh_yeah.aif,             055
+s400 = sn_v_pe_34.mid,       7,3, 70,250        ;peach_a_crystal.aif,           056
+s401 = sn_v_pe_35.mid,       7,3, 70,250        ;peach_i_got_it.aif,            057
+s402 = sn_v_pe_36.mid,       7,3, 70,250        ;peach_oo_hoo_hoo.aif,          058
+
+s403 = sn_v_pe_16ya.mid,     7,3, 70,250        ;peach_eeee_yah.aif,分離後「やっ」115
+
+;s404
+;s405
+;s406
+;s407
+;s408  (予備)
+;s409
+;s410
+;s411
+;s412
+;s413
+
+
+
+
+
+
+
+                                                  
+						 ;●トード（キノピオ）のボイス●
+s414 = sn_v_to_06.mid,       7,3, 60,250        ;toad_ok.aif,                    071
+s415 = sn_v_to_07.mid,       7,3, 70,250        ;toad_hi_yah.aif,                072
+;s416
+;s417
+;s418  (予備)
+;s419
+;s420
+
+
+
+
+;↓（４人共通並びはここから）
+s421 = sn_v_to_08.mid,       7,3, 80,250        ;toad_yeaa.aif,                  073
+s422 = sn_v_to_09.mid,       7,3, 60,250        ;toad_hai_yah.aif,               074
+s423 = sn_v_to_10.mid,       7,3, 60,250        ;toad_ho_oh.aif,                 075
+s424 = sn_v_to_11.mid,       7,3, 60,250        ;toad_yippee.aif,                076
+s425 = sn_v_to_13.mid,       7,3, 70,250        ;toad_ya.aif,                    078
+s426 = sn_v_to_15.mid,       7,3, 70,250        ;toad_ohmm_hmm.aif,              080
+s427 = sn_v_to_16.mid,       7,3, 70,250        ;toad_eeee_yah.aif,分離後「いー」081
+s428 = sn_v_to_18.mid,       7,3, 70,250        ;toad_all_vegies.aif,            083
+s429 = sn_v_to_19.mid,       7,3, 70,250        ;toad_kya.aif,                   084
+s430 = sn_v_to_20.mid,       7,3, 60,250        ;toad_hyaaa.aif,                 085
+s431 = sn_v_to_21.mid,      16,3, 60,250        ;toad_hyaaa_aaa.aif,             086
+s432 = sn_v_to_22.mid,       7,3, 70,250        ;toad_too_bad.aif,               087
+s433 = sn_v_to_23.mid,       7,3, 60,250        ;toad_uh_wahh.aif,               088
+s434 = sn_v_to_24.mid,       7,3, 70,250        ;toad_gotcha.aif,                089
+s435 = sn_v_to_25.mid,       7,3, 70,250        ;toad_thank_you.aif,             090
+s436 = sn_v_to_26.mid,       7,3, 70,250        ;toad_lacky.aif,                 091
+s437 = sn_v_to_28.mid,       7,3, 70,250        ;toad_just_what_i_needed.aif,    093
+s438 = sn_v_to_29.mid,       7,3, 60,250        ;toad_here_i_go.aif,             094
+s439 = sn_v_to_30.mid,       7,3, 60,250        ;toad_great.aif,                 095
+s440 = sn_v_to_31.mid,       7,3, 50,250        ;toad_hee_ya.aif,                096
+s441 = sn_v_to_32.mid,       7,3, 60,250        ;toad_take_that.aif,             097
+s442 = sn_v_to_33.mid,       7,3, 70,250        ;toad_oh_yeah.aif,               098
+s443 = sn_v_to_34.mid,       7,3, 70,250        ;toad_i_got_it.aif,              099
+s444 = sn_v_to_35.mid,       7,3, 70,250        ;toad_piece_of_cake.aif,         100
+s445 = sn_v_to_36.mid,       7,3, 60,250        ;toad_yea_hay.aif,               101
+
+s446 = sn_v_to_16ya.mid,     7,3, 70,250        ;toad_eeee_yah.aif,分離後「やっ」116
+
+;s447
+;s448
+;s449
+;s450
+;s451  (予備)
+;s452
+;s453
+;s454
+;s455
+;s456
+       
+;************************************************************************************
+
+;MIDI入力演奏の設定
+
+pbymidi = 1, 0, 120, 200, 150
+
+
+;ソングデータにおけるメモリ・アクセス・エリアのサイズ（ 0 ～ 255 ）
+
+memacc_s = 16
+
+
+;ＤＭＡ使用制限スイッチ（通常は 0、ＤＭＡを１系統にする場合は 1 にする）
+
+only_dma1 = 0
+
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

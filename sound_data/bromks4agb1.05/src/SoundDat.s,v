@@ -1,0 +1,878 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.section .rodata
+	.align	2
+
+	.equ	sc1dt12, 0
+	.equ	sc1dt25, 1
+	.equ	sc1dt50, 2
+	.equ	sc1dt75, 3
+	.equ	sc2dt12, 0
+	.equ	sc2dt25, 1
+	.equ	sc2dt50, 2
+	.equ	sc2dt75, 3
+	.equ	sc4st15, 0
+	.equ	sc4st07, 1
+
+	.global	__sound_mode_i
+	.equ	__sound_mode_i, 0x0093F100
+
+	.global	voicegroup000
+voicegroup000:
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt12
+	.byte	 0, 7, 5, 3
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 4, 60,  0,0x00
+	.word	sc4st15
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt12
+	.byte	 0, 7, 5, 3
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x16
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x2B
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 7, 5, 3
+
+	.byte	 1, 60,  0,0x3F
+	.word	sc1dt50
+	.byte	 0, 5, 0, 0
+
+	.byte	 1, 60,  0,0x3F
+	.word	sc1dt12
+	.byte	 0, 0,15, 0
+
+	.byte	 3, 60,  0,0x00
+	.word	sc3w001
+	.byte	 0, 5,15, 0
+
+	.byte	 3, 60,  0,0x00
+	.word	sc3w002
+	.byte	 0, 0,15, 0
+
+	.byte	 3, 60,  0,0x00
+	.word	sc3w003
+	.byte	 0, 0,15, 0
+
+	.byte	 3, 60,  0,0x00
+	.word	sc3w004
+	.byte	 0, 2,15, 0
+
+	.byte	 3, 60,  0,0x00
+	.word	sc3w005
+	.byte	 0, 0,15, 0
+
+	.byte	 4, 60,  0,0x00
+	.word	sc4st07
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 6, 5, 3
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt50
+	.byte	 0, 5, 0, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 4, 0, 0
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt50
+	.byte	 0, 4, 0, 0
+
+	.byte	 4, 60,  0,0x00
+	.word	sc4st15
+	.byte	 4, 0,15, 0
+
+	.byte	 4, 60,  0,0x00
+	.word	sc4st15
+	.byte	 0, 3, 0, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 2, 3, 2
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt12
+	.byte	 0, 2, 3, 2
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt12
+	.byte	 0, 5, 0, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt50
+	.byte	 0, 1, 0, 0
+
+	.byte	 1, 60,  0,0x3F
+	.word	sc1dt12
+	.byte	 0, 5, 0, 0
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt50
+	.byte	 0, 7, 3, 0
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt25
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x08
+	.word	sc1dt12
+	.byte	 0, 2, 3, 2
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt12
+	.byte	 6, 0,15, 0
+
+	.byte	 2, 60,  0,0x00
+	.word	sc2dt50
+	.byte	 0, 6, 5, 3
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 0, 60,  0,0x00
+	.word	sn_g_kon
+	.byte	255,  0,255,  0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 0, 60,  0,0x00
+	.word	sn_g_pisnare
+	.byte	255,  0,255,  0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 0, 60,  0,0x00
+	.word	sn_g_lowcg
+	.byte	255,  0,255,  0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	0x80,0,0,0
+	.word	voicegroup001 - (36 * 12)
+	.word	0
+
+	.global	voicegroup001
+voicegroup001:
+	.byte	 8, 60,  0,0x00
+	.word	sn_g_bsdrum
+	.byte	255,  0,255,  0
+
+	.byte	 1, 60,  0,0x00
+	.word	sc1dt50
+	.byte	 0, 0,15, 0
+
+	.byte	 8, 60,  0,0x00
+	.word	sn_g_pisnare
+	.byte	255,  0,255,  0
+
+	.align	2
+
+sc3w000:
+sinewave:
+	.byte	0x00,0x11,0x23,0x56,0x89,0xAC,0xDE,0xEF
+	.byte	0xFF,0xEE,0xDC,0xA9,0x86,0x53,0x21,0x10
+sc3w001:
+bros_title:
+	.byte	0x14,0x8B,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC
+	.byte	0xB8,0x41,0x00,0x00,0x00,0x00,0x00,0x00
+sc3w002:
+bros_start:
+	.byte	0x13,0x69,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA
+	.byte	0x96,0x31,0x00,0x00,0x00,0x00,0x00,0x00
+sc3w003:
+bros_perf_over:
+	.byte	0x88,0x88,0x88,0x88,0x88,0x88,0x88,0x84
+	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04
+sc3w004:
+bros_bonus_count:
+	.byte	0x00,0x00,0x00,0x00,0x00,0x03,0x69,0xCF
+	.byte	0xFF,0xFF,0xFF,0xFF,0xFF,0xFC,0x96,0x30
+sc3w005:
+bros_mrnext_fire:
+	.byte	0x8F,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+	.byte	0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+
+	.global	__total_mplay_n
+	.equ	__total_mplay_n, 32
+
+	.global	mplay_table
+mplay_table:
+	.comm	m4a_mplay000, 64
+	.lcomm	m4a_track000, 80*1
+	.word	m4a_mplay000, m4a_track000, 1
+
+	.comm	m4a_mplay001, 64
+	.lcomm	m4a_track001, 80*1
+	.word	m4a_mplay001, m4a_track001, 1
+
+	.comm	m4a_mplay002, 64
+	.lcomm	m4a_track002, 80*1
+	.word	m4a_mplay002, m4a_track002, 1
+
+	.comm	m4a_mplay003, 64
+	.lcomm	m4a_track003, 80*1
+	.word	m4a_mplay003, m4a_track003, 1
+
+	.comm	m4a_mplay004, 64
+	.lcomm	m4a_track004, 80*1
+	.word	m4a_mplay004, m4a_track004, 1
+
+	.comm	m4a_mplay005, 64
+	.lcomm	m4a_track005, 80*1
+	.word	m4a_mplay005, m4a_track005, 1
+
+	.comm	m4a_mplay006, 64
+	.lcomm	m4a_track006, 80*1
+	.word	m4a_mplay006, m4a_track006, 1
+
+	.comm	m4a_mplay007, 64
+	.lcomm	m4a_track007, 80*1
+	.word	m4a_mplay007, m4a_track007, 1
+
+	.comm	m4a_mplay008, 64
+	.lcomm	m4a_track008, 80*1
+	.word	m4a_mplay008, m4a_track008, 1
+
+	.comm	m4a_mplay009, 64
+	.lcomm	m4a_track009, 80*6
+	.word	m4a_mplay009, m4a_track009, 6
+
+	.comm	m4a_mplay010, 64
+	.lcomm	m4a_track010, 80*1
+	.word	m4a_mplay010, m4a_track010, 1
+
+	.comm	m4a_mplay011, 64
+	.lcomm	m4a_track011, 80*1
+	.word	m4a_mplay011, m4a_track011, 1
+
+	.comm	m4a_mplay012, 64
+	.lcomm	m4a_track012, 80*1
+	.word	m4a_mplay012, m4a_track012, 1
+
+	.comm	m4a_mplay013, 64
+	.lcomm	m4a_track013, 80*1
+	.word	m4a_mplay013, m4a_track013, 1
+
+	.comm	m4a_mplay014, 64
+	.lcomm	m4a_track014, 80*1
+	.word	m4a_mplay014, m4a_track014, 1
+
+	.comm	m4a_mplay015, 64
+	.lcomm	m4a_track015, 80*1
+	.word	m4a_mplay015, m4a_track015, 1
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.word	0, 0, 0
+
+	.comm	m4a_mplay030, 64
+	.lcomm	m4a_track030, 80*6
+	.word	m4a_mplay030, m4a_track030, 6
+
+	.comm	m4a_mplay031, 64
+	.lcomm	m4a_track031, 80*8
+	.word	m4a_mplay031, m4a_track031, 8
+
+	.global	__total_song_n
+	.equ	__total_song_n, 71
+
+	.global	song_table
+song_table:
+	.word	sn_KEKKA0
+	.short	 3,  3
+	.word	sn_STAGE1
+	.short	30, 30
+	.word	sn_STAGE2
+	.short	30, 30
+	.word	sn_CLEAR
+	.short	30, 30
+	.word	sn_KEKKA1
+	.short	 3,  3
+	.word	sn_KEKKA2
+	.short	 3,  3
+	.word	sn_KEKKA
+	.short	 3,  3
+	.word	sn_KEKKA3
+	.short	 3,  3
+	.word	sn_BATTLE_DEAD
+	.short	 6,  6
+	.word	sn_HEART
+	.short	 7,  7
+	.word	sn_COIN5
+	.short	30, 30
+	.word	sn_JUMP
+	.short	11, 11
+	.word	sn_SLIP
+	.short	 4,  4
+	.word	sn_WALK_C
+	.short	 4,  4
+	.word	sn_WALK_E
+	.short	 4,  4
+	.word	sn_WALK_G
+	.short	 4,  4
+	.word	sn_MR_DEAD
+	.short	 6,  6
+	.word	sn_MR_DOWN
+	.short	 6,  6
+	.word	sn_MR_NEXT
+	.short	 5,  5
+	.word	sn_POW
+	.short	 8,  8
+	.word	sn_PAUSE1UP
+	.short	 0,  0
+	.word	sn_KAME
+	.short	 1,  1
+	.word	sn_KANI
+	.short	 1,  1
+	.word	sn_HAE
+	.short	 1,  1
+	.word	sn_COIN_OUT
+	.short	 1,  1
+	.word	sn_TEKI_ATTACK
+	.short	 1,  1
+	.word	sn_TEKI_DEAD
+	.short	13, 13
+	.word	sn_DOBON
+	.short	 1,  1
+	.word	sn_COIN_GET
+	.short	 9,  9
+	.word	sn_FREEZER
+	.short	15, 15
+	.word	sn_FREEZ_DEAD
+	.short	12, 12
+	.word	sn_FIRE
+	.short	 3,  3
+	.word	sn_boss_bros
+	.short	30, 30
+	.word	sn_star_bros
+	.short	30, 30
+	.word	sn_KUPPA
+	.short	30, 30
+	.word	sn_KUPPA_DOSIN
+	.short	 8,  8
+	.word	sn_win1
+	.short	31, 31
+	.word	sn_lose1
+	.short	31, 31
+	.word	sn_win2
+	.short	31, 31
+	.word	sn_lose2
+	.short	31, 31
+	.word	sn_KEKKA4
+	.short	 3,  3
+	.word	sn_battle2
+	.short	30, 30
+	.word	sn_battlekekka
+	.short	31, 31
+	.word	sn_zelda_fan
+	.short	30, 30
+	.word	sn_KUPPAFIRE
+	.short	 8,  8
+	.word	sn_BAKETU
+	.short	14, 14
+	.word	sn_MOTI
+	.short	 3,  3
+	.word	sn_NAGE
+	.short	 3,  3
+	.word	sn_TAME
+	.short	 2,  2
+	.word	sn_DAMAGE
+	.short	10, 10
+	.word	sn_TIBI
+	.short	10, 10
+	.word	sn_NORI
+	.short	 2,  2
+	.word	sn_BUTUKARI
+	.short	 4,  4
+	.word	sn_HEART_GET
+	.short	 2,  2
+	.word	sn_DEKA
+	.short	10, 10
+	.word	sn_KAO
+	.short	 2,  2
+	.word	sn_PUSH
+	.short	 2,  2
+	.word	sn_KUPPA_DAMAGE
+	.short	 8,  8
+	.word	sn_KUPPA_DEAD
+	.short	 5,  5
+	.word	sn_SHIFT
+	.short	10, 10
+	.word	sn_SAVE
+	.short	 9,  9
+	.word	sn_intro_battle
+	.short	30, 30
+	.word	sn_KAMEKERI1
+	.short	 2,  2
+	.word	sn_KAMEKERI2
+	.short	 2,  2
+	.word	sn_KAMEKERI3
+	.short	 2,  2
+	.word	sn_KAMEKERI4
+	.short	 2,  2
+	.word	sn_PINPON
+	.short	 4,  4
+	.word	sn_BUU
+	.short	 4,  4
+	.word	sn_battlekekka_intro
+	.short	31, 31
+	.word	sn_FIREDEAD
+	.short	 3,  3
+	.word	sn_TURARA_DEAD
+	.short	 3,  3
+
+dmy_song:
+	.byte	0,0,0,0
+
+	.comm	m4a_memacc_area, 16
+
+	.global	__only_dma1
+	.equ	__only_dma1, 0
+
+	.global	__sys_rom
+	.equ	__sys_rom, 0
+
+	.global	__max_line
+	.equ	__max_line, 0
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

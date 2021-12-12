@@ -1,0 +1,59 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ヘッダーファ@イル				*/
+/****************************************************************/
+#ifndef __UD_COURSE_DATA_H_
+#define __UD_COURSE_DATA_H_
+
+/*------------- EXTERN -----------------------------------------*/
+extern u16 cos_init_table[11*20];
+//extern u16 *cos_init_table[];
+extern u16 *cos_buf_table1[11*3*6+11*2];
+extern u8 *cos_buf_table2[11*3*6+11*2];
+//extern u16 tubo_init_data[];
+//extern u8 *tubo_bg2_table[];
+
+/*------------- d_next_goto.c -------------*/
+extern u16 next_data[];
+
+/*------------- ud_tubo.c -------------*/
+extern u16 *tubo_bg1_table[];
+
+#endif /* __UD_COURSE_DATA_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

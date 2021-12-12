@@ -1,0 +1,1506 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.22;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*	マリオＵＳＡ　@ヨッシー結果画面プログラム		*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ud_cad.h"
+#include "uca_act.h"
+#include "um_select_sub.h"
+#include "um_yossy.h"
+#include "ua_common.h"
+#include "ua_game.h"
+
+#define YSBG_BASE0 (BG_VRAM+0xf800)
+#define YSBG_BASE1 (BG_VRAM+0xf000)
+#define YSBG_BASE2 (BG_VRAM+0xe800)
+#define YSBG_BASE3 (BG_VRAM+0xe000)
+
+#define	YSOXPOS(pt)	(((Yossy_obj_c *)(pt))->xpos)
+#define	YSOYPOS(pt)	(((Yossy_obj_c *)(pt))->ypos)
+#define	YSOXSPD(pt)	(((Yossy_obj_c *)(pt))->xspd)
+#define	YSOYSPD(pt)	(((Yossy_obj_c *)(pt))->yspd)
+#define	YSOXPOSH(pt)	(((Yossy_obj_c *)(pt))->xposh)
+#define	YSOYPOSH(pt)	(((Yossy_obj_c *)(pt))->yposh)
+#define	YSOHSIZE(pt)	(((Yossy_obj_c *)(pt))->hsize)
+#define	YSOVSIZE(pt)	(((Yossy_obj_c *)(pt))->vsize)
+#define	YSOANGLE(pt)	(((Yossy_obj_c *)(pt))->angle)
+#define	YSOPTRN(pt)	(((Yossy_obj_c *)(pt))->patrn)
+#define	YSOMODE(pt)	(((Yossy_obj_c *)(pt))->mode)
+#define	YSOTIME(pt)	(((Yossy_obj_c *)(pt))->timer)
+#define YSOSNDFG(pt)	(((Yossy_obj_c *)(pt))->sound_flag)
+
+Yossy_obj_c ys_obj_clr = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+Yossy_c *YOS_DATA;
+
+#define	YSEGGNUM	(YOS_DATA->eggnum)
+#define	YSWLDEGG	(YOS_DATA->wld_egg)
+#define	YSMAXEGG	(YOS_DATA->max_egg)
+#define	YSIPT		(YOS_DATA->ys_ipt)
+#define	YSAPT		(YOS_DATA->ys_affpt)
+#define	YSTIME		(YOS_DATA->timer)
+#define	YSEGGTIME	(YOS_DATA->egg_timer)
+#define	YSMODE		(YOS_DATA->mode)
+#define	YSPFTSTFG	(YOS_DATA->perfect_setfg)
+#define	YSPFTDT		(YOS_DATA->perfect)
+#define	YSYOSDT		(YOS_DATA->ysobj)
+#define	YSHAHENDT	(YOS_DATA->hahen)
+#define YSPUSHDT	(YOS_DATA->push_start)
+#define YSPUSHSTFG	(YOS_DATA->push_start_setfg)
+#define	YSMEGSTFG	(YOS_DATA->mini_egg_setfg)
+#define	YSEGGSTFG	(YOS_DATA->yossy_setfg)
+#define	YSHHNSTFG	(YOS_DATA->hahen_setfg)
+#define	YSKEYFG		(YOS_DATA->keyfg)
+#define YSSOUNDTM	(YOS_DATA->sound_timer)
+#define YSGETNUM	(YOS_DATA->get_num)
+
+static u8 ObjNum_Tbl[10] = {
+    0x12, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10
+};
+u8 YossyCol_Tbl[6] = {
+    0x4, 0x6, 0x7, 0x8, 0xA, 0xB,
+};
+
+u8 YossyAnim_Tim[30] = {
+    20, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
+    10, 10, 10, 10,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,
+     6, 10
+};
+
+u8 YossyAnim_Ptn[30] = {
+    0, 1, 2, 3, 2, 3, 2, 3, 2, 3, 4, 3, 4, 3, 
+    4, 3, 4, 5, 6, 7, 8, 6, 7, 8, 6, 7, 8, 6,
+    7, 8
+};
+
+static s16 hhn_xoffset[8] = {
+    0x0A, 0x06, 0x0A, 0x06,	// 小
+    0x03, 0x0D, 0x03, 0x0D	// 大
+};
+
+static s16 hhn_yoffset[8] = {
+    0x02, 0x02, 0x06, 0x06,	// 小
+    0x00, 0x00, 0x0A, 0x0A	// 大
+};
+
+static s32 hhn_xspd[8] = {
+     0x12000, -0x12000,  0x10000, -0x10000,
+    -0x10000,  0x10000, -0x14000,  0x14000
+};
+
+static s32 hhn_yspd[8] = {
+    -0x1C000, -0x1C000, -0xC000, -0xC000,
+    -0x1C000, -0x1C000, -0xC000, -0xC000
+};
+
+u16 YossyDT[] = {
+    0x0000, 0x0000, 0x0018, 0x1C04,	// 卵ノーマル
+    0x0000, 0x0000, 0x001C, 0x0404,	// 卵ひび割れ
+    0x0008, 0x000A, 0x0060, 0x0204,	// ちびヨッシー１
+    0x0008, 0x000A, 0x0062, 0x0204,	// ちびヨッシー２
+    0x0000, 0xFFFC, 0x0068, 0x0404, 	// デカヨッシー１
+    0x0000, 0xFFFC, 0x006C, 0x0404, 	// デカヨッシー２
+    0x0000, 0xFFFC, 0x0070, 0x0404, 	// デカヨッシー３
+    0x0000, 0xFFFC, 0x0074, 0x0404, 	// デカヨッシー４
+    0x0000, 0xFFFC, 0x0064, 0x0404, 	// デカヨッシー５
+};
+
+static u16 HahenDT[] = {
+    0x0010, 0x0008, 0x00A2, 0x0004,	// 破片(小)
+    0x0008, 0x0008, 0x00A2, 0x0084,	// 破片(小)
+    0x0010, 0x0010, 0x00A2, 0x0104,	// 破片(小)
+    0x0008, 0x0010, 0x00A2, 0x0184,	// 破片(小)
+    0x0003, 0x0000, 0x00A0, 0x0204,	// 破片(大)
+    0x000D, 0x0000, 0x00A0, 0x0284,	// 破片(大)
+    0x0003, 0x000A, 0x00A0, 0x0304,	// 破片(大)
+    0x000D, 0x000A, 0x00A0, 0x0384,	// 破片(大)
+};
+static u16 PerfectDT[] = {
+    0x0000, 0x0000, 0x00E0, 0x1E0D,
+    0x0040, 0x0000, 0x00E8, 0x1E0D,
+    0x0080, 0x0000, 0x00F0, 0x1E0D,
+};
+//  modified by Yu Ting
+/*static u16 Push_startDT[] = {
+    0x0000, 0x0000, 0x00D8, 0x0004,	// P
+    0x0008, 0x0000, 0x00DD, 0x0004,	// R
+    0x0010, 0x0000, 0x00D9, 0x0004,	// E
+    0x0018, 0x0000, 0x00DA, 0x0004,	// S
+    0x0020, 0x0000, 0x00DA, 0x0004,	// S
+    0x0000, 0x0010, 0x00DA, 0x0004,	// S
+    0x0008, 0x0010, 0x00DB, 0x0004,	// T
+    0x0010, 0x0010, 0x00DC, 0x0004,	// A
+    0x0018, 0x0010, 0x00DD, 0x0004,	// R
+    0x0020, 0x0010, 0x00DB, 0x0004,	// T
+};*/
+static u16 Push_startDT[] = {
+    0x0000, 0x0000, 0x00F8, 0x0004,	// Press
+    0x0008, 0x0000, 0x00F9, 0x0004,	// 
+    0x0000, 0x0008, 0x0118, 0x0004,	// 
+    0x0008, 0x0008, 0x0119, 0x0004,	// 
+    0x0010, 0x0008, 0x00DA, 0x0004,	// S
+    0x0018, 0x0008, 0x00DB, 0x0004,	// T
+    0x0020, 0x0008, 0x00DC, 0x0004,	// A
+    0x0028, 0x0008, 0x00DD, 0x0004,	// R
+    0x0030, 0x0008, 0x00DB, 0x0004,	// T
+    0x0038, 0x0000, 0x00FA, 0x0004,	// Button
+    0x0040, 0x0000, 0x00FB, 0x0004,	// 
+    0x0038, 0x0008, 0x011A, 0x0004,	// 
+    0x0040, 0x0008, 0x011B, 0x0004,	// 
+};
+
+static void yossy_init(void);
+static void yossy_disp(void);
+static void yossy_end(void);
+
+static void ys_yossy_oam_set(void);
+static void ys_mini_yossy_set(void);
+static void ys_yossy_num_oam_set(void);
+static void ys_bg2_set(void);
+
+static void ys_hahen_set(u8 index);
+static void ys_hahen_move(void);
+static void ys_hahen_oam_set(void);
+
+static void ys_perfect_check(void);
+static void ys_perfect_move(void);
+static void ys_perfect_oam_set(void);
+
+static void (*ys_mode_tbl[])(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub0(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub1(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub2(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub3(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub4(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub5(Yossy_obj_c *yos_pt);
+static void ys_perfect_sub6(Yossy_obj_c *yos_pt);
+
+static void ys_bigegg_set(u8 index);
+static void ys_bigegg_set2(u8 index);
+static void (*ys_bigegg_move_tbl[])(Yossy_obj_c *yos_pt, u8 index);
+static void ys_bigegg_fall(Yossy_obj_c *yos_pt, u8 index);
+static void ys_bigegg_seishi(Yossy_obj_c *yos_pt, u8 index);
+static void ys_bigegg_yure(Yossy_obj_c *yos_pt, u8 index);
+static void ys_bigegg_buyo(Yossy_obj_c *yos_pt, u8 index);
+static void ys_bigegg_move(u8 index);
+static void ys_bigegg_oamset(u8 index);
+
+static void ys_push_start_oamset(void);
+
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面イニシャル処理				*/
+/*--------------------------------------------------------------*/
+void yossy_init(void)
+{
+    u8 t_i;
+    register u32 bgpt, endpt;
+    u8	flag, bit, cosdt, svdt, mask;
+
+    lcdc_off();			//強制ブランキング処理
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = 0;
+    m4aSongNumStart(s_u_worldkekka);
+    
+    mGm_SCCV1 = 0x0;
+    mGm_SCCH1 = 0x0;
+    mGm_SCCV2 = 0x0;
+    mGm_SCCH2 = 0x0;
+    mGm_SCCV3 = 0x0;
+    mGm_SCCH3 = 0x0;
+    NMI_NO = nmi_title;
+    IRQ_NO = irq_dummy;
+    SORTFG = 0;
+
+    COS_CLEAR[WORDNO>>3] |= (1<<(WORDNO&7));
+    redcoin_flagset();
+
+    REDCOIN = 0;
+
+    // 結果用領域確保
+    mGm_MALLOC_YOS_DATA();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_1;
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF | 0x2000
+	 | BG_CHR_BASE_0 | BG_PRIORITY_2;
+    
+/*------------- ＢＧキャラクター転送 ---------------------------*/
+    DmaArrayCopy(3, d_yoshi_BG_schDT, BG_VRAM, 32);
+    DmaArrayCopy(3, d_yoshi_BG2_schDT, BG_VRAM+0x1000, 32); 
+
+/*------------- ＢＧスクリーン転送 -----------------------------*/
+    // ヨッシーチャレンジ
+    TENKAI(&d_yoshi_BG0_sscDTCP[0], (u16 *)TENKAI_RAM);
+    DmaCopy(3, TENKAI_RAM, YSBG_BASE0, 0x100, 16);
+    bgpt = YSBG_BASE0+0x100;
+    endpt = YSBG_BASE0+0x500;
+    while( bgpt < endpt ){
+	*(vu16 *)bgpt = 0x00A1;
+	bgpt += 2;
+    }
+
+    // 枠
+    TENKAI(&d_yoshi_BG1_2_sscDTCP[0], (u16 *)TENKAI_RAM);
+    DmaCopy(3, TENKAI_RAM, YSBG_BASE1, 0x800, 16);
+
+    // 下地
+    bgpt = YSBG_BASE2;
+    endpt = YSBG_BASE2+0x500;
+    while( bgpt < endpt ){
+	*(vu16 *)bgpt = 0x00A1;
+	bgpt += 2;
+    }
+    ys_bg2_set();
+
+/*------------- ＢＧカラー転送 ---------------------------------*/
+    DmaArrayCopy(3, d_yoshi_sclDT, BG_PLTT, 16);
+    
+/*------------- ＯＢＪキャラクター転送 -------------------------*/
+    DmaArrayCopy(3, d_yoshi_obj_schDT, OBJ_MODE0_VRAM, 32);
+    
+/*------------- ＯＢＪカラー転送 ---------------------------------*/
+    DmaArrayCopy(3, d_yoshi_sclDT, OBJ_PLTT, 16);
+    
+    for( t_i = 0; t_i < 8; t_i++ ){
+	YSEGGNUM += ((EGGFG[0]>>t_i)&1);
+	YSEGGNUM += ((EGGFG[1]>>t_i)&1);
+	YSEGGNUM += ((EGGFG[2]>>t_i)&1);
+	YSEGGNUM += ((EGGFG[3]>>t_i)&1);
+	YSEGGNUM += ((EGGFG[4]>>t_i)&1);
+	if( (YSEGGNUM&0xF) >= 10 ){
+	    YSEGGNUM -= 10;
+	    YSEGGNUM += 0x10;
+	}
+    }
+
+    if( CHAPTN == 6 ){
+	mask = 0xF;
+    }
+    else{
+	mask = 0x3F;
+    }
+    cosdt = (CHAPTN*6);
+    bit = cosdt & 7;
+    flag = cosdt>>3;
+    svdt = (EGGFG[flag]>>bit) | (EGGFG[flag+1]<<(8-bit));
+    if( YOSHI_EGG&1 ){
+	svdt &= (0xFF^(1<<((WORDNO-CHAPTN*3)*2)));
+    }
+    if( YOSHI_EGG&2 ){
+	svdt &= (0xFF^(1<<(((WORDNO-CHAPTN*3)*2)+1)));
+    }
+    YSWLDEGG = svdt&0x3F;
+
+    YSTIME = 0;
+    YSMODE = 0;
+    if( CHAPTN == 6 ){
+	YSMAXEGG = 0xF;
+    }
+    else{
+	YSMAXEGG = 0x3F;
+    }
+
+    for( t_i = 0; t_i < 6; t_i++ ){
+	YSMEGSTFG[t_i] = (YSWLDEGG>>t_i)&1;
+	YSEGGSTFG[t_i] = (YSWLDEGG>>t_i)&1;
+	if( YSEGGSTFG[t_i] ){
+	    ys_bigegg_set2(t_i);
+	}
+    }
+
+    mGm_GMMODE++;
+
+//    redcoin_flagset();		// レッドコインフラグセーブ
+//    mGm_PLCNT = 5;
+
+    if( YOSHI_EGG ){
+	YSKEYFG = 0;
+	YSPUSHSTFG = 0;
+	if( YOSHI_EGG == 3 ){
+	    YSGETNUM = 2;
+	}
+	else{
+	    YSGETNUM = 1;
+	}
+    }
+    else{
+	YSKEYFG = 1;
+	YSPUSHSTFG = 1;
+	YSGETNUM = 0;
+    }
+
+    YSPUSHDT.timer = 0;
+
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+    DISPCNT = 
+	DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_OBJ_ON |
+	DISP_OBJ_CHAR_2D_MAP;
+    m4aSoundVSyncOn();
+}
+
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面メイン処理				*/
+/*--------------------------------------------------------------*/
+void yossy_disp(void)
+{
+    u8 t_i, loop_ct;
+    u32	Time_Max;
+    Yossy_obj_c *yos_pt;
+
+    YSIPT = 0;
+    YSAPT = 0;
+    if( CHAPTN == 6 )
+	loop_ct = 4;
+    else
+	loop_ct = 6;
+
+    if( YOSHI_EGG == 3 ){
+	Time_Max = 0xD0;
+    }
+    else if( YOSHI_EGG ){
+	Time_Max = 0xC0;
+    }
+    else{
+	Time_Max = 0x20;
+    }
+    // ヨッシー小卵セット
+    if( YSTIME == 0x80 || YSTIME == 0xA0 ){
+	if( YOSHI_EGG == 1 && YSTIME == 0x80 ){
+	    // １個目だけゲット
+	    YSEGGSTFG[(WORDNO-CHAPTN*3)<<1] = 1;
+	    ys_bigegg_set((WORDNO-CHAPTN*3)<<1);
+	}
+	else if( YOSHI_EGG == 2 && YSTIME == 0x80){
+	    // ２個目だけゲット
+	    YSEGGSTFG[((WORDNO-CHAPTN*3)<<1)+1] = 1;
+	    ys_bigegg_set(((WORDNO-CHAPTN*3)<<1)+1);
+	}
+	else if( YOSHI_EGG == 3 ){
+	    // ２個ともゲット
+	    if( YSTIME == 0x80 ){
+		// １個目セット
+		YSEGGSTFG[(WORDNO-CHAPTN*3)<<1] = 1;
+		ys_bigegg_set((WORDNO-CHAPTN*3)<<1);
+	    }
+	    else{
+		// ２個目セット
+		YSEGGSTFG[((WORDNO-CHAPTN*3)<<1)+1] = 1;
+		ys_bigegg_set(((WORDNO-CHAPTN*3)<<1)+1);
+	    }
+	}
+    }
+    // PUSH START 表示
+    ys_push_start_oamset();
+    // パーフェクト移動
+    if( YSPFTSTFG ){
+	ys_perfect_move();
+	ys_perfect_oam_set();
+    }
+    // 破片移動
+    ys_hahen_move();
+    ys_hahen_oam_set();
+    // ヨッシー卵表示
+    ys_mini_yossy_set();
+    ys_yossy_num_oam_set();
+    ys_yossy_oam_set();
+
+    if( YSMODE == 1 ){
+	for( t_i = 0; t_i < loop_ct; t_i++ ){
+	    yos_pt = &YSYOSDT[t_i];
+	    if( YSEGGSTFG[t_i] == 2 ){	// ひび割れ以降
+		YSOTIME(yos_pt)++;
+	    }
+	    if( YSOTIME(yos_pt) == YossyAnim_Tim[YSOMODE(yos_pt)] ){
+		YSOMODE(yos_pt)++;
+		if( YSOMODE(yos_pt) == 5 ){
+		    m4aSongNumStart(s_u_se_yoshi);
+		}
+		if( YSPFTSTFG == 0 &&
+		    YSOMODE(yos_pt) == 30 &&
+		    t_i == loop_ct-1 ){
+		    ys_perfect_check();
+		}
+		if( YSOMODE(yos_pt) == 30 ){
+		    YSOMODE(yos_pt) = 26;
+		}
+		else if( YSOMODE(yos_pt) == 2 ){
+		    m4aSongNumStart(s_u_se_tamago);
+		    ys_hahen_set(t_i);
+		    if( t_i < loop_ct-1 ){
+			YSEGGSTFG[t_i+1] = 2;
+			YSYOSDT[t_i+1].mode = 0;
+			YSYOSDT[t_i+1].timer = 0;
+			YSYOSDT[t_i+1].ypos = 0x800000;
+			YSYOSDT[t_i+1].yposh = 0x80;
+		    }
+		}
+		YSOPTRN(yos_pt) = YossyAnim_Ptn[YSOMODE(yos_pt)];
+		YSOTIME(yos_pt) = 0;
+	    }
+	}
+    }
+
+    if( YSTIME < Time_Max )
+	YSTIME++;
+
+    if( YSTIME == Time_Max && YSGETNUM == 0 && YSKEYFG == 0 ){
+	YSKEYFG = 1;
+	YSPUSHSTFG = 1;
+    }
+
+    if( YSKEYFG &&
+	(A_BUTTON_ON_T || (game.Trg & START_BUTTON)) ){
+	if( (YSWLDEGG | YOSHI_EGG<<((WORDNO-CHAPTN*3)<<1)) == 
+	    YSMAXEGG ){		// 卵６個ある？    YES
+	    if( YSPFTSTFG ){
+		if( YSPFTDT.mode == 6 ){
+// PERFECT デバック用
+//		    YSPFTSTFG = 0;
+//		    ys_perfect_check();
+		    mGm_GMMODE++;
+		}
+	    }
+	    else if( YSMODE == 1 && YSKEYFG == 2 ){
+		mGm_GMMODE++;
+	    }
+	    else if( YSEGGSTFG[0] == 1 ){
+		YSPUSHSTFG = 0;
+		yos_pt = &YSYOSDT[0];
+		YSOMODE(yos_pt) = 0;
+		YSOTIME(yos_pt) = 0;
+		YSEGGSTFG[0] = 2;	// １個目割れ始め
+		YSMODE = 1;
+		for( t_i = 0; t_i < 6; t_i++ ){
+		    yos_pt = &YSYOSDT[t_i];
+		    YSOXPOSH(yos_pt) = 0x2+t_i*0x1A;
+		    YSOXPOS(yos_pt) = YSOXPOSH(yos_pt)<<16;
+		    YSOYPOS(yos_pt) = 0x800000;
+		    YSOYPOSH(yos_pt) = 0x80;
+		    YSOMODE(yos_pt) = 0;
+		    YSOTIME(yos_pt) = 0;
+		    YSOPTRN(yos_pt) = 0;
+		}
+	    }
+	}
+	else{					// NO
+	    mGm_GMMODE++;
+	}
+    }
+
+}
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面終了処理				*/
+/*--------------------------------------------------------------*/
+void yossy_end(void)
+{
+    EGGFG_DTSV();	// ヨッシーの玉子データセーブ
+    if( WORDNO < 19 )
+	WORDNO++;
+    else
+	WORDNO = 19;
+    CHAPTN = WORDNO / 3;
+    FLGCLEAR();
+    save_push();
+    VSYNC_OFF = 1;
+    mGm_GMMODE = pl_sel_init;
+    mGm_SLMODE = select_mode;
+    mGm_FREE_YOS_DATA();
+}
+
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面のモードサブルーチンテーブル		*/
+/*--------------------------------------------------------------*/
+mfunc yossy_menu[] = {
+    yossy_init,		//結果画面表示イニシャル処理
+    yossy_disp,		//結果画面表示処理
+    yossy_end,		//結果画面終了処理
+};
+
+/*--------------------------------------------------------------*/
+/*	結果画面メイン処理					*/
+/*--------------------------------------------------------------*/
+void M_game_yossy(void)
+{
+    yossy_menu[game.GMMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面ＯＡＭセット処理			*/
+/*--------------------------------------------------------------*/
+/*■■■ヨッシーの卵(大)処理■■■■■■■■■■■■■■■■■■*/
+void ys_yossy_oam_set(void)
+{
+    u8  loop_ct, t_i;
+    u16 work;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Yossy_obj_c *yos_pt;
+
+    if( YSMODE == 0 ){
+	for( t_i = 0; t_i < 6; t_i++ ){
+	    if( YSEGGSTFG[t_i] ){
+		ys_bigegg_move(t_i);
+		ys_bigegg_oamset(t_i);
+	    }
+	}
+    }
+    else if( YSMODE == 1 ){
+	for( t_i = 0; t_i < 6; t_i++ ){
+	    if( YSEGGSTFG[t_i] ){
+		yos_pt = &YSYOSDT[t_i];
+		obj_pt = &YossyDT[YSOPTRN(yos_pt)<<2];
+		p_oam = &OamBak[YSIPT];
+		p_oam->HPos = YSOXPOSH(yos_pt)+*obj_pt;	// Ｘ座標
+		obj_pt++;
+		p_oam->VPos = YSOYPOSH(yos_pt)+*obj_pt;	// Ｙ座標
+		obj_pt++;
+		p_oam->CharNo = *obj_pt;
+		obj_pt++;
+		work = *obj_pt;
+		p_oam->Shape = work>>14;		// ＯＢＪ形状
+		p_oam->Size = (work>>9)&0x03;	// ＯＢＪサイズ
+		p_oam->Priority = 0;
+		p_oam->Pltt = YossyCol_Tbl[t_i];
+		YSIPT++;
+	    }
+	}
+    }
+}
+/*■■■ヨッシーの卵(大)ＯＡＭセット処理■■■■■■■■■■■■*/
+/*------ヨッシーの卵移動用関数テーブル----------------*/
+static void (*ys_bigegg_move_tbl[])(Yossy_obj_c *yos_pt, u8 index) = {
+    ys_bigegg_fall,
+    ys_bigegg_buyo,
+    ys_bigegg_seishi,
+    ys_bigegg_yure,
+    ys_bigegg_seishi,
+};
+/*------ヨッシーの卵移動サブプログラム（落下）----------------*/
+void ys_bigegg_fall(Yossy_obj_c *yos_pt, u8 index)
+{
+    YSOHSIZE(yos_pt) = 0x100;
+    YSOVSIZE(yos_pt) = 0x100;
+    YSOANGLE(yos_pt) = 0;
+
+    if( YSOYPOS(yos_pt) >= 0x800000 ){
+	YSOYPOS(yos_pt) = 0x800000;
+	YSOYPOSH(yos_pt) = 0x80;
+	YSOYSPD(yos_pt) = 0;
+	YSOSNDFG(yos_pt) = 0;
+	YSOMODE(yos_pt)++;
+    }
+    else{
+	if( YSOYSPD(yos_pt) < 0x3E000 )
+	    YSOYSPD(yos_pt) += 0x2000;
+    }
+    YSOYPOS(yos_pt) += YSOYSPD(yos_pt);
+    YSOYPOSH(yos_pt) = YSOYPOS(yos_pt)>>16;
+}
+/*------ヨッシーの卵移動サブプログラム（静止）----------------*/
+void ys_bigegg_seishi(Yossy_obj_c *yos_pt, u8 index)
+{
+    YSOHSIZE(yos_pt) = 0x100;
+    YSOVSIZE(yos_pt) = 0x100;
+    YSOANGLE(yos_pt) = 0;
+
+    if( YSOTIME(yos_pt) )
+	YSOTIME(yos_pt)--;
+
+    if( YSOTIME(yos_pt) == 0 ){
+	YSOMODE(yos_pt)++;
+	if( YSOMODE(yos_pt) == 3 )
+	    YSOTIME(yos_pt) = 4;
+	else if( YSOMODE(yos_pt) == 5 )
+	    YSOMODE(yos_pt) = 1;
+    }
+}
+/*------ヨッシーの卵移動サブプログラム（横揺れ）----------------*/
+void ys_bigegg_yure(Yossy_obj_c *yos_pt, u8 index)
+{
+    if( YSOTIME(yos_pt)&0x8 ){	// 左揺れ
+	YSOANGLE(yos_pt) += 0x5;
+	YSOXPOS(yos_pt) += 0x18000;
+	if( YSOTIME(yos_pt)&0x4 ){
+	    YSOYPOS(yos_pt) += 0x2000;
+	}
+	else{
+	    YSOYPOS(yos_pt) -= 0x2000;
+	}
+    }
+    else{				// 右揺れ
+	YSOANGLE(yos_pt) -= 0x5;
+	YSOXPOS(yos_pt) -= 0x18000;
+	if( YSOTIME(yos_pt)&0x4 ){
+	    YSOYPOS(yos_pt) += 0x2000;
+	}
+	else{
+	    YSOYPOS(yos_pt) -= 0x2000;
+	}
+    }
+    YSOXPOSH(yos_pt) = YSOXPOS(yos_pt)>>16;
+    YSOYPOSH(yos_pt) = YSOYPOS(yos_pt)>>16;
+
+    YSOTIME(yos_pt)++;
+
+    if( YSOTIME(yos_pt) == 0x24 ){
+	YSOTIME(yos_pt) = 0x60;
+	YSOMODE(yos_pt)++;
+    }
+}
+/*------ヨッシーの卵移動サブプログラム（伸縮）----------------*/
+void ys_bigegg_buyo(Yossy_obj_c *yos_pt, u8 index)
+{
+    u8	flag, bit, cosdt, svdt, mask;
+    
+    if( YSOTIME(yos_pt) & 0x10 ){	// 伸び
+	YSOHSIZE(yos_pt) += 3;
+	YSOVSIZE(yos_pt) -= 0xA;
+	YSOYPOS(yos_pt) -= 0x5000;
+    }
+    else{				// 縮み
+	YSOHSIZE(yos_pt) -= 3;
+	YSOVSIZE(yos_pt) += 0xA;
+	YSOYPOS(yos_pt) += 0x5000;
+    }
+    YSOYPOSH(yos_pt) = YSOYPOS(yos_pt)>>16;
+    
+    YSOTIME(yos_pt)++;
+
+    if( YSOSNDFG(yos_pt) == 0 &&
+	YSOTIME(yos_pt) == 0x18 ){
+	cosdt = (WORDNO*2);
+	bit = cosdt & 7;
+	flag = cosdt>>3;
+	svdt = (EGGFG[flag]>>bit)&3;
+	YSOSNDFG(yos_pt) = 1;
+	m4aSongNumStart(s_u_se_yoshi);
+	if( (svdt&((index&1)+1)) == 0 ){
+	    YSEGGNUM++;
+	    if( (YSEGGNUM&0xF) >= 10 ){
+		YSEGGNUM -= 10;
+		YSEGGNUM += 0x10;
+	    }
+	}
+	YSMEGSTFG[index] = 1;
+	YSGETNUM--;
+    }
+    if( YSOTIME(yos_pt) == 0x40 ){
+	YSOTIME(yos_pt) = 0x60;
+	YSOMODE(yos_pt)++;
+    }
+}
+
+void ys_bigegg_move(u8 index)
+{
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSYOSDT[index];
+    ys_bigegg_move_tbl[YSOMODE(yos_pt)](yos_pt, index);
+}
+/*■■■ヨッシーの卵(大)ＯＡＭセット処理■■■■■■■■■■■■*/
+void ys_bigegg_oamset(u8 index)
+{
+    u16 work;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSYOSDT[index];
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = YSOXPOSH(yos_pt)-0x10;	// Ｘ座標
+    p_oam->VPos = YSOYPOSH(yos_pt)-0x10;	// Ｙ座標
+    p_oam->Shape = 0;		// ＯＢＪ形状
+    p_oam->Size = 2;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x18;
+    p_oam->Pltt = YossyCol_Tbl[index];
+
+    p_oam->AffineMode = 3;
+    p_oam->VFlip = YSAPT >> 6;
+    p_oam->HFlip = YSAPT >> 5;
+    p_oam->AffineParamNo_L = YSAPT >> 2;
+    Sraffp.RatioX = YSOHSIZE(yos_pt);
+    Sraffp.RatioY = YSOVSIZE(yos_pt);
+    Sraffp.Theta = 
+	((YSOANGLE(yos_pt) ^ 0xFF) + 1) << 8;
+    a_affinset(YSAPT);
+    YSAPT += 0x04;
+
+    YSIPT++;
+}
+
+/*■■■ヨッシーの卵(小)ＯＡＭセット処理■■■■■■■■■■■■*/
+void ys_mini_yossy_set(void)
+{
+    u8 t_i;
+    u8 wld;
+    u8 loop_ct;
+    OamData *p_oam;
+
+    if( CHAPTN == 6 ){
+	loop_ct = 4;
+    }
+    else{
+	loop_ct = 6;
+    }
+    for( t_i = 0; t_i < loop_ct; t_i++ ){
+	if( YSMEGSTFG[t_i] == 0 )
+	    continue;
+	// 上
+	p_oam = &OamBak[YSIPT];
+	if( CHAPTN == 6 ){
+	    p_oam->HPos = 0x60+(t_i>>1)*0x20;	// Ｘ座標
+	}
+	else{
+	    p_oam->HPos = 0x58+(t_i>>1)*0x18;	// Ｘ座標
+	}
+	if( t_i&1 ){
+	    p_oam->VPos = 0x60;
+	}
+	else{
+	    p_oam->VPos = 0x48;
+	}
+	p_oam->Shape = 0;		// ＯＢＪ形状
+	p_oam->Size = 1;		// ＯＢＪサイズ
+	p_oam->Priority = 2;
+	p_oam->CharNo = 0x15;
+	p_oam->Pltt = YossyCol_Tbl[t_i];
+	YSIPT++;
+
+	// 下
+	p_oam = &OamBak[YSIPT];
+	if( CHAPTN == 6 ){
+	    p_oam->HPos = 0x60+(t_i>>1)*0x20;	// Ｘ座標
+	}
+	else{
+	    p_oam->HPos = 0x58+(t_i>>1)*0x18;	// Ｘ座標
+	}
+	if( t_i&1 ){
+	    p_oam->VPos = 0x70;
+	}
+	else{
+	    p_oam->VPos = 0x58;
+	}
+	p_oam->Shape = 1;		// ＯＢＪ形状
+	p_oam->Size = 0;		// ＯＢＪサイズ
+	p_oam->Priority = 2;
+	p_oam->CharNo = 0x55;
+	p_oam->Pltt = YossyCol_Tbl[t_i];
+	YSIPT++;
+    }
+}
+
+/*■■■ヨッシーの卵の数ＯＡＭセット処理■■■■■■■■■■■■*/
+void ys_yossy_num_oam_set(void)
+{
+    u8 t_i;
+    OamData *p_oam;
+
+    // 取った数１０の位
+    if( (YSEGGNUM&0xF0) ){
+	p_oam = &OamBak[YSIPT];
+	p_oam->HPos = 0xA9;	// Ｘ座標
+	p_oam->VPos = 0x87;	// Ｙ座標
+	p_oam->Shape = 0;	// ＯＢＪ形状
+	p_oam->Size = 1;	// ＯＢＪサイズ
+	p_oam->Priority = 0;
+	p_oam->CharNo = ObjNum_Tbl[(YSEGGNUM&0xF0)>>4];
+	p_oam->Pltt = 0xC;
+	YSIPT++;
+	
+	p_oam = &OamBak[YSIPT];
+	p_oam->HPos = 0xA9;	// Ｘ座標
+	p_oam->VPos = 0x97;	// Ｙ座標
+	p_oam->Shape = 1;	// ＯＢＪ形状
+	p_oam->Size = 0;	// ＯＢＪサイズ
+	p_oam->Priority = 0;
+	p_oam->CharNo = ObjNum_Tbl[(YSEGGNUM&0xF0)>>4]+0x40;
+	p_oam->Pltt = 0xC;
+	YSIPT++;
+    }
+
+    // 取った数１の位
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xB9;		// Ｘ座標
+    p_oam->VPos = 0x87;		// Ｙ座標
+    p_oam->Shape = 0;		// ＯＢＪ形状
+    p_oam->Size = 1;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = ObjNum_Tbl[YSEGGNUM&0xF];
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+    
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xB9;		// Ｘ座標
+    p_oam->VPos = 0x97;		// Ｙ座標
+    p_oam->Shape = 1;		// ＯＢＪ形状
+    p_oam->Size = 0;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = ObjNum_Tbl[YSEGGNUM&0xF]+0x40;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+
+    // /
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xC9;		// Ｘ座標
+    p_oam->VPos = 0x87;		// Ｙ座標
+    p_oam->Shape = 2;		// ＯＢＪ形状
+    p_oam->Size = 0;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x14;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+    
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xC9;		// Ｘ座標
+    p_oam->VPos = 0x97;		// Ｙ座標
+    p_oam->Shape = 0;		// ＯＢＪ形状
+    p_oam->Size = 0;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x54;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+
+    // 40
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xD1;		// Ｘ座標
+    p_oam->VPos = 0x87;		// Ｙ座標
+    p_oam->Shape = 0;		// ＯＢＪ形状
+    p_oam->Size = 1;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x06;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+    
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xD1;		// Ｘ座標
+    p_oam->VPos = 0x97;		// Ｙ座標
+    p_oam->Shape = 1;		// ＯＢＪ形状
+    p_oam->Size = 0;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x46;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xE1;		// Ｘ座標
+    p_oam->VPos = 0x87;		// Ｙ座標
+    p_oam->Shape = 0;		// ＯＢＪ形状
+    p_oam->Size = 1;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x12;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+    
+    p_oam = &OamBak[YSIPT];
+    p_oam->HPos = 0xE1;		// Ｘ座標
+    p_oam->VPos = 0x97;		// Ｙ座標
+    p_oam->Shape = 1;		// ＯＢＪ形状
+    p_oam->Size = 0;		// ＯＢＪサイズ
+    p_oam->Priority = 0;
+    p_oam->CharNo = 0x52;
+    p_oam->Pltt = 0xC;
+    YSIPT++;
+}
+/*--------------------------------------------------------------*/
+/*	BG2セット処理						*/
+/*--------------------------------------------------------------*/
+void ys_bg2_set(void)
+{
+    u16 x, y, ssc_dt;
+    u32 bgpt, endpt;
+
+    bgpt = YSBG_BASE2;
+    endpt = YSBG_BASE2+0x800;
+    while( bgpt < endpt ){
+	*(vu16 *)bgpt = 0x00A1;
+	bgpt += 2;
+    }
+    for( x = 0x0; x < 0x20; x++ ){
+	for( y = 0; y < 0xA; y++ ){
+	    if( x < 0xA || x > 0x14 ){
+		*(vu16 *)(YSBG_BASE2+0x140+(x<<1)+(y<<6)) =
+		     0x207F;
+	    }
+	    else{
+		ssc_dt = x-0xA+CHAPTN*11;
+		*(vu16 *)(YSBG_BASE2+0x140+(x<<1)+(y<<6)) =
+		     d_yoshi_BG2_sscDT[y*0x60+ssc_dt];
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	破片セット処理						*/
+/*--------------------------------------------------------------*/
+void ys_hahen_set(u8 index)
+{
+    u8	t_i, hahen_num = 0;
+    Yossy_obj_c *yos_pt;
+
+    for( t_i = 0; t_i < 24; t_i++ ){
+	if( YSHHNSTFG[t_i] == 0 ){
+	    YSHHNSTFG[t_i] = 1;
+	    yos_pt = &YSHAHENDT[t_i];
+	    YSOXPOSH(yos_pt) = 
+		-0x6+0x1A*index+hhn_xoffset[hahen_num];
+	    YSOYPOSH(yos_pt) = 
+		0x80+hhn_yoffset[hahen_num];
+	    YSOXPOS(yos_pt) = YSOXPOSH(yos_pt)<<16;
+	    YSOYPOS(yos_pt) = YSOYPOSH(yos_pt)<<16;
+	    YSOXSPD(yos_pt) = hhn_xspd[hahen_num];
+	    YSOYSPD(yos_pt) = hhn_yspd[hahen_num];
+	    YSOHSIZE(yos_pt) = 0x100;
+	    YSOVSIZE(yos_pt) = 0x100;
+	    YSOANGLE(yos_pt) = 0;
+	    YSOPTRN(yos_pt) = hahen_num;
+	    YSOMODE(yos_pt) = index;
+	    YSOTIME(yos_pt) = 0;
+	    hahen_num++;
+	    if( hahen_num == 8 )
+		break;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	破片移動処理						*/
+/*--------------------------------------------------------------*/
+void ys_hahen_move(void)
+{
+    u8	t_i, hahen_num = 0;
+    Yossy_obj_c *yos_pt;
+
+    for( t_i = 0; t_i < 24; t_i++ ){
+	if( YSHHNSTFG[t_i] ){
+	    yos_pt = &YSHAHENDT[t_i];
+	    YSOXPOS(yos_pt) += YSOXSPD(yos_pt);
+	    YSOYPOS(yos_pt) += YSOYSPD(yos_pt);
+	    YSOXPOSH(yos_pt) = YSOXPOS(yos_pt)>>16;
+	    YSOYPOSH(yos_pt) = YSOYPOS(yos_pt)>>16;
+	    YSOYSPD(yos_pt) += 0x1000;
+	    if( YSOXPOSH(yos_pt) < -0x10 ||
+		YSOXPOSH(yos_pt) > 0x100 ||
+		YSOYPOSH(yos_pt) > 0xA0 ){
+		YSHHNSTFG[t_i] = 0;
+		YSHAHENDT[t_i] = ys_obj_clr;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	破片OAMセット処理					*/
+/*--------------------------------------------------------------*/
+void ys_hahen_oam_set(void)
+{
+    u8	t_i, hahen_num = 0;
+    s16	*obj_pt;
+    u16	work;
+    OamData *p_oam;
+    Yossy_obj_c *yos_pt;
+
+    for( t_i = 0; t_i < 24; t_i++ ){
+	if( YSHHNSTFG[t_i] ){
+	    yos_pt = &YSHAHENDT[t_i];
+	    obj_pt = &HahenDT[YSOPTRN(yos_pt)<<2];
+	    p_oam = &OamBak[YSIPT];
+	    p_oam->HPos = YSOXPOSH(yos_pt)+*obj_pt;	// Ｘ座標
+	    obj_pt++;
+	    p_oam->VPos = YSOYPOSH(yos_pt)+*obj_pt;	// Ｙ座標
+	    obj_pt++;
+	    p_oam->CharNo = *obj_pt;
+	    obj_pt++;
+	    work = *obj_pt;
+	    p_oam->Shape = work>>14;		// ＯＢＪ形状
+	    p_oam->Size = (work>>9)&0x03;	// ＯＢＪサイズ
+	    p_oam->Priority = 0;
+	    p_oam->HFlip = (work >> 7) & 0x01;
+	    p_oam->VFlip = (work >> 8) & 0x01;	
+	    p_oam->Pltt = YossyCol_Tbl[YSOMODE(yos_pt)];
+	    YSIPT++;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	パーフェクトセットチェック処理				*/
+/*--------------------------------------------------------------*/
+void ys_perfect_check(void)
+{
+    Yossy_obj_c *yos_pt;
+
+    if( YSPFTSTFG == 1 )
+	return;
+
+    if( YSEGGNUM == 0x40 ){
+	YSPFTSTFG = 1;
+	yos_pt = &YSPFTDT;
+	YSOXPOSH(yos_pt) = -8;
+	YSOYPOSH(yos_pt) = -0x60;
+	YSOXPOS(yos_pt) = YSOXPOSH(yos_pt)<<16;
+	YSOYPOS(yos_pt) = YSOYPOSH(yos_pt)<<16;
+	YSOXSPD(yos_pt) = 0;
+	YSOYSPD(yos_pt) = 0;
+	YSOHSIZE(yos_pt) = 0x100;
+	YSOVSIZE(yos_pt) = 0x100;
+	YSOANGLE(yos_pt) = 0;
+	YSOPTRN(yos_pt) = 0;
+	YSOMODE(yos_pt) = 0;
+	YSOTIME(yos_pt) = 20;
+    }
+    else{
+	YSKEYFG = 2;
+	YSPUSHSTFG = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	パーフェクト移動テーブル				*/
+/*--------------------------------------------------------------*/
+void (*ys_mode_tbl[])(Yossy_obj_c *yos_pt) = {
+    ys_perfect_sub0,
+    ys_perfect_sub1,
+    ys_perfect_sub2,
+    ys_perfect_sub3,
+    ys_perfect_sub4,
+    ys_perfect_sub5,
+    ys_perfect_sub6,
+};
+
+/*--------------------------------------------------------------*/
+/*	パーフェクト移動処理					*/
+/*	YSOMODE	0: 画面外で待機@					*/
+/*		1: 落下中					*/
+/*		2: 一回目ひしゃげ				*/
+/*		3: 二回目ひしゃげ				*/
+/*		4: 三回目ひしゃげ				*/
+/*		5: 四回目ひしゃげ				*/
+/*		6: 静止						*/
+/*--------------------------------------------------------------*/
+void ys_perfect_move(void)
+{
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSPFTDT;
+
+    ys_mode_tbl[YSOMODE(yos_pt)](yos_pt);
+}
+
+/*--------------------------------------------------------------*/
+/*	パーフェクト移動サブ処理				*/
+/*--------------------------------------------------------------*/
+/*■■■■■■■■■■■画面外待機@■■■■■■■■■■■■■■■*/
+void ys_perfect_sub0(Yossy_obj_c *yos_pt)
+{
+    if( YSOTIME(yos_pt) ){
+	YSOTIME(yos_pt)--;
+    }
+    else{
+	YSOMODE(yos_pt)++;
+	m4aSongNumStart(s_u_se_rakka);
+    }
+}
+/*■■■■■■■■■■■■落下■■■■■■■■■■■■■■■■■*/
+void ys_perfect_sub1(Yossy_obj_c *yos_pt)
+{
+    YSOYPOS(yos_pt) += YSOYSPD(yos_pt);
+    YSOYPOSH(yos_pt) = YSOYPOS(yos_pt)>>16;
+    YSOYSPD(yos_pt) += 0x2000;
+    if( YSOYPOSH(yos_pt) > 0x10 ){
+	YSOYPOSH(yos_pt) = 0x10;
+	YSOYPOS(yos_pt) = 0x100000;
+	YSOYSPD(yos_pt) = 0;
+	YSOMODE(yos_pt)++;
+	m4aSongNumStart(s_u_jampdai);
+    }
+}
+/*■■■■■■■■■■一回目ひしゃげ■■■■■■■■■■■■■■*/
+void ys_perfect_sub2(Yossy_obj_c *yos_pt)
+{
+    s16 size;
+
+    YSOTIME(yos_pt)++;
+
+    if( YSOTIME(yos_pt) < 0x2F ){
+	size = 0x100 - 10*((Div((YSOTIME(yos_pt)-0x17)*(YSOTIME(yos_pt)-0x17),23))-0x19);
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else if( YSOTIME(yos_pt) < 0x47 ){
+	size = 0x100 + 4*((Div((YSOTIME(yos_pt)-0x3B)*(YSOTIME(yos_pt)-0x3B),9))-0x10);
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else{
+	YSOHSIZE(yos_pt) = 0x100;
+	YSOVSIZE(yos_pt) = 0x100;
+	YSOTIME(yos_pt) = 0;
+	YSOMODE(yos_pt)++;
+	m4aSongNumStart(s_u_jampdai);
+    }
+}
+/*■■■■■■■■■■二回目ひしゃげ■■■■■■■■■■■■■■*/
+void ys_perfect_sub3(Yossy_obj_c *yos_pt)
+{
+    s16 size;
+
+    YSOTIME(yos_pt)++;
+
+    if( YSOTIME(yos_pt) < 0x30 ){
+	size = 0x100 - 4*((Div((YSOTIME(yos_pt)-0x18)*(YSOTIME(yos_pt)-0x18),24))-0x18);
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else if( YSOTIME(yos_pt) < 0x50 ){
+	size = 0x100 + 4*((Div((YSOTIME(yos_pt)-0x40)*(YSOTIME(yos_pt)-0x40),21.3))-0xC);
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else{
+	YSOHSIZE(yos_pt) = 0x100;
+	YSOVSIZE(yos_pt) = 0x100;
+	YSOTIME(yos_pt) = 0;
+	YSOMODE(yos_pt)++;
+	m4aSongNumStart(s_u_jampdai);
+    }
+}
+/*■■■■■■■■■■三回目ひしゃげ■■■■■■■■■■■■■■*/
+void ys_perfect_sub4(Yossy_obj_c *yos_pt)
+{
+    s16 size;
+
+    YSOTIME(yos_pt)++;
+
+    if( YSOTIME(yos_pt) < 0x20 ){
+	size = 0x100 - ((Div((YSOTIME(yos_pt)-0x10)*(YSOTIME(yos_pt)-0x10),16))-0x10)*4;
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else if( YSOTIME(yos_pt) < 0x38 ){
+	size = 0x100 + ((Div((YSOTIME(yos_pt)-0x2C)*(YSOTIME(yos_pt)-0x2C),18))-0x8)*4;
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else{
+	YSOHSIZE(yos_pt) = 0x100;
+	YSOVSIZE(yos_pt) = 0x100;
+	YSOTIME(yos_pt) = 0;
+	YSOMODE(yos_pt)++;
+	m4aSongNumStart(s_u_jampdai);
+    }
+}
+/*■■■■■■■■■■四回目ひしゃげ■■■■■■■■■■■■■■*/
+void ys_perfect_sub5(Yossy_obj_c *yos_pt)
+{
+    s16 size;
+
+    YSOTIME(yos_pt)++;
+
+    if( YSOTIME(yos_pt) < 0x18 ){
+	size = 0x100 - ((Div((YSOTIME(yos_pt)-0xC)*(YSOTIME(yos_pt)-0xC),18))-0x8)*4;
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else if( YSOTIME(yos_pt) < 0x28 ){
+	size = 0x100 + ((Div((YSOTIME(yos_pt)-0x20)*(YSOTIME(yos_pt)-0x20),16))-0x4)*4;
+	YSOHSIZE(yos_pt) = 0x100-Div(size-0x100,2);
+	YSOVSIZE(yos_pt) = size;
+    }
+    else{
+	YSOHSIZE(yos_pt) = 0x100;
+	YSOVSIZE(yos_pt) = 0x100;
+	YSOPTRN(yos_pt) = 0xD;
+	YSOTIME(yos_pt) = 5;
+	YSOMODE(yos_pt)++;
+	YSPUSHSTFG = 1;
+	m4aSongNumStart(s_u_suishou);
+	YSSOUNDTM = 0xAA;
+    }
+}
+/*■■■■■■■■■■■■静止■■■■■■■■■■■■■■■■■*/
+void ys_perfect_sub6(Yossy_obj_c *yos_pt)
+{
+    if( YSSOUNDTM ){
+	YSSOUNDTM--;
+	if( YSSOUNDTM == 0 )
+	    m4aSongNumStart(s_u_worldkekka);
+    }
+    if( YSOTIME(yos_pt) ){
+	YSOTIME(yos_pt)--;
+	if( YSOTIME(yos_pt) == 0 ){
+	    YSOTIME(yos_pt) = 5;
+	    if( YSOPTRN(yos_pt) == 0xD ){
+		YSOPTRN(yos_pt) = 0xE;
+	    }
+	    else{
+		YSOPTRN(yos_pt) = 0xD;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	パーフェクトOAMセット処理				*/
+/*--------------------------------------------------------------*/
+void ys_perfect_oam_set(void)
+{
+    u8	t_i;
+    s16	*obj_pt;
+    s16	xhosei, yhosei, XHosei;
+    u16	work;
+    OamData *p_oam;
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSPFTDT;
+
+    XHosei = 0x4000 - 0x40*Div(0x10000, YSOHSIZE(yos_pt));
+    if( (XHosei & 0xFF) >= 0x40 ){
+	XHosei += 0x100;
+	XHosei = XHosei>>8;
+    }
+    else{
+	XHosei = XHosei>>8;
+    }
+    yhosei = (0x2000 - 0x20*Div(0x10000, YSOVSIZE(yos_pt))>>8);
+    for( t_i = 0; t_i < 3; t_i++ ){
+	obj_pt = &PerfectDT[t_i<<2];
+	p_oam = &OamBak[YSIPT];
+	if( t_i == 0 ){
+	    xhosei = -XHosei;
+	}
+	else if( t_i == 1 ){
+	    xhosei = 0;
+	}
+	else{
+	    xhosei = XHosei;
+	}
+	p_oam->HPos = YSOXPOSH(yos_pt)+*obj_pt-xhosei;	// Ｘ座標
+	obj_pt++;
+	p_oam->VPos = YSOYPOSH(yos_pt)+*obj_pt+yhosei;	// Ｙ座標
+	obj_pt++;
+	p_oam->CharNo = *obj_pt;
+	obj_pt++;
+	work = *obj_pt;
+	p_oam->Shape = 0;	// ＯＢＪ形状
+	p_oam->Size = 3;	// ＯＢＪサイズ
+	p_oam->Priority = 0;
+	if( YSOMODE(yos_pt) == 6 ){
+	    p_oam->Pltt = YSOPTRN(yos_pt);
+	}
+	else{
+	    p_oam->Pltt = 0xD;
+	}
+	p_oam->AffineMode = 3;
+	p_oam->AffineParamNo_L = YSAPT >> 2;
+	YSIPT++;
+    }
+    Sraffp.RatioX = YSOHSIZE(yos_pt);
+    Sraffp.RatioY = YSOVSIZE(yos_pt);
+    Sraffp.Theta = 
+	((YSOANGLE(yos_pt) ^ 0xFF) + 1) << 8;
+    a_affinset(YSAPT);
+    YSAPT += 0x04;
+}
+/*--------------------------------------------------------------*/
+/*	ヨッシー卵(大)オブジェクトセット関数			*/
+/*--------------------------------------------------------------*/
+void ys_bigegg_set(u8 index)
+{
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSYOSDT[index];
+    YSOXPOSH(yos_pt) = 0x2+0x1A*index;
+    YSOXPOS(yos_pt) = YSOXPOSH(yos_pt)<<16;
+    YSOYPOSH(yos_pt) = -0x20;
+    YSOYPOS(yos_pt) = YSOYPOSH(yos_pt)<<16;
+    YSOXSPD(yos_pt) = 0;
+    YSOYSPD(yos_pt) = 0;
+    YSOHSIZE(yos_pt) = 0x100;
+    YSOVSIZE(yos_pt) = 0x100;
+    YSOANGLE(yos_pt) = 0;
+    YSOPTRN(yos_pt) = 0;
+    YSOMODE(yos_pt) = 0;
+    YSOTIME(yos_pt) = 0;
+    m4aSongNumStart(s_u_se_rakka);
+}
+
+/*--------------------------------------------------------------*/
+/*	ヨッシー卵(大)オブジェクトセット関数２			*/
+/*--------------------------------------------------------------*/
+void ys_bigegg_set2(u8 index)
+{
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSYOSDT[index];
+    YSOXPOSH(yos_pt) = 0x2+0x1A*index;
+    YSOXPOS(yos_pt) = YSOXPOSH(yos_pt)<<16;
+    YSOYPOSH(yos_pt) = 0x80;
+    YSOYPOS(yos_pt) = 0x800000;
+    YSOXSPD(yos_pt) = 0;
+    YSOYSPD(yos_pt) = 0;
+    YSOHSIZE(yos_pt) = 0x100;
+    YSOVSIZE(yos_pt) = 0x100;
+    YSOANGLE(yos_pt) = 0;
+    YSOPTRN(yos_pt) = 0;
+    YSOMODE(yos_pt) = DivRem(index,4)+1;
+    YSOSNDFG(yos_pt) = 1;
+    if( YSOMODE(yos_pt) == 3 ){
+	YSOTIME(yos_pt) = 4;
+	if( index > 4 )
+	    YSOTIME(yos_pt) += 0x8;
+    }
+    else if( YSOMODE(yos_pt) == 1 ){
+	YSOTIME(yos_pt) = 0;
+	if( index > 4 )
+	    YSOTIME(yos_pt) += 0x10;
+    }
+    else{
+	YSOTIME(yos_pt) = index * 0x10;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*	PUSH START OAMセット処理				*/
+/*--------------------------------------------------------------*/
+void ys_push_start_oamset(void)
+{
+    u8	t_i;
+    s16	*obj_pt;
+    u16	work;
+    OamData *p_oam;
+    Yossy_obj_c *yos_pt;
+
+    yos_pt = &YSPUSHDT;
+
+    if( YSPUSHSTFG == 0 ||
+	(YSOTIME(yos_pt) >= 36 && YSOTIME(yos_pt) < 66) ){
+	YSOTIME(yos_pt)++;
+	return;
+    }
+
+    for( t_i = 0; t_i < 13; t_i++ ){
+	obj_pt = &Push_startDT[t_i<<2];
+	p_oam = &OamBak[YSIPT];
+	p_oam->HPos = 164+*obj_pt;	// Ｘ座標
+	obj_pt++;
+	p_oam->VPos = 92+*obj_pt;	// Ｙ座標
+	obj_pt++;
+	p_oam->CharNo = *obj_pt;
+	obj_pt++;
+	work = *obj_pt;
+	p_oam->Shape = 0;	// ＯＢＪ形状
+	p_oam->Size = 0;	// ＯＢＪサイズ
+	p_oam->Priority = 0;
+	if(YSOTIME(yos_pt) < 30 ){
+	    p_oam->Pltt = 0x4;
+	}
+	else{
+	    p_oam->Pltt = 0x5;
+	}
+	YSIPT++;
+    }
+
+    YSOTIME(yos_pt)++;
+    if( YSOTIME(yos_pt) > 71 )
+	YSOTIME(yos_pt) = 0;
+}
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面用領域確保				*/
+/*--------------------------------------------------------------*/
+void mGm_MALLOC_YOS_DATA(void)
+{
+    if( YOS_DATA == NULL ){
+	YOS_DATA = (Yossy_c *)mGm_MALLOC(sizeof(Yossy_c));
+    }
+    DmaClear(3, 0, YOS_DATA, sizeof(Yossy_c), 16);
+}
+/*--------------------------------------------------------------*/
+/*	ヨッシー結果画面用領域開放				*/
+/*--------------------------------------------------------------*/
+void mGm_FREE_YOS_DATA(void)
+{
+    if( YOS_DATA != NULL ){
+	mGm_FREE(YOS_DATA);
+	YOS_DATA = NULL;
+    }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d126 2
+a127 2
+
+static u16 Push_startDT[] = {
+d138 15
+d1396 1
+a1396 1
+    for( t_i = 0; t_i < 10; t_i++ ){
+d1399 1
+a1399 1
+	p_oam->HPos = 188+*obj_pt;	// Ｘ座標
+d1401 1
+a1401 1
+	p_oam->VPos = 89+*obj_pt;	// Ｙ座標
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

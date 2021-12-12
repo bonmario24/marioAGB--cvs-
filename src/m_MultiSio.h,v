@@ -1,0 +1,224 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/********************************************************************/
+/*          MultiSio.h                                              */
+/*            マルチプレイ通信ライブラリ外部宣言                    */
+/*            （タイマー割り込み送信バージョン）                    */
+/*                                                                  */
+/*          Copyright (C) 1999-2000 NINTENDO Co.,Ltd.               */
+/********************************************************************/
+#ifndef _MULTI_SIO_H
+#define _MULTI_SIO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <Agb.h>
+
+
+// 下記の設定値はソフトの仕様に合わせて最適化して下さい。
+
+// 通信データブロックサイズが小さければ、
+// レートを落として割り込み回数を減らして下さい。
+#define MULTI_SIO_BAUD_RATE         SIO_115200_BPS  // ボーレート
+
+#define MULTI_SIO_BLOCK_SIZE        1//2      // 通信データブロックサイズ
+
+#define MULTI_SIO_SYNC_DATA         0xFEFE  // 同期データ（0x0000と0xFFFFは禁止）
+#define MULTI_SIO_END_DATA	    0xF800  // 送信完了データ
+#define MULTI_SIO_FRAME_END         0xF400  // メイン処理完了データ
+#define MULTI_SIO_ROM_SET	    0xFDFD  // 子機@側ＲＯＭあり
+#define MULTI_SIO_ROM_CHECK         0xFCFC  // ＲＯＭ内登録データチェック開始
+#define MULTI_SIO_ROM_BOOT          0xFBFB  // 子機@ＲＯＭから起動
+#define	MULTI_SIO_MODE_SEL	    0xFAFA  // ゲームモード選択
+#define	MULTI_SIO_VS_SYNC	    0xF9F9  // 対戦開始前同期データ
+#define	MULTI_SIO_VS_START	    0xFC00  // 対戦開始データ
+
+#define MULTI_SIO_TIMER_NO          3                   // タイマーＮｏ
+#define MULTI_SIO_TIMER_COUNT       0x7800              // タイマーカウント数
+#define MULTI_SIO_TIMER_INTR_FLAG   \
+            (TIMER0_INTR_FLAG << MULTI_SIO_TIMER_NO)    // タイマー割り込みフラグ
+#define REG_MULTI_SIO_TIMER         \
+            (REG_TM0CNT + MULTI_SIO_TIMER_NO * 4)       // タイマーレジスタ
+
+
+// マルチプレイ通信パケット構造体
+typedef struct {
+    u16 Data[MULTI_SIO_BLOCK_SIZE];      // 通信データ
+    u8  FrameCounter;                    // フレームカウンタ
+    u8  State;                           // 通信関数の状態
+    u16 OverRunCatch;                    // オーバーラン保護領域
+} MultiSioPacket;
+
+
+// マルチプレイ通信ワークエリア構造体
+typedef struct {
+    s8  Type;				// 接続関係（親／子）
+    s8  State;                          // 通信関数の状態
+    u8  ConnectedFlags;                 // 接続履歴フラグ
+    u8  RecvSuccessFlags;               // 受信成功フラグ
+
+    u8  SendFrameCounter;               // 送信フレームカウンタ
+    u8  RecvFrameCounter[4][2];         // 受信フレームカウンタ
+
+    s32 SendBufCounter;                 // 送信バッファ@カウンタ
+    s32 RecvBufCounter[4];              // 受信バッファ@カウンタ
+
+    u16 *NextSendBufp;                  // 送信バッファ@ポインタ
+    u16 *CurrentSendBufp;
+    u16 *CurrentRecvBufp[4];            // 受信バッファ@ポインタ
+    u16 *LastRecvBufp[4];
+    u16 *RecvCheckBufp[4];
+
+    MultiSioPacket  SendBuf[2];         // 送信バッファ@（ダブルバッファ@）
+    MultiSioPacket  RecvBuf[4][3];      // 受信バッファ@（トリプルバッファ@）
+
+    u8  SyncRecvFlag[4];                // 同期データ受信確認フラグ
+    u8  FrameEndRecv[4];                // 処理終了フラグ受信確認
+
+//    u16	RecvData[4];			// 受信データチェック
+//    u8	RecvCount[4];			// 同一データ連続受信回数
+
+    u8	NoUsed[3];	// 未使用(構造体のサイズを32ﾋﾞｯﾄの倍数にするため)
+} MultiSioArea;
+
+
+extern MultiSioArea     Ms;            // マルチプレイ通信ワークエリア
+
+
+/*------------------------------------------------------------------*/
+/*                      マルチプレイ通信初期化                      */
+/*------------------------------------------------------------------*/
+
+extern void MultiSioInit(void);
+
+//・シリアル通信モードをマルチプレイモードにします。
+//・レジスタやバッファ@の初期化を行ないます。
+
+/*------------------------------------------------------------------*/
+/*                      マルチプレイ通信メイン                      */
+/*------------------------------------------------------------------*/
+
+extern u32  MultiSioMain(void *Sendp, void *Recvp);
+
+//・まず、親機@か子機@かを判別し、親機@と認識された場合は通信を開始します。
+//・MultiSioSendDataSet()を呼び出し、送信データをセットします。
+//・MultiSioRecvDataCheck()を呼び出し、正常に受信できたかどうかを調べ、
+//  Recvpへ受信データをコピーします。
+//
+//・１フレーム中のできるだけ近いタイミングで呼び出されるようにして下さい。
+//・同期調整に少々時間が掛かる場合があります。
+//・同期調整中にはフラグデータ（SIO_SYNC_DATA）と一致するデータは
+//  送信しない方が安全です。
+//・１度認識された本体からの応答がなくなると同期調整し続けますので、
+//  受信が不安定になります。
+//
+//・引数：
+//    void *Sendp  ユーザ送信バッファ@ポインタ
+//    void *Recvp  ユーザ受信バッファ@ポインタ
+
+/*------------------------------------------------------------------*/
+/* 		    マルチプレイ通信割り込み			    */
+/*------------------------------------------------------------------*/
+
+extern void MultiSioIntr(void);
+
+//・通信割り込み時に各本体からの受信データを各受信バッファ@へ格納し、
+//  送信バッファ@のデータをレジスタへセットします。
+//・親機@は SIO_SEND_WAIT_COUNT 回のループでウェイトした後、送信を再開します。
+//
+//・通信割り込み時に呼ばれるようにプログラミングして下さい。
+//・必ず１パケット（OverRunCatch[]以外）が１フレームで転送できるように
+//  設定値を調整して下さい。
+
+
+/*------------------------------------------------------------------*/
+/*                      送信データ セット                           */
+/*------------------------------------------------------------------*/
+
+extern void MultiSioSendDataSet(u16 *Sendp);
+
+//・ユーザ送信バッファ@のデータを送信バッファ@へセットします。
+//
+//・MultiSioMain()から呼び出されます。
+//・直接呼び出す必要はありません。
+//
+//・引数：
+//    void *Sendp  ユーザ送信バッファ@ポインタ
+
+/*------------------------------------------------------------------*/
+/*                      受信データ チェック                         */
+/*------------------------------------------------------------------*/
+
+extern u32  MultiSioRecvDataCheck(u16 *Recvp);
+
+//・正常に受信できたかどうかをチェックし、正常であれば受信データを
+//  ユーザ受信バッファ@へコピーします。
+//
+//・MultiSioMain()から呼び出されます。
+//・直接呼び出す必要はありません。
+//
+//・引数：
+//    void *Recvp  ユーザ受信バッファ@ポインタ
+
+/*------------------------------------------------------------------*/
+/*                      接続確認通信初期化			    */
+/*------------------------------------------------------------------*/
+
+extern void ConnectSioInit(void);
+
+/*------------------------------------------------------*/
+/*		接続チェック処理			*/
+/*------------------------------------------------------*/
+extern u8 ConnectCheck(void);
+
+/*-------------------------------------------------------------*/
+/*		接続中専用 通信割り込み ルーチン               */
+/*-------------------------------------------------------------*/
+
+extern void ConnectSioIntr(void);
+
+
+
+#ifdef __cplusplus
+}      /* extern "C" */
+#endif
+
+#endif /* _MULTI_SIO_H */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

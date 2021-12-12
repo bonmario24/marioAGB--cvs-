@@ -1,0 +1,297 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*************************************************************/
+//
+//		client_main.c
+//      	マルチブートローダープログラム
+//		作成開始日 2000/10/10
+//
+/*************************************************************/
+#include "client_main.h"
+#include "client_sub.h"
+#include "client_multisio.h"
+//#include "client_player.h"
+#include "client_game.h"
+
+
+/*-------------------- グローバル 変数  ----------------------------*/
+cgameDT_c game;
+u16		Hscroll;
+u16		Bldmod;
+u16		CoLev;
+u16		ColY;
+
+OamData  	OamBak[128];	// OAM バックアップ
+
+u8	SioFlags;       // 通信状態
+u8	SioModeFlg;	// 通信モード
+u32	*SendAddress;	// 転送元アドレス
+u32	*RecvAddress;	// 転送先アドレス
+u32	*EndAddress;	// 転送終了アドレス
+u32	TransSize;	// 転送サイズ
+u32	ReceiveSize;	// 転送済みサイズ
+u32	CheckSumSend;	// チェックサム(送信側)
+u32	CheckSumRecv;	// チェックサム(受信側)
+u8	Connect;	// 接続確認フラグ
+u8	PlayNum;	// 接続台数
+u8	ColMoveFlg;	// カラー転送フラグ
+u8	SioSuccess;	// 転送完了フラグ
+#if DEBUG
+u8	SioCount;	// １フレームの通信回数(デバッグ用)
+u8	ErrorNo;	// エラーの種類
+#endif
+u8	ID_No;		// ＩＤナンバー
+u8	TransCount;	// 転送テーブルポインタ
+u32	*SrcTable[4];	// 転送元アドレステーブル
+u32	*DesTable[4];	// 転送先アドレステーブル
+u32	*EndTable[4];	// 転送終了アドレステーブル
+
+/*---------------------- サブルーチン  ------------------------*/
+void KeyRead(void);
+void InterDammy(void);
+
+/*-------------------------------------------------------------*/
+/*     			割り込みテーブル	   	       */
+/*-------------------------------------------------------------*/
+void VBlankIntr(void);
+void HBlankIntr(void);
+void VCountIntr(void);
+const IntrFuncp IntrTable[13] = {
+//    VBlankIntr,     // Ｖブランク割り込み
+#ifdef MULTI_SIO_DI_FUNC_FAST
+    (IntrFuncp)((u32)SioIntrFunc + 1),
+#else
+    MultiSioIntr,   // マルチプレイ通信割り込み
+#endif
+    VBlankIntr,     // Ｖブランク割り込み
+    InterDammy,
+    InterDammy,	InterDammy,
+    InterDammy,	InterDammy,
+    InterDammy,	InterDammy,
+    InterDammy,	InterDammy,
+    InterDammy,	InterDammy,
+};
+
+IntrFuncp IntrTableBuf[13];
+
+/****************************************************************/
+/*	子機@ブートプログラム					*/
+/****************************************************************/
+static void child_boot(void)
+{
+/*******	内部ワークＲＡＭクリア */
+    DmaClear(3, 0, CPU_WRAM, CPU_WRAM_SIZE - 0x400, 32);
+/*******	ＶＲＡＭクリア */
+    DmaClear(3, 0, VRAM, VRAM_SIZE, 16);
+/*******	パレットＶＲＡＭクリア */
+    DmaClear(3, 0, PLTT, PLTT_SIZE, 16);
+/*******	ＳＩＯレジスタリセット */
+    ID_No = (*(u8 *)REG_SIOCNT & 0x30) >> 4;
+////    *(u8 *)0x020000D3 = ID_No;
+    RegisterRamReset(RESET_REG_SIO_FLAG);
+
+/*******	割り込みﾒｲﾝﾙｰﾁﾝ ｾｯﾄ******/
+    DmaCopy(3, intr_main, game.IntrMainBuf,
+	    sizeof(game.IntrMainBuf), 16);
+    IntrAddrSet(game.IntrMainBuf);
+////    *(vu32 *)INTR_VECTOR_BUF = (vu32)game.IntrMainBuf;
+
+/*******	OAMRAM ｸﾘｱ	******/
+	DmaClear(3, 0, OAM,  OAM_SIZE,		  32);
+
+/******* 各モードフラグのクリア	******/
+    mGm_SLMODE = mGm_GMMODE = 0;
+    mGm_SOUNDFG = 0;
+    ColMoveFlg = 0;
+
+/*******	サウンドイニシャル	******/
+#if SOUND_ON
+	m4aSoundInit();
+#endif
+}
+
+/*==========================================================*/
+/*     		    メインルーチン			    */
+/*==========================================================*/
+
+void ChildMain(void)
+{
+    child_boot();  /* ワークRAMクリアなど */
+    DmaCopy(3,IntrTable,IntrTableBuf,sizeof(IntrTableBuf),32);
+
+    while(1) {
+
+	KeyRead();			//コントローラー入力
+
+	ObjVanishAll();			//ＯＡＭ全クリアー
+	mGm_FRAME_COUNTER();		//フレームカウンターｉｎｃ
+	loader_main();			//転送中画面メイン処理
+	CpuFastArrayCopy(OamBak, OAM);	//ＯＡＭセット
+
+#if SOUND_ON
+#if DEBUG
+//	*(vu16 *)REG_DISPCNT |= DISP_LCDC_OFF;	// 強制ブランク
+#endif
+//	*(vu16 *)REG_IE &= ~V_BLANK_INTR_FLAG;	// V_BLANK割込不許可
+//	if(!mGm_SOUNDFG)
+	    m4aSoundMain();
+//	*(vu16 *)REG_IE |= V_BLANK_INTR_FLAG;	// V_BLANK割込許可
+#if DEBUG
+//	*(vu16 *)REG_DISPCNT &= ~DISP_LCDC_OFF;	// 強制ブランク解除
+#endif
+#endif//SOUND_ON
+
+	// Vﾌﾞﾗﾝｸ割込ﾁｪｯｸ･ﾌﾗｸﾞのｸﾘｱ
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+	while (1) {
+	    // Vﾌﾞﾗﾝｸ割込処理 終了
+	    if (game.IntrCheck & V_BLANK_INTR_FLAG)
+		break;
+	}
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+
+    /******** スクロール値セット ********/
+    *(vu16 *)REG_BG0HOFS = mGm_HSCROLL;
+
+    /******** カラー特殊効果処理 ********/
+    if(ColMoveFlg){
+	*(vu16 *)REG_BLDCNT = mGm_BLDMOD;
+	*(vu16 *)REG_BLDALPHA = mGm_COLEV;
+	*(vu16 *)REG_BLDY = mGm_COLY;
+	ColMoveFlg = OFF;
+    }
+
+#if 0//DEBUG
+	*(vu16 *)(BG_VRAM + 0x5124) = numchange((SioCount & 0x000F0)>>4);
+	*(vu16 *)(BG_VRAM + 0x5126) = numchange((SioCount & 0x0000F));
+	SioCount = 0;
+#endif
+    }
+}
+
+/*=============================================================*/
+/*		Ｖブランク割り込み処理	  		      */
+/*============================================================*/
+void VBlankIntr(void)
+{
+    /******** サウンド ********/
+#if SOUND_ON
+//    if(!mGm_SOUNDFG)
+	m4aSoundVSync();
+#endif
+#if 0
+    /******** スクロール値セット ********/
+    *(vu16 *)REG_BG0HOFS = mGm_HSCROLL;
+//    *(vu16 *)REG_BG0VOFS = mGm_VSCROLL;
+
+    /******** カラー特殊効果処理 ********/
+//    if( mGm_BLDMOD ){
+    if(ColMoveFlg){
+	*(vu16 *)REG_BLDCNT = mGm_BLDMOD;
+	*(vu16 *)REG_BLDALPHA = mGm_COLEV;
+	*(vu16 *)REG_BLDY = mGm_COLY;
+    }
+#endif
+    /******** Ｖブランク割込要求フラグのクリア＆セット ********/
+    *(vu16 *)REG_IF = game.IntrCheck = V_BLANK_INTR_FLAG;
+
+//    ColMoveFlg = OFF;
+}
+
+/*-------------------------------------------------------------*/
+/*     		キー読み込み	    			       */
+/*-------------------------------------------------------------*/
+void KeyRead(void)
+{
+	u16 ReadData = (*(vu16 *)REG_KEYINPUT ^ 0xffff);
+/* トリガ 入力 */
+	game.Trg  = ReadData & (ReadData ^ game.Cont);
+/* ベタ 入力   */
+	game.Cont = ReadData;
+}
+/*-------------------------------------------------------------*/
+/*     		ダミールーチン	    			       */
+/*-------------------------------------------------------------*/
+void InterDammy(void)
+{
+}
+
+/****************************************************************/
+/*		関数名	:ObjVanishAll				*/
+/*		内容	:ＯＢＪを全て非表示にする		*/
+/*		入力	:なし					*/
+/*		備考	:なし					*/
+/****************************************************************/
+static OamData Oamclr = {
+    160,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+};
+
+void ObjVanishAll(void)
+{
+    int		i;
+#if 1
+    for (i=0; i<128; i+=2) {
+	OamBak[i] = Oamclr;
+	OamBak[i+1] = Oamclr;
+    }
+#else
+//    u64		*obj = (u64 *)&OamBak[0];
+//#if 1
+//    for(i=0; i<32; i++){
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//    }
+//#else
+//    u64		*end = (u64 *)&OamBak[128];
+//
+//    while(obj<end){
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//	*(obj++) = 0x00000000000000A0;
+//    }
+//#endif
+
+    CpuArrayClear(0x000000A0, OamBak, 32);
+
+#endif
+    mGm_OAMIDX = 0;
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

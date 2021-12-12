@@ -1,0 +1,80 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.10;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.10;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<srdcad folder>
+srdcad is CAD tool which is used by super mario advance. 
+This is japanese tool(There is not english version).
+
+<scad2bin folder>
+AgbConv is the converter. This converts srdcad data to C file.
+This is japanese tool(There is not english version).
+It is necessary to define enviroment value "AGBDIR".
+Please define the root path of AGB SDK to "AGBDIR".
+For example
+AGBDIR = c:\agb
+
+<mairo_bos and mario_usa folder>
+srdcad datas which are used by super mairo advance is in these folders.
+
+.sch ---- charactor data
+.ssc ---- screen data
+.scl ---- palette data
+.sob ---- object data
+
+<CompTool>
+CompTool is the tool for compressing the data. The array which is decompressed by TENKAI fucntion in source code
+is compressed by this tool. This tool is japanese tool(There is not english version).
+
+How to compress
+1. Convert srdcad data to C file using AgbConv.
+2. Edit outputed C file.
+   
+   Erase the comment.
+   Edit the definition of the array.
+   For example 
+   <before>                                                <after>
+   const unsigned char d_loader_bg_schDT[0x1014] -------> u8 d_loader_bg_schDT[]   
+   const unsigned short int d_selectbg3_sscDT[32*32/1] -> u16  d_selectbg3_sscDT[]
+
+3. Save edited C file.
+4. Compress C file using CompTool. If you want to compress u8 array, push "u8" button.
+   If you want to compress u16 array, push "u16" button.
+
+<Caution>
+There is not the infomation that which srdcad data is converted to which C file(in src/USA_data).
+But there is one hint. The name of C files are similar to the name of original srdcad datas.
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

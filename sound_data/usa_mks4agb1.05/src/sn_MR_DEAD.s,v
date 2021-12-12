@@ -1,0 +1,103 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_MR_DEAD_grp, voicegroup000
+	.equ	sn_MR_DEAD_pri, 200
+	.equ	sn_MR_DEAD_rev, 0
+	.equ	sn_MR_DEAD_mvl, 100
+	.equ	sn_MR_DEAD_key, 0
+	.equ	sn_MR_DEAD_tbs, 1
+	.equ	sn_MR_DEAD_exg, 0
+	.equ	sn_MR_DEAD_cmp, 1
+
+	.section .rodata
+	.global	sn_MR_DEAD
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_MR_DEAD_1:
+	.byte	KEYSH , sn_MR_DEAD_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_MR_DEAD_tbs/2
+	.byte		VOICE , 5
+	.byte		VOL   , 127*sn_MR_DEAD_mvl/mxv
+	.byte		N01   , Dn4 , v064
+	.byte	W01
+	.byte		        Gn4 
+	.byte	W01
+	.byte		N01   
+	.byte	W01
+	.byte		        Fn5 
+	.byte	W01
+	.byte		        Cn5 
+	.byte	W01
+	.byte		        As5 
+	.byte	W01
+	.byte		        Fn5 
+	.byte	W01
+	.byte		        Ds6 
+	.byte	W01
+	.byte		        An5 
+	.byte	W01
+	.byte		        Gs6 
+	.byte	W01
+	.byte		        Dn6 
+	.byte	W01
+	.byte		        Cn7 
+	.byte	W01
+	.byte		        Gn6 
+	.byte	W01
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_MR_DEAD:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_MR_DEAD_pri	@@ Priority
+	.byte	sn_MR_DEAD_rev	@@ Reverb.
+
+	.word	sn_MR_DEAD_grp
+
+	.word	sn_MR_DEAD_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,2856 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@エンディングプログラム		*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_char_set.h"
+#include "ua_color.h"
+#include "up_player.h"
+#include "uca_acters.h"
+#include "ud_ending.h"
+#include "ua_score.h"
+#include "ua_stareffect.h"
+#include "ua_game.h"
+#include "up_common.h"
+#include "ua_save.h"
+
+#include "ud_cad.h"
+
+#include "ua_ending.h"
+
+/*==============================================================*/
+/*		関数のプロトタイプ宣言				*/
+/*==============================================================*/
+static void end_OAM_clr(void);
+static void end_init1(void);
+static void end1_fade_in(void);
+static void end_demo1(void);
+static void end2_fade_out(void);
+static void end_init2(void);
+static void end2_fade_in(void);
+static void end_demo2(void);
+static void end_BANZAI(void);
+static void end3_fade_out(void);
+static void end_init3(void);
+static void end3_fade_in(void);
+static void end_demo3(void);
+static void end_demo4(void);
+static void end_demo5(void);
+static void end_demo6(void);
+static void end_demo7(void);
+static void end_save(void);
+extern void end_timer(void);
+static void u_end_walk1(void);
+static void u_end_jump(void);
+static void u_end_walk2(void);
+static void u_end_katsugi(void);
+static void u_end_action(void);
+static void u_ending_play(void);
+static void u_ending_FUTAMV(void);
+static void u_ending_ENDOAM(aAC_base_c *abs_pt, u8 index, u8 workf);
+static void u_ending_WENYCLC(aAC_base_c *abs_pt);
+static void u_ending_WENXCLC(aAC_base_c *abs_pt);
+static void ending_ENGSET(void);
+static void ending_MOOMV(void);
+static void u_ending_WENXGCL(aAC_base_c *abs_pt);
+static void ending_COTRINT(void);
+static void ending_STOBJST(void);
+static void ending_COTRDSP(void);
+static void ending_DEMAIN(void);
+static void ending_scroll(void);
+static void ending_PLOAMST(void);
+static void ending_MAMUU(void);
+static void ending_YRRMRK(void);
+static void ending_BGCCNG10(void);
+static void ending_SPPLSET(void);
+static void ending_CASTINT(void);
+static void ending_CASTMV(void);
+static void ending_ENDPAS(void);
+static void ending_CSFDIN(void);
+static void ending_CSTIM(void);
+static void ending_CSSCR(void);
+static void ending_CSSCR1(void);
+static void ending_MAMUINT(void);
+static void ending_MAMUSCR(void);
+static void ending_MAMUMV(void);
+static void ending_MMUFDOUT(void);
+static void ending_MAMUDEL(void);
+static void ending_DSENINT(void);
+static void ending_DSPEND(void);
+
+
+/*------------- グローバル変数 ---------------------------------*/
+aAll_str_c	*p_act;
+
+/*--------------------------------------------------------------*/
+/*		関数名	:ObjVanishAll				*/
+/*		内容	:ＯＢＪを全て非表示にする		*/
+/*		入力	:なし					*/
+/*		備考	:なし					*/
+/*--------------------------------------------------------------*/
+static OamData end_Oamclr = {
+    240,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+};
+
+void end_OAM_clr(void)
+{
+    register OamData *pt;
+    register OamData *c_pt;
+    register OamData clrdata;
+    int	i;
+    
+    clrdata = end_Oamclr;
+    pt = OamBak;
+    c_pt = &(OamBak[128]);
+    while(pt<c_pt){
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングイニシャル処理１			*/
+/*--------------------------------------------------------------*/
+void end_init1(void)
+{
+    aAC_base_c	*abs_pt;
+    u8 end_loop;
+
+    lcdc_off();
+//    m4aMPlayAllStop();
+//  m4aSoundVSyncOff();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_2;
+
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_3;
+
+    SORTFG = 0;
+
+/*------------- キャラクターセット -------------*/
+    m_ending_char_set();
+
+/*------------- スクリーンセット -------------*/
+    DmaCopy(3, ud_ending0_1_sscDT, VRAM + 0xf800, 0x800, 16);
+    DmaCopy(3, ud_ending0_2_sscDT, VRAM + 0xf000, 0x800, 16);
+    DmaCopy(3, ud_ending0_3_sscDT, VRAM + 0xe800, 0x800, 16);
+
+/*------------- カラーセット -------------*/
+    ending_color();
+
+/*------------- サウンドセット -------------*/
+
+/*------------- 初期値セット -------------*/
+    ObjVanishAll();
+
+    game.scch1 = 0;
+    game.sccv1 = 0x30;
+    game.scch2 = 0;
+    game.sccv2 = 0x30;
+    game.scch3 = 0;
+    game.sccv3 = 0x30;
+
+/*------------- セーブ関連 -------------*/
+    COS_CLEAR[2] |= 8;
+    GAME_CLEAR = 1;
+    RED_COIN[11] = RED_COIN[11] | REDCOIN << 7;
+    RED_COIN[12] = RED_COIN[12] | REDCOIN >> 1;
+    EGGFG[4] |= YOSHI_EGG << 6;
+    
+    PLAY_PLSTTM = 0x60;
+    PLAY_PLCMKI = 1;
+    PLAY_RUNCLR = 1;
+    PLAY_PLCMOD = 0;
+    PLAY_PLPWJPTM = 0;
+    PLAY_PLXPOSH = 0x0028;
+    PLAY_PLYPOSH = 0x00a0;
+    PLAY_PLXSPED = 0x100000;
+    PLAY_PLYSPED = 0;
+    PLAY_PLTIM = 0;
+    PLAY_PLCLOR = 0;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+//    PLAY_PLSMAL = 0;
+
+    for(end_loop = 0; end_loop < 9; end_loop++){
+	abs_pt = &(p_act->a_base[end_loop]);
+	ABASE_XPOSH(abs_pt) = XPOSDT[end_loop];
+	ABASE_YPOSH(abs_pt) = YPOSDT[end_loop];
+	ABASE_XSPD(abs_pt) = XSPDT[end_loop];
+	ABASE_YSPD(abs_pt) = YSPDT[end_loop];
+	ABASE_ENTIM(abs_pt) = TMDT[end_loop];
+	ABASE_ENCLOR(abs_pt) = CLRDT[end_loop];
+
+	ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+	ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+    }
+
+    fade_in_parameter_set();
+
+    game.GMMODE++;
+    
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();			//サウンドスタート
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_BG2_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ１フェードイン処理		*/
+/*--------------------------------------------------------------*/
+void end1_fade_in(void)
+{
+    aAC_base_c	*abs_pt;
+    u8 workf = 4;
+    u8 en_loop = 8;
+
+    if((mGm_FRAME_COUNT & 7) == 0)
+	game.scch3++;
+    ENTY_OAMPT(p_act) = 2;	// ＯＡＭインデックスクリア
+    ENTY_AFBPT(p_act) = 0;	// Affinインデックスクリア
+    player_oamset(p_ply);
+    abs_pt = &(p_act->a_base[8]);
+    u_ending_ENDOAM(abs_pt, en_loop, workf);
+    fade_in();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理１				*/
+/*--------------------------------------------------------------*/
+void end_demo1(void)
+{
+    u_ending_play();
+    u_ending_FUTAMV();
+    if(PLAY_PLSTTM != 0){
+	if((mGm_FRAME_COUNT & 7) == 0){
+	    PLAY_PLSTTM--;
+	    if(PLAY_PLSTTM == 0x25){
+		m4aSongNumStart(s_u_usa_ending);
+	    }
+	}
+    }
+    else{
+	fade_out_parameter_set();
+	mGm_GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ１終了フェードアウト処理	*/
+/*--------------------------------------------------------------*/
+void end2_fade_out(void)
+{
+    u_ending_play();
+    u_ending_FUTAMV();
+
+    fade_out();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングイニシャル処理２			*/
+/*--------------------------------------------------------------*/
+void end_init2(void)
+{
+    lcdc_off();
+//    m4aSoundVSyncOff();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_2;
+
+/*------------- キャラクターセット -------------*/
+    m_ending_char1_set();
+
+/*------------- スクリーンセット -------------*/
+    DmaCopy(3, ud_ending1_3_sscDT, VRAM + 0xf800, 0x800, 16);
+    DmaCopy(3, ud_ending1_1_sscDT, VRAM + 0xf000, 0x800, 16);
+    DmaCopy(3, ud_ending1_2_sscDT, VRAM + 0xe800, 0x800, 16);
+
+/*------------- カラーセット -------------*/
+    ending1_color();
+
+/*------------- サウンドセット -------------*/
+
+/*------------- 初期値セット -------------*/
+    ObjVanishAll();
+
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    game.scch2 = 0;
+    game.sccv2 = 0;
+    game.scch3 = 0;
+    game.sccv3 = 0;
+
+//    ending_COTRINT();
+    ending_STOBJST();
+
+    PLAY_PLXPOSH = 0xffA0;
+    PLAY_PLXPOSL = PLAY_PLXPOSH << 16;
+    PLAY_PLXSPED = 0x00080000;
+    TTLTM = 0;
+
+//    m4aSoundVSyncOn();
+    m4aSongNumStartOrContinue( s_u_usa_ending );
+
+    fade_in_parameter_set();
+
+    game.GMMODE++;
+    
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();			//サウンドスタート
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_BG2_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ２フェードイン処理		*/
+/*--------------------------------------------------------------*/
+void end2_fade_in(void)
+{
+    ending_scroll();
+    ending_PLOAMST();
+    fade_in();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理２				*/
+/*--------------------------------------------------------------*/
+void end_demo2(void)
+{
+    ending_scroll();
+    end_OAM_clr();
+    ending_DEMAIN();
+    if(DEMOCT == 2){
+	ending_COTRINT();
+	mGm_GMMODE++;
+	DmaCopy(3, ending_BANZDT, VRAM + 0xfc00, 0x80, 16);
+	BANZAI_TIME = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		万歳処理					*/
+/*--------------------------------------------------------------*/
+void end_BANZAI(void)
+{
+    end_OAM_clr();
+    BANZAI_TIME++;
+    ending_COTRDSP();
+    ending_PLOAMST();
+    if(BANZAI_TIME >= 20){
+	BANZAI_TIME = 0;
+	KUJIPT++;
+	DmaCopy(3, ending_BANZDT + (KUJIPT & 1) * 0x40, VRAM  + 0xfc00, 0x80, 16);
+    }
+    if(KUJIPT >= 0x2e){
+	fade_out_parameter_set();
+	game.GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ２終了フェードアウト処理	*/
+/*--------------------------------------------------------------*/
+void end3_fade_out(void)
+{
+    BANZAI_TIME++;
+    ending_PLOAMST();
+    if(BANZAI_TIME >= 20){
+	BANZAI_TIME = 0;
+	KUJIPT++;
+	DmaCopy(3, ending_BANZDT + (KUJIPT & 1) * 0x40, VRAM  + 0xfc00, 0x80, 16);
+    }
+    fade_out();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングイニシャル処理３			*/
+/*--------------------------------------------------------------*/
+static u8 ending_SPFRDT1[] = {
+    32,10,10,10,10,10,10,32,10,
+    10,10,10,10,10
+};
+
+void end_init3(void)
+{
+    u8 end_loop;
+
+    lcdc_off();
+//    m4aSoundVSyncOff();
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1F
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+
+/*    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_0;*/
+
+/*------------- キャラクターセット -------------*/
+    m_ending_char2_set();
+
+/*------------- スクリーンセット -------------*/
+    DmaCopy(3, ud_ending2_1_sscDT, VRAM + 0xf800, 0x800, 16);
+//    DmaCopy(3, ud_ending2_2_sscDT, VRAM + 0xf000, 0x800, 16);
+
+/*------------- カラーセット -------------*/
+    ending2_color();
+
+/*------------- サウンドセット -------------*/
+
+/*------------- 初期値セット -------------*/
+    end_OAM_clr();
+
+    game.scch1 = 0;
+    game.sccv1 = 0;
+    game.scch2 = 0;
+    game.sccv2 = 0;
+
+//    for(end_loop = 0; end_loop != 128; end_loop++)
+//	OamBak[end_loop].VPos = 0xf0;
+
+    SPPLCNT = 16;
+    SPDMCNT = 4;
+    SPPLFLG = 0;
+    SPRAM1 = 0xd;
+    SPRAM = 0;
+    ending_BGCCNG10();
+    ENDSFG = 1;
+    TTLTM = ending_SPFRDT1[SPRAM];
+
+//    m4aSoundVSyncOn();
+    m4aSongNumStartOrContinue( s_u_usa_ending );
+
+    fade_in_parameter_set();
+
+    game.GMMODE++;
+    
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();			//サウンドスタート
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ３フェードイン処理		*/
+/*--------------------------------------------------------------*/
+void end3_fade_in(void)
+{
+    fade_in();
+    end_demo3();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理３				*/
+/*--------------------------------------------------------------*/
+void end_demo3(void)
+{
+    ending_SPPLSET();
+    if(TTLTM != 0xff){
+	SPPLCNT--;
+	if(SPPLCNT == 0xff){
+	    SPPLCNT = 16;
+	    SPPLFLG++;
+	}
+	TTLTM--;
+	return;
+    }
+    else{
+	TTLTM = ending_SPFRDT1[SPRAM];
+	SPRAM++;
+	SPRAM1--;
+	if(SPRAM1 == 0xff){
+	    SPRAM1 = 0xd;
+	    SPRAM = 0;
+	    ENDSFG = 1;
+	    SPDMCNT--;
+	    if(SPDMCNT == 0xff){
+		SPDMCNT = 0;
+		end_OAM_clr();
+		mGm_GMMODE++;
+	    }
+	}
+	ending_BGCCNG10();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理４				*/
+/*--------------------------------------------------------------*/
+static u16 ending_SPENDT4[] = {
+    0xf822,0x001a,
+    0xf862,0x001a,
+    0xffff,
+};
+
+static u16 ending_SPENDT5[] = {
+    0xf8a2,0x001a,
+    0xf8e2,0x001a,
+    0xffff,
+};
+
+static u16 ending_SPENDT6[] = {
+    0xf924,0x0018,
+    0xf964,0x0018,
+    0xffff,
+};
+
+static u16 ending_SPENDT7[] = {
+    0xf9a4,0x0018,
+    0xf9e6,0x0016,
+    0xffff,
+};
+
+static u16 ending_SPENDT8[] = {
+    0xfa2e,0x000e,
+    0xfa70,0x000a,
+    0xfab0,0x0006,
+    0xfaec,0x0004,
+    0xffff,
+};
+
+static u16 *ending_clr_table[] = {
+    ending_SPENDT4,
+    ending_SPENDT5,
+    ending_SPENDT6,
+    ending_SPENDT7,
+    ending_SPENDT8,
+};
+
+static u8 ending_SPFRDT2[] = {
+    8,8,80,64,48,16,16,
+};
+
+void end_demo4(void)
+{
+    u16 end_address;
+    u16 clr_cnt;
+    u16 en_loop;
+    u16 *point;
+    
+    point = ending_clr_table[SPDMCNT];
+    for(en_loop = 0; (*(point + en_loop)) != 0xffff; en_loop += 2){
+	end_address = *(point + en_loop);
+	clr_cnt = *(point + en_loop + 1);
+	DmaClear(3, 0x00bf, VRAM + end_address, clr_cnt, 16);
+    }
+    SPDMCNT++;
+    if(SPDMCNT == 5){
+	mGm_GMMODE++;
+	*(u16 *)(COL_BUF + 0x242) = 0x4480;
+	COL_FLAG = 1;
+	SPRAM = 0;
+	SPRAM1 = 6;
+	SPDMCNT = 0;
+	ENDSFG = 2;
+	ending_BGCCNG10();
+	TTLTM = ending_SPFRDT2[SPRAM];
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理５ 				*/
+/*--------------------------------------------------------------*/
+void end_demo5(void)
+{
+    TTLTM--;
+    if(TTLTM == 0xff){
+	SPRAM++;
+	SPRAM1--;
+	if(SPRAM1 == 0xff){
+	    SPPLCNT = 16;
+	    SPDMCNT = 1;
+	    SPRAM = 0;
+	    SPRAM1 = 0xd;
+	    ENDSFG = 1;
+	    ending_BGCCNG10();
+	    TTLTM = ending_SPFRDT1[SPRAM];
+	    mGm_GMMODE++;
+	}
+	else{
+	    TTLTM = ending_SPFRDT2[SPRAM];
+	    ending_BGCCNG10();
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理６ 				*/
+/*--------------------------------------------------------------*/
+void end_demo6(void)
+{
+    TTLTM--;
+    if(TTLTM == 0xff){
+	SPRAM++;
+	SPRAM1--;
+	if(SPRAM1 == 0xff){
+	    SPDMCNT--;
+	    if(SPDMCNT == 0xff){
+		ending_CASTINT();
+		PSTSND = 0;
+		ENDWAT = 0xb0;
+		SPRAM = 0;
+		SPRAM1 = 0xd;
+		ENDSFG = 1;
+		ending_BGCCNG10();
+		TTLTM = ending_SPFRDT1[SPRAM];
+		mGm_GMMODE++;
+		return;
+	    }
+	    SPRAM = 0;
+	    SPRAM1 = 0xd;
+	    ENDSFG = 1;
+	}
+	TTLTM = ending_SPFRDT1[SPRAM];
+	ending_BGCCNG10();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングデモ処理７ 				*/
+/*--------------------------------------------------------------*/
+void end_demo7(void)
+{
+    ending_CASTMV();
+    ending_ENDPAS();
+
+    TTLTM--;
+    if(TTLTM == 0xff){
+	SPRAM++;
+	SPRAM1--;
+	if(SPRAM1 == 0xff){
+	    SPRAM = 0;
+	    SPRAM1 = 0xd;
+	}
+	TTLTM = ending_SPFRDT1[SPRAM];
+	ending_BGCCNG10();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングセーブ処理				*/
+/*--------------------------------------------------------------*/
+void end_save(void)
+{
+    if((WIN0H & 0xff00) == 0x3300){
+/*	WIN0H = 0x33bd;
+	WIN0V = 0x2b75;
+	WININ = 0x1f10;*/
+	PAUSE_TIM++;
+
+	switch(SAVE_ON){
+	case 0:
+	    if((game.Trg & D_KEY) || (game.Trg & U_KEY) || (game.Trg & SELECT_BUTTON)){
+		m4aSongNumStart( s_u_se_coin );
+		PAUSE_TIM = 0;
+		PAUSE_CUR ^= 1;
+	    }
+	    if(!((mGm_CONT & SELECT_BUTTON) ||
+		 (mGm_CONT & R_BUTTON) ||
+		 (mGm_CONT & L_BUTTON) ||
+		 (mGm_CONT & B_BUTTON))){
+		if(game.Trg & START_BUTTON || game.Trg & A_BUTTON){
+		    PAUSE_TIM = 0;
+		    if(PAUSE_CUR == 0){
+			VSYNC_OFF = 1;
+			SAVE_ON = 1;
+		    }
+		    else{
+			mGm_GMMODE++;
+			m4aSongNumStart( s_u_se_save );
+		    }
+		}
+	    }
+	    break;
+	case 1:
+	    WORDNO = 0;
+	    *(vu16 *)REG_IME = 0;
+	    file_save(FILE_NO);
+	    *(vu16 *)REG_IME = 1;
+	    V_blank_wait();
+	    m4aSoundVSyncOn();
+	    SAVE_ON = 0;
+	    if(ERROR_NO != 0){
+		mGm_FREE_usa_game();
+		mGm_FREE_p_act();		// 敵フリー
+		ply_free_set();			// プレイヤー領域フリー
+		mGm_FREE_p_scr();		// スコアフリー
+		mGm_FREE_p_eff();		// スター＆コインエフェクトフリー
+		mGm_GC();
+		return;
+	    }
+
+	    PAUSE_TIM = 0;
+	    mGm_GMMODE++;
+	    m4aSongNumStart( s_u_se_save );
+	}
+    }
+
+/*	    if(game.Trg & START_BUTTON || game.Trg & A_BUTTON){
+		if(PAUSE_CUR == 0){
+		    WORDNO = 0;
+//		m4aMPlayAllStop();
+//		m4aSoundMain();
+		    *(vu16 *)REG_IME = 0;
+		    m4aSoundVSyncOff();
+		    file_save(FILE_NO);
+		    *(vu16 *)REG_IME = 1;
+		    V_blank_wait();
+//		    m4aSoundVSyncOff();
+		    m4aSoundVSyncOn();
+		    if(ERROR_NO != 0){
+			mGm_FREE_usa_game();
+			mGm_FREE_p_act();	// 敵フリー
+			ply_free_set();		// プレイヤー領域フリー
+			mGm_FREE_p_scr();	// スコアフリー
+			mGm_FREE_p_eff();	// スター＆コインエフェクトフリー
+			mGm_GC();
+			m4aMPlayAllStop();
+			return;
+		    }
+		}
+		PAUSE_TIM = 0;
+		mGm_GMMODE++;
+		m4aSongNumStart( s_u_se_save );
+	    }
+	    else if((game.Trg & D_KEY) || (game.Trg & U_KEY)){
+		m4aSongNumStart( s_u_se_coin );
+		PAUSE_TIM = 0;
+		PAUSE_CUR ^= 1;
+	    }
+	}
+	}*/
+    else{
+	WIN0H = ((WIN0H & 0xff00) - 0x800) | ((WIN0H & 0x00ff) + 0x8);
+	WIN0V = ((WIN0V & 0xff00) - 0x800) | ((WIN0V & 0x00ff) + 0x8);
+	if((WIN0H & 0xff00) == 0x3000){
+	    WIN0H = 0x33bd;
+	    WIN0V = 0x2b75;
+	    WININ = 0x1f10;
+	}
+    }
+    if((PAUSE_TIM & 0x10) == 0x10)
+	OamBak[0x40].VPos = 0xa0;
+    else
+	OamBak[0x40].VPos = PAUSE_CUR * 0x18 + 0x40;
+}
+
+/*--------------------------------------------------------------*/
+/*		タイマー待ち処理				*/
+/*--------------------------------------------------------------*/
+void end_timer(void)
+{
+    PAUSE_TIM++;
+    if(PAUSE_TIM == 60 * 1){
+	VSYNC_OFF = 1;
+	BRUSFG = MAIN_mode;
+	mGm_SLMODE = 0;
+	mGm_GMMODE = 0;
+	mGm_FREE_usa_game();
+	mGm_FREE_p_act();	// 敵フリー
+	ply_free_set();		// プレイヤー領域フリー
+	mGm_FREE_p_scr();	// スコアフリー
+	mGm_FREE_p_eff();	// スター＆コインエフェクトフリー
+	mGm_GC();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングモードテーブル			*/
+/*--------------------------------------------------------------*/
+mfunc ending_table[] = {
+    fade_out,		//00
+    end_init1,		//01
+    end1_fade_in,	//02
+    end_demo1,		//03
+    end2_fade_out,	//04
+    end_init2,		//05
+    end2_fade_in,	//06
+    end_demo2,		//07
+    end_BANZAI,		//08
+    end3_fade_out,	//09
+    end_init3,		//0A
+    end3_fade_in,	//0B
+    end_demo3,		//0C
+    end_demo4,		//0D
+    end_demo5,		//0E
+    end_demo6,		//0F
+    end_demo7,		//10
+    end_save,		//11
+    end_timer,		//12
+};
+
+/*--------------------------------------------------------------*/
+/*		エンディングメイン処理				*/
+/*--------------------------------------------------------------*/
+void MU_ending(void)
+{
+    ending_table[mGm_GMMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングプレイヤーモードテーブル		*/
+/*--------------------------------------------------------------*/
+mfunc u_ending_plmod_table[] = {
+    u_end_walk1,
+    u_end_jump,
+    u_end_walk2,
+    u_end_katsugi,
+    u_end_action,
+};
+
+/*--------------------------------------------------------------*/
+/*		プレイヤー歩き処理１				*/
+/*--------------------------------------------------------------*/
+void u_end_walk1(void)
+{
+    player_WKSET();
+    player_XCALC(p_ply);
+
+    if(PLAY_PLXPOSH >= 0x36){
+	PLAY_PLCMOD++;
+	PLAY_PLJUMP++;
+	PLAY_PLCHRNO = JUMP;
+	m4aSongNumStart(s_u_se_jump);
+	player_YSPSET();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤージャンプ処理				*/
+/*--------------------------------------------------------------*/
+void u_end_jump(void)
+{
+    player_WKSET();
+    player_XCALC(p_ply);
+    ending_ENGSET();
+    player_YCALC(p_ply);
+
+    if(PLAY_PLYSPED > 0){
+	if(PLAY_PLYPOSH >= 0x90){
+	    PLAY_PLXSPED = 0x000c0000;
+	    m4aSongNumStart(s_u_se_jump);
+	    player_YSPSET();
+	    return;
+	}
+	if(PLAY_PLYPOSH >= 0x65){
+	    if(PLAY_PLXPOSH >= 0x60){
+		PLAY_PLCMOD++;
+		PLAY_PLJUMP--;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤー歩き処理２				*/
+/*--------------------------------------------------------------*/
+void u_end_walk2(void)
+{
+    aAC_base_c	*abs_pt;
+
+    player_WKSET();
+    player_XCALC(p_ply);
+    if(PLAY_PLXPOSH >= 0x78){
+	PLAY_PLCMOD++;
+	PLAY_PLKATSG++;
+	PLAY_PLCHRNO = HIKU;
+	PLAY_PLWKTIM = 40;
+
+	abs_pt = &(p_act->a_base[8]);
+	ABASE_ENTIM(abs_pt) = 5;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤー担ぎ処理				*/
+/*--------------------------------------------------------------*/
+static u8 ending_KTTM[] = {
+    0x20,0x10,0x20,0x10,
+};
+
+void u_end_katsugi(void)
+{
+    aAC_base_c	*abs_pt;
+
+    if(game.sccv1 != 0x00){
+	game.sccv1 -= 1;
+	game.sccv2 -= 1;
+	game.sccv3 -= 1;
+    }
+    if(PLAY_PLWKTIM == 0){
+	abs_pt = &(p_act->a_base[8]);
+	ABASE_ENTIM(abs_pt)--;
+	if(ABASE_ENTIM(abs_pt) == 0){
+	    PLAY_PLCMOD++;
+	    PLAY_PLJUMP++;
+	    PLAY_PLCHRNO = JUMP;
+	    ABASE_YSPD(abs_pt) = 0xffa00000;
+	    m4aSongNumStart( s_u_se_moti1 );
+	}
+	else{
+	    PLAY_PLWKTIM = ending_KTTM[ABASE_ENTIM(abs_pt) - 1];
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤーアクション処理			*/
+/*--------------------------------------------------------------*/
+void u_end_action(void)
+{
+    ending_MOOMV();
+    ending_ENGSET();
+    player_WKSET();
+    player_YCALC(p_ply);
+
+    if(PLAY_PLYSPED > 0){
+	if(PLAY_PLYPOSH >= 0x70){
+	    player_YSPSET();
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングプレイヤー処理			*/
+/*--------------------------------------------------------------*/
+void u_ending_play(void)
+{
+    if((mGm_FRAME_COUNT & 7) == 0)
+	game.scch3++;
+
+    if(PLAY_PLTIM != 0)
+	PLAY_PLTIM--;
+
+    if(PLAY_PLWKTIM != 0)
+	PLAY_PLWKTIM--;
+
+//    PLAY_PLOBJX = PLAY_PLXPOSH - game.scch1;
+//    PLAY_PLOBJYL = PLAY_PLYPOSH - game.sccv1;
+
+    ENTY_OAMPT(p_act) = 2;	// ＯＡＭインデックスクリア
+    ENTY_AFBPT(p_act) = 0;	// Affinインデックスクリア
+    player_oamset(p_ply);
+    u_ending_plmod_table[PLAY_PLCMOD]();
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング蓋処理				*/
+/*--------------------------------------------------------------*/
+static u8 ending_KTYAD[] = {
+    0x1C,0x1B,0x1E,0x1D,0x1F,
+};
+
+void u_ending_FUTAMV(void)
+{
+    aAC_base_c	*abs_pt;
+    u8 workf = 4;
+    u8 en_loop = 8;
+
+    abs_pt = &(p_act->a_base[8]);
+    u_ending_ENDOAM(abs_pt, en_loop, workf);
+    if(ABASE_ENTIM(abs_pt) == 0){
+	if((ABASE_YPOSH(abs_pt) & 0xff) >= 0xa0){
+	    if((ABASE_YPOSH(abs_pt) & 0xff) < 0xe0){
+		return;
+	    }
+	}
+	u_ending_WENYCLC(abs_pt);
+    }
+    else{
+	ABASE_YPOSH(abs_pt) = PLAY_PLYPOSH + ending_KTYAD[ABASE_ENTIM(abs_pt) - 1];
+	ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング蓋ＯＡＭセット処理			*/
+/*--------------------------------------------------------------*/
+static u8 ending_ENOAMIN[] = {
+    0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x00
+};
+
+static u16 ending_ENDCHR[] = {
+    0x194,0x196,	//;[00] moo pattern 1
+    0x196,0x194,	//;[02]		  2
+    0x18E,0x18E,	//;[04] futa
+};
+
+void u_ending_ENDOAM(aAC_base_c *abs_pt, u8 index, u8 workf)
+{
+    u8 oam_point;
+
+    oam_point = ending_ENOAMIN[index];
+    OamBak[oam_point].VPos = ABASE_YPOSH(abs_pt) - game.sccv1;
+    OamBak[oam_point].HPos = ABASE_XPOSH(abs_pt) - game.scch1;
+    OamBak[oam_point].VFlip = ABASE_ENCLOR(abs_pt) >> 7;
+    OamBak[oam_point].HFlip = ABASE_ENCLOR(abs_pt) >> 6;
+    OamBak[oam_point].Priority = 2;
+    OamBak[oam_point].ColorMode = 0;
+    OamBak[oam_point].Pltt = 3;
+    OamBak[oam_point].Shape = 0;
+    OamBak[oam_point].Size = 01;
+
+    if((workf & 0x40) == 0)
+	OamBak[oam_point].CharNo = ending_ENDCHR[workf];
+    else
+	OamBak[oam_point].CharNo = ending_ENDCHR[workf + 1];
+}
+
+/*--------------------------------------------------------------*/
+/*		ジャンプ計算処理				*/
+/*--------------------------------------------------------------*/
+void u_ending_WENYCLC(aAC_base_c *abs_pt)
+{
+    ABASE_YPOS(abs_pt) = ABASE_YPOS(abs_pt) +
+	(ABASE_YSPD(abs_pt) + ABASE_MVYSPD(abs_pt) >> 4);
+    ABASE_YPOSH(abs_pt) = ABASE_YPOS(abs_pt) >> 16;
+}
+
+/*--------------------------------------------------------------*/
+/*		Ｘ計算処理					*/
+/*--------------------------------------------------------------*/
+void u_ending_WENXCLC(aAC_base_c *abs_pt)
+{
+    ABASE_XPOS(abs_pt) = ABASE_XPOS(abs_pt) +
+	(ABASE_XSPD(abs_pt) + ABASE_MVXSPD(abs_pt) >> 4);
+    ABASE_XPOSH(abs_pt) = ABASE_XPOS(abs_pt) >> 16;
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングプレイヤー別Ｇ計算処理		*/
+/*--------------------------------------------------------------*/
+static u32 ending_PLGDT[] = {
+    0x40000,0x40000,0x40000,0x10000,
+};
+
+void ending_ENGSET(void)
+{
+    PLAY_PLYSPED = PLAY_PLYSPED + ending_PLGDT[PLAY_PLSYNO];
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディングマムー処理				*/
+/*--------------------------------------------------------------*/
+void ending_MOOMV(void)
+{
+    aAC_base_c *abs_pt;
+    u8 en_loop;
+    u8 workf;
+
+    for(en_loop = 7; en_loop != 0xff; en_loop--){
+	abs_pt = &(p_act->a_base[en_loop]);
+	if(ABASE_ENTIM(abs_pt) == 0){
+	    u_ending_WENXGCL(abs_pt);
+	    if(ABASE_YSPD(abs_pt) >= 0x80000){
+		ABASE_XSPD(abs_pt) = 0;
+		ABASE_YSPD(abs_pt) = 0xfff90000;
+		ABASE_ENCLOR(abs_pt) = CLRDT[en_loop] ^ 0x40;
+	    }
+	    workf = (mGm_FRAME_COUNT & 1) << 1;
+	    u_ending_ENDOAM(abs_pt, en_loop, workf);
+	    ABASE_ENTIM(abs_pt)++;
+	}
+	else if(ABASE_ENTIM(abs_pt) == 1){
+	    m4aSongNumStart( s_u_se_nage );
+	}
+	ABASE_ENTIM(abs_pt)--;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング蜂処理				*/
+/*--------------------------------------------------------------*/
+void u_ending_WENXGCL(aAC_base_c *abs_pt)
+{
+    if(ABASE_WORK0(abs_pt) == 0){
+	u_ending_WENXCLC(abs_pt);
+    }
+    u_ending_WENYCLC(abs_pt);
+    if(ABASE_YSPD(abs_pt) >= 0){
+	if(ABASE_YSPD(abs_pt) >= 0x3e0000){
+	    return;
+	}
+    }
+    ABASE_YSPD(abs_pt)+=0x20000;
+}
+
+/*--------------------------------------------------------------*/
+/*		貢献者イニシャル処理				*/
+/*--------------------------------------------------------------*/
+void ending_COTRINT(void)
+{
+    u8 cot_loop;
+    u8 int_x = 0;
+    u16 *cot_add;
+
+    PLDOWNA[0] = 0;
+    for(cot_loop = 3; cot_loop != 0xff; cot_loop--){
+	if(PLDOWN[cot_loop] > 99)
+	    PLDOWN[cot_loop] = 99;
+	if(PLDOWN[cot_loop] >= PLDOWNA[0])
+	    PLDOWNA[0] = PLDOWN[cot_loop];
+    }
+
+    for(cot_loop = 3; cot_loop != 0xff; cot_loop--){
+	if(PLDOWN[cot_loop] == PLDOWNA[0])
+	    CODSNO[int_x++] = cot_loop;
+    }
+    COTRCNT = int_x - 1;
+
+    cot_add = (u16 *)(VRAM + 0xf000 + 9 * 2);
+    if((PLDOWN[0] / 10) != 0){
+	*(u16 *)(cot_add) = PLDOWN[0] / 10 + 0x8280;
+	*(u16 *)(cot_add + 0x20) = PLDOWN[0] / 10 + 0x8290;
+    }
+    *(u16 *)(cot_add + 1) = (PLDOWN[0] % 10) + 0x8280;
+    *(u16 *)(cot_add + 0x21) = (PLDOWN[0] % 10) + 0x8290;
+
+    if((PLDOWN[3] / 10) != 0){
+	*(u16 *)(cot_add + 3) = PLDOWN[3] / 10 + 0x8280;
+	*(u16 *)(cot_add + 0x23) = PLDOWN[3] / 10 + 0x8290;
+    }
+    *(u16 *)(cot_add + 4) = (PLDOWN[3] % 10) + 0x8280;
+    *(u16 *)(cot_add + 0x24) = (PLDOWN[3] % 10) + 0x8290;
+
+    if((PLDOWN[2] / 10) != 0){
+	*(u16 *)(cot_add + 7) = PLDOWN[2] / 10 + 0x8280;
+	*(u16 *)(cot_add + 0x27) = PLDOWN[2] / 10 + 0x8290;
+    }
+    *(u16 *)(cot_add + 8) = (PLDOWN[2] % 10) + 0x8280;
+    *(u16 *)(cot_add + 0x28) = (PLDOWN[2] % 10) + 0x8290;
+
+    if((PLDOWN[1] / 10) != 0){
+	*(u16 *)(cot_add + 0xa) = PLDOWN[1] / 10 + 0x8280;
+	*(u16 *)(cot_add + 0x2a) = PLDOWN[1] / 10 + 0x8290;
+    }
+    *(u16 *)(cot_add + 0xb) = (PLDOWN[1] % 10) + 0x8280;
+    *(u16 *)(cot_add + 0x2b) = (PLDOWN[1] % 10) + 0x8290;
+
+    COFRCNT = 60;
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤーＯＡＭデータ				*/
+/*--------------------------------------------------------------*/
+static u16 ending_OBJDT[4*8] = {
+    0x000F,0x4048,0x01CA,0x0000,		//; mario   [10]
+    0x001F,0x4048,0x01CC,0x0000,
+    0x000F,0x4060,0x11CE,0x0000,		//; luiji   [20]
+    0x001F,0x4060,0x11D6,0x0000,
+    0x000F,0x4080,0x31DC,0x0000,		//; pinokio [30]
+    0x001F,0x4080,0x31DE,0x0000,
+    0x000F,0x4098,0x21D8,0x0000,		//; piech   [40]
+    0x001F,0x4098,0x21DA,0x0000,
+};
+
+void ending_STOBJST(void)
+{
+    DmaCopy(3, ending_OBJDT, OamBak + 4, 0x40, 16);
+}
+
+/*--------------------------------------------------------------*/
+/*		貢献者の名前表示処理				*/
+/*--------------------------------------------------------------*/
+static u16 ending_MVP_data[] = {
+    0x4050,0x8058,0x8218,0x0000,
+    0x4050,0x8078,0x821c,0x0000,
+};
+
+static u16 ending_COPLDT0[] = {
+    0x8044,0x005c,0x9240,0x0000,	//MARIO
+    0x8044,0x0064,0x9241,0x0000,
+    0x8044,0x006c,0x9242,0x0000,
+    0x8044,0x0074,0x9243,0x0000,
+    0x8044,0x007c,0x9244,0x0000,
+    0x8044,0x0084,0x9245,0x0000,
+    0x8044,0x008c,0x9246,0x0000,
+    0x003c,0x404c,0x9200,0x0000,
+    0x004c,0x404c,0x9204,0x0000,
+    0x003c,0x005c,0x9208,0x0000,
+    0x0054,0x005c,0x9228,0x0000,
+    0x003c,0x0064,0x9208,0x0000,
+    0x0054,0x0064,0x9228,0x0000,
+    0x003c,0x006c,0x9208,0x0000,
+    0x0054,0x006c,0x9228,0x0000,
+    0x003c,0x0074,0x9208,0x0000,
+    0x0054,0x0074,0x9228,0x0000,
+    0x003c,0x007c,0x9208,0x0000,
+    0x0054,0x007c,0x9228,0x0000,
+    0x003c,0x0084,0x9208,0x0000,
+    0x0054,0x0084,0x9228,0x0000,
+    0x003c,0x008c,0x9208,0x0000,
+    0x0054,0x008c,0x9228,0x0000,
+    0x003c,0x4094,0x9202,0x0000,
+    0x004c,0x4094,0x9206,0x0000,
+    
+    0x8044,0x005c,0x924e,0x0000,	//PEACH
+    0x8044,0x0064,0x924f,0x0000,
+    0x8044,0x006c,0x9250,0x0000,
+    0x8044,0x0074,0x9251,0x0000,
+    0x8044,0x007c,0x9252,0x0000,
+    0x8044,0x0084,0x9253,0x0000,
+    0x8044,0x008c,0x9254,0x0000,
+    0x003c,0x404c,0x9200,0x0000,
+    0x004c,0x404c,0x9204,0x0000,
+    0x003c,0x005c,0x9208,0x0000,
+    0x0054,0x005c,0x9228,0x0000,
+    0x003c,0x0064,0x9208,0x0000,
+    0x0054,0x0064,0x9228,0x0000,
+    0x003c,0x006c,0x9208,0x0000,
+    0x0054,0x006c,0x9228,0x0000,
+    0x003c,0x0074,0x9208,0x0000,
+    0x0054,0x0074,0x9228,0x0000,
+    0x003c,0x007c,0x9208,0x0000,
+    0x0054,0x007c,0x9228,0x0000,
+    0x003c,0x0084,0x9208,0x0000,
+    0x0054,0x0084,0x9228,0x0000,
+    0x003c,0x008c,0x9208,0x0000,
+    0x0054,0x008c,0x9228,0x0000,
+    0x003c,0x4094,0x9202,0x0000,
+    0x004c,0x4094,0x9206,0x0000,
+    
+    0x8044,0x005c,0x9255,0x0000,	//TOAD
+    0x8044,0x0064,0x9256,0x0000,
+    0x8044,0x006c,0x9257,0x0000,
+    0x8044,0x0074,0x9258,0x0000,
+    0x8044,0x007c,0x9259,0x0000,
+    0x8044,0x0084,0x925a,0x0000,
+    0x8044,0x008c,0x925b,0x0000,
+    0x003c,0x404c,0x9200,0x0000,
+    0x004c,0x404c,0x9204,0x0000,
+    0x003c,0x005c,0x9208,0x0000,
+    0x0054,0x005c,0x9228,0x0000,
+    0x003c,0x0064,0x9208,0x0000,
+    0x0054,0x0064,0x9228,0x0000,
+    0x003c,0x006c,0x9208,0x0000,
+    0x0054,0x006c,0x9228,0x0000,
+    0x003c,0x0074,0x9208,0x0000,
+    0x0054,0x0074,0x9228,0x0000,
+    0x003c,0x007c,0x9208,0x0000,
+    0x0054,0x007c,0x9228,0x0000,
+    0x003c,0x0084,0x9208,0x0000,
+    0x0054,0x0084,0x9228,0x0000,
+    0x003c,0x008c,0x9208,0x0000,
+    0x0054,0x008c,0x9228,0x0000,
+    0x003c,0x4094,0x9202,0x0000,
+    0x004c,0x4094,0x9206,0x0000,
+    
+    0x8044,0x005c,0x9247,0x0000,	//LUIGI
+    0x8044,0x0064,0x9248,0x0000,
+    0x8044,0x006c,0x9249,0x0000,
+    0x8044,0x0074,0x924a,0x0000,
+    0x8044,0x007c,0x924b,0x0000,
+    0x8044,0x0084,0x924c,0x0000,
+    0x8044,0x008c,0x924d,0x0000,
+    0x003c,0x404c,0x9200,0x0000,
+    0x004c,0x404c,0x9204,0x0000,
+    0x003c,0x005c,0x9208,0x0000,
+    0x0054,0x005c,0x9228,0x0000,
+    0x003c,0x0064,0x9208,0x0000,
+    0x0054,0x0064,0x9228,0x0000,
+    0x003c,0x006c,0x9208,0x0000,
+    0x0054,0x006c,0x9228,0x0000,
+    0x003c,0x0074,0x9208,0x0000,
+    0x0054,0x0074,0x9228,0x0000,
+    0x003c,0x007c,0x9208,0x0000,
+    0x0054,0x007c,0x9228,0x0000,
+    0x003c,0x0084,0x9208,0x0000,
+    0x0054,0x0084,0x9228,0x0000,
+    0x003c,0x008c,0x9208,0x0000,
+    0x0054,0x008c,0x9228,0x0000,
+    0x003c,0x4094,0x9202,0x0000,
+    0x004c,0x4094,0x9206,0x0000,
+    
+/*    0x0050,0x4060,0x820c,0x0000,	//MARIO
+    0x0050,0x4070,0x820e,0x0000,
+    0x0050,0x4080,0x8210,0x0000,
+    0x00a0,0x0000,0x0000,0x0000,
+
+    0x0050,0x4058,0x8218,0x0000,	//PRINCESS
+    0x0050,0x4068,0x821a,0x0000,
+    0x0050,0x4078,0x821c,0x0000,
+    0x0050,0x4088,0x821e,0x0000,
+
+    0x0050,0x4068,0x8208,0x0000,	//TOAD
+    0x0050,0x4078,0x8208,0x0000,
+    0x00a0,0x0000,0x0000,0x0000,
+    0x00a0,0x0000,0x0000,0x0000,
+
+    0x0050,0x4060,0x8212,0x0000,	//LUIGI
+    0x0050,0x4070,0x8214,0x0000,
+    0x0050,0x4080,0x8216,0x0000,
+    0x00a0,0x0000,0x0000,0x0000,*/
+};
+
+void ending_COTRDSP(void)
+{
+    if(KUJIPT < 12){
+	DmaCopy(3, ending_MVP_data, OamBak + 20, 0x10, 16);
+    }
+    else{
+	DmaCopy(3, ending_COPLDT0 + CODSNO[COTRCNT1] * 100, OamBak + 20, 0xc8, 16);
+
+	COFRCNT--;
+	if(COFRCNT < 0){
+	    COFRCNT = 60;
+//	DmaCopy(3, ending_COPLDT0 + (CODSNO[COTRCNT1] * 8), VRAM  + 0xf198, 16, 16);
+	    COTRCNT1--;
+	    if(COTRCNT1 == 0xff)
+		COTRCNT1 = COTRCNT;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		マムー運ばれ処理テーブル			*/
+/*--------------------------------------------------------------*/
+mfunc ending_DEMAIN_table[] = {
+    ending_MAMUU,
+    ending_YRRMRK,
+};
+
+/*--------------------------------------------------------------*/
+/*		マムー運ばれ処理				*/
+/*--------------------------------------------------------------*/
+void ending_DEMAIN(void)
+{
+    ending_PLOAMST();
+    ending_DEMAIN_table[DEMOCT]();
+}
+
+/*--------------------------------------------------------------*/
+/*		スクロール処理					*/
+/*--------------------------------------------------------------*/
+void ending_scroll(void)
+{
+    TTLTM++;
+    if(TTLTM == 10){
+	TTLTM = 0;
+	game.scch1 -= 0x30;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤーＯＡＭセット処理			*/
+/*--------------------------------------------------------------*/
+static u16 ending_CHDATA[] = {
+    0x01CA,0x018A,		//;mario
+    0x01CC,0x018C,
+    0x01CE,0x018E,		//;luiji
+    0x01D6,0x0190,
+    0x01DC,0x01DC,		//;pinokio
+    0x01DE,0x0194,
+    0x01D8,0x0192,		//;piech
+    0x01DA,0x01DA,
+};
+
+void ending_PLOAMST(void)
+{
+    u8 pl_loop;
+    u8 work1;
+    u16 int_x;
+
+    ending_STOBJST();
+
+    PLAY_PLWALK++;
+    work1 = PLAY_PLWALK;
+    for(pl_loop = 3; pl_loop != 0xff; pl_loop--){
+	int_x = pl_loop * 4 + 2;
+	work1++;
+	if((work1 & 0x10) != 0)
+	    int_x++;
+
+	OamBak[5 + pl_loop * 2].CharNo = ending_CHDATA[int_x];
+	int_x -= 2;
+	OamBak[4 + pl_loop * 2].CharNo = ending_CHDATA[int_x];
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		マムー移動処理					*/
+/*--------------------------------------------------------------*/
+static u32 ending_YRMXSP[] = {
+    0xFFC00000,0xFFC80000,0xFFB80000,0xFFB80000,0xFFC80000,0xFFC0000,
+};
+
+static u32 ending_YRMYSP[] = {
+    0xFFC00000,0xFF80000,0xFFE00000,0xFFF00000,0xFFD00000,0xFFE80000,
+};
+
+static u16 ending_MACHR[] = {
+    0x01C0,0x01C2,0x01C4,
+    0x01D0,0x01D2,0x01D4,
+};
+
+static u16 ending_MAXAD[] = {
+    0x0000,0x0010,0x0020,
+    0x0000,0x0010,0x0020,
+};
+
+static u16 ending_MAYAD[] = {
+    0x0000,0x0000,0x0000,
+    0x0010,0x0010,0x0010,
+};
+
+void ending_MAMUU(void)
+{
+    aAC_base_c *abs_pt;
+    u8 ma_loop;
+    u8 int_y;
+    u8 work;
+
+    player_XCALC(p_ply);
+    if(PLAY_PLXPOSH >= 0x120){
+	DEMOCT++;
+	mGm_FRAME_COUNT = 0xa0;
+	for(ma_loop = 5; ma_loop != 0xff; ma_loop--){
+	    abs_pt = &(p_act->a_base[ma_loop]);
+	    ABASE_XPOSH(abs_pt) = 0x110;
+	    ABASE_YPOSH(abs_pt) = 0x68;
+	    ABASE_XSPD(abs_pt) = ending_YRMXSP[ma_loop];
+	    ABASE_YSPD(abs_pt) = ending_YRMYSP[ma_loop];
+	    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+	    ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	}
+    }
+    int_y = 0x60;
+    if((mGm_FRAME_COUNT & 0x38) == 0)
+	int_y--;
+    if((mGm_FRAME_COUNT & 0x8) == 8)
+	int_y--;
+    PLAY_PLYPOSH = int_y;
+    PLAY_PLYPOSL = PLAY_PLYPOSH << 16;
+    int_y = 0x1c;
+    for(ma_loop = 5; ma_loop != 0xff; ma_loop--){
+	work = 0;
+	OamBak[int_y].CharNo = ending_MACHR[ma_loop];
+	OamBak[int_y].Shape = 0;
+	OamBak[int_y].Size = 1;
+	OamBak[int_y].Pltt = 5;
+	OamBak[int_y].Priority = 0;
+	OamBak[int_y].ColorMode = 0;
+	OamBak[int_y].HPos = PLAY_PLXPOSH + ending_MAXAD[ma_loop];
+	if(((PLAY_PLXPOSH + ending_MAXAD[ma_loop] + 0x18) < 0x100) &&
+	   ((PLAY_PLXPOSH + ending_MAXAD[ma_loop] + 0x18) >= 0))
+	    OamBak[int_y].VPos = PLAY_PLYPOSH + ending_MAYAD[ma_loop];
+	int_y--;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		星が飛ぶ処理					*/
+/*--------------------------------------------------------------*/
+static u16 ending_YRMCHR[] = {
+	0x01C8,0x01C6,0x01C7,0x01C6,0x01C7,0x01C8
+};
+
+static u8 ending_INTTM[] = {
+	0x00,0x06,0x03,0x09,0x0F,0x0C
+};
+
+void ending_YRRMRK(void)
+{
+    aAC_base_c *abs_pt;
+    u8 st_loop;
+
+    if(mGm_FRAME_COUNT == 0){
+	abs_pt = &(p_act->a_base[6]);
+	ABASE_XPOSH(abs_pt) = 0;
+	ABASE_YPOSH(abs_pt) = 0x6f;
+	ABASE_XSPD(abs_pt) = 0xffe60000;
+	ABASE_YSPD(abs_pt) = 0xffda0000;
+	ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+	ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	DEMOCT++;
+    }
+    for(st_loop = 5; st_loop != 0xff; st_loop--){
+	abs_pt = &(p_act->a_base[st_loop]);
+	u_ending_WENXCLC(abs_pt);
+	u_ending_WENYCLC(abs_pt);
+	if(mGm_FRAME_COUNT != 0){
+	    if((mGm_FRAME_COUNT & 0xf) == ending_INTTM[st_loop]){
+		ABASE_XPOSH(abs_pt) = 0x110;
+		ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+		ABASE_YPOSH(abs_pt) = 0x68;
+		ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	    }
+	}
+	else{
+	    ABASE_YPOSH(abs_pt) = 0x60;
+	    ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	}
+	if((ABASE_XPOSH(abs_pt) & 0xff) >= 0x80){
+	    OamBak[0x1c + st_loop *2].HPos = ABASE_XPOSH(abs_pt) & 0xff;
+	    OamBak[0x1d + st_loop *2].HPos = ABASE_XPOSH(abs_pt) & 0xff;
+	    OamBak[0x1c + st_loop *2].VPos = ABASE_YPOSH(abs_pt) & 0xff;
+	    OamBak[0x1d + st_loop *2].VPos = (ABASE_YPOSH(abs_pt) & 0xff) + 8;
+	    OamBak[0x1c + st_loop *2].CharNo = ending_YRMCHR[st_loop];
+	    OamBak[0x1d + st_loop *2].CharNo = ending_YRMCHR[st_loop] | 0x20;
+	    OamBak[0x1c + st_loop *2].Shape = 0;
+	    OamBak[0x1d + st_loop *2].Shape = 0;
+	    OamBak[0x1c + st_loop *2].Size = 0;
+	    OamBak[0x1d + st_loop *2].Size = 0;
+	    OamBak[0x1c + st_loop *2].Priority = 0;
+	    OamBak[0x1d + st_loop *2].Priority = 0;
+	    OamBak[0x1c + st_loop *2].ColorMode = 0;
+	    OamBak[0x1d + st_loop *2].ColorMode = 0;
+	    OamBak[0x1c + st_loop *2].Pltt = 1;
+	    OamBak[0x1d + st_loop *2].Pltt = 1;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		マリオのキャラクターチェンジ処理		*/
+/*--------------------------------------------------------------*/
+static u16 ending_MASLEP1[] = {
+    0x0000,0x0200,0x0400,0x0600,0x0800,0x0a00,0x0c00,0x0e00,
+    0x0c00,0x0a00,0x0800,0x0600,0x0400,0x0200,
+};
+
+static u16 ending_MASLEP2[] = {
+    0x1400,0x1200,0x1000,0x1600,0x1000,0x1200,0x1400
+};
+
+void ending_BGCCNG10(void)
+{
+    if((ENDSFG & 3) != 2){
+	DmaCopy(3, ud_ending2_bg_schDT + ending_MASLEP1[SPRAM], VRAM, 0x800, 32);
+    }
+    else{
+	DmaCopy(3, ud_ending2_bg_schDT + ending_MASLEP2[SPRAM], VRAM, 0x800, 32);
+    }
+
+}
+
+/*--------------------------------------------------------------*/
+/*								*/
+/*--------------------------------------------------------------*/
+static u16 ending_SPPLDT1[] = {
+    0x0008,0x00B8,0x04D0,0x0000,	//;mario
+    0x0010,0x00B8,0x04F0,0x0000,	//;
+    0x0008,0x00C0,0x14D1,0x0000,	//;ruiji
+    0x0010,0x00C0,0x14F1,0x0000,	//;
+    0x0008,0x00C8,0x34D3,0x0000,	//;kinopio
+    0x0010,0x00C8,0x34F3,0x0000,	//;
+    0x0008,0x00D0,0x24D2,0x0000,	//;pichi
+    0x0010,0x00D0,0x24F2,0x0000,	//;
+};
+
+static u16 ending_SPPLDT2[] = {
+    0x0008,0x00B8,0x04D4,0x0000,	//;mario
+    0x0010,0x00B8,0x04F4,0x0000,	//;
+    0x0008,0x00C0,0x14D5,0x0000,	//;ruiji
+    0x0010,0x00C0,0x14F5,0x0000,	//;
+    0x0008,0x00C8,0x34D7,0x0000,	//;kinopio
+    0x0010,0x00C8,0x34F7,0x0000,	//;
+    0x0008,0x00D0,0x24D6,0x0000,	//;pichi
+    0x0010,0x00D0,0x24F6,0x0000,	//;
+};
+
+static u16 ending_SPPLDT3[] = {
+    0x002F,0x00B0,0x04F8,0x0000,	//;banzai
+    0x002F,0x00B8,0x04D8,0x0000,	//;
+    0x002F,0x00C0,0x04F8,0x0000,	//;
+    0x002F,0x00C8,0x04D8,0x0000,	//;
+    0x002F,0x00D0,0x04F8,0x0000,	//;
+    0x002F,0x00D8,0x04D8,0x0000,	//;
+};
+
+static u16 ending_SPPLDT4[] = {
+    0x002F,0x00B0,0x04D8,0x0000,	//;banzai
+    0x002F,0x00B8,0x04F8,0x0000,	//;
+    0x002F,0x00C0,0x04D8,0x0000,	//;
+    0x002F,0x00C8,0x04F8,0x0000,	//;
+    0x002F,0x00D0,0x04D8,0x0000,	//;
+    0x002F,0x00D8,0x04F8,0x0000,	//;
+};
+
+void ending_SPPLSET(void)
+{
+    if((SPPLFLG & 1) == 0){
+	DmaCopy(3, ending_SPPLDT1, OamBak, 0x40, 16);
+    }
+    else{
+	DmaCopy(3, ending_SPPLDT2, OamBak, 0x40, 16);
+    }
+
+    if((SPPLFLG & 1) == 0){
+	DmaCopy(3, ending_SPPLDT3, OamBak + 8, 0x30, 16);
+    }
+    else{
+	DmaCopy(3, ending_SPPLDT4, OamBak + 8, 0x30, 16);
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		キャストイニシャル処理				*/
+/*--------------------------------------------------------------*/
+static u16 ending_CASTDT[] = {		// modified by Yu Ting
+    0x8040,0x0020,0x2618,0x0000,
+    0x8040,0x0028,0x2619,0x0000,
+    0x8040,0x0038,0x261a,0x0000,
+    0x8040,0x0040,0x261b,0x0000,
+/*	0x0050,0x0020,0x2638,0x0000,
+    0x0050,0x0028,0x2639,0x0000,
+    0x0050,0x0038,0x263a,0x0000,
+    0x0050,0x0040,0x263b,0x0000,
+*/
+};
+
+void ending_CASTINT(void)
+{
+    DmaCopy(3, ending_CASTDT, OamBak + 0x10, 0x20, 16);
+
+    CFRCNT = 2;
+    CSSLFG = 0;
+    FDIPT = 0;
+    DmaClear(3, 0x2727, DSFCDT, 0x40, 16);
+    DSFCDT[28] = 0x47;
+}
+
+/*--------------------------------------------------------------*/
+/*		キャスト表示処理				*/
+/*--------------------------------------------------------------*/
+mfunc ending_CASTMV_table[] = {
+    ending_CSFDIN,		//0 キャストフェードイン処理
+    ending_CSTIM,		//1 タイマー待ち処理
+    ending_CSSCR,		//2 ”ＣＡＳＴ”ＯＡＭスクロール処理
+    ending_CSSCR1,		//3 キャストＯＡＭスクロール処理
+    ending_MAMUINT,		//4 マムーイニシャル処理
+    ending_MAMUSCR,		//5 マムースクロール処理
+    ending_MAMUMV,		//6 マムー移動処理
+    ending_MMUFDOUT,		//7 マムーフェード処理
+    ending_MAMUDEL,		//8 マムークリアタイマー処理
+    ending_DSENINT,		//9 ”ＴＨＥ　@ＥＮＤ”表示イニシャル処理
+    ending_DSPEND,		//A ”ＴＨＥ　@ＥＮＤ”表示処理
+};
+
+void ending_CASTMV(void)
+{
+    SCFCNT++;
+    if((SCFCNT & 1) == 0){
+	DSFCNT1--;
+	DSFCNT2--;
+	DSFCNT3--;
+    }
+
+    ending_CASTMV_table[CSSLFG]();
+}
+
+/*--------------------------------------------------------------*/
+/*		ＰＵＳＨ　@ＳＴＡＲＴ処理			*/
+/*--------------------------------------------------------------*/
+void ending_ENDPAS(void)
+{
+    u8 nuki_flg;
+    u32 work;
+
+    if(SPWORK == 0x2a){
+	if(PSTSND == 0){
+	    ENDWAT--;
+	    if(ENDWAT == 0){
+		PSTSND = 1;
+		m4aSongNumStart(s_u_se_final);
+		DmaArrayCopy(3, ending_ENSTRTD, OamBak + 0x40, 16);
+		if(HI_FLAG == 0){
+		    OamBak[0x49].CharNo = 0xd9;
+		    OamBak[0x4a].CharNo = 0xd9;
+		    OamBak[0x4b].CharNo = 0xd9;
+		    OamBak[0x4c].CharNo = 0xd9;
+		    OamBak[0x4d].CharNo = 0xd9;
+		    work = SCORE;
+		}
+		else
+		    work = U_HI_SCORE;
+
+		nuki_flg = 0;
+		if((work / 10000000) != 0){
+		    OamBak[0x40].CharNo = (work / 10000000) + 0x190;
+		    work = work % 10000000;
+		    nuki_flg++;
+		}
+
+		if(((work / 1000000) != 0) || (nuki_flg != 0)){
+		    OamBak[0x41].CharNo = (work / 1000000) + 0x190;
+		    work = work % 1000000;
+		    nuki_flg++;
+		}
+
+		if(((work / 100000) != 0) || (nuki_flg != 0)){
+		    OamBak[0x42].CharNo = (work / 100000) + 0x190;
+		    work = work % 100000;
+		    nuki_flg++;
+		}
+
+		if(((work / 10000) != 0) || (nuki_flg != 0)){
+		    OamBak[0x43].CharNo = (work / 10000) + 0x190;
+		    work = work % 10000;
+		    nuki_flg++;
+		}
+
+		if(((work / 1000) != 0) || (nuki_flg != 0)){
+		    OamBak[0x44].CharNo = (work / 1000) + 0x190;
+		    work = work % 1000;
+		    nuki_flg++;
+		}
+
+		if(((work / 100) != 0) || (nuki_flg != 0)){
+		    OamBak[0x45].CharNo = (work / 100) + 0x190;
+		    work = work % 100;
+		    nuki_flg++;
+		}
+
+		if(((work / 10) != 0) || (nuki_flg != 0)){
+		    OamBak[0x46].CharNo = (work / 10) + 0x190;
+		    work = work % 10;
+		    nuki_flg++;
+		}
+
+		if(((work % 10) != 0) || (nuki_flg != 0)){
+		    OamBak[0x47].CharNo = (work % 10) + 0x190;
+		    nuki_flg++;
+		}
+	    }
+	}
+	else{
+	    if(game.Trg & START_BUTTON){
+		PAUSE_TIM = 0;
+		PAUSE_CUR = 0;
+		WIN0H = 0x50a0;
+		WIN1H = 0x30c0;
+		WIN0V = 0x4858;
+		WIN1V = 0x2878;
+		WININ = 0x0f10;
+		WINOUT = 0x3f;
+		DISPCNT |= 0x6000;
+		DmaArrayCopy(3, ending_save, OamBak + 0x40, 16);
+		mGm_GMMODE++;
+		m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 100);
+		m4aSongNumStart( s_u_se_pause );
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		キャストフェードイン処理			*/
+/*--------------------------------------------------------------*/
+static u16 ending_CSFCDT[] = {
+    0x58E0,0x6D40,0x7DA0,0x7E80,0x7FFF,
+};
+
+void ending_CSFDIN(void)
+{
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+	CFRCNT = 2;
+	FDIPT++;
+	*(u16 *)(COL_BUF + 0x242) = ending_CSFCDT[FDIPT];
+	COL_FLAG = 1;
+	if(FDIPT == 4){
+	    CSSLFG++;
+	    CFRCNT = 0x80;
+	    CYPOS1[0] = 0x48;
+	    DSPLYFG1 = 1;
+	    CASTFG = 1;
+	    DSPLYFG2 = 0;
+	    DSPLYFG3 = 0;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		タイマー待ち処理				*/
+/*--------------------------------------------------------------*/
+void ending_CSTIM(void)
+{
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+	CSSLFG++;
+	DSPPT1 = 0;
+	HEBIFLG = 0;
+	DSFCNT2 = 2;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		”ＣＡＳＴ”ＯＡＭスクロール処理		*/
+/*--------------------------------------------------------------*/
+void ending_CSSCR(void)
+{
+    if((SCFCNT & 1) != 0){
+	CYPOS1[0]--;
+	if(CYPOS1[0] == 0xf8){
+	    OamBak[0x10].VPos = 0xf0;
+	    OamBak[0x11].VPos = 0xf0;
+	    OamBak[0x12].VPos = 0xf0;
+	    OamBak[0x13].VPos = 0xf0;
+	    CSSLFG++;
+	    CASTFG = 0;
+	    DSPLYFG1 = 0;
+	    SCFCNT = 0;
+	}
+	else{
+	    OamBak[0x10].VPos = CYPOS1[0];
+	    OamBak[0x11].VPos = CYPOS1[0];
+	    OamBak[0x12].VPos = CYPOS1[0];
+	    OamBak[0x13].VPos = CYPOS1[0];
+	}
+    }
+    ending_CSSCR1();
+}
+
+/*--------------------------------------------------------------*/
+/*		キャストＯＡＭスクロール処理			*/
+/*--------------------------------------------------------------*/
+void ending_CSSCR1(void)
+{
+    u16 *cwork0;
+    u16 en_loop;
+
+    if(DSPLYFG1 == 0){
+	if(DSFCNT1 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    DmaCopy(3, cwork0, OamBak + 0x10, 0x60, 16);
+	    DSPLYFG1 = 1;
+	    CYPOS1[0] = 0xa0;
+	    CYPOS1[1] = 0xb0;
+	    DSPPT1++;
+	    if(DSPPT1 == 30)
+		CYPOS1[2] = 0xc0;
+	    else
+		CYPOS1[2] = 0xc8;
+	}
+    }
+    if(DSPLYFG2 == 0){
+	if(DSFCNT2 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    if(DSPPT1 == 27){
+		DmaCopy(3, cwork0, OamBak + 0x20, 0x80, 16);
+	    }
+	    else{
+		DmaCopy(3, cwork0, OamBak + 0x20, 0x60, 16);
+	    }
+	    for(en_loop = 0; en_loop < 12; en_loop++){
+		OamBak[0x40 + en_loop].VPos = 0xf0;
+		OamBak[0x40 + en_loop].CharNo = 0xd9;
+		OamBak[0x40 + en_loop].Pltt = 2;
+		OamBak[0x40 + en_loop].Priority = 1;
+	    }
+	    DSPLYFG2 = 1;
+	    CYPOS2[0] = 0xa0;
+	    CYPOS2[1] = 0xb0;
+	    DSPPT1++;
+	    if(DSPPT1 == 28){
+		CYPOS2[2] = 0xc0;
+		CYPOS2[3] = 0xd0;
+		CYPOS2[4] = 0xe8;
+	    }
+	    else{
+		CYPOS2[2] = 0xc8;
+		CYPOS2[3] = 0xf0;
+		CYPOS2[4] = 0xf0;
+	    }
+	}
+    }
+    if(DSPLYFG3 == 0){
+	if(DSFCNT3 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    DmaCopy(3, cwork0, OamBak + 0x30, 0x60, 16);
+//	    if(DSPPT1 < 28){
+		for(en_loop = 0; en_loop < 12; en_loop++){
+		    OamBak[0x50 + en_loop].VPos = 0xf0;
+		    OamBak[0x50 + en_loop].CharNo = 0xd9;
+		    OamBak[0x50 + en_loop].Pltt = 2;
+		    OamBak[0x50 + en_loop].Priority = 1;
+		}
+//	    }
+	    DSPLYFG3 = 1;
+	    CYPOS3[0] = 0xa0;
+	    CYPOS3[1] = 0xb0;
+	    CYPOS3[2] = 0xc8;
+	    DSPPT1++;
+	}
+    }
+
+    if(CASTFG == 0){
+	if((SCFCNT & 1) == 1){
+	    if(OamBak[0x10].VPos != 0xf0){
+		if((CYPOS1[0] - 1) == 0xf0)
+		    CYPOS1[0] = 0xf0;
+		else
+		    CYPOS1[0]--;
+		OamBak[0x10].VPos = CYPOS1[0];
+		OamBak[0x11].VPos = CYPOS1[0];
+	    }
+	    if(OamBak[0x12].VPos != 0xf0){
+		CYPOS1[1]--;
+		if((OamBak[0x12].VPos != 0xe9) ||
+		   ((OamBak[0x12].VPos == 0xe9) && (CYPOS1[1] == 0xa0))){
+		    if(CYPOS1[1] == 0xf0){
+			OamBak[0x12].VPos = 0xf0;
+			OamBak[0x13].VPos = 0xf0;
+		    }
+		    else{
+			OamBak[0x12].VPos = CYPOS1[1];
+			OamBak[0x13].VPos = CYPOS1[1];
+		    }
+		}
+	    }
+	    if(OamBak[0x14].VPos != 0xf0){
+		CYPOS1[2]--;
+		if(OamBak[0x14].VPos == 0xe9){
+		    if(CYPOS1[2] == 0xa0)
+			DSFCNT2 = DSFCDT[DSPPT1];
+		    else
+			goto CSS255;
+		}
+		if(DSPPT1 == 30){
+		    OamBak[0x14].Size = 1;
+		    OamBak[0x15].Size = 1;
+		    if(CYPOS1[2] == 0x88)
+			HEBIFLG = 1;
+		}
+		if(CYPOS1[2] == 0xf0){
+		    DSPLYFG1 = 0;
+		    if(DSPPT1 ==0xff)
+			DSPLYFG1 = 0xff;
+		    OamBak[0x14].VPos = 0xf0;
+		    OamBak[0x15].VPos = 0xf0;
+		    OamBak[0x16].VPos = 0xf0;
+		    OamBak[0x17].VPos = 0xf0;
+		    OamBak[0x18].VPos = 0xf0;
+		    OamBak[0x19].VPos = 0xf0;
+		    OamBak[0x1a].VPos = 0xf0;
+		    OamBak[0x1b].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x14].VPos = CYPOS1[2];
+		    OamBak[0x15].VPos = CYPOS1[2];
+		    OamBak[0x16].VPos = CYPOS1[2];
+		    OamBak[0x17].VPos = CYPOS1[2];
+		    OamBak[0x18].VPos = CYPOS1[2];
+		    OamBak[0x19].VPos = CYPOS1[2];
+		    OamBak[0x1a].VPos = CYPOS1[2];
+		    OamBak[0x1b].VPos = CYPOS1[2];
+		}
+		if(HEBIFLG != 0){
+		    DmaCopy(3, ending_HEBIDT, OamBak + 0x40, 0x40, 16);
+		    OamBak[0x20].CharNo = 0xd9;
+		    OamBak[0x21].CharNo = 0xd9;
+		    OamBak[0x22].CharNo = 0xd9;
+		    OamBak[0x23].CharNo = 0xd9;
+		    OamBak[0x20].Size = 0;
+		    OamBak[0x21].Size = 0;
+		    OamBak[0x22].Size = 0;
+		    OamBak[0x23].Size = 0;
+		    OamBak[0x20].Pltt = 2;
+		    OamBak[0x21].Pltt = 2;
+		    OamBak[0x22].Pltt = 2;
+		    OamBak[0x23].Pltt = 2;
+		    OamBak[0x20].Priority = 1;
+		    OamBak[0x21].Priority = 1;
+		    OamBak[0x22].Priority = 1;
+		    OamBak[0x23].Priority = 1;
+		    CYPOS2[0] = 0xa0;
+		    CYPOS2[1] = 0xa0;
+		    HEBIFLG = 0;
+		    DSPPT1 = 0xff;
+		}
+	    }
+	}
+    }
+CSS255:
+    if((SCFCNT & 1) == 1){
+	if((OamBak[0x40].VPos != 0xf0) || (OamBak[0x20].VPos != 0xf0)){
+	    if((CYPOS2[0] - 1) == 0xf0)
+		CYPOS2[0] = 0xf0;
+	    else
+		CYPOS2[0]--;
+	    OamBak[0x20].VPos = CYPOS2[0];
+	    OamBak[0x21].VPos = CYPOS2[0];
+	    OamBak[0x40].VPos = CYPOS2[0];
+	    OamBak[0x41].VPos = CYPOS2[0];
+	    OamBak[0x42].VPos = CYPOS2[0];
+	    OamBak[0x43].VPos = CYPOS2[0];
+	}
+
+	if((OamBak[0x40].VPos != 0xf0) || (OamBak[0x22].VPos != 0xf0)){
+	    CYPOS2[1]--;
+	    if((OamBak[0x40].VPos != 0xe9) ||
+	       (OamBak[0x22].VPos != 0xe9) ||
+	       ((OamBak[0x40].VPos == 0xe9) && (CYPOS2[1] == 0xa0)) ||
+	       ((OamBak[0x22].VPos == 0xe9) && (CYPOS2[1] == 0xa0))){
+		if(CYPOS2[1] == 0xf0){
+		    if(DSPPT1 == 0xff)
+			CSSLFG++;
+		    OamBak[0x22].VPos = 0xf0;
+		    OamBak[0x23].VPos = 0xf0;
+		    OamBak[0x44].VPos = 0xf0;
+		    OamBak[0x45].VPos = 0xf0;
+		    OamBak[0x46].VPos = 0xf0;
+		    OamBak[0x47].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x22].VPos = CYPOS2[1];
+		    OamBak[0x23].VPos = CYPOS2[1];
+		    OamBak[0x44].VPos = CYPOS2[1];
+		    OamBak[0x45].VPos = CYPOS2[1];
+		    OamBak[0x46].VPos = CYPOS2[1];
+		    OamBak[0x47].VPos = CYPOS2[1];
+		}
+	    }
+	}
+
+	if(OamBak[0x24].VPos != 0xf0){
+	    CYPOS2[2]--;
+	    if( OamBak[0x24].VPos == 0xe9){
+		if(CYPOS2[2] == 0xa0)
+		    DSFCNT3 = DSFCDT[DSPPT1];
+		else
+		    goto CSS354;
+	    }
+/*	    if(DSPPT1 == 28){
+		OamBak[0x24].Size = 1;
+		OamBak[0x25].Size = 1;
+		if(CYPOS2[2] == 0x88)
+			HEBIFLG = 1;
+			}*/
+	    if(CYPOS2[2] == 0xf0){
+		if(CYPOS2[3] == 0xf0){
+		    DSPLYFG2 = 0;
+		    if(DSPPT1 == 0xff)
+			DSPLYFG2 = 0xff;
+		}
+		OamBak[0x24].VPos = 0xf0;
+		OamBak[0x25].VPos = 0xf0;
+		if(CYPOS2[3] == 0xf0){
+		    OamBak[0x26].VPos = 0xf0;
+		    OamBak[0x27].VPos = 0xf0;
+		    OamBak[0x28].VPos = 0xf0;
+		    OamBak[0x29].VPos = 0xf0;
+		    OamBak[0x2a].VPos = 0xf0;
+		    OamBak[0x2b].VPos = 0xf0;
+		}
+	    }
+	    else{
+		OamBak[0x24].VPos = CYPOS2[2];
+		OamBak[0x25].VPos = CYPOS2[2];
+		if(CYPOS2[3] == 0xf0){
+		    OamBak[0x26].VPos = CYPOS2[2];
+		    OamBak[0x27].VPos = CYPOS2[2];
+		    OamBak[0x28].VPos = CYPOS2[2];
+		    OamBak[0x29].VPos = CYPOS2[2];
+		    OamBak[0x2a].VPos = CYPOS2[2];
+		    OamBak[0x2b].VPos = CYPOS2[2];
+		}
+	    }
+/*	    if(HEBIFLG != 0){
+		DmaCopy(3, ending_DEBUDT, OamBak + 0x50, 0x40, 16);
+		OamBak[0x30].CharNo = 0xd9;
+		OamBak[0x31].CharNo = 0xd9;
+		OamBak[0x32].CharNo = 0xd9;
+		OamBak[0x33].CharNo = 0xd9;
+		OamBak[0x30].Size = 0;
+		OamBak[0x31].Size = 0;
+		OamBak[0x32].Size = 0;
+		OamBak[0x33].Size = 0;
+		OamBak[0x30].Pltt = 2;
+		OamBak[0x31].Pltt = 2;
+		OamBak[0x32].Pltt = 2;
+		OamBak[0x33].Pltt = 2;
+		OamBak[0x30].Priority = 1;
+		OamBak[0x31].Priority = 1;
+		OamBak[0x32].Priority = 1;
+		OamBak[0x33].Priority = 1;
+		CYPOS3[0] = 0xb0;
+		CYPOS3[1] = 0xb0;
+		HEBIFLG = 0;
+		}*/
+	}
+
+CSS354:
+	if((OamBak[0x26].VPos != 0xf0) && (CYPOS2[3] != 0xf0)){
+	    CYPOS2[3]--;
+	    if(CYPOS2[3] == 0xf0){
+		OamBak[0x26].VPos = 0xf0;
+		OamBak[0x27].VPos = 0xf0;
+	    }
+	    else{
+		OamBak[0x26].VPos = CYPOS2[3];
+		OamBak[0x27].VPos = CYPOS2[3];
+	    }
+	}
+
+	if((OamBak[0x28].VPos != 0xf0) && (CYPOS2[4] != 0xf0)){
+	    CYPOS2[4]--;
+	    if(CYPOS2[4] == 0xf0){
+		OamBak[0x28].VPos = 0xf0;
+		OamBak[0x29].VPos = 0xf0;
+		OamBak[0x2a].VPos = 0xf0;
+		OamBak[0x2b].VPos = 0xf0;
+		OamBak[0x2c].VPos = 0xf0;
+		OamBak[0x2d].VPos = 0xf0;
+		OamBak[0x2e].VPos = 0xf0;
+		OamBak[0x2f].VPos = 0xf0;
+	    }
+	    else{
+		OamBak[0x28].VPos = CYPOS2[4];
+		OamBak[0x29].VPos = CYPOS2[4];
+		OamBak[0x2a].VPos = CYPOS2[4];
+		OamBak[0x2b].VPos = CYPOS2[4];
+		OamBak[0x2c].VPos = CYPOS2[4];
+		OamBak[0x2d].VPos = CYPOS2[4];
+		OamBak[0x2e].VPos = CYPOS2[4];
+		OamBak[0x2f].VPos = CYPOS2[4];
+	    }
+	}
+    }
+
+CSS355:
+    if((SCFCNT & 1) == 1){
+	if(OamBak[0x30].VPos != 0xf0){
+	    if((CYPOS3[0] - 1) == 0xf0)
+		CYPOS3[0] = 0xf0;
+	    else
+		CYPOS3[0]--;
+	    OamBak[0x30].VPos = CYPOS3[0];
+	    OamBak[0x31].VPos = CYPOS3[0];
+	}
+
+	if(OamBak[0x32].VPos != 0xf0){
+	    CYPOS3[1]--;
+	    if((OamBak[0x32].VPos != 0xe9) ||
+	       ((OamBak[0x32].VPos == 0xe9) && (CYPOS3[1] == 0xa0))){
+		if(CYPOS3[1] == 0xf0){
+		    OamBak[0x32].VPos = 0xf0;
+		    OamBak[0x33].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x32].VPos = CYPOS3[1];
+		    OamBak[0x33].VPos = CYPOS3[1];
+		}
+	    }
+	}
+
+	if(OamBak[0x34].VPos != 0xf0){
+	    CYPOS3[2]--;
+	    if(OamBak[0x34].VPos == 0xe9){
+		if(CYPOS3[2] == 0xa0)
+		    DSFCNT1 = DSFCDT[DSPPT1];
+		else
+		    return;
+	    }
+	    if(CYPOS3[2] == 0xf0){
+		DSPLYFG3 = 0;
+		if(DSPPT1 == 0xff)
+		    DSPLYFG3 = 0xff;
+		OamBak[0x34].VPos = 0xf0;
+		OamBak[0x35].VPos = 0xf0;
+		OamBak[0x36].VPos = 0xf0;
+		OamBak[0x37].VPos = 0xf0;
+		OamBak[0x38].VPos = 0xf0;
+		OamBak[0x39].VPos = 0xf0;
+		OamBak[0x3a].VPos = 0xf0;
+		OamBak[0x3b].VPos = 0xf0;
+	    }
+	    else{
+		OamBak[0x34].VPos = CYPOS3[2];
+		OamBak[0x35].VPos = CYPOS3[2];
+		OamBak[0x36].VPos = CYPOS3[2];
+		OamBak[0x37].VPos = CYPOS3[2];
+		OamBak[0x38].VPos = CYPOS3[2];
+		OamBak[0x39].VPos = CYPOS3[2];
+		OamBak[0x3a].VPos = CYPOS3[2];
+		OamBak[0x3b].VPos = CYPOS3[2];
+	    }
+	}
+    }
+}
+
+/*void ending_CSSCR1(void)
+{
+    u16 *cwork0;
+    u16 en_loop;
+
+    if(DSPLYFG1 == 0){
+	if(DSFCNT1 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    DmaCopy(3, cwork0, OamBak + 0x10, 0x60, 16);
+	    for(en_loop = 0; en_loop < 12; en_loop++){
+		OamBak[0x40 + en_loop].VPos = 0xf0;
+		OamBak[0x40 + en_loop].CharNo = 0xd9;
+		OamBak[0x40 + en_loop].Pltt = 2;
+		OamBak[0x40 + en_loop].Priority = 1;
+	    }
+	    DSPLYFG1 = 1;
+	    CYPOS1[0] = 0xa0;
+	    CYPOS1[1] = 0xb0;
+	    CYPOS1[2] = 0xc8;
+	    DSPPT1++;
+	}
+    }
+    if(DSPLYFG2 == 0){
+	if(DSFCNT2 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    DmaCopy(3, cwork0, OamBak + 0x20, 0x60, 16);
+	    DSPLYFG2 = 1;
+	    CYPOS2[0] = 0xa0;
+	    CYPOS2[1] = 0xb0;
+	    CYPOS2[2] = 0xc8;
+	    DSPPT1++;
+	}
+    }
+    if(DSPLYFG3 == 0){
+	if(DSFCNT3 == 0){
+	    cwork0 = ending_ADRCAL_table[DSPPT1];
+	    DmaCopy(3, cwork0, OamBak + 0x30, 0x60, 16);
+	    DSPLYFG3 = 1;
+	    CYPOS3[0] = 0xa0;
+	    CYPOS3[1] = 0xb0;
+	    DSPPT1++;
+	    if(DSPPT1 == 29)
+		CYPOS3[2] = 0xc0;
+	    else
+		CYPOS3[2] = 0xc8;
+	}
+    }
+
+    if(CASTFG == 0){
+	if((SCFCNT & 1) == 1){
+	    if((OamBak[0x40].VPos != 0xf0) || (OamBak[0x10].VPos != 0xf0)){
+		if((CYPOS1[0] - 1) == 0xf0)
+		    CYPOS1[0] = 0xf0;
+		else
+		    CYPOS1[0]--;
+		OamBak[0x10].VPos = CYPOS1[0];
+		OamBak[0x11].VPos = CYPOS1[0];
+		OamBak[0x40].VPos = CYPOS1[0];
+		OamBak[0x41].VPos = CYPOS1[0];
+		OamBak[0x42].VPos = CYPOS1[0];
+		OamBak[0x43].VPos = CYPOS1[0];
+	    }
+	    if((OamBak[0x40].VPos != 0xf0) || (OamBak[0x12].VPos != 0xf0)){
+		CYPOS1[1]--;
+		if((OamBak[0x40].VPos != 0xe9) ||
+		   (OamBak[0x12].VPos != 0xe9) ||
+		   ((OamBak[0x40].VPos == 0xe9) && (CYPOS1[1] == 0xa0)) ||
+		   ((OamBak[0x12].VPos == 0xe9) && (CYPOS1[1] == 0xa0))){
+		    if(CYPOS1[1] == 0xf0){
+			if(DSPPT1 == 0xff)
+			    CSSLFG++;
+			OamBak[0x12].VPos = 0xf0;
+			OamBak[0x13].VPos = 0xf0;
+			OamBak[0x44].VPos = 0xf0;
+			OamBak[0x45].VPos = 0xf0;
+			OamBak[0x46].VPos = 0xf0;
+			OamBak[0x47].VPos = 0xf0;
+		    }
+		    else{
+			OamBak[0x12].VPos = CYPOS1[1];
+			OamBak[0x13].VPos = CYPOS1[1];
+			OamBak[0x44].VPos = CYPOS1[1];
+			OamBak[0x45].VPos = CYPOS1[1];
+			OamBak[0x46].VPos = CYPOS1[1];
+			OamBak[0x47].VPos = CYPOS1[1];
+		    }
+		}
+	    }
+	    if(OamBak[0x14].VPos != 0xf0){
+		CYPOS1[2]--;
+		if(OamBak[0x14].VPos == 0xe9){
+		    if(CYPOS1[2] == 0xa0)
+			DSFCNT2 = DSFCDT[DSPPT1];
+		    else
+			goto CSS255;
+		}
+		if(CYPOS1[2] == 0xf0){
+		    DSPLYFG1 = 0;
+		    if(DSPPT1 ==0xff)
+			DSPLYFG1 = 0xff;
+		    OamBak[0x14].VPos = 0xf0;
+		    OamBak[0x15].VPos = 0xf0;
+		    OamBak[0x16].VPos = 0xf0;
+		    OamBak[0x17].VPos = 0xf0;
+		    OamBak[0x18].VPos = 0xf0;
+		    OamBak[0x19].VPos = 0xf0;
+		    OamBak[0x1a].VPos = 0xf0;
+		    OamBak[0x1b].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x14].VPos = CYPOS1[2];
+		    OamBak[0x15].VPos = CYPOS1[2];
+		    OamBak[0x16].VPos = CYPOS1[2];
+		    OamBak[0x17].VPos = CYPOS1[2];
+		    OamBak[0x18].VPos = CYPOS1[2];
+		    OamBak[0x19].VPos = CYPOS1[2];
+		    OamBak[0x1a].VPos = CYPOS1[2];
+		    OamBak[0x1b].VPos = CYPOS1[2];
+		}
+	    }
+	}
+    }
+CSS255:
+    if((SCFCNT & 1) == 1){
+	if(OamBak[0x20].VPos != 0xf0){
+	    if((CYPOS2[0] - 1) == 0xf0)
+		CYPOS2[0] = 0xf0;
+	    else
+		CYPOS2[0]--;
+	    OamBak[0x20].VPos = CYPOS2[0];
+	    OamBak[0x21].VPos = CYPOS2[0];
+	}
+
+	if(OamBak[0x22].VPos != 0xf0){
+	    CYPOS2[1]--;
+	    if((OamBak[0x22].VPos != 0xe9) ||
+	       ((OamBak[0x22].VPos == 0xe9) && (CYPOS2[1] == 0xa0))){
+		if(CYPOS2[1] == 0xf0){
+		    OamBak[0x22].VPos = 0xf0;
+		    OamBak[0x23].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x22].VPos = CYPOS2[1];
+		    OamBak[0x23].VPos = CYPOS2[1];
+		}
+	    }
+	}
+
+	if(OamBak[0x24].VPos != 0xf0){
+	    CYPOS2[2]--;
+	    if(OamBak[0x24].VPos == 0xe9){
+		if(CYPOS2[2] == 0xa0)
+		    DSFCNT3 = DSFCDT[DSPPT1];
+		else
+		    goto CSS355;
+	    }
+	    if(CYPOS2[2] == 0xf0){
+		DSPLYFG2 = 0;
+		if(DSPPT1 == 0xff)
+		    DSPLYFG2 = 0xff;
+		OamBak[0x24].VPos = 0xf0;
+		OamBak[0x25].VPos = 0xf0;
+		OamBak[0x26].VPos = 0xf0;
+		OamBak[0x27].VPos = 0xf0;
+		OamBak[0x28].VPos = 0xf0;
+		OamBak[0x29].VPos = 0xf0;
+		OamBak[0x2a].VPos = 0xf0;
+		OamBak[0x2b].VPos = 0xf0;
+	    }
+	    else{
+		OamBak[0x24].VPos = CYPOS2[2];
+		OamBak[0x25].VPos = CYPOS2[2];
+		OamBak[0x26].VPos = CYPOS2[2];
+		OamBak[0x27].VPos = CYPOS2[2];
+		OamBak[0x28].VPos = CYPOS2[2];
+		OamBak[0x29].VPos = CYPOS2[2];
+		OamBak[0x2a].VPos = CYPOS2[2];
+		OamBak[0x2b].VPos = CYPOS2[2];
+	    }
+	}
+    }
+
+CSS355:
+    if((SCFCNT & 1) == 1){
+	if(OamBak[0x30].VPos != 0xf0){
+	    if((CYPOS3[0] - 1) == 0xf0)
+		CYPOS3[0] = 0xf0;
+	    else
+		CYPOS3[0]--;
+	    OamBak[0x30].VPos = CYPOS3[0];
+	    OamBak[0x31].VPos = CYPOS3[0];
+	}
+
+	if(OamBak[0x32].VPos != 0xf0){
+	    CYPOS3[1]--;
+	    if((OamBak[0x32].VPos != 0xe9) ||
+	       ((OamBak[0x32].VPos == 0xe9) && (CYPOS3[1] == 0xa0))){
+		if(CYPOS3[1] == 0xf0){
+		    OamBak[0x32].VPos = 0xf0;
+		    OamBak[0x33].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x32].VPos = CYPOS3[1];
+		    OamBak[0x33].VPos = CYPOS3[1];
+		}
+	    }
+	}
+
+	if(OamBak[0x34].VPos != 0xf0){
+	    CYPOS3[2]--;
+	    if(OamBak[0x34].VPos == 0xe9){
+		if(CYPOS3[2] == 0xa0)
+		    DSFCNT1 = DSFCDT[DSPPT1];
+		else
+		    return;
+	    }
+	    if(DSPPT1 == 29){
+		OamBak[0x34].Size = 1;
+		OamBak[0x35].Size = 1;
+		if(CYPOS3[2] == 0x88)
+		    HEBIFLG = 1;
+	    }
+	    if(CYPOS3[2] == 0xf0){
+		DSPLYFG3 = 0;
+		if(DSPPT1 == 0xff)
+		    DSPLYFG3 = 0xff;
+		OamBak[0x34].VPos = 0xf0;
+		OamBak[0x35].VPos = 0xf0;
+		OamBak[0x36].VPos = 0xf0;
+		OamBak[0x37].VPos = 0xf0;
+		OamBak[0x38].VPos = 0xf0;
+		OamBak[0x39].VPos = 0xf0;
+		OamBak[0x3a].VPos = 0xf0;
+		OamBak[0x3b].VPos = 0xf0;
+	    }
+	    else{
+		OamBak[0x34].VPos = CYPOS3[2];
+		OamBak[0x35].VPos = CYPOS3[2];
+		OamBak[0x36].VPos = CYPOS3[2];
+		OamBak[0x37].VPos = CYPOS3[2];
+		OamBak[0x38].VPos = CYPOS3[2];
+		OamBak[0x39].VPos = CYPOS3[2];
+		OamBak[0x3a].VPos = CYPOS3[2];
+		OamBak[0x3b].VPos = CYPOS3[2];
+	    }
+	    if(HEBIFLG != 0){
+		DmaCopy(3, ending_HEBIDT, OamBak + 0x40, 0x40, 16);
+		OamBak[0x10].CharNo = 0xd9;
+		OamBak[0x11].CharNo = 0xd9;
+		OamBak[0x12].CharNo = 0xd9;
+		OamBak[0x13].CharNo = 0xd9;
+		OamBak[0x10].Size = 0;
+		OamBak[0x11].Size = 0;
+		OamBak[0x12].Size = 0;
+		OamBak[0x13].Size = 0;
+		OamBak[0x10].Pltt = 2;
+		OamBak[0x11].Pltt = 2;
+		OamBak[0x12].Pltt = 2;
+		OamBak[0x13].Pltt = 2;
+		OamBak[0x10].Priority = 1;
+		OamBak[0x11].Priority = 1;
+		OamBak[0x12].Priority = 1;
+		OamBak[0x13].Priority = 1;
+		CYPOS1[0] = 0xa0;
+		CYPOS1[1] = 0xa0;
+		HEBIFLG = 0;
+		DSPPT1 = 0xff;
+	    }
+	}
+    }
+}*/
+
+/*--------------------------------------------------------------*/
+/*		マムーイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void ending_MAMUINT(void)
+{
+    DmaCopy(3, ending_MAMUDT, OamBak + 0x10, 0x88, 16);
+
+    CSSLFG++;
+
+    CYPOS1[0] = 0xb0;
+    CYPOS1[1] = 0xc0;
+    CYPOS1[2] = 0xd0;
+    CYPOS2[0] = 0xe8;
+}
+
+/*--------------------------------------------------------------*/
+/*		マムースクロール処理				*/
+/*--------------------------------------------------------------*/
+void ending_MAMUSCR(void)
+{
+    if((SCFCNT & 1) == 1){
+	if(OamBak[0x10].VPos != 0xf0){
+	    if((CYPOS1[0] - 1) == 0x18){
+		CSSLFG++;
+		goto MUS255;
+	    }
+	    else{
+		CYPOS1[0]--;
+		OamBak[0x10].VPos = CYPOS1[0];
+		OamBak[0x11].VPos = CYPOS1[0];
+		OamBak[0x12].VPos = CYPOS1[0];
+	    }
+	}
+
+	if(OamBak[0x13].VPos != 0xf0){
+	    CYPOS1[1]--;
+	    if((OamBak[0x13].VPos != 0xe9) ||
+	       ((OamBak[0x13].VPos == 0xe9) && (CYPOS1[1] == 0xa0))){
+		if(CYPOS1[1] == 0x10){
+		    OamBak[0x13].VPos = 0xf0;
+		    OamBak[0x14].VPos = 0xf0;
+		    OamBak[0x15].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x13].VPos = CYPOS1[1];
+		    OamBak[0x14].VPos = CYPOS1[1];
+		    OamBak[0x15].VPos = CYPOS1[1];
+		}
+	    }
+	}
+
+	if(OamBak[0x16].VPos != 0xf0){
+	    CYPOS1[2]--;
+	    if((OamBak[0x16].VPos != 0xe9) ||
+	       ((OamBak[0x16].VPos == 0xe9) && (CYPOS1[2] == 0xa0))){
+		if(CYPOS1[2] == 0x10){
+		    OamBak[0x16].VPos = 0xf0;
+		    OamBak[0x17].VPos = 0xf0;
+		    OamBak[0x18].VPos = 0xf0;
+		}
+		else{
+		    OamBak[0x16].VPos = CYPOS1[2];
+		    OamBak[0x17].VPos = CYPOS1[2];
+		    OamBak[0x18].VPos = CYPOS1[2];
+		}
+	    }
+	}
+
+	if(OamBak[0x19].VPos != 0xf0){
+	    CYPOS2[0]--;
+	    if((OamBak[0x19].VPos != 0xe9) ||
+	       ((OamBak[0x19].VPos ==0xe9) && (CYPOS2[0] == 0xa0))){
+		   if(CYPOS2[0] == 0x10){
+		       OamBak[0x19].VPos = 0xf0;
+		       OamBak[0x1a].VPos = 0xf0;
+		       OamBak[0x1b].VPos = 0xf0;
+		       OamBak[0x1c].VPos = 0xf0;
+		       OamBak[0x1d].VPos = 0xf0;
+		       OamBak[0x1e].VPos = 0xf0;
+		       OamBak[0x1f].VPos = 0xf0;
+		       OamBak[0x20].VPos = 0xf0;
+		   }
+		   else{
+		       OamBak[0x19].VPos = CYPOS2[0];
+		       OamBak[0x1a].VPos = CYPOS2[0];
+		       OamBak[0x1b].VPos = CYPOS2[0];
+		       OamBak[0x1c].VPos = CYPOS2[0];
+		       OamBak[0x1d].VPos = CYPOS2[0];
+		       OamBak[0x1e].VPos = CYPOS2[0];
+		       OamBak[0x1f].VPos = CYPOS2[0];
+		       OamBak[0x20].VPos = CYPOS2[0];
+		   }
+	    }
+	}
+    }
+
+MUS255:
+    MAMUFG = 0;
+    MUFCNT = 0;
+    MULOOP = 12;
+}
+
+/*--------------------------------------------------------------*/
+/*		マムー移動処理					*/
+/*--------------------------------------------------------------*/
+static u16 ending_MAMUDT1[] = {
+    0x0105,0x0107,0x0108,
+    0x0115,0x0117,0x0118,
+};
+
+static u16 ending_MAMUDT2[] = {
+    0x010A,0x010C,0x010D,
+    0x011A,0x011C,0x011D,
+};
+
+void ending_MAMUMV(void)
+{
+    MUFCNT--;
+    if(MUFCNT == 0xff){
+	MUFCNT = 8;
+	MULOOP--;
+	if(MULOOP == 0xff){
+	    CFRCNT = 0;
+	    FDIPT = 0;
+	    CSSLFG++;
+	    return;
+	}
+
+	MAMUFG++;
+	if((MAMUFG & 1) == 0){
+	    OamBak[0x10].CharNo = ending_MAMUDT1[0];
+	    OamBak[0x11].CharNo = ending_MAMUDT1[1];
+	    OamBak[0x12].CharNo = ending_MAMUDT1[2];
+	    OamBak[0x13].CharNo = ending_MAMUDT1[3];
+	    OamBak[0x14].CharNo = ending_MAMUDT1[4];
+	    OamBak[0x15].CharNo = ending_MAMUDT1[5];
+	}
+	else{
+	    OamBak[0x10].CharNo = ending_MAMUDT2[0];
+	    OamBak[0x11].CharNo = ending_MAMUDT2[1];
+	    OamBak[0x12].CharNo = ending_MAMUDT2[2];
+	    OamBak[0x13].CharNo = ending_MAMUDT2[3];
+	    OamBak[0x14].CharNo = ending_MAMUDT2[4];
+	    OamBak[0x15].CharNo = ending_MAMUDT2[5];
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		マムーフェード処理				*/
+/*--------------------------------------------------------------*/
+static u16 ending_CSFCDT1[] = {
+    0x7E80,0x7DA0,0x6D40,0x58E0,0x4480,
+};
+
+void ending_MMUFDOUT(void)
+{
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+	CFRCNT = 2;
+	FDIPT++;
+	*(u16 *)(COL_BUF + 0x242) = ending_CSFCDT1[FDIPT];
+	COL_FLAG = 1;
+	if(FDIPT == 4){
+	    CSSLFG++;
+	    CFRCNT = 2;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		マムークリアタイマー処理			*/
+/*--------------------------------------------------------------*/
+void ending_MAMUDEL(void)
+{
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+	end_OAM_clr();
+	CFRCNT = 0x30;
+	CSSLFG++;
+    }
+}
+
+
+static u16 ending_ENDDT[] = {		// Added by Yu Ting
+    0x8018,0x00B8,0x261c,0x0000,
+    0x8018,0x00C0,0x261d,0x0000,
+    0x8018,0x00D0,0x261e,0x0000,
+    0x8018,0x00D8,0x261f,0x0000,
+};
+
+
+/*--------------------------------------------------------------*/
+/*		”ＴＨＥ　@ＥＮＤ”表示イニシャル処理		*/
+/*--------------------------------------------------------------*/
+void ending_DSENINT(void)
+{
+    DmaCopy(3, ending_ENDDT, OamBak + 0x10, 0x20, 16);
+
+	CFRCNT = 5;
+    CSSLFG ++;
+    FDIPT = 0;
+//    DmaClear(3, 0x2727, DSFCDT, 0x40, 16);
+//    DSFCDT[28] = 0x47;
+
+/*    CFRCNT--;
+	if(CFRCNT == 0xff){
+	ENDTPT = 0;
+	DSENFLG = 0;
+	SPWORK = 0;
+	TTLTM = 5;
+	DSWRCNT = 20;
+	CSSLFG++;
+    }
+*/
+}
+
+void ending_DSPEND(void)
+{	
+	if (FDIPT<4)
+	{
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+	CFRCNT = 5;
+	FDIPT++;
+	*(u16 *)(COL_BUF + 0x242) = ending_CSFCDT[FDIPT];
+	COL_FLAG = 1;
+/*	if(FDIPT == 4){
+//	    CSSLFG++;
+	    CFRCNT = 0x80;
+	    CYPOS1[0] = 0x48;
+	    DSPLYFG1 = 1;
+	    CASTFG = 1;
+	    DSPLYFG2 = 0;
+	    DSPLYFG3 = 0;
+	}
+    */
+	}
+	}
+	else
+		SPWORK=0x2a;
+}
+
+/*--------------------------------------------------------------*/
+/*		”ＴＨＥ　@ＥＮＤ”表示処理			*/
+/*--------------------------------------------------------------*/
+/*
+void ending_DSPEND(void)
+{
+    u16 *end_address;
+    u8 oam_loop;
+    u16 point;
+    u16 oam_cnt;
+
+    if(SPWORK != 0x2a){
+	TTLTM--;
+	if(TTLTM == 0xff){
+	    TTLTM = 5;
+	    end_address = ending_DSPEND_table[SPWORK];
+	    SPWORK++;
+	    oam_loop = *(u16 *)(end_address);
+	    point = 1;
+	    for(; oam_loop != 0; oam_loop--){
+		oam_cnt = *(u16 *)(end_address + point);
+		point++;
+		DmaCopy(3, end_address + point, OamBak + oam_cnt, 8, 16);
+		point += 4;
+	    }
+	}
+    }
+}
+*/
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1192 7
+a1198 7
+    0x8044,0x005c,0x9209,0x0000,	//MARIO
+    0x8044,0x0064,0x920a,0x0000,
+    0x8044,0x006c,0x920b,0x0000,
+    0x8044,0x0074,0x920c,0x0000,
+    0x8044,0x007c,0x920d,0x0000,
+    0x8044,0x0084,0x920e,0x0000,
+    0x8044,0x008c,0x9209,0x0000,
+d1218 7
+a1224 7
+    0x8044,0x005c,0x9209,0x0000,	//PEACH
+    0x8044,0x0064,0x9212,0x0000,
+    0x8044,0x006c,0x9213,0x0000,
+    0x8044,0x0074,0x920b,0x0000,
+    0x8044,0x007c,0x9214,0x0000,
+    0x8044,0x0084,0x9215,0x0000,
+    0x8044,0x008c,0x9209,0x0000,
+d1244 7
+a1250 7
+    0x8044,0x005c,0x9209,0x0000,	//TOAD
+    0x8044,0x0064,0x9216,0x0000,
+    0x8044,0x006c,0x920e,0x0000,
+    0x8044,0x0074,0x920b,0x0000,
+    0x8044,0x007c,0x9217,0x0000,
+    0x8044,0x0084,0x9209,0x0000,
+    0x8044,0x008c,0x9209,0x0000,
+d1270 7
+a1276 7
+    0x8044,0x005c,0x9209,0x0000,	//LUIGI
+    0x8044,0x0064,0x920f,0x0000,
+    0x8044,0x006c,0x9210,0x0000,
+    0x8044,0x0074,0x920d,0x0000,
+    0x8044,0x007c,0x9211,0x0000,
+    0x8044,0x0084,0x920d,0x0000,
+    0x8044,0x008c,0x9209,0x0000,
+d1621 10
+a1630 5
+static u16 ending_CASTDT[] = {
+    0x0048,0x0018,0x24ca,0x0000,
+    0x0048,0x0028,0x24c8,0x0000,
+    0x0048,0x0038,0x251f,0x0000,
+    0x0048,0x0048,0x253f,0x0000,
+d1692 2
+a1693 1
+		    OamBak[0x4c].CharNo = 0x1bd;
+d2659 9
+d2673 10
+a2682 2
+    CFRCNT--;
+    if(CFRCNT == 0xff){
+d2690 27
+d2722 1
+d2747 1
+a2747 1
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,1097 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/*
+ ****************************************************************
+ *              
+ *	É^ÉCÉgÉãèàóù
+ *
+ ****************************************************************
+ */
+#include "m_main.h"
+#include "m_classic_sub.h"
+#include "m_game_title.h"
+#include "m_sub.h"
+#include "m_score.h"
+#include "ba_act.h"
+#include "m_game.h"
+
+
+extern	u32 d_title_bros_bg_schDT[8*320];
+extern	u16 d_title_bros_bg_sclDT[256];
+extern	u16 d_title_kabe_sscDT[32*32/1];
+extern	u16 d_title_waku_sscDT[32*32/1];
+//extern	u16 d_title_maruc_sscDT[64*32/1];
+extern	u16 d_title_maruc_sscDT[32*32/1];
+//extern	u32 d_title_bros_obj_schDT[8*768];
+extern u8 d_title_bros_obj_Huff[0x2ca8];
+extern	u16 d_title_bros_obj_sclDT[256];
+
+#define	TLPLXSPD	0x0100
+#define	TLGROUND	0x5800
+
+#if 0
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ÉJÉâÅ[í≤êÆ
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	TitleColorAdjust(void)
+{
+    u16		i;
+    u16		red, green, blue;
+    u16		AddColDT;
+
+    /******** ÇaÇfÉJÉâÅ[ ********/
+    for( i = 0; i < (sizeof(d_bros_title_sclDT) >> 1); i++ ){
+	AddColDT = 0x0006;
+	red = d_bros_title_sclDT[i] & 0x001F;
+	red += AddColDT;
+	if( red >= 0x001F )
+	    red = 0x001F;
+	AddColDT = AddColDT << 5;
+	green = d_bros_title_sclDT[i] & 0x03E0;
+	green += AddColDT;
+	if( green >= 0x03E0 )
+	    green = 0x03E0;
+	AddColDT = AddColDT << 5;
+	blue = d_bros_title_sclDT[i] & 0x7800;
+	blue += AddColDT;
+	if( blue >= 0x7800 )
+	    blue = 0x7800;
+	mGm_ColBufBG[i] = blue | green | red;
+    }
+
+    /******** ÇnÇaÇiÉJÉâÅ[ ********/
+    for( i = 0; i < (sizeof(title_obj_sclDT) >> 1); i++ ){
+	AddColDT = 0x0006;
+	red = title_obj_sclDT[i] & 0x001F;
+	red += AddColDT;
+	if( red >= 0x001F )
+	    red = 0x001F;
+	AddColDT = AddColDT << 5;
+	green = title_obj_sclDT[i] & 0x03E0;
+	green += AddColDT;
+	if( green >= 0x03E0 )
+	    green = 0x03E0;
+	AddColDT = AddColDT << 5;
+	blue = title_obj_sclDT[i] & 0x7800;
+	blue += AddColDT;
+	if( blue >= 0x7800 )
+	    blue = 0x7800;
+	mGm_ColBufOBJ[i] = blue | green | red;
+    }
+}
+#endif
+#if DEBUG
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ìGÇÃêîÉJÉEÉìÉg
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	EnmyTestCnt(u8 Count)
+{
+    u8		i;
+    u16		Data[10] = {0x018C, 0x018D,
+			    0x01AC, 0x01AD,
+			    0x01CC, 0x01CD,
+			    0x01EC, 0x01ED,
+			    0x019A, 0x019B};
+
+    for( i = 0; Count >= 10; i++ ){
+	Count -= 10;
+    }
+    OamBak[126].VPos = 90;
+    OamBak[126].HPos = 64;
+    OamBak[126].Shape = 0;
+    OamBak[126].Size = 0;
+    OamBak[126].CharNo = Data[i];
+    OamBak[126].Pltt = 8;
+    OamBak[125].VPos = 90;
+    OamBak[125].HPos = 72;
+    OamBak[125].Shape = 0;
+    OamBak[125].Size = 0;
+    OamBak[125].CharNo = Data[Count];
+    OamBak[125].Pltt = 8;
+}
+#endif
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãÉçÉSÇnÇaÇiï\é¶èàóù
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static u16 TitleLogoChr[6][5] = {
+    { 0x000, 0x004, 0x008, 0x00C, 0x010, },
+    { 0x014, 0x018, 0x01C, 0x080, 0x084, },
+    { 0x088, 0x08C, 0x090, 0x094, 0x098, },
+    { 0x09C, 0x100, 0x104, 0x108, 0x10C, },
+    { 0x110, 0x114, 0x118, 0x11C, 0x180, },
+    { 0x184, 0x188, 0x18C, 0x190, 0x194, },
+};
+static u16 TitleLogoYps[5] = {
+    0x0000, 0xFFFC, 0xFFF4, 0xFFFC, 0x0000,
+};
+
+static	void	TitleLogo_Init(void)
+{
+    titleDT_c	*title;
+    u8		i;
+
+    title = (titleDT_c *)mGm_OTHER;
+    for(i=0; i<6; i++){
+	if(i < 3){
+	    title->logo[i].xpos = 0x20 + 0x20 * i;
+	}
+	else if (i<5){
+		title->logo[i].xpos = 0x1A + 0x20 * i;
+	}
+	else
+		title->logo[i].xpos = 0x0C + 0x20 * i;
+	title->logo[i].ypos = 0x009C;
+	title->logo[i].anime = 0;
+	title->logo[i].timer = 0;
+    }
+}
+
+void	TitleLogo_Set(void)
+{
+    titleDT_c	*title;
+    u16		ypos;
+    OamData	*oam;
+    u8		anime;
+    u8		i;
+
+    title = (titleDT_c *)mGm_OTHER;
+    for(i=0; i<6; i++){
+	ypos = title->logo[i].ypos;
+	if(ypos > 0x0E0){
+	    anime = title->logo[i].anime;
+	    oam = &OamBak[mGm_OAMIDX++];
+	    oam->VPos = (ypos & 0x0FF);// + TitleLogoYps[anime];
+	    oam->AffineMode = ST_OAM_AFFINE_NONE;
+	    oam->ObjMode = ST_OAM_OBJ_NORMAL;
+	    oam->Mosaic = 0;
+	    oam->ColorMode = ST_OAM_COLOR_16;
+	    oam->Shape = ST_OAM_SQUARE;
+	    oam->HPos = title->logo[i].xpos;
+	    oam->AffineParamNo_L = 0;
+	    oam->VFlip = 0;
+	    oam->HFlip = 0;
+	    oam->Size = 2;
+	    oam->CharNo = TitleLogoChr[i][anime];
+	    oam->Priority = 0;
+	    oam->Pltt = 2;
+	}
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãä≈î¬ÇnÇaÇiï\é¶èàóù
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+// ¢ÇbÇåÇÅÇìÇìÇâÇÉ£ä≈î?
+static OamData title_classic_sob[] = {
+    {
+	0x16, 0x0, 0x0, 0x0, 0x0, 0x2,
+	0x50, 0x0, 0x0, 0x0, 0x0,
+	0x24E, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x06, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x40, 0x0, 0x0, 0x0, 0x0,
+	0x23E, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x06, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x20, 0x0, 0x0, 0x0, 0x1,
+	0x23A, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x1E, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x40, 0x0, 0x0, 0x0, 0x0,
+	0x250, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x1E, 0x0, 0x0, 0x0, 0x0, 0x0,
+	0x30, 0x0, 0x0, 0x0, 0x1,
+	0x24C, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x1E, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x10, 0x0, 0x0, 0x0, 0x2,
+	0x248, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x0E, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x30, 0x0, 0x0, 0x0, 0x2,
+	0x244, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x0E, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x10, 0x0, 0x0, 0x0, 0x2,
+	0x240, 0x0, 0x6,
+	0x0000
+    },
+    {
+	0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+	0x0, 0x0, 0x0, 0x0, 0x0,
+	0x0, 0x0, 0x0,
+	0xffff
+    },
+};
+// ¢ÇaÇ`ÇsÇsÇkÇd£ä≈î?
+static OamData title_battle_sob[] = {
+    {
+	0x18, 0x0, 0x0, 0x0, 0x0, 0x0,
+	0x40, 0x0, 0x0, 0x0, 0x1,
+	0x212, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x18, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x20, 0x0, 0x0, 0x0, 0x2,
+	0x20E, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x18, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x0, 0x0, 0x0, 0x0, 0x2,
+	0x20A, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x08, 0x0, 0x0, 0x0, 0x0, 0x0,
+	0x40, 0x0, 0x0, 0x0, 0x1,
+	0x208, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x08, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x20, 0x0, 0x0, 0x0, 0x2,
+	0x204, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x08, 0x0, 0x0, 0x0, 0x0, 0x1,
+	0x0, 0x0, 0x0, 0x0, 0x2,
+	0x200, 0x0, 0x7,
+	0x0000
+    },
+    {
+	0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+	0x0, 0x0, 0x0, 0x0, 0x0,
+	0x0, 0x0, 0x0,
+	0xffff
+    },
+};
+OamData *PlateData[2] = {
+    title_classic_sob,
+    title_battle_sob,
+};
+#if 0
+void	Plate_Write(u16 xpos, u16 ypos, u8 mode)
+{
+    OamData	*oam;
+
+    oam = PlateData[mode];
+    SobDataOamSet(oam, xpos, ypos);
+}
+#endif
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãògêFïœÇ¶èàóù
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	u8	TitleFrameCol[] = {
+    0x10, 0x20, 0x30, 0x80, 0x90, 0xA0,
+};
+
+void	Frame_ColChang(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		tmp;
+
+    if(!(title->frame & 0x07)){
+	tmp = title->frame_col;
+	tmp++;
+	if(tmp >= 6){
+	    tmp = 0;
+	}
+	title->frame_col = tmp;
+	DmaCopy(3, d_title_bros_bg_sclDT + TitleFrameCol[tmp], 
+		BG_PLTT + 0x20, 0x20, 16);
+//	DmaCopy(3, d_title_bros_bg_sclDT + TitleFrameCol[tmp], 
+//		mGm_ColBufBG + 0x20, 0x20, 16);
+//	COL_FLAG |= BG_COL_TRANS;
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉã¢ÇoÇqÇdÇrÇrÅ@@ÇrÇsÇ`ÇqÇs£ï\é¶
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+#if 0// BG
+static	u16 PushStartChr[10] = {
+    0x00e7, 0x00eb, 0x00e9, 0x00e4, 0x0000,
+    0x00e9, 0x00ea, 0x00e0, 0x00e8, 0x00ea,
+};
+
+void	PushStart_Write(void)
+{
+    u16		*vram;
+    u8		i;
+
+    vram = (u16 *)(BG_VRAM+0x4354);
+    for(i=0; i<10; i++){
+	*(vram++) = PushStartChr[i];
+    }	
+}
+#else// OBJ
+static	u16 PushStartChr[13][2] = {
+/*	{ 0x00, 0x216 },//P
+	{ 0x08, 0x238 },//R
+	{ 0x10, 0x239 },//E
+	{ 0x18, 0x218 },//S
+	{ 0x20, 0x218 },//S
+
+	{ 0x30, 0x218 },//S
+	{ 0x38, 0x236 },//T
+	{ 0x40, 0x237 },//A
+	{ 0x48, 0x238 },//R
+	{ 0x50, 0x236 },//T
+*/
+	{ 0x04, 0x292 },
+	{ 0x0c, 0x293 },
+	{ 0x44, 0x294 },
+	{ 0x4c, 0x295 },
+
+	{ 0x04, 0x2b2 },
+	{ 0x0c, 0x2b3 },
+	{ 0x44, 0x2b4 },
+	{ 0x4c, 0x2b5 },
+
+	{ 0x18, 0x218 },//S
+	{ 0x20, 0x236 },//T
+	{ 0x28, 0x237 },//A
+	{ 0x30, 0x238 },//R
+	{ 0x38, 0x236 },//T
+
+};
+
+void	PushStart_Write(u8 ypos)		//modified for chinese version , Yu Ting
+{
+    titleDT_c	*title = mGm_OTHER;
+    OamData	*Oam;
+    u8		i;
+
+    if(title->frame & 0x10){
+	for(i=0; i<13; i++){
+	    if(mGm_OAMIDX >= 128){
+		return;
+	    }
+	    Oam = &OamBak[mGm_OAMIDX++];
+		if (i<4)
+			Oam->VPos = ypos-4;
+		else if (i<8)
+			Oam->VPos = ypos+4;
+		else
+			Oam->VPos = ypos;
+	    Oam->AffineMode = 0;
+	    Oam->ObjMode = 0;
+	    Oam->Mosaic = 0;
+	    Oam->ColorMode = ST_OAM_COLOR_16;
+	    Oam->Shape = 0;
+
+	    Oam->HPos = 0x4C + PushStartChr[i][0];
+	    Oam->AffineParamNo_L = 0;
+	    Oam->VFlip = 0;
+	    Oam->HFlip = 0;
+	    Oam->Size = 0;
+
+	    Oam->CharNo = PushStartChr[i][1];
+	    Oam->Priority = 0;
+	    Oam->Pltt = 0x02;
+	}
+    }
+}
+#endif
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãÉvÉåÅ[ÉÑÅ[ÉCÉjÉVÉÉÉãèàóù
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	Player_Init(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+
+    //ç∂ë§Å@@É}ÉäÉI
+    title->player[0].xpos = 0x0000;
+    title->player[0].ypos = TLGROUND;
+    title->player[0].xspd = 0;//TLPLXSPD;
+    title->player[0].yspd = 0x0000;
+    title->player[0].jump = OFF;
+    title->player[0].anime = 2;
+    title->player[0].timer = 0;
+    title->player[0].direc = 1;
+    title->player[0].color = 0;
+
+    //âEë§Å@@ÉãÉCÅ[ÉW
+    title->player[1].xpos = 0xE000;
+    title->player[1].ypos = TLGROUND;
+    title->player[1].xspd = 0;//- TLPLXSPD;
+    title->player[1].yspd = 0x0000;
+    title->player[1].jump = OFF;
+    title->player[1].anime = 2;
+    title->player[1].timer = 0;
+    title->player[1].direc = 0;
+    title->player[1].color = 1;
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãÉvÉåÅ[ÉÑÅ[à⁄ìÆèàóù
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+static	void	Player_Move(u8 id)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		xpos = title->player[id].xpos;
+    u16		ypos = title->player[id].ypos;
+    u16		xspd = title->player[id].xspd;
+    u16		yspd = title->player[id].yspd;
+    u16		frame = title->frame;
+    u8		tmp;
+
+    /*** èdóÕâ¡ë¨ ***/
+    yspd += 0x0040;
+
+    /*** à⁄ìÆèàóù ***/
+    xpos += xspd;
+    ypos += yspd;
+
+    /*** íÖínï‚ê≥ ***/
+    if(ypos >= TLGROUND){
+	ypos = TLGROUND;
+	yspd = 0;
+	title->player[id].jump = OFF;
+    }
+
+    /*** ÉfÉÇÇÃìÆÇ´ ***/
+    if(frame == 0x8C){
+	xspd = - TLPLXSPD * (id * 2 - 1);
+    }else if((frame == 0x9C) || (frame == 0xC4)){
+	yspd = 0xFB00;		//ÉWÉÉÉìÉv
+	title->player[id].jump = ON;
+	m4aSongNumStart( s_b_JUMP );
+    }else if(frame == 0xEC){
+	yspd = 0xFB00;		//ÉWÉÉÉìÉv
+	title->player[id].jump = ON;
+	xspd = 0;
+	m4aSongNumStart( s_b_JUMP );
+    }else if(frame == 0x114){	//í‚é~
+	xspd = 0;
+    }else if(frame == 0x134){	//ëﬁèÍ
+	tmp = title->player[id].direc ^ 0x01;
+	title->player[id].direc = tmp;
+	if(tmp){
+	    xspd = TLPLXSPD;
+	}else{
+	    xspd = - TLPLXSPD;
+	}
+    }
+
+    title->player[id].xpos = xpos;
+    title->player[id].ypos = ypos;
+    title->player[id].xspd = xspd;
+    title->player[id].yspd = yspd;
+
+    /*** ÉAÉjÉÅÅ[ÉVÉáÉì ***/
+    if(title->player[id].jump == OFF){
+	if(xspd == 0){
+	    title->player[id].anime = 2;
+	    title->player[id].timer = 3;
+	}else{
+	    tmp = title->player[id].timer;
+	    tmp++;
+	    title->player[id].timer = tmp;
+	    if( !(tmp & 0x03) ){
+		tmp = title->player[id].anime;
+		tmp++;
+		if(tmp >= 3){
+		    tmp = 0;
+		}
+		title->player[id].anime = tmp;
+	    }
+	}
+    }else{
+	title->player[id].anime = 3;
+    }
+}
+/*
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	É^ÉCÉgÉãÉvÉåÅ[ÉÑÅ[ï\é¶
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+void	Player_ObjSet(u8 id)
+{
+    titleDT_c	*title = mGm_OTHER;
+    OamData	*Oam;
+    s16		xpos = (title->player[id].xpos) >> 8;
+    u16		ypos = (title->player[id].ypos) >> 8;
+
+    if(xpos > 0x00F0){
+	xpos -= 0x0100;
+    }
+    if(ypos < 0x002E){
+	ypos = 0x002E;
+    }
+
+    //é©ã@@ï\é¶
+    Oam = &OamBak[mGm_OAMIDX++];
+    Oam->VPos = ypos;
+    Oam->AffineMode = 0;
+    Oam->ObjMode = 0;
+    Oam->Mosaic = 0;
+    Oam->ColorMode = ST_OAM_COLOR_16;
+    Oam->Shape = 2;
+    Oam->HPos = xpos;
+    Oam->AffineParamNo_L = 0;
+    Oam->VFlip = 0;
+    Oam->HFlip = title->player[id].direc;
+    Oam->Size = 2;
+    Oam->CharNo = 0x198 + (title->player[id].anime * 2);
+    Oam->Priority = 0;
+    Oam->Pltt = title->player[id].color;
+}
+
+/*
+ ****************************************************************
+ *     ÉCÉjÉVÉÉÉãèàóù
+ ****************************************************************
+ */
+static	void	game_title_init(void)
+{
+    u16		i;
+    titleDT_c	*pTitle;
+
+    /******** ÇkÇbÇcÇbÅ@@ÇnÇeÇe ********/
+    lcdc_off();
+#if SOUND_ON
+//    m4aSoundVSyncOff();
+//    mGm_SOUNDFG = 1;
+/////    VSync_Off();
+#endif
+//2001/2/14    RegisterRamReset(RESET_REG_SIO_FLAG);
+    ObjVanishAll();
+//    DmaArrayCopy( 3, OamBak, OAM, 32 );
+
+    /******* ÇkÇbÇcÇbê›íË ********/
+    mGm_DISPCNT = DISP_BG0_ON | DISP_BG1_ON | DISP_BG2_ON | DISP_MODE_0 | 
+	 DISP_OBJ_ON | DISP_OBJ_CHAR_2D_MAP;
+
+    BrosMemoryInit();
+    mGm_TOPSCORE = B_HI_SCORE;
+
+    /******* ï`âÊê›íË ********/
+    *(vu16 *)REG_DISPCNT = mGm_DISPCNT | DISP_LCDC_OFF;
+    *(vu16 *)REG_BG0CNT = BG_SCREEN_SIZE_0 | (12 << BG_SCREEN_BASE_SHIFT) |
+	 BG_COLOR_16 | BG_CHR_BASE_0 | BG_MOS_OFF | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCREEN_SIZE_2 | (8 << BG_SCREEN_BASE_SHIFT) |
+	 BG_COLOR_16 | BG_CHR_BASE_0 | BG_MOS_OFF | BG_PRIORITY_1;
+    *(vu16 *)REG_BG2CNT = BG_SCREEN_SIZE_0 | (10 << BG_SCREEN_BASE_SHIFT) |
+	 BG_COLOR_16 | BG_CHR_BASE_0 | BG_MOS_OFF | BG_PRIORITY_2;
+
+    /******* ÉLÉÉÉâÉNÉ^ÇcÇlÇ`ì]ëó ********/
+    DmaArrayCopy(3, d_title_bros_bg_schDT, (BG_VRAM+0x0000), 32);
+//    DmaArrayCopy(3, d_title_bros_obj_schDT, OBJ_MODE1_VRAM, 32);
+    HuffUnComp(d_title_bros_obj_Huff, (void *)OBJ_MODE1_VRAM);
+
+    /******* ÉXÉNÉäÅ[ÉìÇcÇlÇ`ì]ëó ********/
+    DmaArrayCopy(3, d_title_waku_sscDT, (BG_VRAM+0x4000), 16);
+    DmaClear(3, 0, (BG_VRAM+0x4800), 0x800, 16);
+    DmaArrayCopy(3, d_title_kabe_sscDT, (BG_VRAM+0x5000), 16);
+    DmaArrayCopy(3, d_title_maruc_sscDT, (BG_VRAM+0x6000), 16);
+
+    /******* ÉJÉâÅ[ÇcÇlÇ`ì]ëó ********/
+//////    TitleColorAdjust();
+    DmaArrayCopy(3, d_title_bros_bg_sclDT, mGm_ColBufBG, 16);
+    DmaArrayCopy(3, mGm_ColBufBG, BG_PLTT, 16);
+    DmaArrayCopy(3, d_title_bros_obj_sclDT, mGm_ColBufOBJ, 16);
+    DmaArrayCopy(3, mGm_ColBufOBJ, OBJ_PLTT, 16);
+
+    /******* É^ÉCÉgÉãópÉÅÉÇÉäämï€ ********/
+    mGm_OTHER = (titleDT_c *)mGm_MALLOC(sizeof(titleDT_c));
+    pTitle = mGm_OTHER;
+    pTitle->frame = 0;
+    pTitle->frame_col = 0;
+    TitleLogo_Init();
+    Player_Init();
+
+    /******* ÉXÉNÉçÅ[Éãèâä˙ílê›íË ********/
+    m_scrollInit();
+    mGm_HSCROLL1 = mGm_HSCROLL2 = 0;
+    mGm_VSCROLL1 = 0x007C;
+    mGm_VSCROLL2 = 0;
+    scroll_set();
+
+    /******* ÉtÉâÉOä÷åWÇÃèâä˙ê›íË ********/
+    mGm_GMMODE++;
+    mGm_V_BLKFLG = 1;
+    mGm_PAUSEFG = mGm_COLFLG = 0;
+    mGm_PLTYPE = 0;
+#if DEBUG
+    mGm_ETC = 0;
+    mGm_EnmyTest = 0;
+#endif
+    SOUND_TIMER = 0;
+
+    /******* ÉAÉNÉ^Å[ÇÃèâä˙âª ********/
+//    acter_init();
+//    for( i = 0; i < (TITLE_end-TITLE_start); i++ ){
+//	mGm_ActTBL(i) = i;
+//	mGm_ActID(i) = mGm_ACTERID(i) = TITLE_start + i;
+//    }
+
+    /******* ÇaÇfÇlÉIÉì ********/
+//#if SOUND_ON
+//    m4aSoundVSyncOn();
+//    m4aSongNumStart( s_b_TITLE );
+//#endif
+
+    /******* ÉtÉFÅ[Éhä÷åWÇÃèâä˙ê›íË ********/
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = BLD_DOWN_MODE | BLD_BG2_1ST;
+//    *(vu16 *)REG_BLDALPHA = mGm_COLEV = 0x0010;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x0010;
+
+    /******* ÇuÉuÉâÉìÉNäÑçûãñâ¬ÉtÉâÉOÇÃÉZÉbÉg ********/
+    *(vu16 *)REG_IE   = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT  = STAT_V_BLANK_IF_ENABLE;
+
+    /******* ÇhÇlÇdÉZÉbÉg ******/
+    *(vu16 *)REG_IME   = 1;
+
+    V_blank_wait();
+    /******* ÇaÇfÇlÉIÉì ********/
+#if SOUND_ON
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    mGm_SOUNDFG = 0;
+    m4aSongNumStart( s_b_TITLE );
+#endif
+
+    /******* ÇkÇbÇcÇbÅ@@ÇnÇm ********/
+//    *(vu16 *)REG_DISPCNT = mGm_DISPCNT;
+}
+/*
+ ****************************************************************
+ *     É^ÉCÉgÉãâÊñ óéâ∫
+ ****************************************************************
+ */
+static	void	game_title_down(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u8		i;
+
+    if(!(title->frame & 0x03)){
+	mGm_VSCROLL1--;
+	for(i=0; i<6; i++){
+	    title->logo[i].ypos++;
+	}
+    }
+
+    TitleLogo_Set();
+
+    if( mGm_VSCROLL1 == 0 ){
+	title->frame = 0xFFFF;
+	mGm_GMMODE++;
+    } else {
+	if( (mGm_TRG == START_BUTTON) | (mGm_TRG & A_BUTTON) ){
+	    title->frame = 0x0F;
+	    for(i=0; i<6; i++){
+		title->logo[i].ypos = 0x0118;
+		title->logo[i].anime = 4;
+	    }
+	    mGm_VSCROLL1 = 0;
+	    mGm_COLY = 0;
+	    mGm_GMMODE += 3;
+#if SOUND_ON
+	    m4aSongNumStart(s_u_se_final);
+#endif
+	}
+    }
+}
+/*
+ ****************************************************************
+ *     É^ÉCÉgÉãÉ}ÉäÉIÉfÉÇ
+ ****************************************************************
+ */
+static	u8 LogoAnimeTM[5] = {
+//    4, 3, 12, 3, 4,
+    6, 4, 12, 4, 6,
+};
+
+static	void	game_title_demo(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		frame = title->frame;
+    u8		anime, timer, i;
+
+    /*** ÉfÉÇópé©ã@@ï\é¶ ***/
+    if(frame >= 0x6C){
+	for(i=0; i<2;i++){
+	    Player_Move(i);
+	    Player_ObjSet(i);
+	}
+    }
+
+    /*** É^ÉCÉgÉãÉçÉSï\é¶ ***/
+    if((frame > 0xAC) && (frame <= 0xB2)){
+	title->logo[0].ypos -= 4;
+	title->logo[5].ypos -= 4;
+    }else if((frame > 0xC6) && (frame <= 0xCC)){
+	title->logo[0].ypos += 4;
+	title->logo[5].ypos += 4;
+    }else if((frame > 0xD4) && (frame <= 0xDA)){
+	title->logo[1].ypos -= 4;
+	title->logo[4].ypos -= 4;
+    }else if((frame > 0xEE) && (frame <= 0xF4)){
+	title->logo[1].ypos += 4;
+	title->logo[4].ypos += 4;
+    }else if((frame > 0xFC) && (frame <= 0x102)){
+	title->logo[2].ypos -= 4;
+	title->logo[3].ypos -= 4;
+    }else if((frame > 0x116) && (frame <= 0x11C)){
+	title->logo[2].ypos += 4;
+	title->logo[3].ypos += 4;
+    }
+    if(frame == 0xB2){
+	title->logo[0].anime = 1;
+	title->logo[5].anime = 1;
+    }else if(frame == 0xDA){
+	title->logo[1].anime = 1;
+	title->logo[4].anime = 1;
+    }else if(frame == 0x102){
+	title->logo[2].anime = 1;
+	title->logo[3].anime = 1;
+    }
+
+    for(i=0; i<6; i++){
+	anime = title->logo[i].anime;
+	if((anime > 0) && (anime < 4)){
+	    timer = title->logo[i].timer;
+	    timer++;
+	    if(timer >= LogoAnimeTM[anime]){
+		timer = 0;
+		title->logo[i].anime = anime + 1;
+	    }
+	    title->logo[i].timer = timer;
+	}
+    }
+
+    TitleLogo_Set();
+
+    /*** êFïœÇ¶èàóù ***/
+    if(frame > 0xFC){
+	Frame_ColChang();
+    }
+
+    /*** èIóπÉ`ÉFÉbÉN ***/
+    if(frame > 0x1A4){
+	mGm_GMMODE++;
+    }else{
+	if((mGm_TRG == START_BUTTON) | (mGm_TRG & A_BUTTON)){
+	    title->frame = 10;
+	    for(i=0; i<6; i++){
+		title->logo[i].ypos = 0x0118;
+		title->logo[i].anime = 4;
+	    }
+	    mGm_VSCROLL1 = 0;
+	    mGm_COLY = 0;
+	    mGm_GMMODE++;
+	    mGm_GMMODE++;
+#if SOUND_ON
+	    m4aSongNumStart(s_u_se_final);
+#endif
+	}
+    }
+
+//    title->frame++;
+}
+/*
+ ****************************************************************
+ *     ÉuÉâÉbÉNÉCÉì
+ ****************************************************************
+ */
+static	void	game_title_in(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+
+    TitleLogo_Set();
+    Frame_ColChang();
+//    title->frame++;
+
+    mGm_COLY--;
+    if( (mGm_COLY & 0x8000) ){
+	title->frame = 0;
+	mGm_BLDMOD = mGm_COLY = 0;
+	mGm_GMMODE++;
+    }
+}
+/*
+ ****************************************************************
+ *     ÉÅÉCÉìèàóù
+ ****************************************************************
+ */
+static	void	game_title_main(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+    u16		TrgKey = mGm_TRG;
+    u8		i;
+
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[PLAY_CLSS], 0x098, 0x030);
+    PushStart_Write(0x68);
+    Frame_ColChang();
+//    title->frame++;
+
+    if( (TrgKey & START_BUTTON) | (TrgKey & A_BUTTON) ){
+	mGm_COURSE = 0;
+	ScoreInit();
+	mGm_BLDMOD = BLD_UP_MODE | BLD_ALL;
+	ConnectAGB = 1;//ÇPÇoÉvÉåÉC
+	mGm_AGBNO = 0;
+	mGm_GMMODE++;
+//	if(mGm_OTHER != NULL){
+//	    mGm_FREE(mGm_OTHER);
+//	    mGm_OTHER = NULL;
+//	}
+#if SOUND_ON
+	m4aSongNumStart(s_u_se_final);
+#endif
+    }
+
+    /******** ÉQÅ[ÉÄÉvÉåÉCÉ^ÉCÉvÉZÉåÉNÉg ********/
+//    if( (TrgKey & U_KEY) | (TrgKey & D_KEY)){
+//	pTitle->Cursor = pTitle->Cursor ^ 0x01;
+//	mGm_PLTYPE = mGm_PLTYPE ^ 0x01;
+//    }
+
+#if DEBUG
+    /** ìGÇÃêîïœçX **/
+    if( (TrgKey & SELECT_BUTTON) ){
+	mGm_ETC = 0;
+	mGm_EnmyTest ^= 1;
+    }
+    if( mGm_EnmyTest ){
+	if( (TrgKey & L_KEY) )
+	    mGm_ETC++;
+	if( (TrgKey & R_KEY) ){
+	    if( mGm_ETC )
+		mGm_ETC--;
+	}
+	EnmyTestCnt(mGm_ETC);
+    }
+#endif
+}
+/*
+ ****************************************************************
+ *     ÉzÉèÉCÉgÉAÉEÉgèàóù
+ ****************************************************************
+ */
+static	void	game_title_WhiteOUT(void)
+{
+    titleDT_c	*title = mGm_OTHER;
+
+    TitleLogo_Set();
+    SobDataOamSet(PlateData[PLAY_CLSS], 0x098, 0x030);
+    Frame_ColChang();
+//    title->frame++;
+
+    m_WhiteOUT(BROS_GAME_MODE);
+    if( !mGm_GMMODE ){
+//	AllEraseEnemy();
+	if(mGm_OTHER != NULL){
+	    mGm_FREE(mGm_OTHER);
+	    mGm_OTHER = NULL;
+	}
+	VSYNC_OFF = 1;
+	m4aMPlayAllStop();
+    }
+}
+/*
+ ****************************************************************
+ *     ÉÅÉjÉÖÅ[îzóÒ
+ ****************************************************************
+ */
+mfunc game_title_menu[] = {
+    game_title_init,		// ÉCÉjÉVÉÉÉãèàóù
+    game_title_down,		// É^ÉCÉgÉãâÊñ óéâ∫
+    game_title_demo,		// É^ÉCÉgÉãâÊñ óéâ∫
+//    m_BlackIN,			// ÉuÉâÉbÉNÉCÉì
+    game_title_in,		// ÉuÉâÉbÉNÉCÉì
+    game_title_main,		// ÉÅÉCÉìèàóù
+    game_title_WhiteOUT,	// ÉzÉèÉCÉgÉAÉEÉgèàóù
+};
+/*
+ ****************************************************************
+ *     ÉÇÅ[ÉhÉZÉåÉNÉg
+ ****************************************************************
+ */
+void	game_title(void)
+{
+    titleDT_c	*title;
+
+    game_title_menu[mGm_GMMODE]();
+
+    if(SOUND_TIMER == 0){
+	if(mGm_TRG & B_BUTTON){
+	    SOUND_TIMER = 1;
+#if SOUND_ON
+	    m4aSongNumStop(s_b_TITLE);
+	    m4aSongNumStart(s_u_se_cansel);
+#endif
+	}
+    }else{
+	SOUND_TIMER++;
+	if(SOUND_TIMER > 30){
+	    SOUND_TIMER = 0;
+	    if(mGm_OTHER != NULL){
+		mGm_FREE(mGm_OTHER);	// ÉvÉåÉCópÉÅÉÇÉääJï˙
+		mGm_OTHER = NULL;
+	    }
+	    if( mGm_BROS != NULL ){
+		if( mGm_player_OamSet != NULL ){
+		    ((u8 *)mGm_player_OamSet)--;
+		    mGm_FREE(mGm_player_OamSet);
+		    mGm_player_OamSet = NULL;
+		}
+		if( mGm_OamOtherSet != NULL ){
+		    ((u8 *)mGm_OamOtherSet)--;
+		    mGm_FREE(mGm_OamOtherSet);
+		    mGm_OamOtherSet = NULL;
+		}
+		if( mGm_PLEnemyHitCheck != NULL ){
+		    ((u8 *)mGm_PLEnemyHitCheck)--;
+		    mGm_FREE(mGm_PLEnemyHitCheck);
+		    mGm_PLEnemyHitCheck = NULL;
+		}
+		if( mGm_bgbuf_check != NULL ){
+		    ((u8 *)mGm_bgbuf_check)--;
+		    mGm_FREE(mGm_bgbuf_check);
+		    mGm_bgbuf_check = NULL;
+		}
+		if( mGm_EnEn_hitchk != NULL ){
+		    ((u8 *)mGm_EnEn_hitchk)--;
+		    mGm_FREE(mGm_EnEn_hitchk);
+		    mGm_EnEn_hitchk = NULL;
+		}
+		if( mGm_ROUND_DISP != NULL ){
+		    mGm_FREE(mGm_ROUND_DISP);
+		    mGm_ROUND_DISP = NULL;
+		}
+		if( mGm_SCORE_DISP != NULL ){
+		    mGm_FREE(mGm_SCORE_DISP);
+		    mGm_SCORE_DISP = NULL;
+		}
+		mGm_FREE(mGm_BROS);		// ÉuÉçÉXêÍópÉÅÉÇÉääJï˙
+		mGm_BROS = NULL;
+	    }
+	    NMI_NO = nmi_title;
+	    mGm_GC();
+#if SOUND_ON
+	    m4aMPlayAllStop();
+#endif
+	    BRUSFG = MAIN_mode;
+	    mGm_SLMODE = 3;
+	    mGm_GMMODE = 0;
+	    VSYNC_OFF = ON;
+	}
+    }
+
+    if(mGm_OTHER != NULL){
+	title = mGm_OTHER;
+	title->frame++;
+    }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d24 1
+a24 1
+extern u8 d_title_bros_obj_Huff[0x2f78];
+a140 2
+	}else{
+	    title->logo[i].xpos = 0x10 + 0x20 * i;
+d142 5
+d189 1
+a189 1
+// ¢ÇbÇåÇÅÇìÇìÇâÇÉ£ä≈î¬
+d246 1
+a246 1
+// ¢ÇaÇ`ÇsÇsÇkÇd£ä≈î¬
+d354 2
+a355 2
+static	u16 PushStartChr[10][2] = {
+	{ 0x00, 0x216 },//P
+d360 1
+d366 17
+d385 1
+a385 1
+void	PushStart_Write(u8 ypos)
+d392 1
+a392 1
+	for(i=0; i<10; i++){
+d397 6
+a402 1
+	    Oam->VPos = ypos;
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,1071 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		ゲームのタイトル処理				*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_char_set.h"
+#include "ua_color.h"
+#include "um_oamset.h"
+#include "up_player.h"
+
+#include "ad_cad.h"
+#include "m_title.h"
+#include "m_title_sub.h"
+#include "um_select_sub.h"
+#include "ua_save.h"
+#include "m_opening.h"
+
+#include "HealthGameData.h"
+
+Title_sel_c	*p_tsl;
+Opening_c	*p_opn;
+
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void     M_title_iQue_init(void);
+static void     M_title_iQue_wait(void);
+
+static void     M_title_advance_init(void);
+static void     M_title_advance_move(void);
+static void     M_title_soune_wait1(void);
+static void     M_title_select_init(void);
+static void     M_title_select_move(void);
+static void     M_title_soune_wait2(void);
+static void     M_title_wait(void);// デバック用ダミー
+
+static void	title_obj_param_init(void);
+static void	title_obj_move(void);
+static void	title_obj_set(void);
+static void	title_bg1_move(void);
+static void	title_bg2_move(void);
+static void	USA_title_RAMclear(void);
+
+mfunc M_ique_menu[] = {
+	M_title_iQue_init,
+	M_title_iQue_wait,
+};
+
+void M_iQue(void)
+{
+    ObjVanishAll();			//ＯＡＭクリア処理
+    ObjVanishTemp();
+    M_ique_menu[game.SLMODE]();
+}
+
+void M_title_iQue_init(void)
+{
+    u8 t_i;
+    u32 start, end;
+    u32 s_mode;
+	
+    lcdc_off();			//強制ブランキング処理
+/*
+    ConnectSioInit();
+    
+    RegisterRamReset(RESET_EX_WRAM_FLAG);
+
+    mGm_MALLOC_p_opn();
+*/
+    NO_RESET = ON;
+    
+    // map
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_1E
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_1;
+    // title
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_2 | BG_SCR_BASE_1C
+	 | BG_COL_MODE_256 | BG_MOSAIC_OFF | BG_LOOP_ON
+	 | BG_CHR_BASE_1 | BG_PRIORITY_2;
+    // sky
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1B
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_3;
+    // mask
+    *(vu16 *)REG_BG3CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1A
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+    DmaArrayCopy(3, GAME_schDT, BG_VRAM, 32);  //  Set BG character
+//  DmaArrayCopy(3, GAME_schDT, OBJ_MODE0_VRAM, 32);  // Set OBJ character
+    DmaArrayCopy(3, PlttData_Sample, BG_PLTT,        16);  //  Set BG palette
+//    DmaArrayCopy(3, PlttData_Sample, COL_BUF + 0x200,     16);  // Set OBJ palette
+
+//    DmaArrayCopy(3, BgScData_Sample,   BG_VRAM + 0xf000,        32);
+    DmaArrayCopy(3, BgScData_Sample, BG_VRAM + 0xd800, 16);
+    DmaArrayCopy(3, BgScData_Sample, BG_VRAM + 0xd000, 16);
+	
+
+  //  DmaCopy(3, COL_BUF, BG_PLTT, 0x400, 16);
+
+    /*--- ブロスの通信時にサウンドプログラムをＯＦＦにするフラグのクリア ---*/
+    mGm_SOUNDFG = 0;
+    
+    //NMI_NO = nmi_title;
+    game.SLMODE++;
+
+    DISPCNT = 0;
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+
+    /*------------- カラー特殊効果の初期化 -------------*/
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0;
+    *(vu16 *)REG_BLDY = BLDY = 0;
+    
+    /*------------ オープニング関係変数初期化 ---------*/
+//    NMI_NO = nmi_opening;
+//    IRQ_NO = irq_title;
+    SORTFG = 0;
+
+    mGm_FRAME_COUNT = 1;
+
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | SIO_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+	SOUND_TIMER = 180;
+
+    V_blank_wait();
+}
+
+void M_title_iQue_wait(void)
+{
+
+    SOUND_TIMER--;
+    if(SOUND_TIMER == 0){
+//	    mGm_FREE_p_opn();
+	    game.SLMODE++;
+	    VSYNC_OFF = 1;
+	}
+}
+
+/*--------------------------------------------------------------*/
+/*		タイトルメニュー				*/
+/*--------------------------------------------------------------*/
+mfunc M_title_menu[] = {
+    M_title_advance_init,
+    M_title_advance_move,
+    M_title_soune_wait1,
+    M_title_select_init,
+    M_title_select_move,
+    M_title_soune_wait2,
+    M_title_wait,
+};
+
+/*--------------------------------------------------------------*/
+/*		タイトル処理					*/
+/*--------------------------------------------------------------*/
+void M_title(void)
+{
+    ObjVanishAll();			//ＯＡＭクリア処理
+    ObjVanishTemp();
+    M_title_menu[game.SLMODE]();
+}
+
+
+
+/*--------------------------------------------------------------*/
+/*		タイトルイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void M_title_advance_init(void)
+{
+    u8 t_i;
+    u32 start, end;
+    u32 s_mode;
+
+    lcdc_off();			//強制ブランキング処理
+
+    ConnectSioInit();
+    
+	RegisterRamReset(RESET_EX_WRAM_FLAG);
+
+    NO_RESET = ON;
+    
+    mGm_MALLOC_p_opn();
+
+    // map
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_1E
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_1;
+    // title
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_2 | BG_SCR_BASE_1C
+	 | BG_COL_MODE_256 | BG_MOSAIC_OFF | BG_LOOP_ON
+	 | BG_CHR_BASE_1 | BG_PRIORITY_2;
+    // sky
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1B
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_3;
+    // mask
+    *(vu16 *)REG_BG3CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1A
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 | BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+
+    DmaArrayCopy(3, d_demo_4bit_schDT, BG_VRAM, 16);
+    DmaArrayCopy(3, d_demo_8bit_schDT, BG_VRAM+0x4000, 32);
+    DmaArrayCopy(3, d_demo_obj_schDT, OBJ_MODE0_VRAM, 16);
+    
+    DmaArrayCopy(3, d_demo_map_sscDT, BG_VRAM + 0xf000, 16);
+    DmaArrayCopy(3, d_demo_sky_sscDT, BG_VRAM + 0xd800, 16);
+    DmaArrayCopy(3, d_demo_mask_sscDT, BG_VRAM + 0xd000, 16);
+
+    // とりあえず抜きだけセット
+    start = BG_VRAM+0xe000;
+    end = BG_VRAM+0xf000;
+    while( start < end ){
+	*(vu32 *)start = 0x00000000;
+	start += 4;
+    }
+
+    DmaArrayCopy(3, d_demo_8bit4bit_sclDT, COL_BUF, 16);
+    DmaArrayCopy(3, d_demo_obj_sclDT, COL_BUF + 0x200, 16);
+    OPYOSFG = 0;
+    OPREDFG = 0;
+    for( t_i = 0; t_i < 3; t_i++ ){
+	file_load(t_i);
+	if(ERROR_NO != 0){
+	    mGm_FREE_p_opn();
+	    return;
+	}
+	if( GAME_CLEAR ){
+	    if( OPYOSFG != 2 )
+		OPYOSFG = 1;
+	    if( EGGFG[0] == 0xFF &&
+		EGGFG[1] == 0xFF &&
+		EGGFG[2] == 0xFF &&
+		EGGFG[3] == 0xFF &&
+		EGGFG[4] == 0xFF ){
+		// 卵全部そろってる
+		OPYOSFG = 2;
+		if( RED_COIN[0] == 0xFF &&
+		    RED_COIN[1] == 0xFF &&
+		    RED_COIN[2] == 0xFF &&
+		    RED_COIN[3] == 0xFF &&
+		    RED_COIN[4] == 0xFF &&
+		    RED_COIN[5] == 0xFF &&
+		    RED_COIN[6] == 0xFF &&
+		    RED_COIN[7] == 0xFF &&
+		    RED_COIN[8] == 0xFF &&
+		    RED_COIN[9] == 0xFF &&
+		    RED_COIN[10] == 0xFF &&
+		    RED_COIN[11] == 0xFF &&
+		    (RED_COIN[12]&0xF) == 0xF ){
+		    // 赤コイン全部そろってる
+		    OPREDFG = 1;
+		    break;
+		}
+		else{
+		    OPREDFG = 0;
+		}
+	    }
+	    else{
+		if( OPYOSFG == 2 )
+		    continue;
+		// 卵全部そろってない
+		if( RED_COIN[0] == 0xFF &&
+		    RED_COIN[1] == 0xFF &&
+		    RED_COIN[2] == 0xFF &&
+		    RED_COIN[3] == 0xFF &&
+		    RED_COIN[4] == 0xFF &&
+		    RED_COIN[5] == 0xFF &&
+		    RED_COIN[6] == 0xFF &&
+		    RED_COIN[7] == 0xFF &&
+		    RED_COIN[8] == 0xFF &&
+		    RED_COIN[9] == 0xFF &&
+		    RED_COIN[10] == 0xFF &&
+		    RED_COIN[11] == 0xFF &&
+		    (RED_COIN[12]&0xF) == 0xF ){
+		    // 赤コイン全部そろってる
+		    OPREDFG = 1;
+		}
+		else{
+		    if( OPREDFG != 1 )
+			OPREDFG = 0;
+		}
+	    }
+	}
+    }
+    if( OPYOSFG ){
+	DmaCopy(3, d_demo_sky4bit_sclDT, COL_BUF+0x180, 0x20, 16);
+	GAME_CLEAR = 1;
+    }
+    DmaCopy(3, COL_BUF, BG_PLTT, 0x400, 16);
+
+    /*--- ブロスの通信時にサウンドプログラムをＯＦＦにするフラグのクリア ---*/
+    mGm_SOUNDFG = 0;
+    
+    NMI_NO = nmi_title;
+    game.SLMODE++;
+
+    DISPCNT = 0;
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON |
+	DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+
+    /*------------- カラー特殊効果の初期化 -------------*/
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0;
+    *(vu16 *)REG_BLDY = BLDY = 0;
+    
+    /*------------ オープニング関係変数初期化 ---------*/
+    mGm_SCCH1 = 0;	// map
+    mGm_SCCV1 = 0x60;
+    mGm_SCCH2 = -0x02;	// title
+    mGm_SCCV2 = 0;
+    mGm_SCCH3 = 0;	// sky
+    mGm_SCCV3 = 0x60;
+    mGm_SCCH4 = 0;	// mask
+    mGm_SCCV4 = 0;
+    OPMODE = 0;
+    OPTIME = 0;
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0x2F48;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0x060A;
+    NMI_NO = nmi_opening;
+    IRQ_NO = irq_title;
+    open_obj_init();
+    SORTFG = 0;
+
+    if( TITLE_FLAG ){
+	op_go_to_4();
+    }
+    else{
+	TITLE_FLAG = 1;
+    }
+    mGm_FRAME_COUNT = 1;
+
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | SIO_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+  
+    V_blank_wait();
+
+    m4aSoundVSyncOn();
+    s_mode = 8<<SOUND_MODE_MAXCHN_SHIFT;
+    m4aSoundMode(s_mode);
+    m4aSongNumStart( s_u_usa_title );
+}
+
+/*-------------------------------------------------------------*/
+void M_title_advance_move(void){
+    Opening_Main();
+    if((game.Trg & START_BUTTON) || (game.Trg & A_BUTTON)){
+	if( OPMODE == 3 ){
+	    if( OPOBJDT[sel_cursol].work ){
+		if( ConnectCheck() ){
+		    m4aSongNumStart( s_u_se_start );
+		    m4aSongNumStart( s_u_mario_lets_go );
+		    SOUND_TIMER = 90;
+		    game.SLMODE++;
+		}
+		else{
+		    m4aSongNumStart(s_b_BUU);
+		}
+	    }
+	    else{
+		m4aSongNumStart( s_u_se_start );
+		m4aSongNumStart( s_u_mario_lets_go );
+		SOUND_TIMER = 90;
+		game.SLMODE++;
+	    }
+	}
+	else{
+	    op_go_to_4();
+	}
+    }
+}
+/*--------------------------------------------------------------*/
+/*		セレクト画面イニシャル処理			*/
+/*--------------------------------------------------------------*/
+void M_title_select_init(void){
+    u8 GC_Temp;
+    u16 i,j;
+    u32 s_mode;
+
+    lcdc_off();			//強制ブランキング処理
+    
+    mGm_SCCH1 = 0;
+    mGm_SCCV1 = 0;
+    mGm_SCCH2 = 0;
+    mGm_SCCV2 = 0;
+    mGm_SCCH3 = 0;
+    mGm_SCCV3 = 0;
+    mGm_SCCH4 = 0;
+    mGm_SCCV4 = 0;
+    MAIN_SELECT = 0;
+
+    NO_RESET = OFF;
+
+    /*------------- ＢＧＭセット -------------*/
+    m4aSongNumStart(s_u_gamesel);
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1A
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF | BG_LOOP_ON
+	 | BG_CHR_BASE_0 | BG_PRIORITY_0;
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1B
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF | BG_SCREEN_SIZE_1
+	 | BG_CHR_BASE_0 | BG_PRIORITY_1 | BG_LOOP_ON;
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1D
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF | BG_LOOP_ON
+	 | BG_CHR_BASE_0 | BG_PRIORITY_2;
+    *(vu16 *)REG_BG3CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_1E
+	 | BG_COL_MODE_16 | BG_MOSAIC_OFF | BG_LOOP_ON
+	 | BG_CHR_BASE_0 | BG_PRIORITY_3;
+    
+    /*------------- キャラクターセット -------------*/
+    DmaArrayCopy(3, ad_select_bg_schDT, BG_VRAM, 16);
+    DmaArrayCopy(3, ad_select_obj_schDT, OBJ_MODE0_VRAM, 16);
+    
+    /*------------- スクリーンセット -------------*/
+    DmaArrayCopy(3, ad_selectbg1_game_sscDT, BG_VRAM + 0xd000, 16);
+    for( i = 0; i < 0x380; i++ ){
+	*(u16 *)(BG_VRAM+0xd100+(i<<1)) = 0x00A0;
+    }
+
+    for( i = 0; i < 0x480; i++ ){
+	*(u16 *)(BG_VRAM+0xd800+(i<<1)) = 0x00A0;
+    }
+    DmaArrayCopy(3, ad_selectbg2_sscDT, BG_VRAM + 0xe100, 16);
+    for( i = 0; i < 0x240; i++ ){
+	*(u16 *)(BG_VRAM+0xe380+(i<<1)) = 0x00A0;
+    }
+
+    TENKAI( &ad_selectbg3_sscDTCP[0], (u16 *)TENKAI_RAM );
+    DmaCopy(3, TENKAI_RAM, BG_VRAM + 0xe800, 0x800, 16);
+
+    TENKAI( &ad_selectbg4_sscDTCP[0], (u16 *)TENKAI_RAM );
+    DmaCopy(3, TENKAI_RAM, BG_VRAM + 0xf000, 0x800, 16);
+
+// 画面外に抜きキャラセット
+    for( i = 0x280; i < 0x400; i++ ){
+	*(u16 *)(BG_VRAM+0xe800+(i<<1)) = 0x00A0;
+	*(u16 *)(BG_VRAM+0xf000+(i<<1)) = 0x00A0;
+    }
+    for( i = 0; i < 0x100; i++ ){
+	*(u16 *)(BG_VRAM+0xf800+(i<<1)) = 0x00A0;
+	*(u16 *)(BG_VRAM+0xce00+(i<<1)) = 0x00A0;
+    }
+
+    /*------------- カラーセット -------------*/
+    DmaArrayCopy(3, ad_select_bg_sclDT, COL_BUF, 16);
+    DmaArrayCopy(3, ad_select_obj_sclDT, COL_BUF + 0x200, 16);
+    DmaCopy(3, COL_BUF, BG_PLTT, 0x400, 16);
+    
+    m4aSongNumStart( s_u_navi_choose_a_game );
+#if 0
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = BLD_A_BLEND_MODE |
+	 BLD_BG1_1ST | BLD_BG2_2ND;
+    *(vu16 *)REG_BLDALPHA = mGm_COLEV = 0x00906;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x0000;
+#endif
+    /*------------- オブジェ用領域確保 -------------*/
+    mGm_MALLOC_p_tsl();
+    /*------------- オブジェ初期値セット -------------*/
+    title_obj_param_init();
+    title_obj_set();
+
+    /*------------- ＢＧ２ 文字セット -------------*/
+    GC_Temp = GAME_CLEAR;
+    for( i = 0; i < 3; i++ ){
+	file_load(i);
+	if(ERROR_NO != 0){
+	    mGm_FREE_p_tsl();
+	    return;
+	}
+	TSWRDNO[i] = WORDNO;
+	TSCLRFG[i] = GAME_CLEAR;
+	MAX_WORDNO[i] = WORDNO;
+	if( GAME_CLEAR ){
+	    TSWRDMAX[i] = 20;
+	}
+	else{
+	    TSWRDMAX[i] = MAX_WORDNO[i];
+	}
+	TSEGGFG[i*5+0] = EGGFG[0];
+	TSEGGFG[i*5+1] = EGGFG[1];
+	TSEGGFG[i*5+2] = EGGFG[2];
+	TSEGGFG[i*5+3] = EGGFG[3];
+	TSEGGFG[i*5+4] = EGGFG[4];
+	FileData_Set(i);
+    }
+    GAME_CLEAR = GC_Temp;
+
+    /*------------- カラー特殊効果の初期化 -------------*/
+//    *(vu16 *)REG_BLDCNT = BLDCNT = BLD_NORMAL_MODE;
+//    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0;
+    *(vu16 *)REG_BLDY = BLDY = 0;
+    
+/*    WORLD_PLAY[0] = WORLD_PLAY[1] = 
+      WORLD_PLAY[2] = WORLD_PLAY[3] = 0;// CONTRIBUTER クリア*/
+    *(vu16 *)REG_BLDCNT = BLDCNT = 0x4C40;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA = 0x0B05;
+
+    DISPCNT = 0;
+    game.SLMODE++;
+
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+    
+    V_blank_wait();
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON|
+	DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+
+    m4aSoundVSyncOn();
+    s_mode = 6<<SOUND_MODE_MAXCHN_SHIFT;
+    m4aSoundMode(s_mode);
+    m4aSongNumStart(s_u_gamesel);
+}
+
+/*-------------------------------------------------------------*/
+void title_obj_param_init(void){
+    u8 t_i;
+    Title_sel_obj_c *tso_pt;
+
+    TSLGTM = 0;
+    TSBG1FG = GAME_WAIT;
+    TSBG2FG = WAIT;
+
+    tso_pt = &TSOBJDT[Hi_score];
+    TSOXPOS(tso_pt) = 0x0;
+    TSOYPOS(tso_pt) = 0xA0;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[USA_door];
+    TSOXPOS(tso_pt) = 0x18;
+    TSOYPOS(tso_pt) = 0x30;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[USA_doorshade];
+    TSOXPOS(tso_pt) = 0x19;
+    TSOYPOS(tso_pt) = 0x82;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Bros_pipe];
+    TSOXPOS(tso_pt) = 0x93;
+    TSOYPOS(tso_pt) = 0x31;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Bros_pipeshade];
+    TSOXPOS(tso_pt) = 0x9F;
+    TSOYPOS(tso_pt) = 0x7F;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Cursol];
+    TSOXPOS(tso_pt) = 0x18;
+    TSOYPOS(tso_pt) = 0x30;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[USA_title];
+    TSOXPOS(tso_pt) = -0x68;
+    TSOYPOS(tso_pt) = 0x87;
+    TSOXSPD(tso_pt) = LOGOSPDL;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Bros_title];
+    TSOXPOS(tso_pt) = 0xF8;
+    TSOYPOS(tso_pt) = 0x87;
+    TSOXSPD(tso_pt) = -LOGOSPDL;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 2;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Mario];
+    TSOXPOS(tso_pt) = 0x68;
+    TSOYPOS(tso_pt) = 0x64;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 1;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[Marioshade];
+    TSOXPOS(tso_pt) = 0x60;
+    TSOYPOS(tso_pt) = 0xB2;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[USA_smok];
+    TSOXPOS(tso_pt) = 0x24;
+    TSOYPOS(tso_pt) = 0x30;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 1;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+    tso_pt = &TSOBJDT[USA_casalin];
+    TSOXPOS(tso_pt) = 0x24;
+    TSOYPOS(tso_pt) = 0x30;
+    TSOXSPD(tso_pt) = 0;
+    TSOYSPD(tso_pt) = 0;
+    TSOHSIZ(tso_pt) = 0x100;
+    TSOVSIZ(tso_pt) = 0x100;
+    TSOPTRN(tso_pt) = 0;
+    TSOMODE(tso_pt) = 0;
+    TSOTIM(tso_pt)  = 0;
+	
+    for( t_i = 0; t_i < TSOBJMAX; t_i++ ){
+	if( t_i < USA_smokbomb || t_i >= USA_doorshade ){
+	    TSSTTBL[t_i] = 1;
+	}
+	else{
+	    tso_pt = &TSOBJDT[t_i];
+	    TSOXPOS(tso_pt) = 0;
+	    TSOYPOS(tso_pt) = 0;
+	    TSOXSPD(tso_pt) = 0;
+	    TSOYSPD(tso_pt) = 0;
+	    TSOHSIZ(tso_pt) = 0x100;
+	    TSOVSIZ(tso_pt) = 0x100;
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	    TSOTIM(tso_pt)  = 0;
+	    TSSTTBL[t_i] = 0;
+	}
+    }
+    TSSTTBL[USA_smok] = 0;
+    TSSTTBL[USA_heart] = 0;
+    TSTILT = 0;
+    TSCCLFG = 1;
+    TSIPT = 0;
+    TSAPT = 0;
+}
+
+/*-------------------------------------------------------------*/
+void title_obj_move(void){
+    u8 t_i;
+
+    TSLGTM++;
+    if( SOUND_TIMER > 0 )
+	SOUND_TIMER--;
+    if( TSLGTM == 0x0026 ){
+	TSLGTM = 0x8000;		// 拡大開始
+    }
+    else if( TSLGTM == 0x8026 ){
+	TSLGTM = 0x0000;		// 縮小開始
+    }
+    for( t_i = 0; t_i < TSOBJMAX; t_i++ ){
+	if( TSSTTBL[t_i] ){
+	    title_obj_move_tbl[t_i](&TSOBJDT[t_i], t_i);
+	}
+    }
+}
+
+/*-------------------------------------------------------------*/
+void title_obj_set(void){
+    u8 t_i;
+
+    TSIPT = 0;
+    TSAPT = 0;
+    for( t_i = 0; t_i < TSOBJMAX; t_i++ ){
+	if( TSSTTBL[t_i] ){
+	    title_obj_oam_tbl[t_i](t_i);
+	}
+    }
+}
+
+/*-------------------------------------------------------------*/
+void title_bg1_move(void)
+{
+    if( TSBG1FG == GAME_WAIT || TSBG1FG == FILE_WAIT )
+	return;
+
+    if( TSBG1FG == GAME_UP ){
+	mGm_SCCV1 += 4;
+	if( mGm_SCCV1 >= 0x20 ){
+	    mGm_SCCV1 = 0x20;
+	    TITLE_WORK32(0) = 3;
+	    NMI_NO = nmi_titleselect;
+	    TSBG1FG = FILE_DOWN;
+	}
+    }
+    else if( TSBG1FG == GAME_DOWN ){
+	mGm_SCCV1 -= 4;
+	if( mGm_SCCV1 <= 0 ){
+	    mGm_SCCV1 = 0;
+	    TSBG1FG = GAME_WAIT;
+	}
+    }
+    else if( TSBG1FG == FILE_UP ){
+	mGm_SCCV1 += 4;
+	if( mGm_SCCV1 >= 0x20 ){
+	    mGm_SCCV1 = 0x20;
+	    TITLE_WORK32(0) = 2;
+	    NMI_NO = nmi_titleselect;
+	    TSBG1FG = GAME_DOWN;
+	}
+    }
+    else{
+	mGm_SCCV1 -= 4;
+	if( mGm_SCCV1 <= 0 ){
+	    mGm_SCCV1 = 0;
+	    TSBG1FG = FILE_WAIT;
+	}
+    }
+}
+
+/*-------------------------------------------------------------*/
+void title_bg2_move(void)
+{
+    Title_sel_obj_c *egg_pt;
+
+    if( TSBG2FG == WAIT )
+	return;
+
+    if( TSBG2FG == LEFT_MOVE ){
+	if( mGm_SCCH2 < 0x78 ){
+	    mGm_SCCH2 += 0xC;
+	}
+	else{
+	    mGm_SCCH2 = 0x78;
+	    TSBG2FG = WAIT;
+	    TSOBJDT[Mario].mode = 0;
+	    // 卵表示
+	    TSSTTBL[USA_egg] = 1;
+	    egg_pt = &TSOBJDT[USA_egg];
+	    TSOXPOS(egg_pt) = EGGXPOS;
+	    TSOYPOS(egg_pt) = LINE1;
+	    TSOXSPD(egg_pt) = 0;
+	    TSOYSPD(egg_pt) = 0;
+	    TSOHSIZ(egg_pt) = 0x100;
+	    TSOVSIZ(egg_pt) = 0x100;
+	    TSOPTRN(egg_pt) = 0;
+	}
+    }
+    else{
+	if( mGm_SCCH2 > 0 ){
+	    mGm_SCCH2 -= 0xC;
+	}
+	else{
+	    mGm_SCCH2 = 0;
+	    TSBG2FG = WAIT;
+	}
+    }
+}
+
+/*-------------------------------------------------------------*/
+void USA_title_RAMclear(void)
+{
+    DmaClear(3, 0, usa_game, sizeof(usa_gameDT_c), 16);
+
+    STWRDNO = 0xff;
+}
+
+void M_title_select_move(void)
+{
+    title_bg1_move();
+    title_bg2_move();
+    title_obj_move();
+    title_obj_set();
+    if(game.Trg & START_BUTTON || game.Trg & A_BUTTON){
+	m4aSongNumStart(s_u_se_final);
+	if(MAIN_SELECT == 0){
+	    m4aSongNumStart( s_u_smario_usa_advance );
+	    m4aSongNumStop( s_u_mariobros );
+	    TSOBJDT[USA_door].mode = 1;
+	    TSOBJDT[USA_casalin].mode = 0;
+	    TSOBJDT[Bros_pipe].mode = 1;
+	    TSOBJDT[Mario].mode = 1;
+	    SOUND_TIMER = 164;
+	}
+	else{
+	    m4aSongNumStop( s_u_smario_usa_advance );
+	    m4aSongNumStart( s_u_mariobros );
+	    TSSTTBL[Hi_score] = 1;
+	    TSOBJDT[Hi_score].mode = 1;
+	    TSOBJDT[Hi_score].patrn = 1;
+	    TSOBJDT[USA_title].mode = 1;
+	    TITLE_WORK32(0) = 10;
+	    NMI_NO = nmi_titleselect;
+	    TSOBJDT[USA_door].mode = 3;
+	    SOUND_TIMER = 124;
+	}
+	game.SLMODE++;
+    }
+    else if( L_KEY_ON_T || R_KEY_ON_T || SELECT_BUTTON_ON ){
+	m4aSongNumStart(s_u_se_kamekeri8);
+	MAIN_SELECT ^= 0x1;
+	TSOBJDT[Mario].timer = 10;
+    }
+    else if( B_BUTTON_ON_T ){
+	BRUSFG = MAIN_mode;		// タイトルモードセット
+	mGm_SLMODE = 0;
+	mGm_GMMODE = 0;
+	mGm_FREE_p_tsl();
+	VSYNC_OFF = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		サウンド待ち処理				*/
+/*--------------------------------------------------------------*/
+void M_title_soune_wait1(void)
+{
+    u8 t_i;
+    Opening_obj_c *opn_pt;
+
+    SOUND_TIMER--;
+    if(SOUND_TIMER == 0){
+	if( OPOBJDT[sel_cursol].work ){
+	    BRUSFG = SIO_mode;
+	    mGm_SLMODE = 0;
+	    mGm_GMMODE = 0;
+	    mGm_FREE_p_opn();
+	    NMI_NO = nmi_title;
+	    VSYNC_OFF = 1;
+	}
+	else{
+	    mGm_FREE_p_opn();
+	    NMI_NO = nmi_title;
+	    game.SLMODE++;
+	    TITLE_WORK32(0) = 0;
+	    TITLE_WORK32(1) = 0;
+	    TITLE_WORK32(2) = 0;
+	    TITLE_WORK32(3) = 0;
+	    VSYNC_OFF = 1;
+	}
+    }
+    else{
+	Opening_Main();
+    }
+}
+void M_title_soune_wait2(void)
+{
+    u8 t_i;
+    title_bg1_move();
+    title_bg2_move();
+    title_obj_move();
+    title_obj_set();
+    if( (A_BUTTON_ON_T || (game.Trg&START_BUTTON)) &&
+	MAIN_SELECT == 0 ){
+	SOUND_TIMER = 0;
+    }
+    if( (B_BUTTON_ON_T) && (TSCCLFG) &&
+	(MAIN_SELECT == 0) ){
+	if( TSBG1FG >= FILE_WAIT ){
+	    TSBG1FG = FILE_UP;
+	}
+	else{
+	    if( TSBG1FG != GAME_WAIT ){
+		TSBG1FG = GAME_DOWN;
+	    }
+	}
+	TSBG2FG = RIGHT_MOVE;
+	m4aSongNumStart(s_u_se_cansel);
+	TSOBJDT[USA_door].mode = 2;
+	TSOBJDT[Bros_pipe].mode = 2;
+	TSSTTBL[Bros_title] = 1;
+	TSOBJDT[Hi_score].mode = 2;
+	TSOBJDT[Mario].mode = 1;
+	for( t_i = USA_smok; t_i < TSOBJMAX; t_i++ ){
+	    if( t_i != USA_casalin && t_i < USA_doorshade ){
+		TSSTTBL[t_i] = 0;
+		TSOBJDT[t_i] = Ts_obj_clr;
+	    }
+	}
+	game.SLMODE -= 1;
+    }
+    else if(SOUND_TIMER == 0){
+	if(MAIN_SELECT == 0){
+	    if( TSBG1FG == GAME_WAIT ){
+		TSBG1FG = GAME_UP;
+	    }
+	    TSBG2FG = LEFT_MOVE;
+
+	    for( t_i = 0; t_i < 3; t_i++ ){
+		if( TSCLRFG[t_i] ){
+		    TSWRDNO[t_i] = 20;
+		}
+		else{
+		    if( FILE_SUM[t_i] ){
+			TSWRDNO[t_i] = TSWRDMAX[t_i];
+		    }
+		}
+		FileData_Set(t_i);
+	    }
+
+	    game.SLMODE++;
+//	    TSOBJDT[Bros_pipe].mode = 3;
+	    TSOBJDT[Bros_pipe].mode = 1;
+	    TSSTTBL[Hi_score] = 1;
+	    TSOBJDT[Hi_score].mode = 1;
+	    TSOBJDT[Hi_score].patrn = 0;
+	}
+	else{
+	    VSYNC_OFF = 1;
+	    BRUSFG = BROS_mode;
+	    TSOBJDT[Mario].mode = 1;
+	    game.SLMODE = 0;
+	    game.GMMODE = 0;
+	    mGm_FREE_p_tsl();
+	}
+    }    
+}
+
+void M_title_wait(void)
+{
+    u8 t_i;
+
+    title_bg1_move();
+    title_bg2_move();
+    if( TSOBJDT[USA_heart].timer == 70 ){
+	VSYNC_OFF = 1;
+	BRUSFG = USA_mode;
+	game.SLMODE = select_mode;
+	game.GMMODE = pl_sel_init;
+	save_push();
+	mGm_FREE_p_tsl();
+	mGm_MALLOC_usa_game();
+	ply_maloc_set();
+	
+	USA_title_RAMclear();
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//■		デバッグモード(FUFUFU)
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#if MARIO_USA_DEBUG
+	HEHEHE = 0;
+	PAUSEF = 0;
+#endif
+//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+    }
+    else{
+	title_obj_move();
+	title_obj_set();
+	if( B_BUTTON_ON_T && TSCCLFG ){
+	    m4aSongNumStart(s_u_se_cansel);
+	    TSOBJDT[USA_door].mode = 2;
+	    TSOBJDT[Bros_pipe].mode = 2;
+	    TSSTTBL[Bros_title] = 1;
+	    TSOBJDT[Hi_score].mode = 2;
+	    TSOBJDT[Mario].mode = 1;
+	    for( t_i = USA_smok; t_i < TSOBJMAX; t_i++ ){
+		if( t_i != USA_casalin && t_i < USA_doorshade ){
+		    TSSTTBL[t_i] = 0;
+		    TSOBJDT[t_i] = Ts_obj_clr;
+		}
+	    }
+	    TSBG1FG = FILE_UP;
+	    TSBG2FG = RIGHT_MOVE;
+	    game.SLMODE -= 2;
+	}
+    }
+}
+
+/*------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d19 2
+d24 1
+d28 3
+d46 99
+d168 2
+d183 1
+a183 1
+    RegisterRamReset(RESET_EX_WRAM_FLAG);
+a186 1
+    /*------------- オープニング用領域確保 -------------*/
+d205 2
+a206 2
+    
+    /*------------- キャラクターセット -------------*/
+a210 1
+    /*------------- スクリーンセット -------------*/
+a222 1
+    /*------------- カラーセット -------------*/
+d341 1
+a341 1
+    
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

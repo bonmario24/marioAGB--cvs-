@@ -1,0 +1,97 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_se_mamukemuri_grp, voicegroup000
+	.equ	sn_se_mamukemuri_pri, 50
+	.equ	sn_se_mamukemuri_rev, 0
+	.equ	sn_se_mamukemuri_mvl, 100
+	.equ	sn_se_mamukemuri_key, 0
+	.equ	sn_se_mamukemuri_tbs, 1
+	.equ	sn_se_mamukemuri_exg, 0
+	.equ	sn_se_mamukemuri_cmp, 1
+
+	.section .rodata
+	.global	sn_se_mamukemuri
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_se_mamukemuri_1:
+	.byte	KEYSH , sn_se_mamukemuri_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_se_mamukemuri_tbs/2
+	.byte		VOICE , 3
+	.byte		VOL   , 127*sn_se_mamukemuri_mvl/mxv
+	.byte		N02   , En2 , v080
+	.byte	W04
+	.byte		        Fs2 , v100
+	.byte	W07
+	.byte		        Ds2 , v076
+	.byte	W04
+	.byte		        Fn2 , v092
+	.byte	W07
+	.byte		        Dn2 , v048
+	.byte	W03
+	.byte		        En2 , v060
+	.byte	W07
+	.byte		        Cs2 , v040
+	.byte	W04
+	.byte		        Ds2 , v052
+	.byte	W07
+	.byte		        Cn2 , v040
+	.byte	W04
+	.byte		        Dn2 , v052
+	.byte	W02
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_se_mamukemuri:
+	.byte	1	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_se_mamukemuri_pri	@@ Priority
+	.byte	sn_se_mamukemuri_rev	@@ Reverb.
+
+	.word	sn_se_mamukemuri_grp
+
+	.word	sn_se_mamukemuri_1
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

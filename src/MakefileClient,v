@@ -1,0 +1,113 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#### アセンブラ・ローダ・コンパイラ・変換ツール定義
+AS = as
+LD = ld
+CC = gcc
+OBJCOPY = objcopy
+
+#### ソースファ@イル定義
+.SFILES    =   crt0_multi_boot.s
+
+.CFILES    =   
+
+.OFILES    =   $(.SFILES:.s=.o) $(.CFILES:.c=.o)
+
+
+#### 各フラグ定義
+ASFLAGS	= -I c:/agb/Include -mthumb-interwork
+CFLAGS	= -g -I c:/agb/Include -mthumb-interwork -nostdlib
+CFLAGS	+= -D_LANGUAGE_C=1 -DOPTIMUM_MALLOC
+
+CFLAGS  += -W -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wformat -Wchar-subscripts
+CFLAGS  += -Wpointer-arith -Wmissing-declarations -Wmissing-prototypes
+
+LDFLAGS	+= -Map client.map -nostartfiles -Ttext 0x02000000 -Tbss 0x03000000
+
+MAPFILE    =   client.map
+TARGET_ELF =   client.elf
+TARGET_BIN =   client.bin
+
+COMP_OFILE =   child_LZ.o
+COMP_BIN   =   child_LZ.bin
+
+CHILD_BIN   =   child.bin
+
+
+#### 各ファ@イル構造定義
+default:
+	@@$(MAKE) -f MakefileChild
+	@@$(MAKE) -f MakefileClient $(TARGET_BIN)
+
+
+$(TARGET_BIN): $(TARGET_ELF)
+	$(OBJCOPY) -v -O binary $< $@@
+
+$(TARGET_ELF): $(.OFILES) Makefile $(COMP_OFILE)
+	@@echo > $(MAPFILE)
+	$(CC) -g -o $@@ $(.OFILES) $(COMP_OFILE) -Wl,$(LDFLAGS)
+
+$(COMP_OFILE): $(COMP_BIN)
+##	objcopy -v -I binary -O elf32-little $< $@@
+	$(OBJCOPY) -v -I binary -O elf32-little $< $@@
+
+$(COMP_BIN): $(CHILD_BIN)
+###	agbcomp -b -l $<
+	cp -f $< $@@
+
+
+.PHONY: all clean depend
+
+
+all:    clean default
+
+##clean:
+##	@@$(MAKE) -f MakefileChild clean
+##	-rm $(.OFILES) $(MAPFILE) $(TARGET_ELF) $(TARGET_BIN) \
+##				$(COMP_OFILE) $(COMP_BIN)
+clean:
+	@@$(MAKE) -f MakefileChild clean
+	-rm -f $(.OFILES) $(TARGET_ELF) $(TARGET_BIN) \
+				$(COMP_OFILE) $(COMP_BIN)
+
+depend:
+	@@$(MAKE) -f MakefileChild depend
+
+
+##include MakedependClient
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

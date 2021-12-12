@@ -1,0 +1,506 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.14;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.14;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@//------------------------------------------------------------//
+//             mks4agbLib.h ( m4aLib.h ) ver1.05              //
+//                                                            //
+//          Copyright (C) 1999-2001 NINTENDO Co.,Ltd.         //
+//------------------------------------------------------------//
+
+#ifndef _M4A_LIB_H
+#define _M4A_LIB_H
+
+#define _M4A_LIB_VER 105
+
+#include <AgbSound.h>
+
+
+//ＣＧＢ仮想チャンネルの構造
+typedef struct {
+    u8 ch1[64];
+    u8 ch2[64];
+    u8 ch3[64];
+    u8 ch4[64];
+} CgbChannels;
+
+//ミュージックプレイヤー・テーブルの構造
+typedef struct {
+    MusicPlayerArea *ma;
+    MusicPlayerTrack *ta;
+    u32 tn;
+} MPlayTable;
+
+//ソング・テーブルの構造
+typedef struct {
+    SongHeader *so;
+    u16 ms, me;
+} SongTable;
+
+
+#define CGB1_P12 ((WaveData *)0)
+#define CGB1_P25 ((WaveData *)1)
+#define CGB1_P50 ((WaveData *)2)
+#define CGB1_P75 ((WaveData *)3)
+#define CGB2_P12 CGB1_P12
+#define CGB2_P25 CGB1_P25
+#define CGB2_P50 CGB1_P50
+#define CGB2_P75 CGB1_P75
+#define CGB4_C15 ((WaveData *)0)
+#define CGB4_C07 ((WaveData *)1)
+
+
+extern const u8 __sound_mode_i[];
+#define sound_mode_i ((u32)__sound_mode_i)
+extern const u8 __total_mplay_n[];
+#define total_mplay_n ((u16)__total_mplay_n)
+extern const u8 __total_song_n[];
+#define total_song_n ((u16)__total_song_n)
+
+extern SoundArea m4a_sound;
+extern const MPlayTable mplay_table[];
+extern const SongTable song_table[];
+extern u8 m4a_memacc_area[];
+
+
+extern void m4aSoundInit(void);
+
+#define m4aSoundMode(P1) SoundMode_rev01(P1)
+extern void SoundMode_rev01(u32 mode);
+
+extern void m4aSoundMain(void);
+
+#define m4aSoundVSync() SoundVSync_rev01()
+extern void SoundVSync_rev01(void);
+
+#define m4aSoundVSyncOff() SoundVSyncOff_rev01()
+extern void SoundVSyncOff_rev01(void);
+
+#define m4aSoundVSyncOn() SoundVSyncOn_rev01()
+extern void SoundVSyncOn_rev01(void);
+
+#define m4aMPlayStart(P1,P2) MPlayStart_rev01(P1,P2)
+extern void MPlayStart_rev01(MusicPlayerArea *ma, SongHeader *so);
+
+extern void m4aSongNumStart(u16 n);
+
+extern void m4aSongNumStartOrChange(u16 n);
+
+extern void m4aSongNumStartOrContinue(u16 n);
+
+extern void m4aMPlayImmInit(MusicPlayerArea *ma);
+
+#define m4aMPlayStop(P1) MPlayStop_rev01(P1)
+extern void MPlayStop_rev01(MusicPlayerArea *ma);
+
+extern void m4aSongNumStop(u16 n);
+
+extern void m4aMPlayAllStop(void);
+
+extern void m4aMPlayContinue(MusicPlayerArea *ma);
+
+extern void m4aSongNumContinue(u16 n);
+
+extern void m4aMPlayAllContinue(void);
+
+extern void m4aMPlayFadeOut(MusicPlayerArea *ma, u16 sp);
+
+#define m4aMPlayTempoControl(P1,P2) MPlayTempoControl(P1,P2)
+extern void MPlayTempoControl(MusicPlayerArea *ma, u16 te);
+
+#define m4aMPlayVolumeControl(P1,P2,P3) MPlayVolumeControl(P1,P2,P3)
+extern void MPlayVolumeControl(MusicPlayerArea *ma, u16 tb, u16 vo);
+
+#define m4aMPlayPitchControl(P1,P2,P3) MPlayPitchControl(P1,P2,P3)
+extern void MPlayPitchControl(MusicPlayerArea *ma, u16 tb, s16 pi);
+
+#define m4aMPlayPampotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+#define m4aMPlayPanpotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+extern void MPlayPanpotControl(MusicPlayerArea *ma, u16 tb, s8 pa);
+
+#define m4aMPlayModDepthSet(P1,P2,P3) MPlayModDepthSet(P1,P2,P3)
+extern void MPlayModDepthSet(MusicPlayerArea *ma, u16 tb, u8 md);
+
+#define m4aMPlayLFOSpeedSet(P1,P2,P3) MPlayLFOSpeedSet(P1,P2,P3)
+extern void MPlayLFOSpeedSet(MusicPlayerArea *ma, u16 tb, u8 ls);
+
+
+#endif // _M4A_LIB_H
+
+// MusicPlayers
+extern MusicPlayerArea m4a_mplay000;
+extern MusicPlayerArea m4a_mplay001;
+extern MusicPlayerArea m4a_mplay002;
+extern MusicPlayerArea m4a_mplay003;
+extern MusicPlayerArea m4a_mplay004;
+extern MusicPlayerArea m4a_mplay005;
+extern MusicPlayerArea m4a_mplay006;
+extern MusicPlayerArea m4a_mplay007;
+extern MusicPlayerArea m4a_mplay008;
+extern MusicPlayerArea m4a_mplay009;
+extern MusicPlayerArea m4a_mplay010;
+extern MusicPlayerArea m4a_mplay011;
+extern MusicPlayerArea m4a_mplay012;
+extern MusicPlayerArea m4a_mplay013;
+extern MusicPlayerArea m4a_mplay014;
+extern MusicPlayerArea m4a_mplay015;
+extern MusicPlayerArea m4a_mplay016;
+extern MusicPlayerArea m4a_mplay030;
+extern MusicPlayerArea m4a_mplay031;
+
+// Song files
+extern SongHeader sn_TITLE;
+extern SongHeader sn_STAGE1;
+extern SongHeader sn_STAGE2;
+extern SongHeader sn_CLEAR;
+extern SongHeader sn_GAMEOVER;
+extern SongHeader sn_BONUS;
+extern SongHeader sn_KEKKA;
+extern SongHeader sn_PERFECT;
+extern SongHeader sn_BATTLE_DEAD;
+extern SongHeader sn_HEART;
+extern SongHeader sn_COIN5;
+extern SongHeader sn_JUMP;
+extern SongHeader sn_SLIP;
+extern SongHeader sn_WALK_C;
+extern SongHeader sn_WALK_E;
+extern SongHeader sn_WALK_G;
+extern SongHeader sn_MR_DEAD;
+extern SongHeader sn_MR_DOWN;
+extern SongHeader sn_MR_NEXT;
+extern SongHeader sn_POW;
+extern SongHeader sn_PAUSE1UP;
+extern SongHeader sn_KAME;
+extern SongHeader sn_KANI;
+extern SongHeader sn_HAE;
+extern SongHeader sn_COIN_OUT;
+extern SongHeader sn_TEKI_ATTACK;
+extern SongHeader sn_TEKI_DEAD;
+extern SongHeader sn_DOBON;
+extern SongHeader sn_COIN_GET;
+extern SongHeader sn_FREEZER;
+extern SongHeader sn_FREEZ_DEAD;
+extern SongHeader sn_FIRE;
+extern SongHeader sn_boss_bros;
+extern SongHeader sn_star_bros;
+extern SongHeader sn_KUPPA;
+extern SongHeader sn_KUPPA_DOSIN;
+extern SongHeader sn_win1;
+extern SongHeader sn_lose1;
+extern SongHeader sn_win2;
+extern SongHeader sn_lose2;
+extern SongHeader sn_battle2;
+extern SongHeader sn_battlekekka;
+extern SongHeader sn_zelda_fan;
+extern SongHeader sn_KUPPAFIRE;
+extern SongHeader sn_BAKETU;
+extern SongHeader sn_MOTI;
+extern SongHeader sn_NAGE;
+extern SongHeader sn_TAME;
+extern SongHeader sn_DAMAGE;
+extern SongHeader sn_TIBI;
+extern SongHeader sn_NORI;
+extern SongHeader sn_BUTUKARI;
+extern SongHeader sn_HEART_GET;
+extern SongHeader sn_DEKA;
+extern SongHeader sn_KAO;
+extern SongHeader sn_PUSH;
+extern SongHeader sn_KUPPA_DAMAGE;
+extern SongHeader sn_KUPPA_DEAD;
+extern SongHeader sn_SHIFT;
+extern SongHeader sn_SAVE;
+extern SongHeader sn_intro_battle;
+extern SongHeader sn_KAMEKERI1;
+extern SongHeader sn_KAMEKERI2;
+extern SongHeader sn_KAMEKERI3;
+extern SongHeader sn_KAMEKERI4;
+extern SongHeader sn_PINPON;
+extern SongHeader sn_BUU;
+extern SongHeader sn_battlekekka_intro;
+extern SongHeader sn_FIREDEAD;
+extern SongHeader sn_TURARA_DEAD;
+extern SongHeader sn_battle3;
+extern SongHeader sn_battle4;
+extern SongHeader sn_bassdrum3;
+extern SongHeader sn_intro_bonus;
+extern SongHeader sn_NOBONUS;
+extern SongHeader sn_usa_title;
+extern SongHeader sn_tijou;
+extern SongHeader sn_chika;
+extern SongHeader sn_ura;
+extern SongHeader sn_select;
+extern SongHeader sn_boss;
+extern SongHeader sn_boss_mamu;
+extern SongHeader sn_boss_clear;
+extern SongHeader sn_suishou;
+extern SongHeader sn_game_over;
+extern SongHeader sn_slot_start;
+extern SongHeader sn_usa_dead;
+extern SongHeader sn_star;
+extern SongHeader sn_warp;
+extern SongHeader sn_usa_ending;
+extern SongHeader sn_se_final;
+extern SongHeader sn_se_kettei;
+extern SongHeader sn_se_nage;
+extern SongHeader sn_se_chery;
+extern SongHeader sn_se_tekidead;
+extern SongHeader sn_se_hasigo;
+extern SongHeader sn_se_damage;
+extern SongHeader sn_se_moti1;
+extern SongHeader sn_se_moti2;
+extern SongHeader sn_se_timer;
+extern SongHeader sn_se_dooropen;
+extern SongHeader sn_se_doorclose;
+extern SongHeader sn_se_kamen;
+extern SongHeader sn_se_kujira;
+extern SongHeader sn_se_bomb;
+extern SongHeader sn_se_coin;
+extern SongHeader sn_se_tame;
+extern SongHeader sn_se_tuboin;
+extern SongHeader sn_se_tuboout;
+extern SongHeader sn_se_1up;
+extern SongHeader sn_se_pow;
+extern SongHeader sn_se_pause;
+extern SongHeader sn_se_toriopen;
+extern SongHeader sn_se_toriclose;
+extern SongHeader sn_se_kinoko;
+extern SongHeader sn_se_slotroll;
+extern SongHeader sn_se_slotkettei;
+extern SongHeader sn_se_slotdrum1;
+extern SongHeader sn_se_slotdrum2;
+extern SongHeader sn_se_bossdamage;
+extern SongHeader sn_se_bosshaku;
+extern SongHeader sn_se_rakka;
+extern SongHeader sn_se_bossdead;
+extern SongHeader sn_se_kourakie;
+extern SongHeader sn_se_jump;
+extern SongHeader sn_se_rocket;
+extern SongHeader sn_se_tibi;
+extern SongHeader sn_se_slip;
+extern SongHeader sn_se_kamekeri0;
+extern SongHeader sn_se_kamekeri1;
+extern SongHeader sn_se_kamekeri2;
+extern SongHeader sn_se_kamekeri3;
+extern SongHeader sn_se_kamekeri4;
+extern SongHeader sn_se_kamekeri5;
+extern SongHeader sn_se_kamekeri6;
+extern SongHeader sn_se_kamekeri7;
+extern SongHeader sn_se_kamekeri8;
+extern SongHeader sn_se_mamu;
+extern SongHeader sn_se_mamudead;
+extern SongHeader sn_se_fire;
+extern SongHeader sn_se_mamukemuri;
+extern SongHeader sn_se_yoshi;
+extern SongHeader sn_tubo;
+extern SongHeader sn_worldkekka;
+extern SongHeader sn_se_awa;
+extern SongHeader sn_se_big;
+extern SongHeader sn_se_tama;
+extern SongHeader sn_boss_mae;
+extern SongHeader sn_gamesel;
+extern SongHeader sn_se_jampdai;
+extern SongHeader sn_se_bossbig;
+extern SongHeader sn_se_bombfire;
+extern SongHeader sn_se_cansel;
+extern SongHeader sn_se_heart;
+extern SongHeader sn_se_biribiri;
+extern SongHeader sn_tamago;
+extern SongHeader sn_se_shift;
+extern SongHeader sn_se_start;
+extern SongHeader sn_se_save;
+extern SongHeader sn_se_kamen_okori;
+extern SongHeader sn_se_kabe;
+extern SongHeader sn_se_titlemoti;
+extern SongHeader sn_se_titledosun2;
+extern SongHeader sn_se_titledosun3;
+extern SongHeader sn_se_tamago;
+extern SongHeader sn_boss_mae_r;
+extern SongHeader sn_boss_r;
+extern SongHeader sn_se_kirakira;
+extern SongHeader sn_se_cork;
+extern SongHeader sn_v_usa_00;
+extern SongHeader sn_v_br_01;
+extern SongHeader sn_v_ma_07;
+extern SongHeader sn_v_ma_08;
+extern SongHeader sn_v_ma_09;
+extern SongHeader sn_v_ma_10;
+extern SongHeader sn_v_ma_11;
+extern SongHeader sn_v_ma_12;
+extern SongHeader sn_v_ma_14;
+extern SongHeader sn_v_ma_16;
+extern SongHeader sn_v_ma_17;
+extern SongHeader sn_v_ma_19;
+extern SongHeader sn_v_ma_20;
+extern SongHeader sn_v_ma_21;
+extern SongHeader sn_v_ma_22;
+extern SongHeader sn_v_ma_23;
+extern SongHeader sn_v_ma_24;
+extern SongHeader sn_v_ma_25;
+extern SongHeader sn_v_ma_26;
+extern SongHeader sn_v_ma_27;
+extern SongHeader sn_v_ma_29;
+extern SongHeader sn_v_ma_30;
+extern SongHeader sn_v_ma_31;
+extern SongHeader sn_v_ma_32;
+extern SongHeader sn_v_ma_33;
+extern SongHeader sn_v_ma_34;
+extern SongHeader sn_v_ma_35;
+extern SongHeader sn_v_ma_36;
+extern SongHeader sn_v_ma_37;
+extern SongHeader sn_v_ma_17ya;
+extern SongHeader sn_v_mo_01;
+extern SongHeader sn_v_mo_02;
+extern SongHeader sn_v_mo_03;
+extern SongHeader sn_v_tr_01;
+extern SongHeader sn_v_tr_02;
+extern SongHeader sn_v_tr_03;
+extern SongHeader sn_v_tr_04;
+extern SongHeader sn_v_tr_05;
+extern SongHeader sn_v_cl_01;
+extern SongHeader sn_v_cl_02;
+extern SongHeader sn_v_cl_03;
+extern SongHeader sn_v_fl_01;
+extern SongHeader sn_v_fl_02;
+extern SongHeader sn_v_fl_03;
+extern SongHeader sn_v_wa_01;
+extern SongHeader sn_v_wa_02;
+extern SongHeader sn_v_wa_03;
+extern SongHeader sn_v_wa_04;
+extern SongHeader sn_v_wa_05;
+extern SongHeader sn_v_na_01;
+extern SongHeader sn_v_na_02;
+extern SongHeader sn_v_na_04;
+extern SongHeader sn_v_na_05;
+extern SongHeader sn_v_pi_01;
+extern SongHeader sn_v_pi_02;
+extern SongHeader sn_v_pi_03;
+extern SongHeader sn_v_pi_04;
+extern SongHeader sn_v_re_01;
+extern SongHeader sn_v_re_02;
+extern SongHeader sn_v_re_03;
+extern SongHeader sn_v_re_04;
+extern SongHeader sn_v_gr_01;
+extern SongHeader sn_v_gr_02;
+extern SongHeader sn_v_gr_03;
+extern SongHeader sn_v_gr_04;
+extern SongHeader sn_v_me_01;
+extern SongHeader sn_v_me_02;
+extern SongHeader sn_v_me_03;
+extern SongHeader sn_v_me_04;
+extern SongHeader sn_v_lu_06;
+extern SongHeader sn_v_lu_08;
+extern SongHeader sn_v_lu_10;
+extern SongHeader sn_v_lu_09;
+extern SongHeader sn_v_lu_11;
+extern SongHeader sn_v_lu_12;
+extern SongHeader sn_v_lu_14;
+extern SongHeader sn_v_lu_16;
+extern SongHeader sn_v_lu_17;
+extern SongHeader sn_v_lu_19;
+extern SongHeader sn_v_lu_20;
+extern SongHeader sn_v_lu_21;
+extern SongHeader sn_v_lu_22;
+extern SongHeader sn_v_lu_23;
+extern SongHeader sn_v_lu_24;
+extern SongHeader sn_v_lu_25;
+extern SongHeader sn_v_lu_26;
+extern SongHeader sn_v_lu_27;
+extern SongHeader sn_v_lu_28;
+extern SongHeader sn_v_lu_29;
+extern SongHeader sn_v_lu_30;
+extern SongHeader sn_v_lu_31;
+extern SongHeader sn_v_lu_32;
+extern SongHeader sn_v_lu_33;
+extern SongHeader sn_v_lu_34;
+extern SongHeader sn_v_lu_35;
+extern SongHeader sn_v_lu_36;
+extern SongHeader sn_v_lu_17ya;
+extern SongHeader sn_v_pe_06;
+extern SongHeader sn_v_pe_08;
+extern SongHeader sn_v_pe_09;
+extern SongHeader sn_v_pe_10;
+extern SongHeader sn_v_pe_11;
+extern SongHeader sn_v_pe_13;
+extern SongHeader sn_v_pe_15;
+extern SongHeader sn_v_pe_16;
+extern SongHeader sn_v_pe_18;
+extern SongHeader sn_v_pe_19;
+extern SongHeader sn_v_pe_20;
+extern SongHeader sn_v_pe_21;
+extern SongHeader sn_v_pe_22;
+extern SongHeader sn_v_pe_23;
+extern SongHeader sn_v_pe_24;
+extern SongHeader sn_v_pe_25;
+extern SongHeader sn_v_pe_26;
+extern SongHeader sn_v_pe_28;
+extern SongHeader sn_v_pe_29;
+extern SongHeader sn_v_pe_30;
+extern SongHeader sn_v_pe_31;
+extern SongHeader sn_v_pe_32;
+extern SongHeader sn_v_pe_33;
+extern SongHeader sn_v_pe_34;
+extern SongHeader sn_v_pe_35;
+extern SongHeader sn_v_pe_36;
+extern SongHeader sn_v_pe_16ya;
+extern SongHeader sn_v_to_06;
+extern SongHeader sn_v_to_07;
+extern SongHeader sn_v_to_08;
+extern SongHeader sn_v_to_09;
+extern SongHeader sn_v_to_10;
+extern SongHeader sn_v_to_11;
+extern SongHeader sn_v_to_13;
+extern SongHeader sn_v_to_15;
+extern SongHeader sn_v_to_16;
+extern SongHeader sn_v_to_18;
+extern SongHeader sn_v_to_19;
+extern SongHeader sn_v_to_20;
+extern SongHeader sn_v_to_21;
+extern SongHeader sn_v_to_22;
+extern SongHeader sn_v_to_23;
+extern SongHeader sn_v_to_24;
+extern SongHeader sn_v_to_25;
+extern SongHeader sn_v_to_26;
+extern SongHeader sn_v_to_28;
+extern SongHeader sn_v_to_29;
+extern SongHeader sn_v_to_30;
+extern SongHeader sn_v_to_31;
+extern SongHeader sn_v_to_32;
+extern SongHeader sn_v_to_33;
+extern SongHeader sn_v_to_34;
+extern SongHeader sn_v_to_35;
+extern SongHeader sn_v_to_36;
+extern SongHeader sn_v_to_16ya;
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

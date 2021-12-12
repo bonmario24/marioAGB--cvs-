@@ -1,0 +1,116 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#### アセンブラ・ローダ・コンパイラ・変換ツール定義
+AGBLIB = $(AGBDIR)/lib/
+
+AS = as
+LD = ld
+CC = gcc
+OBJCOPY = objcopy
+
+#### ソースファ@イル定義
+.SFILES  = crt0_child2.s
+
+.CFILES += client_game.c
+.CFILES += client_main.c
+
+.CFILES += d_loader_bg_sch.c
+.CFILES += d_load_obj_Huff.c
+.CFILES += d_loader_bg_scl.c
+.CFILES += d_loader_obj_scl.c
+
+#### オブジェクトファ@イル定義
+CHILD_OFILES  =
+CHILD_OFILES += client_sub.o
+CHILD_OFILES += client_multisio.o
+CHILD_OFILES += client_player.o
+CHILD_OFILES += client_sky.o
+
+.OFILES = $(.SFILES:.s=.o) $(.CFILES:.c=.o)
+
+#### サウンドファ@イル定義
+#SOUND_DIR = Sound/loader_set/
+#include $(SOUND_DIR)Soundfiles
+
+#### 各フラグ定義
+ASFLAGS	= -I c:/agb/Include -mthumb-interwork
+CFLAGS	= -g -I c:/agb/Include -mthumb-interwork -nostdlib
+CFLAGS	+= -D_LANGUAGE_C=1 -DOPTIMUM_MALLOC
+
+CFLAGS  += -W -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wformat -Wchar-subscripts
+CFLAGS  += -Wpointer-arith -Wmissing-declarations -Wmissing-prototypes
+
+LDFLAGS	+= -Map child.map -nostartfiles -Ttext 0x020002A0 -Tbss 0x03000000 -L$(AGBLIB) -lagbsyscall -lisagbprn
+
+DEPENDFILE =   MakedependChild
+MAPFILE    =   child.map
+TARGET_ELF =   child.elf
+TARGET_BIN =   child.bin
+
+#### 各ファ@イル構造定義
+default:
+	@@$(MAKE) -f MakefileChild $(TARGET_BIN)
+
+$(TARGET_BIN): $(TARGET_ELF)
+	$(OBJCOPY) -v -O binary $< $@@
+
+#$(TARGET_ELF): $(.OFILES) $(SOUND_FILES) Makefile $(DEPENDFILE)
+#	@@echo > $(MAPFILE)
+#	$(CC) -g -o $@@ $(.OFILES) $(SOUND_FILES) -Wl,$(LDFLAGS)
+$(TARGET_ELF): $(.OFILES) $(CHILD_OFILES) Makefile $(DEPENDFILE)
+	@@echo > $(MAPFILE)
+	$(CC) -g -o $@@ $(.OFILES) $(CHILD_OFILES) -Wl,$(LDFLAGS)
+
+
+.PHONY: all clean depend
+
+
+all:    clean $(TARGET_BIN)
+
+clean:
+	-rm -f $(.OFILES) $(DEPENDFILE) $(TARGET_ELF) $(TARGET_BIN)
+
+depend:
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+$(DEPENDFILE): 
+	$(CC) $(CFLAGS) -M $(.CFILES) > $(DEPENDFILE)
+
+##include MakedependChild
+include $(DEPENDFILE)
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

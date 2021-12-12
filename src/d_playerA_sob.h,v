@@ -1,0 +1,71 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef _D_PLAYERA_SOB_H_
+#define _D_PLAYERA_SOB_H_
+
+extern OamData d_playerA_sob_00[];	/* 00 */
+extern OamData d_playerA_sob_01[];	/* 01 */
+extern OamData d_playerA_sob_02[];	/* 02 */
+extern OamData d_playerA_sob_03[];	/* 03 */
+extern OamData d_playerA_sob_04[];	/* 04 */
+extern OamData d_playerA_sob_05[];	/* 05 */
+extern OamData d_playerA_sob_08[];	/* 08 */
+extern OamData d_playerA_sob_09[];	/* 09 */
+extern OamData d_playerA_sob_0A[];	/* 0A */
+extern OamData d_playerA_sob_0B[];	/* 0B */
+extern OamData d_playerA_sob_0C[];	/* 0C */
+extern OamData d_playerA_sob_0D[];	/* 0D */
+extern OamData d_playerA_sob_0E[];	/* 0E */
+extern OamData d_playerA_sob_0F[];	/* 0F */
+extern OamData d_playerA_sob_10[];	/* 10 */
+extern OamData d_playerA_sob_11[];	/* 11 */
+extern OamData d_playerA_sob_12[];	/* 12 */
+extern OamData d_playerA_sob_13[];	/* 13 */
+extern OamData d_playerA_sob_14[];	/* 14 */
+extern OamData d_playerA_sob_15[];	/* 15 */
+extern OamData d_playerA_sob_16[];	/* 16 */
+extern OamData d_playerA_sob_17[];	/* 17 */
+extern OamData d_playerA_sob_18[];	/* 18 */
+extern OamData d_playerA_sob_19[];	/* 19 */
+extern OamData d_playerA_sob_1A[];	/* 1A */
+extern OamData d_playerA_sob_1B[];	/* 1B */
+extern OamData d_playerA_sob_1C[];	/* 1C */
+extern OamData d_playerA_sob_1D[];	/* 1D */
+
+#endif /* _D_PLAYERA_SOB_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

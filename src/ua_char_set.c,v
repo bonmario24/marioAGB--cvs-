@@ -1,0 +1,284 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@コースセットプログラム		*/
+/****************************************************************/
+#include "m_main.h"
+#include "ua_course.h"
+#include "up_player.h"
+#include "up_commondt.h"
+#include "ua_bg.h"
+
+#include "ud_cad.h"
+
+#include "ua_char_set.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+
+/*--------------------------------------------------------------*/
+/*		ゲーム中のキャラクターセット処理		*/
+/*--------------------------------------------------------------*/
+void game_char_set(u8 cos_no)
+{
+    u16 char_address;
+
+/*------------- キャラクターセット（ＢＧ） -------------*/
+    char_address = base_bg_char_table1[CHAPTN];
+    DmaCopy(3, base_char1DT + char_address, BG_VRAM + 0x600, 0x0a00, 32);
+    if(TAKIFLG == 0){
+	DmaCopy(3, base_chenge_chrDT + (game.frameCnt & 0x38) * 0x30, BG_VRAM, 0x600, 32);
+    }
+    else{
+	DmaCopy(3, base_chenge_chrDT + ((game.frameCnt & 0x38) + 0x40) * 0x30, BG_VRAM, 0x600, 32);
+    }
+    DmaCopy(3, base_char2DT, BG_VRAM + 0x1000, 0x800, 32);
+    if((WORDNO == 2) ||
+       (WORDNO == 8) ||
+       (WORDNO == 0xb) ||
+       ((WORDNO == 0x11) && (cos_no == 5))){
+	DmaCopy(3, base_char3DT + 0x200, BG_VRAM + 0x1800, 0x800, 32);
+    }
+    else if(WORDNO == 0x13){
+	DmaCopy(3, base_char3DT + 0x400, BG_VRAM + 0x1800, 0x800, 32);
+    }
+    else{
+	DmaCopy(3, base_char3DT, BG_VRAM + 0x1800, 0x800, 32);
+    }
+
+    if(CHAPTN != 6){
+	if((WORDNO == 3) && (COSUNO == 1) ||
+	   (WORDNO == 3) && (COSUNO == 2) ||
+	   (WORDNO == 5) && (COSUNO == 3) ||
+	   (WORDNO == 5) && (COSUNO == 5) ||
+	   (WORDNO == 5) && (COSUNO == 7)){
+	    DmaCopy(3, bg_2_0_schDT + 0x400, BG_VRAM + 0x2000, 0x800, 32);
+	    IWACFG = 1;
+	}
+	else{
+	    DmaCopy(3, bg_2_0_schDT, BG_VRAM + 0x2000, 0x800, 32);
+	    IWACFG = 0;
+	}
+    }
+    else{
+	DmaCopy(3, bg_2_0_schDT + 0x200, BG_VRAM + 0x2000, 0x800, 32);
+	IWACFG = 0;
+    }
+    char_address = bg_2_table1[WORDNO * COS_MAX + cos_no];
+    DmaCopy(3, bg_2_1_schDT + char_address, BG_VRAM + 0x2800, 0x800, 32);
+    char_address = bg_2_table2[WORDNO * COS_MAX + cos_no];
+    DmaCopy(3, bg_2_2_schDT + char_address, BG_VRAM + 0x3000, 0x800, 32);
+    char_address = bg_2_table3[WORDNO * COS_MAX + cos_no];
+    DmaCopy(3, bg_2_3_schDT + char_address, BG_VRAM + 0x3800, 0x800, 32);
+/*    if(TSBIN == 3){
+	char_address = tubo_bg_2_table1[WORDNO];
+	DmaCopy(3, bg_2_1_schDT + char_address, BG_VRAM + 0x2800, 0x800, 32);
+	char_address = tubo_bg_2_table2[WORDNO];
+	DmaCopy(3, bg_2_2_schDT + char_address, BG_VRAM + 0x3000, 0x800, 32);
+	char_address = tubo_bg_2_table3[WORDNO];
+	DmaCopy(3, bg_2_3_schDT + char_address, BG_VRAM + 0x3800, 0x800, 32);
+    }
+    else{
+	char_address = bg_2_table1[WORDNO * 10 + cos_no];
+	DmaCopy(3, bg_2_1_schDT + char_address, BG_VRAM + 0x2800, 0x800, 32);
+	char_address = bg_2_table2[WORDNO * 10 + cos_no];
+	DmaCopy(3, bg_2_2_schDT + char_address, BG_VRAM + 0x3000, 0x800, 32);
+	char_address = bg_2_table3[WORDNO * 10 + cos_no];
+	DmaCopy(3, bg_2_3_schDT + char_address, BG_VRAM + 0x3800, 0x800, 32);
+	}*/
+
+    if((WORDNO == 0xe) || (TSBIN == 1) || (TSBIN == 3) || (TSBOFG != 0)){
+	DmaCopy(3, d_bg1_200_schDT + 0x200, BG_VRAM + 0x4000, 0x800, 32);
+    }
+    else{
+	DmaCopy(3, d_bg1_200_schDT, BG_VRAM + 0x4000, 0x800, 32);
+    }
+    DmaCopy(3, d_bg1_240_schDT, BG_VRAM + 0x4800, 0x800, 32);
+
+    DmaArrayCopy(3, d_bg3_schDT, BG_VRAM + 0x6000, 32);
+
+/*------------- キャラクターセット（ＯＢＪ） -------------*/
+    DmaArrayCopy(3, obj_jyochu_schDT, OBJ_MODE0_VRAM, 32);
+    char_address = base_obj_char_table11[CHAPTN];
+    DmaCopy(3, obj_dat1DT + char_address, OBJ_MODE0_VRAM + 0x2800, 0x800, 32);
+    char_address = base_obj_char_table12[CHAPTN];
+    DmaCopy(3, obj_dat2DT + char_address, OBJ_MODE0_VRAM + 0x3000, 0x800, 32);
+
+    if(BOSROM[CHAPTN] == WORDNO * COS_MAX + cos_no){
+	DmaCopy(3, d_baikaku_schDT + 0x400, OBJ_MODE0_VRAM + 0x7000, 0x1000, 32);
+	if(CHAPTN == 2){
+	    DmaCopy(3, obj_dat3DT + 0x180 * 8, OBJ_MODE0_VRAM + 0x3000, 0x1000, 32);
+	}
+	else{
+	    if(CHAPTN == 6)
+		DmaCopy(3, obj_dat3DT + 0xa00, OBJ_MODE0_VRAM + 0x3000, 0x800, 32);
+	    char_address = base_obj_char_table13[CHAPTN];
+	    DmaCopy(3, obj_dat3DT + char_address, OBJ_MODE0_VRAM + 0x3800, 0x800, 32);
+	}
+    }
+    else{
+	DmaArrayCopy(3, obj_jyochu_sch1DT, OBJ_MODE0_VRAM + 0x3800, 32);
+	if((TSBOFG != 0) && (TSBIN == 0)){
+	    DmaCopy(3, d_baikaku_schDT + 0x800, OBJ_MODE0_VRAM + 0x7000, 0x1000, 32);	// ２倍キャラ
+	}
+	else{
+	    DmaCopy(3, d_baikaku_schDT, OBJ_MODE0_VRAM + 0x7000, 0x1000, 32);	// ２倍キャラ
+	}
+    }
+
+    char_address = player_PLSYDT[PLAY_PLSYNO];
+    DmaCopy(3, d_player_schDT + char_address, OBJ_MODE0_VRAM + 0x4000, 0x2000, 32);
+    DmaArrayCopy(3, ud_pause_schDT, OBJ_MODE0_VRAM + 0x6000, 32);
+
+    if((WORDNO == 3) ||
+       (WORDNO == 4)){
+	DmaCopy(3, ud_bighakkun_schDT + 8 * 0, OBJ_MODE0_VRAM + 0x7300, 0x100, 32);
+	DmaCopy(3, ud_bighakkun_schDT + 8 * 8, OBJ_MODE0_VRAM + 0x7700, 0x100, 32);
+	DmaCopy(3, ud_bighakkun_schDT + 8 * 0x10, OBJ_MODE0_VRAM + 0x7b00, 0x100, 32);
+	DmaCopy(3, ud_bighakkun_schDT + 8 * 0x18, OBJ_MODE0_VRAM + 0x7f00, 0x100, 32);
+    }
+
+    DmaCopy(3, 
+	    obj_tensoDT + (game.frameCnt & 0x38) * 0xc, 
+	    OBJ_MODE0_VRAM + 0x80, 
+	    0xc0, 
+	    16);
+    DmaCopy(3, 
+	    obj_tensoDT + (game.frameCnt & 0x38) * 0xc + 0x30, 
+	    OBJ_MODE0_VRAM + 0x480, 
+	    0xc0, 
+	    16);
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼのキャラクターセット処理			*/
+/*--------------------------------------------------------------*/
+void tubo_char_set(void)
+{
+/*------------- キャラクターセット（ＢＧ） -------------*/
+    DmaCopy(3, d_bg1_200_schDT + 0x200, BG_VRAM + 0x4000, 0x800, 32);
+    DmaCopy(3, ud_gondola_BG_schDT, BG_VRAM + 0x2800, 0x1800, 32);
+    DmaCopy(3, ud_gondola_BG_schDT + 0xc0 * 8, BG_VRAM + 0x5000, 0x1000, 32);
+    DmaCopy(3, d_bg1_240_schDT, BG_VRAM + 0x4800, 0x800, 32);
+
+/*------------- キャラクターセット（ＯＢＪ） -------------*/
+    DmaCopy(3, d_baikaku_schDT + 0x800, OBJ_MODE0_VRAM + 0x7000, 0x1000, 32);	// ２倍キャラ
+    DmaCopy(3, ud_gondola_obj2_schDT, OBJ_MODE0_VRAM + 0x6b00, 0x100, 32);
+    DmaCopy(3, ud_gondola_obj2_schDT + 0x40, OBJ_MODE0_VRAM + 0x6f00, 0x100, 32);
+
+    IWACFG = 0;
+}
+
+///*--------------------------------------------------------------*/
+///*		タイトルキャラクターセット処理			*/
+///*--------------------------------------------------------------*/
+//void m_title_char_set(void)
+//{
+//    DmaCopy(3, sm_2_y_1f_schDT + 0x400, BG_VRAM + 0x1000, 0x1000, 32);
+//
+//    DmaCopy(3, sm_2_y_1f_schDT + 0x1c00, OBJ_MODE0_VRAM, 0x800, 32);
+//}
+
+/*--------------------------------------------------------------*/
+/*		ワープキャラクターセット			*/
+/*--------------------------------------------------------------*/
+void m_warp_char_set(void)
+{
+    DmaCopy(3, ud_waku_base_schDT, BG_VRAM, 0x1800, 32);
+    DmaCopy(3, ud_waku_tenso_schDT + 8 * 0x80, BG_VRAM + 0x1800, 0x800, 32);
+    DmaCopy(3, ud_waku_base_schDT + 8 * 0xc0, BG_VRAM + 0x2000, 0x800, 32);
+//    DmaCopy(3, sm_2_y_1f_schDT + 8 * 0x140, BG_VRAM + 0x3000, 0x800, 32);
+//    DmaCopy(3, sm_2_y_1f_schDT + 8 * 0xc0, BG_VRAM + 0x3800, 0x800, 32);
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング１キャラクターセット		*/
+/*--------------------------------------------------------------*/
+void m_ending_char_set(void)
+{
+    DmaCopy(3, ud_ending_schDT, BG_VRAM + 0x2800, 0x800, 32);
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング２キャラクターセット		*/
+/*--------------------------------------------------------------*/
+void m_ending_char1_set(void)
+{
+/*------------- ＢＧ -------------*/
+    DmaCopy(3, ud_ending1_schDT, BG_VRAM + 0x1800, 0x800, 32);
+//    DmaCopy(3, sm_2_y_1f_schDT + 8 * 0xc0, BG_VRAM + 0x3800, 0x800, 32);
+    DmaCopy(3, ud_ending1_schDT + 8 * 0x40, BG_VRAM + 0x5000, 0x400, 32);
+
+/*------------- ＯＢＪ -------------*/
+    DmaCopy(3, ud_ending1_obj_schDT, OBJ_MODE0_VRAM + 0x3000, 0x2000, 32);
+}
+
+/*--------------------------------------------------------------*/
+/*		エンディング３キャラクターセット		*/
+/*--------------------------------------------------------------*/
+void m_ending_char2_set(void)
+{
+/*------------- ＢＧ -------------*/
+    DmaCopy(3, ud_ending2_bg_schDT, VRAM, 0x800, 32);
+    DmaArrayCopy(3, ud_ending2_bg_base_schDT, VRAM + 0x800, 32);
+//    DmaCopy(3, sm_2_y_1f_schDT + 0x240 * 8, VRAM + 0x800, 0x1800, 32);
+
+/*------------- ＯＢＪ -------------*/
+    DmaArrayCopy(3, ud_ending2_obj_schDT, OBJ_MODE0_VRAM, 32);
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d212 1
+a212 1
+    DmaCopy(3, ud_ending1_obj_schDT, OBJ_MODE0_VRAM + 0x3000, 0x1800, 32);
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

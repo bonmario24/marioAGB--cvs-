@@ -1,0 +1,2104 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Archive member included       because of file (symbol)
+
+C:\agb\lib/libagbsyscall.a(AgbSysCpuSet.o)
+                              m4aLib.o (CpuSet)
+C:\agb\lib/libagbsyscall.a(AgbSysMidiKey2Freq.o)
+                              C:\mks4agb1.05\SoundMon.o (MidiKey2Freq)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                              m4aLib.o (_call_via_r1)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o)
+                              m4aLib.o (__divsi3)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                              C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o) (__div0)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                              C:\mks4agb1.05\SoundMon.o (__udivsi3)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_umodsi3.o)
+                              C:\mks4agb1.05\SoundMon.o (__umodsi3)
+
+Allocating common symbols
+Common symbol       size              file
+
+c_bit               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_sound           0xfb0             m4aLib.o
+p_rev               0x4               C:\mks4agb1.05\SoundMon.o
+p_bit               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay013        0x40              SoundDat.o
+m4a_mplay005        0x40              SoundDat.o
+m4a_mplay030        0x40              SoundDat.o
+c_mvg               0x4               C:\mks4agb1.05\SoundMon.o
+AvrLinC             0x4               C:\mks4agb1.05\SoundMon.o
+c_mvo               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay016        0x40              SoundDat.o
+m4a_mplay009        0x40              SoundDat.o
+m4a_mplay006        0x40              SoundDat.o
+w_midibuf           0x4               C:\mks4agb1.05\SoundMon.o
+vcount              0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay000        0x40              SoundDat.o
+ExtMPlyJmpTbl       0x90              m4aLib.o
+Cont                0x4               C:\mks4agb1.05\SoundMon.o
+xcmdn               0x4               C:\mks4agb1.05\SoundMon.o
+MaxLin              0x4               C:\mks4agb1.05\SoundMon.o
+c_mch               0x4               C:\mks4agb1.05\SoundMon.o
+AvrLinT             0x4               C:\mks4agb1.05\SoundMon.o
+r_midibuf           0x4               C:\mks4agb1.05\SoundMon.o
+Trg                 0x4               C:\mks4agb1.05\SoundMon.o
+c_rev               0x4               C:\mks4agb1.05\SoundMon.o
+sysex               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay014        0x40              SoundDat.o
+m4a_cgbchn          0x100             m4aLib.o
+MaxChnC             0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay031        0x40              SoundDat.o
+c_song              0x10              C:\mks4agb1.05\SoundMon.o
+c_fre               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay007        0x40              SoundDat.o
+p_mch               0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay001        0x40              SoundDat.o
+m4a_mplay002        0x40              SoundDat.o
+m4a_mplay010        0x40              SoundDat.o
+midibuf             0x100             C:\mks4agb1.05\SoundMon.o
+IntrMainBuf         0x800             C:\mks4agb1.05\SoundMon.o
+MaxChn              0x4               C:\mks4agb1.05\SoundMon.o
+c_mpr               0x4               C:\mks4agb1.05\SoundMon.o
+midi_ma             0x40              C:\mks4agb1.05\SoundMon.o
+midi_ta             0x500             C:\mks4agb1.05\SoundMon.o
+runst               0x4               C:\mks4agb1.05\SoundMon.o
+KeyRep              0x4               C:\mks4agb1.05\SoundMon.o
+m4a_mplay015        0x40              SoundDat.o
+m4a_mplay012        0x40              SoundDat.o
+OamBak              0x400             C:\mks4agb1.05\SoundMon.o
+m4a_mplay004        0x40              SoundDat.o
+m4a_memacc_area     0x10              SoundDat.o
+m4a_mplay008        0x40              SoundDat.o
+p_song              0x10              C:\mks4agb1.05\SoundMon.o
+m4a_mplay003        0x40              SoundDat.o
+m4a_mplay011        0x40              SoundDat.o
+p_fre               0x4               C:\mks4agb1.05\SoundMon.o
+BgBak               0x800             C:\mks4agb1.05\SoundMon.o
+CurtCurs            0x4               C:\mks4agb1.05\SoundMon.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\mks4agb1.05\crt0.o
+LOAD m4aLib.o
+LOAD C:\mks4agb1.05\SoundMon.o
+LOAD C:\mks4agb1.05\SndMonDat.o
+LOAD SoundDat.o
+LOAD sn_g_cork.o
+LOAD sn_g_fletbass.o
+LOAD sn_g_brass3.o
+LOAD sn_g_kusa.o
+LOAD sn_g_yoshi.o
+LOAD sn_g_steeldr.o
+LOAD sn_g_kon.o
+LOAD sn_g_hits.o
+LOAD sn_g_oud.o
+LOAD sn_g_timp1g_f.o
+LOAD sn_g_slbass7.o
+LOAD sn_g_fantasy.o
+LOAD sn_g_panflute.o
+LOAD sn_g_s5honky_3.o
+LOAD sn_g_marimba3.o
+LOAD sn_g_pisnare.o
+LOAD sn_g_cannon.o
+LOAD sn_g_clarinet.o
+LOAD sn_g_trumpet.o
+LOAD sn_g_heavyguitar.o
+LOAD sn_g_lowcg.o
+LOAD sn_g_stringsd5.o
+LOAD sn_g_clhihat2.o
+LOAD sn_g_bsdrum.o
+LOAD sn_g_rvsnare.o
+LOAD sn_o_usa_00.o
+LOAD sn_o_br_01.o
+LOAD sn_o_ma_07.o
+LOAD sn_o_ma_08.o
+LOAD sn_o_ma_09.o
+LOAD sn_o_ma_10.o
+LOAD sn_o_ma_11.o
+LOAD sn_o_ma_12.o
+LOAD sn_o_ma_14.o
+LOAD sn_o_ma_16.o
+LOAD sn_o_ma_17.o
+LOAD sn_o_ma_19.o
+LOAD sn_o_ma_20.o
+LOAD sn_o_ma_21.o
+LOAD sn_o_ma_22.o
+LOAD sn_o_ma_23.o
+LOAD sn_o_ma_24.o
+LOAD sn_o_ma_25.o
+LOAD sn_o_ma_26.o
+LOAD sn_o_ma_27.o
+LOAD sn_o_ma_29.o
+LOAD sn_o_ma_30.o
+LOAD sn_o_ma_31.o
+LOAD sn_o_ma_32.o
+LOAD sn_o_ma_33.o
+LOAD sn_o_ma_34.o
+LOAD sn_o_ma_35.o
+LOAD sn_o_ma_36.o
+LOAD sn_o_ma_37.o
+LOAD sn_o_mo_01.o
+LOAD sn_o_mo_02.o
+LOAD sn_o_mo_03.o
+LOAD sn_o_tr_01.o
+LOAD sn_o_tr_02.o
+LOAD sn_o_tr_03.o
+LOAD sn_o_tr_04.o
+LOAD sn_o_tr_05.o
+LOAD sn_o_cl_01.o
+LOAD sn_o_cl_02.o
+LOAD sn_o_cl_03.o
+LOAD sn_o_fl_01.o
+LOAD sn_o_fl_02.o
+LOAD sn_o_fl_03.o
+LOAD sn_o_wa_01.o
+LOAD sn_o_wa_02.o
+LOAD sn_o_wa_03.o
+LOAD sn_o_wa_04.o
+LOAD sn_o_wa_05.o
+LOAD sn_o_na_01.o
+LOAD sn_o_na_02.o
+LOAD sn_o_na_04.o
+LOAD sn_o_na_05.o
+LOAD sn_o_pi_01.o
+LOAD sn_o_pi_02.o
+LOAD sn_o_pi_03.o
+LOAD sn_o_pi_04.o
+LOAD sn_o_re_01.o
+LOAD sn_o_re_02.o
+LOAD sn_o_re_03.o
+LOAD sn_o_re_04.o
+LOAD sn_o_gr_01.o
+LOAD sn_o_gr_02.o
+LOAD sn_o_gr_03.o
+LOAD sn_o_gr_04.o
+LOAD sn_o_lu_06.o
+LOAD sn_o_lu_08.o
+LOAD sn_o_lu_09.o
+LOAD sn_o_lu_10.o
+LOAD sn_o_lu_11.o
+LOAD sn_o_lu_12.o
+LOAD sn_o_lu_14.o
+LOAD sn_o_lu_16.o
+LOAD sn_o_lu_17.o
+LOAD sn_o_lu_19.o
+LOAD sn_o_lu_20.o
+LOAD sn_o_lu_21.o
+LOAD sn_o_lu_22.o
+LOAD sn_o_lu_23.o
+LOAD sn_o_lu_24.o
+LOAD sn_o_lu_25.o
+LOAD sn_o_lu_26.o
+LOAD sn_o_lu_27.o
+LOAD sn_o_lu_28.o
+LOAD sn_o_lu_29.o
+LOAD sn_o_lu_30.o
+LOAD sn_o_lu_31.o
+LOAD sn_o_lu_32.o
+LOAD sn_o_lu_33.o
+LOAD sn_o_lu_34.o
+LOAD sn_o_lu_35.o
+LOAD sn_o_lu_36.o
+LOAD sn_o_pe_06.o
+LOAD sn_o_pe_08.o
+LOAD sn_o_pe_09.o
+LOAD sn_o_pe_10.o
+LOAD sn_o_pe_11.o
+LOAD sn_o_pe_13.o
+LOAD sn_o_pe_15.o
+LOAD sn_o_pe_16.o
+LOAD sn_o_pe_18.o
+LOAD sn_o_pe_19.o
+LOAD sn_o_pe_20.o
+LOAD sn_o_pe_21.o
+LOAD sn_o_pe_22.o
+LOAD sn_o_pe_23.o
+LOAD sn_o_pe_24.o
+LOAD sn_o_pe_25.o
+LOAD sn_o_pe_26.o
+LOAD sn_o_pe_28.o
+LOAD sn_o_pe_29.o
+LOAD sn_o_pe_30.o
+LOAD sn_o_pe_31.o
+LOAD sn_o_pe_32.o
+LOAD sn_o_pe_33.o
+LOAD sn_o_pe_34.o
+LOAD sn_o_pe_35.o
+LOAD sn_o_pe_36.o
+LOAD sn_o_to_06.o
+LOAD sn_o_to_07.o
+LOAD sn_o_to_08.o
+LOAD sn_o_to_09.o
+LOAD sn_o_to_10.o
+LOAD sn_o_to_11.o
+LOAD sn_o_to_13.o
+LOAD sn_o_to_15.o
+LOAD sn_o_to_16.o
+LOAD sn_o_to_18.o
+LOAD sn_o_to_19.o
+LOAD sn_o_to_20.o
+LOAD sn_o_to_21.o
+LOAD sn_o_to_22.o
+LOAD sn_o_to_23.o
+LOAD sn_o_to_24.o
+LOAD sn_o_to_25.o
+LOAD sn_o_to_26.o
+LOAD sn_o_to_28.o
+LOAD sn_o_to_29.o
+LOAD sn_o_to_30.o
+LOAD sn_o_to_31.o
+LOAD sn_o_to_32.o
+LOAD sn_o_to_33.o
+LOAD sn_o_to_34.o
+LOAD sn_o_to_35.o
+LOAD sn_o_to_36.o
+LOAD sn_o_me_01.o
+LOAD sn_o_me_02.o
+LOAD sn_o_me_03.o
+LOAD sn_o_me_04.o
+LOAD sn_o_ma_17ya.o
+LOAD sn_o_lu_17ya.o
+LOAD sn_o_pe_16ya.o
+LOAD sn_o_to_16ya.o
+LOAD sn_TITLE.o
+LOAD sn_STAGE1.o
+LOAD sn_STAGE2.o
+LOAD sn_CLEAR.o
+LOAD sn_GAMEOVER.o
+LOAD sn_BONUS.o
+LOAD sn_KEKKA.o
+LOAD sn_PERFECT.o
+LOAD sn_BATTLE_DEAD.o
+LOAD sn_HEART.o
+LOAD sn_COIN5.o
+LOAD sn_JUMP.o
+LOAD sn_SLIP.o
+LOAD sn_WALK_C.o
+LOAD sn_WALK_E.o
+LOAD sn_WALK_G.o
+LOAD sn_MR_DEAD.o
+LOAD sn_MR_DOWN.o
+LOAD sn_MR_NEXT.o
+LOAD sn_POW.o
+LOAD sn_PAUSE1UP.o
+LOAD sn_KAME.o
+LOAD sn_KANI.o
+LOAD sn_HAE.o
+LOAD sn_COIN_OUT.o
+LOAD sn_TEKI_ATTACK.o
+LOAD sn_TEKI_DEAD.o
+LOAD sn_DOBON.o
+LOAD sn_COIN_GET.o
+LOAD sn_FREEZER.o
+LOAD sn_FREEZ_DEAD.o
+LOAD sn_FIRE.o
+LOAD sn_boss_bros.o
+LOAD sn_star_bros.o
+LOAD sn_KUPPA.o
+LOAD sn_KUPPA_DOSIN.o
+LOAD sn_win1.o
+LOAD sn_lose1.o
+LOAD sn_win2.o
+LOAD sn_lose2.o
+LOAD sn_battle2.o
+LOAD sn_battlekekka.o
+LOAD sn_zelda_fan.o
+LOAD sn_KUPPAFIRE.o
+LOAD sn_BAKETU.o
+LOAD sn_MOTI.o
+LOAD sn_NAGE.o
+LOAD sn_TAME.o
+LOAD sn_DAMAGE.o
+LOAD sn_TIBI.o
+LOAD sn_NORI.o
+LOAD sn_BUTUKARI.o
+LOAD sn_HEART_GET.o
+LOAD sn_DEKA.o
+LOAD sn_KAO.o
+LOAD sn_PUSH.o
+LOAD sn_KUPPA_DAMAGE.o
+LOAD sn_KUPPA_DEAD.o
+LOAD sn_SHIFT.o
+LOAD sn_SAVE.o
+LOAD sn_intro_battle.o
+LOAD sn_KAMEKERI1.o
+LOAD sn_KAMEKERI2.o
+LOAD sn_KAMEKERI3.o
+LOAD sn_KAMEKERI4.o
+LOAD sn_PINPON.o
+LOAD sn_BUU.o
+LOAD sn_battlekekka_intro.o
+LOAD sn_FIREDEAD.o
+LOAD sn_TURARA_DEAD.o
+LOAD sn_battle3.o
+LOAD sn_battle4.o
+LOAD sn_bassdrum3.o
+LOAD sn_intro_bonus.o
+LOAD sn_NOBONUS.o
+LOAD sn_usa_title.o
+LOAD sn_tijou.o
+LOAD sn_chika.o
+LOAD sn_ura.o
+LOAD sn_select.o
+LOAD sn_boss.o
+LOAD sn_boss_mamu.o
+LOAD sn_boss_clear.o
+LOAD sn_suishou.o
+LOAD sn_game_over.o
+LOAD sn_slot_start.o
+LOAD sn_usa_dead.o
+LOAD sn_star.o
+LOAD sn_warp.o
+LOAD sn_usa_ending.o
+LOAD sn_se_final.o
+LOAD sn_se_kettei.o
+LOAD sn_se_nage.o
+LOAD sn_se_chery.o
+LOAD sn_se_tekidead.o
+LOAD sn_se_hasigo.o
+LOAD sn_se_damage.o
+LOAD sn_se_moti1.o
+LOAD sn_se_moti2.o
+LOAD sn_se_timer.o
+LOAD sn_se_dooropen.o
+LOAD sn_se_doorclose.o
+LOAD sn_se_kamen.o
+LOAD sn_se_kujira.o
+LOAD sn_se_bomb.o
+LOAD sn_se_coin.o
+LOAD sn_se_tame.o
+LOAD sn_se_tuboin.o
+LOAD sn_se_tuboout.o
+LOAD sn_se_1up.o
+LOAD sn_se_pow.o
+LOAD sn_se_pause.o
+LOAD sn_se_toriopen.o
+LOAD sn_se_toriclose.o
+LOAD sn_se_kinoko.o
+LOAD sn_se_slotroll.o
+LOAD sn_se_slotkettei.o
+LOAD sn_se_slotdrum1.o
+LOAD sn_se_slotdrum2.o
+LOAD sn_se_bossdamage.o
+LOAD sn_se_bosshaku.o
+LOAD sn_se_rakka.o
+LOAD sn_se_bossdead.o
+LOAD sn_se_kourakie.o
+LOAD sn_se_jump.o
+LOAD sn_se_rocket.o
+LOAD sn_se_tibi.o
+LOAD sn_se_slip.o
+LOAD sn_se_kamekeri0.o
+LOAD sn_se_kamekeri1.o
+LOAD sn_se_kamekeri2.o
+LOAD sn_se_kamekeri3.o
+LOAD sn_se_kamekeri4.o
+LOAD sn_se_kamekeri5.o
+LOAD sn_se_kamekeri6.o
+LOAD sn_se_kamekeri7.o
+LOAD sn_se_kamekeri8.o
+LOAD sn_se_mamu.o
+LOAD sn_se_mamudead.o
+LOAD sn_se_fire.o
+LOAD sn_se_mamukemuri.o
+LOAD sn_se_yoshi.o
+LOAD sn_tubo.o
+LOAD sn_worldkekka.o
+LOAD sn_se_awa.o
+LOAD sn_se_big.o
+LOAD sn_se_tama.o
+LOAD sn_boss_mae.o
+LOAD sn_gamesel.o
+LOAD sn_se_jampdai.o
+LOAD sn_se_bossbig.o
+LOAD sn_se_bombfire.o
+LOAD sn_se_cansel.o
+LOAD sn_se_heart.o
+LOAD sn_se_biribiri.o
+LOAD sn_tamago.o
+LOAD sn_se_shift.o
+LOAD sn_se_start.o
+LOAD sn_se_save.o
+LOAD sn_se_kamen_okori.o
+LOAD sn_se_kabe.o
+LOAD sn_se_titlemoti.o
+LOAD sn_se_titledosun2.o
+LOAD sn_se_titledosun3.o
+LOAD sn_se_tamago.o
+LOAD sn_boss_mae_r.o
+LOAD sn_boss_r.o
+LOAD sn_se_kirakira.o
+LOAD sn_se_cork.o
+LOAD sn_v_usa_00.o
+LOAD sn_v_br_01.o
+LOAD sn_v_ma_07.o
+LOAD sn_v_ma_08.o
+LOAD sn_v_ma_09.o
+LOAD sn_v_ma_10.o
+LOAD sn_v_ma_11.o
+LOAD sn_v_ma_12.o
+LOAD sn_v_ma_14.o
+LOAD sn_v_ma_16.o
+LOAD sn_v_ma_17.o
+LOAD sn_v_ma_19.o
+LOAD sn_v_ma_20.o
+LOAD sn_v_ma_21.o
+LOAD sn_v_ma_22.o
+LOAD sn_v_ma_23.o
+LOAD sn_v_ma_24.o
+LOAD sn_v_ma_25.o
+LOAD sn_v_ma_26.o
+LOAD sn_v_ma_27.o
+LOAD sn_v_ma_29.o
+LOAD sn_v_ma_30.o
+LOAD sn_v_ma_31.o
+LOAD sn_v_ma_32.o
+LOAD sn_v_ma_33.o
+LOAD sn_v_ma_34.o
+LOAD sn_v_ma_35.o
+LOAD sn_v_ma_36.o
+LOAD sn_v_ma_37.o
+LOAD sn_v_ma_17ya.o
+LOAD sn_v_mo_01.o
+LOAD sn_v_mo_02.o
+LOAD sn_v_mo_03.o
+LOAD sn_v_tr_01.o
+LOAD sn_v_tr_02.o
+LOAD sn_v_tr_03.o
+LOAD sn_v_tr_04.o
+LOAD sn_v_tr_05.o
+LOAD sn_v_cl_01.o
+LOAD sn_v_cl_02.o
+LOAD sn_v_cl_03.o
+LOAD sn_v_fl_01.o
+LOAD sn_v_fl_02.o
+LOAD sn_v_fl_03.o
+LOAD sn_v_wa_01.o
+LOAD sn_v_wa_02.o
+LOAD sn_v_wa_03.o
+LOAD sn_v_wa_04.o
+LOAD sn_v_wa_05.o
+LOAD sn_v_na_01.o
+LOAD sn_v_na_02.o
+LOAD sn_v_na_04.o
+LOAD sn_v_na_05.o
+LOAD sn_v_pi_01.o
+LOAD sn_v_pi_02.o
+LOAD sn_v_pi_03.o
+LOAD sn_v_pi_04.o
+LOAD sn_v_re_01.o
+LOAD sn_v_re_02.o
+LOAD sn_v_re_03.o
+LOAD sn_v_re_04.o
+LOAD sn_v_gr_01.o
+LOAD sn_v_gr_02.o
+LOAD sn_v_gr_03.o
+LOAD sn_v_gr_04.o
+LOAD sn_v_me_01.o
+LOAD sn_v_me_02.o
+LOAD sn_v_me_03.o
+LOAD sn_v_me_04.o
+LOAD sn_v_lu_06.o
+LOAD sn_v_lu_08.o
+LOAD sn_v_lu_10.o
+LOAD sn_v_lu_09.o
+LOAD sn_v_lu_11.o
+LOAD sn_v_lu_12.o
+LOAD sn_v_lu_14.o
+LOAD sn_v_lu_16.o
+LOAD sn_v_lu_17.o
+LOAD sn_v_lu_19.o
+LOAD sn_v_lu_20.o
+LOAD sn_v_lu_21.o
+LOAD sn_v_lu_22.o
+LOAD sn_v_lu_23.o
+LOAD sn_v_lu_24.o
+LOAD sn_v_lu_25.o
+LOAD sn_v_lu_26.o
+LOAD sn_v_lu_27.o
+LOAD sn_v_lu_28.o
+LOAD sn_v_lu_29.o
+LOAD sn_v_lu_30.o
+LOAD sn_v_lu_31.o
+LOAD sn_v_lu_32.o
+LOAD sn_v_lu_33.o
+LOAD sn_v_lu_34.o
+LOAD sn_v_lu_35.o
+LOAD sn_v_lu_36.o
+LOAD sn_v_lu_17ya.o
+LOAD sn_v_pe_06.o
+LOAD sn_v_pe_08.o
+LOAD sn_v_pe_09.o
+LOAD sn_v_pe_10.o
+LOAD sn_v_pe_11.o
+LOAD sn_v_pe_13.o
+LOAD sn_v_pe_15.o
+LOAD sn_v_pe_16.o
+LOAD sn_v_pe_18.o
+LOAD sn_v_pe_19.o
+LOAD sn_v_pe_20.o
+LOAD sn_v_pe_21.o
+LOAD sn_v_pe_22.o
+LOAD sn_v_pe_23.o
+LOAD sn_v_pe_24.o
+LOAD sn_v_pe_25.o
+LOAD sn_v_pe_26.o
+LOAD sn_v_pe_28.o
+LOAD sn_v_pe_29.o
+LOAD sn_v_pe_30.o
+LOAD sn_v_pe_31.o
+LOAD sn_v_pe_32.o
+LOAD sn_v_pe_33.o
+LOAD sn_v_pe_34.o
+LOAD sn_v_pe_35.o
+LOAD sn_v_pe_36.o
+LOAD sn_v_pe_16ya.o
+LOAD sn_v_to_06.o
+LOAD sn_v_to_07.o
+LOAD sn_v_to_08.o
+LOAD sn_v_to_09.o
+LOAD sn_v_to_10.o
+LOAD sn_v_to_11.o
+LOAD sn_v_to_13.o
+LOAD sn_v_to_15.o
+LOAD sn_v_to_16.o
+LOAD sn_v_to_18.o
+LOAD sn_v_to_19.o
+LOAD sn_v_to_20.o
+LOAD sn_v_to_21.o
+LOAD sn_v_to_22.o
+LOAD sn_v_to_23.o
+LOAD sn_v_to_24.o
+LOAD sn_v_to_25.o
+LOAD sn_v_to_26.o
+LOAD sn_v_to_28.o
+LOAD sn_v_to_29.o
+LOAD sn_v_to_30.o
+LOAD sn_v_to_31.o
+LOAD sn_v_to_32.o
+LOAD sn_v_to_33.o
+LOAD sn_v_to_34.o
+LOAD sn_v_to_35.o
+LOAD sn_v_to_36.o
+LOAD sn_v_to_16ya.o
+LOAD C:\agb\lib/libagbsyscall.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libg.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libc.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+Address of section .text set to 0x8000000
+Address of section .bss set to 0x3000000
+                0x00008000                .=0x8000
+
+.interp
+ *(.interp)
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.init
+ *(.init)
+
+.plt
+ *(.plt)
+
+.text           0x08000000     0x3aa8
+ *(.text)
+ .text          0x08000000      0x1d0 C:\mks4agb1.05\crt0.o
+                0x080001d0                seg_m4aLib_top
+                0x08000000                _start
+                0x080000c0                start_vector
+                0x080000fc                intr_main
+ .text          0x080001d0     0x2098 m4aLib.o
+                0x08001498                SoundVSyncOff_rev01
+                0x08001308                SampFreqSet_rev01
+                0x080001d0                umul3232H32
+                0x080010f0                MPlayExtender
+                0x08001444                SoundClear_rev01
+                0x080021fc                ply_xsust
+                0x0800122c                Clear64byte_rev
+                0x080021e8                ply_xdeca
+                0x08001214                MusicPlayerJumpTableCopy
+                0x080021c0                ply_xtype
+                0x08001da0                MPlayVolumeControl
+                0x08001598                MPlayStart_rev01
+                0x08000608                SoundMainBTM
+                0x08002250                ply_xswee
+                0x080014e4                SoundVSyncOn_rev01
+                0x08001098                m4aMPlayFadeOut
+                0x08001520                MPlayOpen_rev01
+                0x08000ad8                TrackStop_rev01
+                0x0800106c                m4aMPlayAllContinue
+                0x080021d4                ply_xatta
+                0x080017d4                MidiKey2CgbFr
+                0x08002224                ply_xiecv
+                0x08001000                m4aSongNumContinue
+                0x08001f78                MPlayLFOSpeedSet
+                0x08000e28                DummyFunc
+                0x08000e48                MPlayFadeOut
+                0x08000d34                ply_endtie_rev01
+                0x08001060                m4aMPlayContinue
+                0x08001d78                MPlayTempoControl
+                0x0800168c                FadeOutBody_rev01
+                0x0800187c                CgbOscOff
+                0x08002164                ply_xxx
+                0x08000dc4                MidiKey2fr
+                0x08000ef4                m4aSoundMain
+                0x08002178                ply_xwave
+                0x0800170c                TrkVolPitSet_rev01
+                0x08000f00                m4aSongNumStart
+                0x08000d9c                ply_lfos_rev01
+                0x08000e2c                MPlayContinue
+                0x08000db0                ply_mod_rev01
+                0x08001e08                MPlayPitchControl
+                0x08001ee4                MP_clear_modM
+                0x0800086c                MPlayMain_rev01
+                0x08000b1c                ply_note_rev01
+                0x08001240                SoundInit_rev01
+                0x08000f2c                m4aSongNumStartOrChange
+                0x08001f04                MPlayModDepthSet
+                0x08000f78                m4aSongNumStartOrContinue
+                0x08001934                CgbSound
+                0x0800164c                MPlayStop_rev01
+                0x08002264                DummyFunc_rev
+                0x08002144                ply_xcmd
+                0x080013ac                SoundMode_rev01
+                0x08001e7c                MPlayPanpotControl
+                0x08001218                ClearChain_rev
+                0x08000834                SoundVSync_rev01
+                0x08000e68                m4aSoundInit
+                0x08002230                ply_xiecl
+                0x0800223c                ply_xleng
+                0x080010a8                m4aMPlayImmInit
+                0x08001fec                ply_memacc
+                0x080001e0                SoundMain
+                0x08000264                SoundMainRAM
+                0x08001034                m4aMPlayAllStop
+                0x080018cc                CgbModVol
+                0x08000608                Clear64byte
+                0x08000fcc                m4aSongNumStop
+                0x08000670                MPlyJmpTblCopy
+                0x08002210                ply_xrele
+ .text          0x08002268     0x162c C:\mks4agb1.05\SoundMon.o
+                0x08002918                IntrDummy
+                0x08002ed0                ModeWrite
+                0x08002904                VBlankIntr
+                0x08002bac                ValueWrite
+                0x08003230                MidiInputMain
+                0x08002268                seg_m4aLib_end
+                0x08003218                unReadMidi
+                0x080028a4                KeyRead
+                0x08002f88                MidiWrite
+                0x08003180                MidiInIntr
+                0x08002cd0                SongWrite
+                0x08003858                MidiAllStop
+                0x0800291c                ValueChange
+                0x0800226c                _MPlayFadeOut
+                0x08002b84                StrWrite
+                0x0800314c                MidiPortInit
+                0x0800302c                MidiInputInit
+                0x08002c40                ValueWriteHex
+                0x080031e0                ReadMidi
+                0x08002270                AgbMain
+ .text          0x08003894        0x4 C:\agb\lib/libagbsyscall.a(AgbSysCpuSet.o)
+                0x08003894                CpuSet
+ .text          0x08003898        0x4 C:\agb\lib/libagbsyscall.a(AgbSysMidiKey2Freq.o)
+                0x08003898                MidiKey2Freq
+ .text          0x0800389c       0x3c C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                0x080038a4                _call_via_r2
+                0x080038b4                _call_via_r6
+                0x080038b0                _call_via_r5
+                0x080038a8                _call_via_r3
+                0x080038c8                _call_via_fp
+                0x080038bc                _call_via_r8
+                0x080038b8                _call_via_r7
+                0x0800389c                _call_via_r0
+                0x080038c4                _call_via_sl
+                0x080038d0                _call_via_sp
+                0x080038c0                _call_via_r9
+                0x080038ac                _call_via_r4
+                0x080038a0                _call_via_r1
+                0x080038cc                _call_via_ip
+                0x080038d4                _call_via_lr
+ .text          0x080038d8       0x94 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o)
+                0x080038d8                __divsi3
+ .text          0x0800396c        0x4 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                0x0800396c                __div0
+ .text          0x08003970       0x78 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                0x08003970                __udivsi3
+ .text          0x080039e8       0xc0 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_umodsi3.o)
+                0x080039e8                __umodsi3
+ *(.text.*)
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7t)
+ *(.glue_7)
+                0x08003aa8                _etext=.
+                0x08003aa8                PROVIDE (etext, .)
+
+.fini
+ *(.fini)
+
+.rodata         0x08003aa8   0x1ce26c
+ *(.rodata)
+ .rodata        0x08003aa8        0x4 C:\mks4agb1.05\crt0.o
+                0x08003aac                seg_m4aLib_rodata_top
+ .rodata        0x08003aac      0x2d8 m4aLib.o
+                0x08003bf0                FreqTable
+                0x08003cbc                CgbFrTable
+                0x08003aac                MPlyJmpTbl
+                0x08003d10                Cgb3vol
+                0x08003b3c                ScaleTable
+                0x08003d54                xcmd_tbl
+                0x08003d20                clock_tbl_rev01
+                0x08003c38                CgbScTable
+                0x08003cd4                NoiseTable
+                0x08003c20                pcmVBtbl_rev
+ .rodata        0x08003d84     0x13c0 C:\mks4agb1.05\SoundMon.o
+                0x080050d8                IntrTable
+                0x080042d0                OamData_Sample
+                0x08003d84                seg_m4aLib_rodata_end
+                0x08003da0                CurP
+                0x080042d8                PlttData_Sample
+                0x08003d86                FreTbl
+                0x080044d8                CharData_Sample
+                0x08003dd0                BgScData_Sample
+ .rodata        0x08005144      0x70c C:\mks4agb1.05\SndMonDat.o
+                0x08005840                app_vgrp_table
+                0x08005850                seg_rodata_top
+                0x08005144                app_song_table
+ .rodata        0x08005850     0x2188 SoundDat.o
+                0x08005850                voicegroup000
+                0x08006480                voicegroup003
+                0x08005e80                voicegroup002
+                0x08005e50                voicegroup001
+                0x08006a5c                mplay_table
+                0x08006bdc                song_table
+ .rodata        0x080079d8      0x2d8 sn_g_cork.o
+                0x080079d8                sn_g_cork
+ .rodata        0x08007cb0       0xf4 sn_g_fletbass.o
+                0x08007cb0                sn_g_fletbass
+ .rodata        0x08007da4      0x468 sn_g_brass3.o
+                0x08007da4                sn_g_brass3
+ .rodata        0x0800820c      0x8dc sn_g_kusa.o
+                0x0800820c                sn_g_kusa
+ .rodata        0x08008ae8     0x13c0 sn_g_yoshi.o
+                0x08008ae8                sn_g_yoshi
+ .rodata        0x08009ea8      0x7a4 sn_g_steeldr.o
+                0x08009ea8                sn_g_steeldr
+ .rodata        0x0800a64c      0x70c sn_g_kon.o
+                0x0800a64c                sn_g_kon
+ .rodata        0x0800ad58      0x4ac sn_g_hits.o
+                0x0800ad58                sn_g_hits
+ .rodata        0x0800b204      0x764 sn_g_oud.o
+                0x0800b204                sn_g_oud
+ .rodata        0x0800b968      0x5cc sn_g_timp1g_f.o
+                0x0800b968                sn_g_timp1g_f
+ .rodata        0x0800bf34      0x2e4 sn_g_slbass7.o
+                0x0800bf34                sn_g_slbass7
+ .rodata        0x0800c218      0x1a0 sn_g_fantasy.o
+                0x0800c218                sn_g_fantasy
+ .rodata        0x0800c3b8       0x78 sn_g_panflute.o
+                0x0800c3b8                sn_g_panflute
+ .rodata        0x0800c430      0x6cc sn_g_s5honky_3.o
+                0x0800c430                sn_g_s5honky_3
+ .rodata        0x0800cafc      0x1ec sn_g_marimba3.o
+                0x0800cafc                sn_g_marimba3
+ .rodata        0x0800cce8      0x7c8 sn_g_pisnare.o
+                0x0800cce8                sn_g_pisnare
+ .rodata        0x0800d4b0      0x800 sn_g_cannon.o
+                0x0800d4b0                sn_g_cannon
+ .rodata        0x0800dcb0       0xac sn_g_clarinet.o
+                0x0800dcb0                sn_g_clarinet
+ .rodata        0x0800dd5c      0x270 sn_g_trumpet.o
+                0x0800dd5c                sn_g_trumpet
+ .rodata        0x0800dfcc      0x628 sn_g_heavyguitar.o
+                0x0800dfcc                sn_g_heavyguitar
+ .rodata        0x0800e5f4      0x700 sn_g_lowcg.o
+                0x0800e5f4                sn_g_lowcg
+ .rodata        0x0800ecf4       0x94 sn_g_stringsd5.o
+                0x0800ecf4                sn_g_stringsd5
+ .rodata        0x0800ed88      0x1d8 sn_g_clhihat2.o
+                0x0800ed88                sn_g_clhihat2
+ .rodata        0x0800ef60      0x2f8 sn_g_bsdrum.o
+                0x0800ef60                sn_g_bsdrum
+ .rodata        0x0800f258      0x44c sn_g_rvsnare.o
+                0x0800f258                sn_g_rvsnare
+ .rodata        0x0800f6a4     0x5650 sn_o_usa_00.o
+                0x0800f6a4                sn_o_usa_00
+ .rodata        0x08014cf4     0x44c0 sn_o_br_01.o
+                0x08014cf4                sn_o_br_01
+ .rodata        0x080191b4     0x2c24 sn_o_ma_07.o
+                0x080191b4                sn_o_ma_07
+ .rodata        0x0801bdd8     0x39a4 sn_o_ma_08.o
+                0x0801bdd8                sn_o_ma_08
+ .rodata        0x0801f77c     0x390c sn_o_ma_09.o
+                0x0801f77c                sn_o_ma_09
+ .rodata        0x08023088     0x37d0 sn_o_ma_10.o
+                0x08023088                sn_o_ma_10
+ .rodata        0x08026858     0x126c sn_o_ma_11.o
+                0x08026858                sn_o_ma_11
+ .rodata        0x08027ac4     0x1f88 sn_o_ma_12.o
+                0x08027ac4                sn_o_ma_12
+ .rodata        0x08029a4c     0x131c sn_o_ma_14.o
+                0x08029a4c                sn_o_ma_14
+ .rodata        0x0802ad68     0x2764 sn_o_ma_16.o
+                0x0802ad68                sn_o_ma_16
+ .rodata        0x0802d4cc     0x20d4 sn_o_ma_17.o
+                0x0802d4cc                sn_o_ma_17
+ .rodata        0x0802f5a0     0x36b4 sn_o_ma_19.o
+                0x0802f5a0                sn_o_ma_19
+ .rodata        0x08032c54     0x1214 sn_o_ma_20.o
+                0x08032c54                sn_o_ma_20
+ .rodata        0x08033e68      0xba4 sn_o_ma_21.o
+                0x08033e68                sn_o_ma_21
+ .rodata        0x08034a0c     0x6e48 sn_o_ma_22.o
+                0x08034a0c                sn_o_ma_22
+ .rodata        0x0803b854     0x3360 sn_o_ma_23.o
+                0x0803b854                sn_o_ma_23
+ .rodata        0x0803ebb4     0x2084 sn_o_ma_24.o
+                0x0803ebb4                sn_o_ma_24
+ .rodata        0x08040c38     0x152c sn_o_ma_25.o
+                0x08040c38                sn_o_ma_25
+ .rodata        0x08042164     0x24b0 sn_o_ma_26.o
+                0x08042164                sn_o_ma_26
+ .rodata        0x08044614     0x1dac sn_o_ma_27.o
+                0x08044614                sn_o_ma_27
+ .rodata        0x080463c0     0x31e4 sn_o_ma_29.o
+                0x080463c0                sn_o_ma_29
+ .rodata        0x080495a4     0x27a0 sn_o_ma_30.o
+                0x080495a4                sn_o_ma_30
+ .rodata        0x0804bd44     0x2d00 sn_o_ma_31.o
+                0x0804bd44                sn_o_ma_31
+ .rodata        0x0804ea44     0x157c sn_o_ma_32.o
+                0x0804ea44                sn_o_ma_32
+ .rodata        0x0804ffc0     0x1020 sn_o_ma_33.o
+                0x0804ffc0                sn_o_ma_33
+ .rodata        0x08050fe0     0x2088 sn_o_ma_34.o
+                0x08050fe0                sn_o_ma_34
+ .rodata        0x08053068     0x2ec4 sn_o_ma_35.o
+                0x08053068                sn_o_ma_35
+ .rodata        0x08055f2c     0x2d50 sn_o_ma_36.o
+                0x08055f2c                sn_o_ma_36
+ .rodata        0x08058c7c     0x35b4 sn_o_ma_37.o
+                0x08058c7c                sn_o_ma_37
+ .rodata        0x0805c230     0x5f14 sn_o_mo_01.o
+                0x0805c230                sn_o_mo_01
+ .rodata        0x08062144     0x1c8c sn_o_mo_02.o
+                0x08062144                sn_o_mo_02
+ .rodata        0x08063dd0     0x6a18 sn_o_mo_03.o
+                0x08063dd0                sn_o_mo_03
+ .rodata        0x0806a7e8     0x2e70 sn_o_tr_01.o
+                0x0806a7e8                sn_o_tr_01
+ .rodata        0x0806d658     0x2b08 sn_o_tr_02.o
+                0x0806d658                sn_o_tr_02
+ .rodata        0x08070160     0x24e4 sn_o_tr_03.o
+                0x08070160                sn_o_tr_03
+ .rodata        0x08072644     0x39b4 sn_o_tr_04.o
+                0x08072644                sn_o_tr_04
+ .rodata        0x08075ff8     0x4f54 sn_o_tr_05.o
+                0x08075ff8                sn_o_tr_05
+ .rodata        0x0807af4c     0x738c sn_o_cl_01.o
+                0x0807af4c                sn_o_cl_01
+ .rodata        0x080822d8     0x2a78 sn_o_cl_02.o
+                0x080822d8                sn_o_cl_02
+ .rodata        0x08084d50     0x5ea8 sn_o_cl_03.o
+                0x08084d50                sn_o_cl_03
+ .rodata        0x0808abf8     0x4968 sn_o_fl_01.o
+                0x0808abf8                sn_o_fl_01
+ .rodata        0x0808f560     0x2a8c sn_o_fl_02.o
+                0x0808f560                sn_o_fl_02
+ .rodata        0x08091fec     0x20f4 sn_o_fl_03.o
+                0x08091fec                sn_o_fl_03
+ .rodata        0x080940e0     0x7878 sn_o_wa_01.o
+                0x080940e0                sn_o_wa_01
+ .rodata        0x0809b958     0x191c sn_o_wa_02.o
+                0x0809b958                sn_o_wa_02
+ .rodata        0x0809d274     0x1ee0 sn_o_wa_03.o
+                0x0809d274                sn_o_wa_03
+ .rodata        0x0809f154     0x5f3c sn_o_wa_04.o
+                0x0809f154                sn_o_wa_04
+ .rodata        0x080a5090     0xd464 sn_o_wa_05.o
+                0x080a5090                sn_o_wa_05
+ .rodata        0x080b24f4     0x4734 sn_o_na_01.o
+                0x080b24f4                sn_o_na_01
+ .rodata        0x080b6c28     0x2e44 sn_o_na_02.o
+                0x080b6c28                sn_o_na_02
+ .rodata        0x080b9a6c     0x2900 sn_o_na_04.o
+                0x080b9a6c                sn_o_na_04
+ .rodata        0x080bc36c     0x280c sn_o_na_05.o
+                0x080bc36c                sn_o_na_05
+ .rodata        0x080beb78     0x3e44 sn_o_pi_01.o
+                0x080beb78                sn_o_pi_01
+ .rodata        0x080c29bc     0x4ba8 sn_o_pi_02.o
+                0x080c29bc                sn_o_pi_02
+ .rodata        0x080c7564     0x2058 sn_o_pi_03.o
+                0x080c7564                sn_o_pi_03
+ .rodata        0x080c95bc     0x6158 sn_o_pi_04.o
+                0x080c95bc                sn_o_pi_04
+ .rodata        0x080cf714     0x45e8 sn_o_re_01.o
+                0x080cf714                sn_o_re_01
+ .rodata        0x080d3cfc     0x4c20 sn_o_re_02.o
+                0x080d3cfc                sn_o_re_02
+ .rodata        0x080d891c     0x1594 sn_o_re_03.o
+                0x080d891c                sn_o_re_03
+ .rodata        0x080d9eb0     0x4280 sn_o_re_04.o
+                0x080d9eb0                sn_o_re_04
+ .rodata        0x080de130     0x5388 sn_o_gr_01.o
+                0x080de130                sn_o_gr_01
+ .rodata        0x080e34b8     0x6e04 sn_o_gr_02.o
+                0x080e34b8                sn_o_gr_02
+ .rodata        0x080ea2bc     0x1fe8 sn_o_gr_03.o
+                0x080ea2bc                sn_o_gr_03
+ .rodata        0x080ec2a4     0x62e4 sn_o_gr_04.o
+                0x080ec2a4                sn_o_gr_04
+ .rodata        0x080f2588     0x2498 sn_o_lu_06.o
+                0x080f2588                sn_o_lu_06
+ .rodata        0x080f4a20     0x2e60 sn_o_lu_08.o
+                0x080f4a20                sn_o_lu_08
+ .rodata        0x080f7880     0x2630 sn_o_lu_09.o
+                0x080f7880                sn_o_lu_09
+ .rodata        0x080f9eb0     0x2c40 sn_o_lu_10.o
+                0x080f9eb0                sn_o_lu_10
+ .rodata        0x080fcaf0     0x11b8 sn_o_lu_11.o
+                0x080fcaf0                sn_o_lu_11
+ .rodata        0x080fdca8     0x1050 sn_o_lu_12.o
+                0x080fdca8                sn_o_lu_12
+ .rodata        0x080fecf8     0x1db4 sn_o_lu_14.o
+                0x080fecf8                sn_o_lu_14
+ .rodata        0x08100aac     0x1930 sn_o_lu_16.o
+                0x08100aac                sn_o_lu_16
+ .rodata        0x081023dc     0x1754 sn_o_lu_17.o
+                0x081023dc                sn_o_lu_17
+ .rodata        0x08103b30     0x339c sn_o_lu_19.o
+                0x08103b30                sn_o_lu_19
+ .rodata        0x08106ecc      0xfa4 sn_o_lu_20.o
+                0x08106ecc                sn_o_lu_20
+ .rodata        0x08107e70     0x234c sn_o_lu_21.o
+                0x08107e70                sn_o_lu_21
+ .rodata        0x0810a1bc     0x65cc sn_o_lu_22.o
+                0x0810a1bc                sn_o_lu_22
+ .rodata        0x08110788     0x3a9c sn_o_lu_23.o
+                0x08110788                sn_o_lu_23
+ .rodata        0x08114224     0x1d70 sn_o_lu_24.o
+                0x08114224                sn_o_lu_24
+ .rodata        0x08115f94     0x1968 sn_o_lu_25.o
+                0x08115f94                sn_o_lu_25
+ .rodata        0x081178fc     0x1f54 sn_o_lu_26.o
+                0x081178fc                sn_o_lu_26
+ .rodata        0x08119850     0x2304 sn_o_lu_27.o
+                0x08119850                sn_o_lu_27
+ .rodata        0x0811bb54     0x372c sn_o_lu_28.o
+                0x0811bb54                sn_o_lu_28
+ .rodata        0x0811f280     0x2200 sn_o_lu_29.o
+                0x0811f280                sn_o_lu_29
+ .rodata        0x08121480     0x2780 sn_o_lu_30.o
+                0x08121480                sn_o_lu_30
+ .rodata        0x08123c00     0x1eb0 sn_o_lu_31.o
+                0x08123c00                sn_o_lu_31
+ .rodata        0x08125ab0     0x120c sn_o_lu_32.o
+                0x08125ab0                sn_o_lu_32
+ .rodata        0x08126cbc     0x26e0 sn_o_lu_33.o
+                0x08126cbc                sn_o_lu_33
+ .rodata        0x0812939c     0x4298 sn_o_lu_34.o
+                0x0812939c                sn_o_lu_34
+ .rodata        0x0812d634     0x34ac sn_o_lu_35.o
+                0x0812d634                sn_o_lu_35
+ .rodata        0x08130ae0     0x1ff4 sn_o_lu_36.o
+                0x08130ae0                sn_o_lu_36
+ .rodata        0x08132ad4     0x30b4 sn_o_pe_06.o
+                0x08132ad4                sn_o_pe_06
+ .rodata        0x08135b88     0x1b40 sn_o_pe_08.o
+                0x08135b88                sn_o_pe_08
+ .rodata        0x081376c8     0x1268 sn_o_pe_09.o
+                0x081376c8                sn_o_pe_09
+ .rodata        0x08138930     0x1f88 sn_o_pe_10.o
+                0x08138930                sn_o_pe_10
+ .rodata        0x0813a8b8     0x28f8 sn_o_pe_11.o
+                0x0813a8b8                sn_o_pe_11
+ .rodata        0x0813d1b0     0x10dc sn_o_pe_13.o
+                0x0813d1b0                sn_o_pe_13
+ .rodata        0x0813e28c     0x2644 sn_o_pe_15.o
+                0x0813e28c                sn_o_pe_15
+ .rodata        0x081408d0     0x18b4 sn_o_pe_16.o
+                0x081408d0                sn_o_pe_16
+ .rodata        0x08142184     0x3be4 sn_o_pe_18.o
+                0x08142184                sn_o_pe_18
+ .rodata        0x08145d68      0x9f4 sn_o_pe_19.o
+                0x08145d68                sn_o_pe_19
+ .rodata        0x0814675c     0x1864 sn_o_pe_20.o
+                0x0814675c                sn_o_pe_20
+ .rodata        0x08147fc0     0x4810 sn_o_pe_21.o
+                0x08147fc0                sn_o_pe_21
+ .rodata        0x0814c7d0     0x4110 sn_o_pe_22.o
+                0x0814c7d0                sn_o_pe_22
+ .rodata        0x081508e0     0x1c3c sn_o_pe_23.o
+                0x081508e0                sn_o_pe_23
+ .rodata        0x0815251c     0x13c8 sn_o_pe_24.o
+                0x0815251c                sn_o_pe_24
+ .rodata        0x081538e4     0x16cc sn_o_pe_25.o
+                0x081538e4                sn_o_pe_25
+ .rodata        0x08154fb0     0x201c sn_o_pe_26.o
+                0x08154fb0                sn_o_pe_26
+ .rodata        0x08156fcc     0x3538 sn_o_pe_28.o
+                0x08156fcc                sn_o_pe_28
+ .rodata        0x0815a504     0x21b8 sn_o_pe_29.o
+                0x0815a504                sn_o_pe_29
+ .rodata        0x0815c6bc     0x2e9c sn_o_pe_30.o
+                0x0815c6bc                sn_o_pe_30
+ .rodata        0x0815f558     0x1868 sn_o_pe_31.o
+                0x0815f558                sn_o_pe_31
+ .rodata        0x08160dc0     0x1d9c sn_o_pe_32.o
+                0x08160dc0                sn_o_pe_32
+ .rodata        0x08162b5c     0x2db4 sn_o_pe_33.o
+                0x08162b5c                sn_o_pe_33
+ .rodata        0x08165910     0x2a90 sn_o_pe_34.o
+                0x08165910                sn_o_pe_34
+ .rodata        0x081683a0     0x2c78 sn_o_pe_35.o
+                0x081683a0                sn_o_pe_35
+ .rodata        0x0816b018     0x2e30 sn_o_pe_36.o
+                0x0816b018                sn_o_pe_36
+ .rodata        0x0816de48     0x2564 sn_o_to_06.o
+                0x0816de48                sn_o_to_06
+ .rodata        0x081703ac     0x3118 sn_o_to_07.o
+                0x081703ac                sn_o_to_07
+ .rodata        0x081734c4     0x14a0 sn_o_to_08.o
+                0x081734c4                sn_o_to_08
+ .rodata        0x08174964     0x2070 sn_o_to_09.o
+                0x08174964                sn_o_to_09
+ .rodata        0x081769d4     0x22d4 sn_o_to_10.o
+                0x081769d4                sn_o_to_10
+ .rodata        0x08178ca8     0x34e8 sn_o_to_11.o
+                0x08178ca8                sn_o_to_11
+ .rodata        0x0817c190     0x1574 sn_o_to_13.o
+                0x0817c190                sn_o_to_13
+ .rodata        0x0817d704     0x25d8 sn_o_to_15.o
+                0x0817d704                sn_o_to_15
+ .rodata        0x0817fcdc      0xda4 sn_o_to_16.o
+                0x0817fcdc                sn_o_to_16
+ .rodata        0x08180a80     0x57cc sn_o_to_18.o
+                0x08180a80                sn_o_to_18
+ .rodata        0x0818624c     0x1bf8 sn_o_to_19.o
+                0x0818624c                sn_o_to_19
+ .rodata        0x08187e44     0x1594 sn_o_to_20.o
+                0x08187e44                sn_o_to_20
+ .rodata        0x081893d8     0x7518 sn_o_to_21.o
+                0x081893d8                sn_o_to_21
+ .rodata        0x081908f0     0x4780 sn_o_to_22.o
+                0x081908f0                sn_o_to_22
+ .rodata        0x08195070     0x20b4 sn_o_to_23.o
+                0x08195070                sn_o_to_23
+ .rodata        0x08197124     0x1758 sn_o_to_24.o
+                0x08197124                sn_o_to_24
+ .rodata        0x0819887c     0x1e54 sn_o_to_25.o
+                0x0819887c                sn_o_to_25
+ .rodata        0x0819a6d0     0x2ab0 sn_o_to_26.o
+                0x0819a6d0                sn_o_to_26
+ .rodata        0x0819d180     0x3e10 sn_o_to_28.o
+                0x0819d180                sn_o_to_28
+ .rodata        0x081a0f90     0x24c0 sn_o_to_29.o
+                0x081a0f90                sn_o_to_29
+ .rodata        0x081a3450     0x1f40 sn_o_to_30.o
+                0x081a3450                sn_o_to_30
+ .rodata        0x081a5390     0x1e84 sn_o_to_31.o
+                0x081a5390                sn_o_to_31
+ .rodata        0x081a7214     0x23c8 sn_o_to_32.o
+                0x081a7214                sn_o_to_32
+ .rodata        0x081a95dc     0x28f4 sn_o_to_33.o
+                0x081a95dc                sn_o_to_33
+ .rodata        0x081abed0     0x2878 sn_o_to_34.o
+                0x081abed0                sn_o_to_34
+ .rodata        0x081ae748     0x2b6c sn_o_to_35.o
+                0x081ae748                sn_o_to_35
+ .rodata        0x081b12b4     0x3538 sn_o_to_36.o
+                0x081b12b4                sn_o_to_36
+ .rodata        0x081b47ec     0x45e8 sn_o_me_01.o
+                0x081b47ec                sn_o_me_01
+ .rodata        0x081b8dd4     0x4c20 sn_o_me_02.o
+                0x081b8dd4                sn_o_me_02
+ .rodata        0x081bd9f4     0x1594 sn_o_me_03.o
+                0x081bd9f4                sn_o_me_03
+ .rodata        0x081bef88     0x4280 sn_o_me_04.o
+                0x081bef88                sn_o_me_04
+ .rodata        0x081c3208     0x1ac0 sn_o_ma_17ya.o
+                0x081c3208                sn_o_ma_17ya
+ .rodata        0x081c4cc8     0x181c sn_o_lu_17ya.o
+                0x081c4cc8                sn_o_lu_17ya
+ .rodata        0x081c64e4      0xd64 sn_o_pe_16ya.o
+                0x081c64e4                sn_o_pe_16ya
+ .rodata        0x081c7248      0x944 sn_o_to_16ya.o
+                0x081c7248                sn_o_to_16ya
+ .rodata        0x081c7b8c      0x324 sn_TITLE.o
+                0x081c7e90                sn_TITLE
+ .rodata        0x081c7eb0       0x74 sn_STAGE1.o
+                0x081c7f14                sn_STAGE1
+ .rodata        0x081c7f24       0x4c sn_STAGE2.o
+                0x081c7f60                sn_STAGE2
+ .rodata        0x081c7f70       0xf0 sn_CLEAR.o
+                0x081c8054                sn_CLEAR
+ .rodata        0x081c8060       0xa4 sn_GAMEOVER.o
+                0x081c80f4                sn_GAMEOVER
+ .rodata        0x081c8104       0x1c sn_BONUS.o
+                0x081c8114                sn_BONUS
+ .rodata        0x081c8120       0x1c sn_KEKKA.o
+                0x081c8130                sn_KEKKA
+ .rodata        0x081c813c       0x40 sn_PERFECT.o
+                0x081c816c                sn_PERFECT
+ .rodata        0x081c817c       0xec sn_BATTLE_DEAD.o
+                0x081c825c                sn_BATTLE_DEAD
+ .rodata        0x081c8268       0x2c sn_HEART.o
+                0x081c8288                sn_HEART
+ .rodata        0x081c8294       0xb0 sn_COIN5.o
+                0x081c8338                sn_COIN5
+ .rodata        0x081c8344       0x40 sn_JUMP.o
+                0x081c8378                sn_JUMP
+ .rodata        0x081c8384       0x20 sn_SLIP.o
+                0x081c8398                sn_SLIP
+ .rodata        0x081c83a4       0x1c sn_WALK_C.o
+                0x081c83b4                sn_WALK_C
+ .rodata        0x081c83c0       0x1c sn_WALK_E.o
+                0x081c83d0                sn_WALK_E
+ .rodata        0x081c83dc       0x1c sn_WALK_G.o
+                0x081c83ec                sn_WALK_G
+ .rodata        0x081c83f8       0x34 sn_MR_DEAD.o
+                0x081c8420                sn_MR_DEAD
+ .rodata        0x081c842c       0x3c sn_MR_DOWN.o
+                0x081c845c                sn_MR_DOWN
+ .rodata        0x081c8468       0x64 sn_MR_NEXT.o
+                0x081c84c0                sn_MR_NEXT
+ .rodata        0x081c84cc       0x40 sn_POW.o
+                0x081c8500                sn_POW
+ .rodata        0x081c850c       0x2c sn_PAUSE1UP.o
+                0x081c852c                sn_PAUSE1UP
+ .rodata        0x081c8538       0x1c sn_KAME.o
+                0x081c8548                sn_KAME
+ .rodata        0x081c8554       0x3c sn_KANI.o
+                0x081c8584                sn_KANI
+ .rodata        0x081c8590       0x6c sn_HAE.o
+                0x081c85f0                sn_HAE
+ .rodata        0x081c85fc       0x50 sn_COIN_OUT.o
+                0x081c8640                sn_COIN_OUT
+ .rodata        0x081c864c       0x40 sn_TEKI_ATTACK.o
+                0x081c8680                sn_TEKI_ATTACK
+ .rodata        0x081c868c       0x5c sn_TEKI_DEAD.o
+                0x081c86dc                sn_TEKI_DEAD
+ .rodata        0x081c86e8       0x20 sn_DOBON.o
+                0x081c86fc                sn_DOBON
+ .rodata        0x081c8708       0x48 sn_COIN_GET.o
+                0x081c8744                sn_COIN_GET
+ .rodata        0x081c8750       0x54 sn_FREEZER.o
+                0x081c8798                sn_FREEZER
+ .rodata        0x081c87a4       0x70 sn_FREEZ_DEAD.o
+                0x081c8808                sn_FREEZ_DEAD
+ .rodata        0x081c8814       0x38 sn_FIRE.o
+                0x081c8840                sn_FIRE
+ .rodata        0x081c884c      0x114 sn_boss_bros.o
+                0x081c894c                sn_boss_bros
+ .rodata        0x081c8960       0xec sn_star_bros.o
+                0x081c8a34                sn_star_bros
+ .rodata        0x081c8a4c      0x13c sn_KUPPA.o
+                0x081c8b74                sn_KUPPA
+ .rodata        0x081c8b88       0x68 sn_KUPPA_DOSIN.o
+                0x081c8be4                sn_KUPPA_DOSIN
+ .rodata        0x081c8bf0       0xa4 sn_win1.o
+                0x081c8c78                sn_win1
+ .rodata        0x081c8c94       0xdc sn_lose1.o
+                0x081c8d58                sn_lose1
+ .rodata        0x081c8d70       0xd4 sn_win2.o
+                0x081c8e2c                sn_win2
+ .rodata        0x081c8e44       0xa8 sn_lose2.o
+                0x081c8ed4                sn_lose2
+ .rodata        0x081c8eec      0x290 sn_battle2.o
+                0x081c9160                sn_battle2
+ .rodata        0x081c917c      0x15c sn_battlekekka.o
+                0x081c92bc                sn_battlekekka
+ .rodata        0x081c92d8       0x80 sn_zelda_fan.o
+                0x081c9340                sn_zelda_fan
+ .rodata        0x081c9358       0x28 sn_KUPPAFIRE.o
+                0x081c9374                sn_KUPPAFIRE
+ .rodata        0x081c9380       0x1c sn_BAKETU.o
+                0x081c9390                sn_BAKETU
+ .rodata        0x081c939c       0x3c sn_MOTI.o
+                0x081c93cc                sn_MOTI
+ .rodata        0x081c93d8       0x24 sn_NAGE.o
+                0x081c93f0                sn_NAGE
+ .rodata        0x081c93fc       0x28 sn_TAME.o
+                0x081c9418                sn_TAME
+ .rodata        0x081c9424       0x60 sn_DAMAGE.o
+                0x081c9478                sn_DAMAGE
+ .rodata        0x081c9484       0x78 sn_TIBI.o
+                0x081c94f0                sn_TIBI
+ .rodata        0x081c94fc       0x38 sn_NORI.o
+                0x081c9528                sn_NORI
+ .rodata        0x081c9534       0x30 sn_BUTUKARI.o
+                0x081c9558                sn_BUTUKARI
+ .rodata        0x081c9564       0x20 sn_HEART_GET.o
+                0x081c9578                sn_HEART_GET
+ .rodata        0x081c9584       0x50 sn_DEKA.o
+                0x081c95c8                sn_DEKA
+ .rodata        0x081c95d4       0xb8 sn_KAO.o
+                0x081c9680                sn_KAO
+ .rodata        0x081c968c       0x2c sn_PUSH.o
+                0x081c96ac                sn_PUSH
+ .rodata        0x081c96b8       0x80 sn_KUPPA_DAMAGE.o
+                0x081c972c                sn_KUPPA_DAMAGE
+ .rodata        0x081c9738       0xf4 sn_KUPPA_DEAD.o
+                0x081c9820                sn_KUPPA_DEAD
+ .rodata        0x081c982c       0x2c sn_SHIFT.o
+                0x081c984c                sn_SHIFT
+ .rodata        0x081c9858       0x5c sn_SAVE.o
+                0x081c98a0                sn_SAVE
+ .rodata        0x081c98b4       0xd0 sn_intro_battle.o
+                0x081c996c                sn_intro_battle
+ .rodata        0x081c9984       0x1c sn_KAMEKERI1.o
+                0x081c9994                sn_KAMEKERI1
+ .rodata        0x081c99a0       0x1c sn_KAMEKERI2.o
+                0x081c99b0                sn_KAMEKERI2
+ .rodata        0x081c99bc       0x1c sn_KAMEKERI3.o
+                0x081c99cc                sn_KAMEKERI3
+ .rodata        0x081c99d8       0x1c sn_KAMEKERI4.o
+                0x081c99e8                sn_KAMEKERI4
+ .rodata        0x081c99f4       0x2c sn_PINPON.o
+                0x081c9a14                sn_PINPON
+ .rodata        0x081c9a20       0x24 sn_BUU.o
+                0x081c9a38                sn_BUU
+ .rodata        0x081c9a44       0x84 sn_battlekekka_intro.o
+                0x081c9ab4                sn_battlekekka_intro
+ .rodata        0x081c9ac8       0x1c sn_FIREDEAD.o
+                0x081c9ad8                sn_FIREDEAD
+ .rodata        0x081c9ae4       0x24 sn_TURARA_DEAD.o
+                0x081c9afc                sn_TURARA_DEAD
+ .rodata        0x081c9b08      0x4ac sn_battle3.o
+                0x081c9f98                sn_battle3
+ .rodata        0x081c9fb4      0x328 sn_battle4.o
+                0x081ca2c0                sn_battle4
+ .rodata        0x081ca2dc      0x3b8 sn_bassdrum3.o
+                0x081ca678                sn_bassdrum3
+ .rodata        0x081ca694       0xdc sn_intro_bonus.o
+                0x081ca754                sn_intro_bonus
+ .rodata        0x081ca770       0x1c sn_NOBONUS.o
+                0x081ca780                sn_NOBONUS
+ .rodata        0x081ca78c      0x8f4 sn_usa_title.o
+                0x081cb058                sn_usa_title
+ .rodata        0x081cb080      0xa70 sn_tijou.o
+                0x081cbad0                sn_tijou
+ .rodata        0x081cbaf0      0x214 sn_chika.o
+                0x081cbce8                sn_chika
+ .rodata        0x081cbd04      0x2e4 sn_ura.o
+                0x081cbfc8                sn_ura
+ .rodata        0x081cbfe8      0x594 sn_select.o
+                0x081cc55c                sn_select
+ .rodata        0x081cc57c      0x2cc sn_boss.o
+                0x081cc828                sn_boss
+ .rodata        0x081cc848      0x3e0 sn_boss_mamu.o
+                0x081ccc08                sn_boss_mamu
+ .rodata        0x081ccc28      0x11c sn_boss_clear.o
+                0x081ccd28                sn_boss_clear
+ .rodata        0x081ccd44       0xe4 sn_suishou.o
+                0x081cce0c                sn_suishou
+ .rodata        0x081cce28       0xcc sn_game_over.o
+                0x081cced4                sn_game_over
+ .rodata        0x081ccef4       0x88 sn_slot_start.o
+                0x081ccf64                sn_slot_start
+ .rodata        0x081ccf7c       0xa4 sn_usa_dead.o
+                0x081cd008                sn_usa_dead
+ .rodata        0x081cd020      0x188 sn_star.o
+                0x081cd18c                sn_star
+ .rodata        0x081cd1a8      0x350 sn_warp.o
+                0x081cd4dc                sn_warp
+ .rodata        0x081cd4f8      0x968 sn_usa_ending.o
+                0x081cde40                sn_usa_ending
+ .rodata        0x081cde60       0x28 sn_se_final.o
+                0x081cde7c                sn_se_final
+ .rodata        0x081cde88       0x24 sn_se_kettei.o
+                0x081cdea0                sn_se_kettei
+ .rodata        0x081cdeac       0x24 sn_se_nage.o
+                0x081cdec4                sn_se_nage
+ .rodata        0x081cded0       0x20 sn_se_chery.o
+                0x081cdee4                sn_se_chery
+ .rodata        0x081cdef0       0x28 sn_se_tekidead.o
+                0x081cdf0c                sn_se_tekidead
+ .rodata        0x081cdf18       0x28 sn_se_hasigo.o
+                0x081cdf34                sn_se_hasigo
+ .rodata        0x081cdf40       0x60 sn_se_damage.o
+                0x081cdf94                sn_se_damage
+ .rodata        0x081cdfa0       0x1c sn_se_moti1.o
+                0x081cdfb0                sn_se_moti1
+ .rodata        0x081cdfbc       0x3c sn_se_moti2.o
+                0x081cdfec                sn_se_moti2
+ .rodata        0x081cdff8       0x28 sn_se_timer.o
+                0x081ce014                sn_se_timer
+ .rodata        0x081ce020       0x48 sn_se_dooropen.o
+                0x081ce05c                sn_se_dooropen
+ .rodata        0x081ce068       0x34 sn_se_doorclose.o
+                0x081ce090                sn_se_doorclose
+ .rodata        0x081ce09c       0x30 sn_se_kamen.o
+                0x081ce0c0                sn_se_kamen
+ .rodata        0x081ce0cc       0x2c sn_se_kujira.o
+                0x081ce0ec                sn_se_kujira
+ .rodata        0x081ce0f8       0x28 sn_se_bomb.o
+                0x081ce114                sn_se_bomb
+ .rodata        0x081ce120       0x1c sn_se_coin.o
+                0x081ce130                sn_se_coin
+ .rodata        0x081ce13c       0x28 sn_se_tame.o
+                0x081ce158                sn_se_tame
+ .rodata        0x081ce164       0x30 sn_se_tuboin.o
+                0x081ce188                sn_se_tuboin
+ .rodata        0x081ce194       0x30 sn_se_tuboout.o
+                0x081ce1b8                sn_se_tuboout
+ .rodata        0x081ce1c4       0x24 sn_se_1up.o
+                0x081ce1dc                sn_se_1up
+ .rodata        0x081ce1e8       0x48 sn_se_pow.o
+                0x081ce224                sn_se_pow
+ .rodata        0x081ce230       0x20 sn_se_pause.o
+                0x081ce244                sn_se_pause
+ .rodata        0x081ce250       0x50 sn_se_toriopen.o
+                0x081ce294                sn_se_toriopen
+ .rodata        0x081ce2a0       0x50 sn_se_toriclose.o
+                0x081ce2e4                sn_se_toriclose
+ .rodata        0x081ce2f0       0x54 sn_se_kinoko.o
+                0x081ce338                sn_se_kinoko
+ .rodata        0x081ce344       0x24 sn_se_slotroll.o
+                0x081ce35c                sn_se_slotroll
+ .rodata        0x081ce368       0x20 sn_se_slotkettei.o
+                0x081ce37c                sn_se_slotkettei
+ .rodata        0x081ce388       0x6c sn_se_slotdrum1.o
+                0x081ce3e8                sn_se_slotdrum1
+ .rodata        0x081ce3f4       0x24 sn_se_slotdrum2.o
+                0x081ce40c                sn_se_slotdrum2
+ .rodata        0x081ce418       0x40 sn_se_bossdamage.o
+                0x081ce44c                sn_se_bossdamage
+ .rodata        0x081ce458       0x38 sn_se_bosshaku.o
+                0x081ce484                sn_se_bosshaku
+ .rodata        0x081ce490       0x98 sn_se_rakka.o
+                0x081ce51c                sn_se_rakka
+ .rodata        0x081ce528       0x4c sn_se_bossdead.o
+                0x081ce568                sn_se_bossdead
+ .rodata        0x081ce574       0x34 sn_se_kourakie.o
+                0x081ce59c                sn_se_kourakie
+ .rodata        0x081ce5a8       0x3c sn_se_jump.o
+                0x081ce5d8                sn_se_jump
+ .rodata        0x081ce5e4       0x44 sn_se_rocket.o
+                0x081ce61c                sn_se_rocket
+ .rodata        0x081ce628       0x78 sn_se_tibi.o
+                0x081ce694                sn_se_tibi
+ .rodata        0x081ce6a0       0x38 sn_se_slip.o
+                0x081ce6cc                sn_se_slip
+ .rodata        0x081ce6d8       0x1c sn_se_kamekeri0.o
+                0x081ce6e8                sn_se_kamekeri0
+ .rodata        0x081ce6f4       0x1c sn_se_kamekeri1.o
+                0x081ce704                sn_se_kamekeri1
+ .rodata        0x081ce710       0x1c sn_se_kamekeri2.o
+                0x081ce720                sn_se_kamekeri2
+ .rodata        0x081ce72c       0x1c sn_se_kamekeri3.o
+                0x081ce73c                sn_se_kamekeri3
+ .rodata        0x081ce748       0x1c sn_se_kamekeri4.o
+                0x081ce758                sn_se_kamekeri4
+ .rodata        0x081ce764       0x1c sn_se_kamekeri5.o
+                0x081ce774                sn_se_kamekeri5
+ .rodata        0x081ce780       0x1c sn_se_kamekeri6.o
+                0x081ce790                sn_se_kamekeri6
+ .rodata        0x081ce79c       0x1c sn_se_kamekeri7.o
+                0x081ce7ac                sn_se_kamekeri7
+ .rodata        0x081ce7b8       0x1c sn_se_kamekeri8.o
+                0x081ce7c8                sn_se_kamekeri8
+ .rodata        0x081ce7d4       0x58 sn_se_mamu.o
+                0x081ce820                sn_se_mamu
+ .rodata        0x081ce82c       0xbc sn_se_mamudead.o
+                0x081ce8dc                sn_se_mamudead
+ .rodata        0x081ce8e8       0x1c sn_se_fire.o
+                0x081ce8f8                sn_se_fire
+ .rodata        0x081ce904       0x34 sn_se_mamukemuri.o
+                0x081ce92c                sn_se_mamukemuri
+ .rodata        0x081ce938       0x1c sn_se_yoshi.o
+                0x081ce948                sn_se_yoshi
+ .rodata        0x081ce954      0x25c sn_tubo.o
+                0x081ceb90                sn_tubo
+ .rodata        0x081cebb0      0x3b8 sn_worldkekka.o
+                0x081cef48                sn_worldkekka
+ .rodata        0x081cef68       0x68 sn_se_awa.o
+                0x081cefc4                sn_se_awa
+ .rodata        0x081cefd0      0x110 sn_se_big.o
+                0x081cf0d4                sn_se_big
+ .rodata        0x081cf0e0       0x64 sn_se_tama.o
+                0x081cf138                sn_se_tama
+ .rodata        0x081cf144      0x654 sn_boss_mae.o
+                0x081cf778                sn_boss_mae
+ .rodata        0x081cf798      0x30c sn_gamesel.o
+                0x081cfa84                sn_gamesel
+ .rodata        0x081cfaa4       0x74 sn_se_jampdai.o
+                0x081cfb0c                sn_se_jampdai
+ .rodata        0x081cfb18       0x40 sn_se_bossbig.o
+                0x081cfb4c                sn_se_bossbig
+ .rodata        0x081cfb58       0x28 sn_se_bombfire.o
+                0x081cfb74                sn_se_bombfire
+ .rodata        0x081cfb80       0x38 sn_se_cansel.o
+                0x081cfbac                sn_se_cansel
+ .rodata        0x081cfbb8       0x58 sn_se_heart.o
+                0x081cfbfc                sn_se_heart
+ .rodata        0x081cfc10       0x34 sn_se_biribiri.o
+                0x081cfc34                sn_se_biribiri
+ .rodata        0x081cfc44       0xcc sn_tamago.o
+                0x081cfcf4                sn_tamago
+ .rodata        0x081cfd10       0x2c sn_se_shift.o
+                0x081cfd30                sn_se_shift
+ .rodata        0x081cfd3c       0x54 sn_se_start.o
+                0x081cfd80                sn_se_start
+ .rodata        0x081cfd90       0x58 sn_se_save.o
+                0x081cfdd4                sn_se_save
+ .rodata        0x081cfde8       0x38 sn_se_kamen_okori.o
+                0x081cfe10                sn_se_kamen_okori
+ .rodata        0x081cfe20       0x24 sn_se_kabe.o
+                0x081cfe38                sn_se_kabe
+ .rodata        0x081cfe44       0xd8 sn_se_titlemoti.o
+                0x081cff0c                sn_se_titlemoti
+ .rodata        0x081cff1c       0x38 sn_se_titledosun2.o
+                0x081cff48                sn_se_titledosun2
+ .rodata        0x081cff54       0x38 sn_se_titledosun3.o
+                0x081cff80                sn_se_titledosun3
+ .rodata        0x081cff8c       0x24 sn_se_tamago.o
+                0x081cffa4                sn_se_tamago
+ .rodata        0x081cffb0      0x654 sn_boss_mae_r.o
+                0x081d05e4                sn_boss_mae_r
+ .rodata        0x081d0604      0x2cc sn_boss_r.o
+                0x081d08b0                sn_boss_r
+ .rodata        0x081d08d0      0x120 sn_se_kirakira.o
+                0x081d09dc                sn_se_kirakira
+ .rodata        0x081d09f0       0x20 sn_se_cork.o
+                0x081d0a04                sn_se_cork
+ .rodata        0x081d0a10       0x20 sn_v_usa_00.o
+                0x081d0a24                sn_v_usa_00
+ .rodata        0x081d0a30       0x20 sn_v_br_01.o
+                0x081d0a44                sn_v_br_01
+ .rodata        0x081d0a50       0x20 sn_v_ma_07.o
+                0x081d0a64                sn_v_ma_07
+ .rodata        0x081d0a70       0x20 sn_v_ma_08.o
+                0x081d0a84                sn_v_ma_08
+ .rodata        0x081d0a90       0x20 sn_v_ma_09.o
+                0x081d0aa4                sn_v_ma_09
+ .rodata        0x081d0ab0       0x20 sn_v_ma_10.o
+                0x081d0ac4                sn_v_ma_10
+ .rodata        0x081d0ad0       0x20 sn_v_ma_11.o
+                0x081d0ae4                sn_v_ma_11
+ .rodata        0x081d0af0       0x20 sn_v_ma_12.o
+                0x081d0b04                sn_v_ma_12
+ .rodata        0x081d0b10       0x20 sn_v_ma_14.o
+                0x081d0b24                sn_v_ma_14
+ .rodata        0x081d0b30       0x20 sn_v_ma_16.o
+                0x081d0b44                sn_v_ma_16
+ .rodata        0x081d0b50       0x20 sn_v_ma_17.o
+                0x081d0b64                sn_v_ma_17
+ .rodata        0x081d0b70       0x20 sn_v_ma_19.o
+                0x081d0b84                sn_v_ma_19
+ .rodata        0x081d0b90       0x20 sn_v_ma_20.o
+                0x081d0ba4                sn_v_ma_20
+ .rodata        0x081d0bb0       0x20 sn_v_ma_21.o
+                0x081d0bc4                sn_v_ma_21
+ .rodata        0x081d0bd0       0x20 sn_v_ma_22.o
+                0x081d0be4                sn_v_ma_22
+ .rodata        0x081d0bf0       0x20 sn_v_ma_23.o
+                0x081d0c04                sn_v_ma_23
+ .rodata        0x081d0c10       0x20 sn_v_ma_24.o
+                0x081d0c24                sn_v_ma_24
+ .rodata        0x081d0c30       0x20 sn_v_ma_25.o
+                0x081d0c44                sn_v_ma_25
+ .rodata        0x081d0c50       0x20 sn_v_ma_26.o
+                0x081d0c64                sn_v_ma_26
+ .rodata        0x081d0c70       0x20 sn_v_ma_27.o
+                0x081d0c84                sn_v_ma_27
+ .rodata        0x081d0c90       0x20 sn_v_ma_29.o
+                0x081d0ca4                sn_v_ma_29
+ .rodata        0x081d0cb0       0x20 sn_v_ma_30.o
+                0x081d0cc4                sn_v_ma_30
+ .rodata        0x081d0cd0       0x20 sn_v_ma_31.o
+                0x081d0ce4                sn_v_ma_31
+ .rodata        0x081d0cf0       0x20 sn_v_ma_32.o
+                0x081d0d04                sn_v_ma_32
+ .rodata        0x081d0d10       0x20 sn_v_ma_33.o
+                0x081d0d24                sn_v_ma_33
+ .rodata        0x081d0d30       0x20 sn_v_ma_34.o
+                0x081d0d44                sn_v_ma_34
+ .rodata        0x081d0d50       0x20 sn_v_ma_35.o
+                0x081d0d64                sn_v_ma_35
+ .rodata        0x081d0d70       0x20 sn_v_ma_36.o
+                0x081d0d84                sn_v_ma_36
+ .rodata        0x081d0d90       0x20 sn_v_ma_37.o
+                0x081d0da4                sn_v_ma_37
+ .rodata        0x081d0db0       0x20 sn_v_ma_17ya.o
+                0x081d0dc4                sn_v_ma_17ya
+ .rodata        0x081d0dd0       0x20 sn_v_mo_01.o
+                0x081d0de4                sn_v_mo_01
+ .rodata        0x081d0df0       0x20 sn_v_mo_02.o
+                0x081d0e04                sn_v_mo_02
+ .rodata        0x081d0e10       0x20 sn_v_mo_03.o
+                0x081d0e24                sn_v_mo_03
+ .rodata        0x081d0e30       0x20 sn_v_tr_01.o
+                0x081d0e44                sn_v_tr_01
+ .rodata        0x081d0e50       0x20 sn_v_tr_02.o
+                0x081d0e64                sn_v_tr_02
+ .rodata        0x081d0e70       0x20 sn_v_tr_03.o
+                0x081d0e84                sn_v_tr_03
+ .rodata        0x081d0e90       0x20 sn_v_tr_04.o
+                0x081d0ea4                sn_v_tr_04
+ .rodata        0x081d0eb0       0x20 sn_v_tr_05.o
+                0x081d0ec4                sn_v_tr_05
+ .rodata        0x081d0ed0       0x20 sn_v_cl_01.o
+                0x081d0ee4                sn_v_cl_01
+ .rodata        0x081d0ef0       0x20 sn_v_cl_02.o
+                0x081d0f04                sn_v_cl_02
+ .rodata        0x081d0f10       0x20 sn_v_cl_03.o
+                0x081d0f24                sn_v_cl_03
+ .rodata        0x081d0f30       0x20 sn_v_fl_01.o
+                0x081d0f44                sn_v_fl_01
+ .rodata        0x081d0f50       0x20 sn_v_fl_02.o
+                0x081d0f64                sn_v_fl_02
+ .rodata        0x081d0f70       0x20 sn_v_fl_03.o
+                0x081d0f84                sn_v_fl_03
+ .rodata        0x081d0f90       0x20 sn_v_wa_01.o
+                0x081d0fa4                sn_v_wa_01
+ .rodata        0x081d0fb0       0x20 sn_v_wa_02.o
+                0x081d0fc4                sn_v_wa_02
+ .rodata        0x081d0fd0       0x20 sn_v_wa_03.o
+                0x081d0fe4                sn_v_wa_03
+ .rodata        0x081d0ff0       0x20 sn_v_wa_04.o
+                0x081d1004                sn_v_wa_04
+ .rodata        0x081d1010       0x20 sn_v_wa_05.o
+                0x081d1024                sn_v_wa_05
+ .rodata        0x081d1030       0x20 sn_v_na_01.o
+                0x081d1044                sn_v_na_01
+ .rodata        0x081d1050       0x20 sn_v_na_02.o
+                0x081d1064                sn_v_na_02
+ .rodata        0x081d1070       0x20 sn_v_na_04.o
+                0x081d1084                sn_v_na_04
+ .rodata        0x081d1090       0x20 sn_v_na_05.o
+                0x081d10a4                sn_v_na_05
+ .rodata        0x081d10b0       0x20 sn_v_pi_01.o
+                0x081d10c4                sn_v_pi_01
+ .rodata        0x081d10d0       0x20 sn_v_pi_02.o
+                0x081d10e4                sn_v_pi_02
+ .rodata        0x081d10f0       0x20 sn_v_pi_03.o
+                0x081d1104                sn_v_pi_03
+ .rodata        0x081d1110       0x20 sn_v_pi_04.o
+                0x081d1124                sn_v_pi_04
+ .rodata        0x081d1130       0x20 sn_v_re_01.o
+                0x081d1144                sn_v_re_01
+ .rodata        0x081d1150       0x20 sn_v_re_02.o
+                0x081d1164                sn_v_re_02
+ .rodata        0x081d1170       0x20 sn_v_re_03.o
+                0x081d1184                sn_v_re_03
+ .rodata        0x081d1190       0x20 sn_v_re_04.o
+                0x081d11a4                sn_v_re_04
+ .rodata        0x081d11b0       0x20 sn_v_gr_01.o
+                0x081d11c4                sn_v_gr_01
+ .rodata        0x081d11d0       0x20 sn_v_gr_02.o
+                0x081d11e4                sn_v_gr_02
+ .rodata        0x081d11f0       0x20 sn_v_gr_03.o
+                0x081d1204                sn_v_gr_03
+ .rodata        0x081d1210       0x20 sn_v_gr_04.o
+                0x081d1224                sn_v_gr_04
+ .rodata        0x081d1230       0x20 sn_v_me_01.o
+                0x081d1244                sn_v_me_01
+ .rodata        0x081d1250       0x20 sn_v_me_02.o
+                0x081d1264                sn_v_me_02
+ .rodata        0x081d1270       0x20 sn_v_me_03.o
+                0x081d1284                sn_v_me_03
+ .rodata        0x081d1290       0x20 sn_v_me_04.o
+                0x081d12a4                sn_v_me_04
+ .rodata        0x081d12b0       0x20 sn_v_lu_06.o
+                0x081d12c4                sn_v_lu_06
+ .rodata        0x081d12d0       0x20 sn_v_lu_08.o
+                0x081d12e4                sn_v_lu_08
+ .rodata        0x081d12f0       0x20 sn_v_lu_10.o
+                0x081d1304                sn_v_lu_10
+ .rodata        0x081d1310       0x20 sn_v_lu_09.o
+                0x081d1324                sn_v_lu_09
+ .rodata        0x081d1330       0x20 sn_v_lu_11.o
+                0x081d1344                sn_v_lu_11
+ .rodata        0x081d1350       0x20 sn_v_lu_12.o
+                0x081d1364                sn_v_lu_12
+ .rodata        0x081d1370       0x20 sn_v_lu_14.o
+                0x081d1384                sn_v_lu_14
+ .rodata        0x081d1390       0x20 sn_v_lu_16.o
+                0x081d13a4                sn_v_lu_16
+ .rodata        0x081d13b0       0x20 sn_v_lu_17.o
+                0x081d13c4                sn_v_lu_17
+ .rodata        0x081d13d0       0x20 sn_v_lu_19.o
+                0x081d13e4                sn_v_lu_19
+ .rodata        0x081d13f0       0x20 sn_v_lu_20.o
+                0x081d1404                sn_v_lu_20
+ .rodata        0x081d1410       0x20 sn_v_lu_21.o
+                0x081d1424                sn_v_lu_21
+ .rodata        0x081d1430       0x20 sn_v_lu_22.o
+                0x081d1444                sn_v_lu_22
+ .rodata        0x081d1450       0x20 sn_v_lu_23.o
+                0x081d1464                sn_v_lu_23
+ .rodata        0x081d1470       0x20 sn_v_lu_24.o
+                0x081d1484                sn_v_lu_24
+ .rodata        0x081d1490       0x20 sn_v_lu_25.o
+                0x081d14a4                sn_v_lu_25
+ .rodata        0x081d14b0       0x20 sn_v_lu_26.o
+                0x081d14c4                sn_v_lu_26
+ .rodata        0x081d14d0       0x20 sn_v_lu_27.o
+                0x081d14e4                sn_v_lu_27
+ .rodata        0x081d14f0       0x20 sn_v_lu_28.o
+                0x081d1504                sn_v_lu_28
+ .rodata        0x081d1510       0x20 sn_v_lu_29.o
+                0x081d1524                sn_v_lu_29
+ .rodata        0x081d1530       0x20 sn_v_lu_30.o
+                0x081d1544                sn_v_lu_30
+ .rodata        0x081d1550       0x20 sn_v_lu_31.o
+                0x081d1564                sn_v_lu_31
+ .rodata        0x081d1570       0x20 sn_v_lu_32.o
+                0x081d1584                sn_v_lu_32
+ .rodata        0x081d1590       0x20 sn_v_lu_33.o
+                0x081d15a4                sn_v_lu_33
+ .rodata        0x081d15b0       0x20 sn_v_lu_34.o
+                0x081d15c4                sn_v_lu_34
+ .rodata        0x081d15d0       0x20 sn_v_lu_35.o
+                0x081d15e4                sn_v_lu_35
+ .rodata        0x081d15f0       0x20 sn_v_lu_36.o
+                0x081d1604                sn_v_lu_36
+ .rodata        0x081d1610       0x20 sn_v_lu_17ya.o
+                0x081d1624                sn_v_lu_17ya
+ .rodata        0x081d1630       0x20 sn_v_pe_06.o
+                0x081d1644                sn_v_pe_06
+ .rodata        0x081d1650       0x20 sn_v_pe_08.o
+                0x081d1664                sn_v_pe_08
+ .rodata        0x081d1670       0x20 sn_v_pe_09.o
+                0x081d1684                sn_v_pe_09
+ .rodata        0x081d1690       0x20 sn_v_pe_10.o
+                0x081d16a4                sn_v_pe_10
+ .rodata        0x081d16b0       0x20 sn_v_pe_11.o
+                0x081d16c4                sn_v_pe_11
+ .rodata        0x081d16d0       0x20 sn_v_pe_13.o
+                0x081d16e4                sn_v_pe_13
+ .rodata        0x081d16f0       0x20 sn_v_pe_15.o
+                0x081d1704                sn_v_pe_15
+ .rodata        0x081d1710       0x20 sn_v_pe_16.o
+                0x081d1724                sn_v_pe_16
+ .rodata        0x081d1730       0x20 sn_v_pe_18.o
+                0x081d1744                sn_v_pe_18
+ .rodata        0x081d1750       0x20 sn_v_pe_19.o
+                0x081d1764                sn_v_pe_19
+ .rodata        0x081d1770       0x20 sn_v_pe_20.o
+                0x081d1784                sn_v_pe_20
+ .rodata        0x081d1790       0x20 sn_v_pe_21.o
+                0x081d17a4                sn_v_pe_21
+ .rodata        0x081d17b0       0x20 sn_v_pe_22.o
+                0x081d17c4                sn_v_pe_22
+ .rodata        0x081d17d0       0x20 sn_v_pe_23.o
+                0x081d17e4                sn_v_pe_23
+ .rodata        0x081d17f0       0x20 sn_v_pe_24.o
+                0x081d1804                sn_v_pe_24
+ .rodata        0x081d1810       0x20 sn_v_pe_25.o
+                0x081d1824                sn_v_pe_25
+ .rodata        0x081d1830       0x20 sn_v_pe_26.o
+                0x081d1844                sn_v_pe_26
+ .rodata        0x081d1850       0x20 sn_v_pe_28.o
+                0x081d1864                sn_v_pe_28
+ .rodata        0x081d1870       0x20 sn_v_pe_29.o
+                0x081d1884                sn_v_pe_29
+ .rodata        0x081d1890       0x20 sn_v_pe_30.o
+                0x081d18a4                sn_v_pe_30
+ .rodata        0x081d18b0       0x20 sn_v_pe_31.o
+                0x081d18c4                sn_v_pe_31
+ .rodata        0x081d18d0       0x20 sn_v_pe_32.o
+                0x081d18e4                sn_v_pe_32
+ .rodata        0x081d18f0       0x20 sn_v_pe_33.o
+                0x081d1904                sn_v_pe_33
+ .rodata        0x081d1910       0x20 sn_v_pe_34.o
+                0x081d1924                sn_v_pe_34
+ .rodata        0x081d1930       0x20 sn_v_pe_35.o
+                0x081d1944                sn_v_pe_35
+ .rodata        0x081d1950       0x20 sn_v_pe_36.o
+                0x081d1964                sn_v_pe_36
+ .rodata        0x081d1970       0x20 sn_v_pe_16ya.o
+                0x081d1984                sn_v_pe_16ya
+ .rodata        0x081d1990       0x20 sn_v_to_06.o
+                0x081d19a4                sn_v_to_06
+ .rodata        0x081d19b0       0x20 sn_v_to_07.o
+                0x081d19c4                sn_v_to_07
+ .rodata        0x081d19d0       0x20 sn_v_to_08.o
+                0x081d19e4                sn_v_to_08
+ .rodata        0x081d19f0       0x20 sn_v_to_09.o
+                0x081d1a04                sn_v_to_09
+ .rodata        0x081d1a10       0x20 sn_v_to_10.o
+                0x081d1a24                sn_v_to_10
+ .rodata        0x081d1a30       0x20 sn_v_to_11.o
+                0x081d1a44                sn_v_to_11
+ .rodata        0x081d1a50       0x20 sn_v_to_13.o
+                0x081d1a64                sn_v_to_13
+ .rodata        0x081d1a70       0x20 sn_v_to_15.o
+                0x081d1a84                sn_v_to_15
+ .rodata        0x081d1a90       0x20 sn_v_to_16.o
+                0x081d1aa4                sn_v_to_16
+ .rodata        0x081d1ab0       0x20 sn_v_to_18.o
+                0x081d1ac4                sn_v_to_18
+ .rodata        0x081d1ad0       0x20 sn_v_to_19.o
+                0x081d1ae4                sn_v_to_19
+ .rodata        0x081d1af0       0x20 sn_v_to_20.o
+                0x081d1b04                sn_v_to_20
+ .rodata        0x081d1b10       0x20 sn_v_to_21.o
+                0x081d1b24                sn_v_to_21
+ .rodata        0x081d1b30       0x20 sn_v_to_22.o
+                0x081d1b44                sn_v_to_22
+ .rodata        0x081d1b50       0x20 sn_v_to_23.o
+                0x081d1b64                sn_v_to_23
+ .rodata        0x081d1b70       0x20 sn_v_to_24.o
+                0x081d1b84                sn_v_to_24
+ .rodata        0x081d1b90       0x20 sn_v_to_25.o
+                0x081d1ba4                sn_v_to_25
+ .rodata        0x081d1bb0       0x20 sn_v_to_26.o
+                0x081d1bc4                sn_v_to_26
+ .rodata        0x081d1bd0       0x20 sn_v_to_28.o
+                0x081d1be4                sn_v_to_28
+ .rodata        0x081d1bf0       0x20 sn_v_to_29.o
+                0x081d1c04                sn_v_to_29
+ .rodata        0x081d1c10       0x20 sn_v_to_30.o
+                0x081d1c24                sn_v_to_30
+ .rodata        0x081d1c30       0x20 sn_v_to_31.o
+                0x081d1c44                sn_v_to_31
+ .rodata        0x081d1c50       0x20 sn_v_to_32.o
+                0x081d1c64                sn_v_to_32
+ .rodata        0x081d1c70       0x20 sn_v_to_33.o
+                0x081d1c84                sn_v_to_33
+ .rodata        0x081d1c90       0x20 sn_v_to_34.o
+                0x081d1ca4                sn_v_to_34
+ .rodata        0x081d1cb0       0x20 sn_v_to_35.o
+                0x081d1cc4                sn_v_to_35
+ .rodata        0x081d1cd0       0x20 sn_v_to_36.o
+                0x081d1ce4                sn_v_to_36
+ .rodata        0x081d1cf0       0x20 sn_v_to_16ya.o
+                0x081d1d04                sn_v_to_16ya
+ *(.rodata.*)
+ .rodata.end    0x081d1d10        0x4 C:\mks4agb1.05\SndMonDat.o
+                0x081d1d10                seg_rodata_end
+ *(.gnu.linkonce.r*)
+
+.rodata1
+ *(.rodata1)
+                0x081d1e14                .=(ALIGN(0x100)+(.&0xff))
+
+.data           0x081d1e14        0x0
+ *(.data)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+
+.data1
+ *(.data1)
+
+.ctors
+ EXCLUDE_FILE ( *crtend.o )*(.ctors)
+ *(SORT(.ctors.*))
+ *crtend(.ctors)
+
+.dtors
+ EXCLUDE_FILE ( *crtend.o )*(.dtors)
+ *(SORT(.dtors.*))
+ *crtend.o(.dtors)
+
+.got
+ *(.got.plt)
+ *(.got)
+
+.dynamic
+ *(.dynamic)
+
+.sdata
+ *(.sdata)
+ *(.sdata.*)
+                0x081d1e14                _edata=.
+                0x081d1e14                PROVIDE (edata, .)
+                0x081d1e14                __bss_start=.
+                0x081d1e14                __bss_start__=.
+
+.sbss
+ *(.sbss)
+ *(.scommon)
+
+.bss            0x03000000     0x4050
+ *(.dynbss)
+ *(.bss)
+ .bss           0x03000000      0xb40 SoundDat.o
+ *(.bss.*)
+ .bss.code      0x03000b40      0x400 m4aLib.o
+                0x03000b40                SoundMainBuf
+ *(COMMON)
+ COMMON         0x03000f40     0x1140 m4aLib.o
+                                  0x0 (size before relaxing)
+                0x03000f40                m4a_sound
+                0x03001ef0                ExtMPlyJmpTbl
+                0x03001f80                m4a_cgbchn
+ COMMON         0x03002080     0x1af4 C:\mks4agb1.05\SoundMon.o
+                                  0x0 (size before relaxing)
+                0x03002080                c_bit
+                0x03002084                p_rev
+                0x03002088                p_bit
+                0x0300208c                c_mvg
+                0x03002090                AvrLinC
+                0x03002094                c_mvo
+                0x03002098                w_midibuf
+                0x0300209c                vcount
+                0x030020a0                Cont
+                0x030020a4                xcmdn
+                0x030020a8                MaxLin
+                0x030020ac                c_mch
+                0x030020b0                AvrLinT
+                0x030020b4                r_midibuf
+                0x030020b8                Trg
+                0x030020bc                c_rev
+                0x030020c0                sysex
+                0x030020c4                MaxChnC
+                0x030020d0                c_song
+                0x030020e0                c_fre
+                0x030020e4                p_mch
+                0x030020f0                midibuf
+                0x030021f0                IntrMainBuf
+                0x030029f0                MaxChn
+                0x030029f4                c_mpr
+                0x03002a00                midi_ma
+                0x03002a40                midi_ta
+                0x03002f40                runst
+                0x03002f44                KeyRep
+                0x03002f50                OamBak
+                0x03003350                p_song
+                0x03003360                p_fre
+                0x03003370                BgBak
+                0x03003b70                CurtCurs
+ *fill*         0x03003b74        0xc
+ COMMON         0x03003b80      0x4d0 SoundDat.o
+                                  0x0 (size before relaxing)
+                0x03003b80                m4a_mplay013
+                0x03003bc0                m4a_mplay005
+                0x03003c00                m4a_mplay030
+                0x03003c40                m4a_mplay016
+                0x03003c80                m4a_mplay009
+                0x03003cc0                m4a_mplay006
+                0x03003d00                m4a_mplay000
+                0x03003d40                m4a_mplay014
+                0x03003d80                m4a_mplay031
+                0x03003dc0                m4a_mplay007
+                0x03003e00                m4a_mplay001
+                0x03003e40                m4a_mplay002
+                0x03003e80                m4a_mplay010
+                0x03003ec0                m4a_mplay015
+                0x03003f00                m4a_mplay012
+                0x03003f40                m4a_mplay004
+                0x03003f80                m4a_memacc_area
+                0x03003f90                m4a_mplay008
+                0x03003fd0                m4a_mplay003
+                0x03004010                m4a_mplay011
+                0x03004050                .=ALIGN(0x4)
+                0x03004050                .=ALIGN(0x4)
+                0x03004050                _end=.
+                0x03004050                _bss_end__=.
+                0x03004050                __bss_end__=.
+                0x03004050                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x00080000        0x0
+                0x00080000                _stack=.
+ *(.stack)
+OUTPUT(C:\mks4agb1.05\SoundMon.elf elf32-littlearm)
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,277 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.13;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_star_bros_grp, voicegroup000
+	.equ	sn_star_bros_pri, 40
+	.equ	sn_star_bros_rev, 0
+	.equ	sn_star_bros_mvl, 100
+	.equ	sn_star_bros_key, 0
+	.equ	sn_star_bros_tbs, 1
+	.equ	sn_star_bros_exg, 0
+	.equ	sn_star_bros_cmp, 1
+
+	.section .rodata
+	.global	sn_star_bros
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_star_bros_1:
+	.byte	KEYSH , sn_star_bros_key+0
+sn_star_bros_1_B1:
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_star_bros_tbs/2
+	.byte		VOICE , 8
+	.byte		VOL   , 100*sn_star_bros_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N06   , Fn3 , v064
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		        Dn3 
+	.byte	W06
+	.byte		        Fn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		        Dn3 
+	.byte	W06
+	.byte		        Fn3 
+	.byte	W06
+	.byte		        Dn3 
+	.byte	W06
+	.byte		        Fn3 
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		        En3 
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W06
+	.byte		        En3 
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		        Cn3 
+	.byte	W06
+	.byte		        En3 
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		        En3 
+	.byte	W12
+	.byte	GOTO
+	 .word	sn_star_bros_1_B1
+sn_star_bros_1_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_star_bros_2:
+	.byte	KEYSH , sn_star_bros_key+0
+sn_star_bros_2_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 20
+	.byte		VOL   , 100*sn_star_bros_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N06   , Cn4 , v064
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W18
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W18
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		        Bn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W18
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W18
+	.byte		N06   
+	.byte	W12
+	.byte		N06   
+	.byte	W12
+	.byte	GOTO
+	 .word	sn_star_bros_2_B1
+sn_star_bros_2_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_star_bros_3:
+	.byte	KEYSH , sn_star_bros_key+0
+sn_star_bros_3_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 11
+	.byte		VOL   , 127*sn_star_bros_mvl/mxv
+	.byte		N12   , Dn3 , v064
+	.byte	W24
+	.byte		        An3 
+	.byte	W18
+	.byte		        Dn4 
+	.byte	W30
+	.byte		        An3 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		        Cn3 
+	.byte	W24
+	.byte		        Gn3 
+	.byte	W18
+	.byte		        Cn4 
+	.byte	W30
+	.byte		        Gn3 
+	.byte	W12
+	.byte		        Cn4 
+	.byte	W12
+	.byte	GOTO
+	 .word	sn_star_bros_3_B1
+sn_star_bros_3_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 4 (Midi-Chn.10) ****************@@
+
+sn_star_bros_4:
+	.byte	KEYSH , sn_star_bros_key+0
+sn_star_bros_4_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 124
+	.byte		VOL   , 127*sn_star_bros_mvl/mxv
+	.byte		N06   , Cn3 , v064
+	.byte	W06
+	.byte		N12   , Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N12   , Gn3 
+	.byte	W12
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte		        Cn3 
+	.byte	W06
+	.byte		N06   
+	.byte	W06
+	.byte	GOTO
+	 .word	sn_star_bros_4_B1
+sn_star_bros_4_B2:
+@@ 002   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_star_bros:
+	.byte	4	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_star_bros_pri	@@ Priority
+	.byte	sn_star_bros_rev	@@ Reverb.
+
+	.word	sn_star_bros_grp
+
+	.word	sn_star_bros_1
+	.word	sn_star_bros_2
+	.word	sn_star_bros_3
+	.word	sn_star_bros_4
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,155 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/********************************************************************/
+/*          MultiBoot.h                                             */
+/*            AGBマルチプレイブート・ライブラリ外部宣言             */
+/*             （マルチプレイブートのサーバサポートライブラリ）     */
+/*                                                                  */
+/*          Copyright (C) 1999-2000 NINTENDO Co.,Ltd.               */
+/********************************************************************/
+#ifndef _MULTI_BOOT_H
+#define _MULTI_BOOT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <Agb.h>
+
+
+/* MASTER_INFO から MASTER_START_DL までは 上位の値。
+ * MASTER_REQUEST_CRC から MASTER_VERIFY_CRC までは下位の値 (上位=0)
+ */
+#define MULTIBOOT_MASTER_INFO            0x62
+#define MULTIBOOT_CLIENT_INFO            0x72
+#define MULTIBOOT_MASTER_START_PROBE     0x61
+#define MULTIBOOT_MASTER_REQUEST_DLREADY 0x63
+#define MULTIBOOT_CLIENT_DLREADY         0x73
+#define MULTIBOOT_MASTER_START_DL        0x64
+#define MULTIBOOT_MASTER_REQUEST_CRC     0x65
+#define MULTIBOOT_CLIENT_CALC_CRC        0x74
+#define MULTIBOOT_CLIENT_CRCREADY        0x75
+#define MULTIBOOT_MASTER_VERIFY_CRC      0x66
+
+
+/*------------------------------------------------------------------*/
+/*                   マルチプレイブート初期化                       */
+/*------------------------------------------------------------------*/
+
+extern void MultiBootInit(MultiBootParam *mp);
+
+//・シリアル通信モードをマルチプレイモードにします。
+//・基本的に、IEのSIO_INTR_FLAGはクリアしておきますが、
+//  SIO割込みを使っても構いません。
+//
+//・mp -> masterp の設定はしません。
+//  必ず、この初期化関数を呼ぶ前に設定して下さい。
+
+/*------------------------------------------------------------------*/
+/*                   マルチプレイブート メイン                      */
+/*------------------------------------------------------------------*/
+
+extern int MultiBootMain(MultiBootParam *mp);
+
+//・基本的に毎フレーム１回呼び出します。
+//  ただし、十分にウエイトを入れれば、１フレームに複数回呼び出しても構いません。
+//  どれだけウエイトを入れれば安全であるかはアプリケーションに依存します。
+//  （Vブランク割りこみ処理等、長期間の割り込みの処理時間よりも
+//  十分大きなウエイトにする必要があります。）
+//
+//・正常終了で 0 を返します。
+//
+//・転送完了（成功）で 0 を返すと共に、
+//  MultiBootCheckComplete() が 0 でない値を返します。
+//
+//・一旦転送完了状態になると、すぐに 0 を返すだけになります。
+//  この状態を解除するには MultiBootInit() を呼び出します。
+//  MultiBootStartProbe(), MultiBootStartMaster() を呼び出しても結構ですが、
+//  これらも内部で MultiBootInit() を呼び出しています。
+
+/*------------------------------------------------------------------*/
+/*                    クライアントの認識開始                        */
+/*------------------------------------------------------------------*/
+
+extern void MultiBootStartProbe(MultiBootParam *mp);
+
+//・これを呼び出した後、MultiBootMain() でクライアントの認識処理が行われます。
+//  あらかじめ mp -> probe_count が 0 であるのを確認してから呼び出して下さい。
+
+/*------------------------------------------------------------------*/
+/*                   マスタサーバから転送開始                       */
+/*------------------------------------------------------------------*/
+
+extern void MultiBootStartMaster(MultiBootParam *mp, u8 *srcp, int length, u8 palette_color, s8 palette_speed);
+
+//・マルチプレイ通信ケーブル親機@で、カートリッジを挿入されている
+//  本体だけが、マスタサーバになることができます。
+//
+//  srcp            ブートしたいプログラム本体へのポインタ（4バイト alignment が必要）
+//                  クライアントへは、ヘッダの直後からダウンロードされます
+//  length          プログラムの転送バイト数
+//                  MULTIBOOT_SEND_SIZE_MIN (0x100) バイト以上、
+//                  MULTIBOOT_SEND_SIZE_MAX (0x40000) バイト以内です。
+//  palette_color, palette_speed  クライアントの、ロード中パレット点滅パラメタ
+//  palette_color は 0-6 で、基本のパレット(7種類)を指定します。
+//  palette_speed は -4から-1が、逆順の点滅 (-4が一番速い)
+//                   +1から+4が、正順の点滅 (+4が一番速い)
+//                   0 で、パレット固定(点滅なし)になります。
+//  上記以外の値は指定しないでください。
+
+/*------------------------------------------------------------------*/
+/*                       転送完了チェック                           */
+/*------------------------------------------------------------------*/
+
+extern int MultiBootCheckComplete(MultiBootParam *mp);
+
+//・転送が完了しているかどうかを調べます。
+//
+//・転送完了(成功)状態なら 0 でない値を返します。
+//  認識途中や、転送を開始していなかったり、転送失敗なら 0 を返します。
+//
+//・MultiBootInit(), MultiBootStartProbe(), MultiBootStartMaster()
+//  のいずれかを呼び出すと、転送完了状態はキャンセルされます。
+
+
+#ifdef __cplusplus
+}      /* extern "C" */
+#endif
+
+#endif /* _MULTI_BOOT_H */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

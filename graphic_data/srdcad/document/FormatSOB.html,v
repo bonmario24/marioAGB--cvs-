@@ -1,0 +1,577 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+   <meta name="GENERATOR" content="Mozilla/4.6 [ja] (Win98; I) [Netscape]">
+   <title>オブジェファ@イルフォーマット</title>
+</head>
+<body>
+&nbsp;
+<br><b><font size=+2>オブジェ（．ＳＯＢ）ファ@イル</font></b>
+<br>
+<hr WIDTH="100%">
+<p>アドレス
+<p><tt>00000&nbsp; ┏━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@ヘッダー情報　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>009FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>00A00&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@オブジェデータ　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>209FF&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>20A00&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@シーケンスデータ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>21A40&nbsp; ┃　@表示ＳＷ（転送用）　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@ＳＥＱ０　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@ＳＥＱ１　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@ＳＥＱＥ　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@ＳＥＱＦ　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┠────────────┨</tt>
+<br><tt>21A80&nbsp; ┃ポジションデータ　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@（転送用）　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＳＥＱ０　@ＸＰＯＳ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＳＥＱ０　@ＹＰＯＳ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@・　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＳＥＱＦ　@ＸＰＯＳ　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＳＥＱＦ　@ＹＰＯＳ　@　@┃</tt>
+<br><tt>21ABF&nbsp; ┗━━━━━━━━━━━━┛</tt>
+<br>&nbsp;
+<p>ヘッダー情報
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th ALIGN=LEFT NOWRAP>アドレス</th>
+
+<th ALIGN=LEFT NOWRAP>説明</th>
+</tr>
+
+<tr>
+<td>00000 - 00003</td>
+
+<td>ﾌｧｲﾙﾀｲﾌﾟ&nbsp; "SOB"</td>
+</tr>
+
+<tr>
+<td>00004 - 00008</td>
+
+<td>ﾋﾞｯﾄﾓｰﾄﾞ&nbsp; "?BIT"</td>
+</tr>
+
+<tr>
+<td>00009 - 00013</td>
+
+<td>ﾊﾞｰｼﾞｮﾝﾅﾝﾊﾞｰ "Ver-????\n"</td>
+</tr>
+
+<tr>
+<td>00014 - 00017</td>
+
+<td>ﾍｯﾀﾞｰｻｲｽﾞ</td>
+</tr>
+
+<tr>
+<td>00018 - 0001b</td>
+
+<td>ﾊｰﾄﾞ名&nbsp; "SFC" or "CGB" or "GB"</td>
+</tr>
+
+<tr>
+<td>0001c</td>
+
+<td>SBank Low</td>
+</tr>
+
+<tr>
+<td>0001d</td>
+
+<td>SBank High</td>
+</tr>
+
+<tr>
+<td>0001e</td>
+
+<td>Size Mode</td>
+</tr>
+
+<tr>
+<td>0001f</td>
+
+<td>Color Pallette Number</td>
+</tr>
+
+<tr>
+<td>00020</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ1</td>
+</tr>
+
+<tr>
+<td>00021</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ2</td>
+</tr>
+
+<tr>
+<td>00022</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ3</td>
+</tr>
+
+<tr>
+<td>00023</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ4</td>
+</tr>
+
+<tr>
+<td>00024</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ5</td>
+</tr>
+
+<tr>
+<td>00025</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ6</td>
+</tr>
+
+<tr>
+<td>00026</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ7</td>
+</tr>
+
+<tr>
+<td>00027</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾞﾝｸ8</td>
+</tr>
+
+<tr>
+<td>00028</td>
+
+<td>先頭ｷｬﾗｸﾀ使用ﾌﾗｸﾞ</td>
+</tr>
+
+<tr>
+<td>00029 - 000FF</td>
+
+<td>予約</td>
+</tr>
+
+<tr>
+<td>00100 - 001FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ1</td>
+</tr>
+
+<tr>
+<td>00200 - 002FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ2</td>
+</tr>
+
+<tr>
+<td>00300 - 003FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ3</td>
+</tr>
+
+<tr>
+<td>00400 - 004FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ4</td>
+</tr>
+
+<tr>
+<td>00500 - 005FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ5</td>
+</tr>
+
+<tr>
+<td>00600 - 006FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ6</td>
+</tr>
+
+<tr>
+<td>00700 - 007FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ7</td>
+</tr>
+
+<tr>
+<td>00800 - 008FF</td>
+
+<td>ｷｬﾗｸﾀﾌﾞﾛｯｸﾊﾟｽ8</td>
+</tr>
+
+<tr>
+<td>00900 - 009FF</td>
+
+<td>Color Path</td>
+</tr>
+</table>
+
+<p><b>オブジェデータ</b>
+<p>オブジェのデータが１２８（８０Ｈ）個入っています。
+<br>&nbsp;
+<p><tt>&nbsp;SFCモード</tt>
+<p><tt>00A00&nbsp; ┏━━━━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@未使用　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@オブジェサイズ情報　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｙ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｘ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＯＢＪ－ＮＡＭＥ（Ｌ）　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＯＢＪ－ＮＡＭＥ（Ｈ）　@　@　@┃</tt>
+<br><tt>00A08&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>00A10&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@未使用　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@オブジェサイズ情報　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｙ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｘ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@ＯＢＪ－ＮＡＭＥ（Ｌ）　@　@　@┃</tt>
+<br><tt>209FF&nbsp; ┃　@ＯＢＪ－ＮＡＭＥ（Ｈ）　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━━━━┛</tt>
+<p><tt>ＯＢＪ－ＮＡＭＥ</tt>（１ワードの内容）
+<p><tt>&nbsp;D15 D14 D13 D12 D11 D10 D9 D8 D7&nbsp; D6&nbsp; D5&nbsp; D4
+D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃　@┃　@┃　@┃　@　@　@　@　@┃　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th NOWRAP>ビット</th>
+
+<th ALIGN=LEFT NOWRAP WIDTH="100%">説明</th>
+</tr>
+
+<tr>
+<td>15</td>
+
+<td WIDTH="100%">上下反転フラグ（0：正常、1：上下反転）</td>
+</tr>
+
+<tr>
+<td>14</td>
+
+<td>左右反転フラグ（0：正常、1：左右反転）</td>
+</tr>
+
+<tr>
+<td>13</td>
+
+<td>表示優先フラグ</td>
+</tr>
+
+<tr>
+<td>12～10</td>
+
+<td>カラーパレットの指定</td>
+</tr>
+
+<tr>
+<td>9～0</td>
+
+<td>キャラクタ番号</td>
+</tr>
+</table>
+
+<br>&nbsp;
+<p><tt>&nbsp;CGBモード</tt>
+<p><tt>00A00&nbsp; ┏━━━━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@未使用　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@オブジェサイズ情報　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｙ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｘ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@キャラクタナンバー　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート　@　@　@　@　@　@　@┃</tt>
+<br><tt>00A08&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>00A10&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@未使用　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@オブジェサイズ情報　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｙ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@Ｘ－Ｐｏｓ（－８０～＋７Ｆ）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@キャラクタナンバー　@　@　@　@　@┃</tt>
+<br><tt>209FF&nbsp; ┃　@アトリビュート　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━━━━┛</tt>
+<br>&nbsp;
+<p>　@アトリビュートデータ（１バイトの内容）
+<p><tt>&nbsp;D7&nbsp; D6&nbsp; D5 D4&nbsp; D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃　@┃　@┃　@┃―┃　@┃　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th NOWRAP>ビット</th>
+
+<th ALIGN=LEFT NOWRAP WIDTH="100%">説明</th>
+</tr>
+
+<tr>
+<td>7</td>
+
+<td WIDTH="100%">表示優先フラグ</td>
+</tr>
+
+<tr>
+<td>6</td>
+
+<td>上下反転フラグ（0：正常、1：上下反転）</td>
+</tr>
+
+<tr>
+<td>5</td>
+
+<td>左右反転フラグ（0：正常、1：左右反転）</td>
+</tr>
+
+<tr>
+<td>4</td>
+
+<td>未使用</td>
+</tr>
+
+<tr>
+<td>3</td>
+
+<td>キャラクタバンク</td>
+</tr>
+
+<tr>
+<td>2～0</td>
+
+<td>カラーパレットの指定</td>
+</tr>
+</table>
+
+<p><tt>&nbsp;AGBモード</tt>
+<p><tt>00A00&nbsp; ┏━━━━━━━━━━━━━━━┓</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート０　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート１　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート２　@　@　@　@　@　@┃</tt>
+<br><tt>00A08&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@　@　@　@　@　@・　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>00A10&nbsp; ┠───────────────┨</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@フラグ（０：クリア１：有効）┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@グループ情報　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート０　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┃　@アトリビュート１　@　@　@　@　@　@┃</tt>
+<br><tt>209FF&nbsp; ┃　@アトリビュート２　@　@　@　@　@　@┃</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┗━━━━━━━━━━━━━━━┛</tt>
+<br>&nbsp;
+<p>　@アトリビュート０（２バイトの内容）
+<p><tt>&nbsp;D15 D14 D13 D12 D11 D10 D9 D8 D7&nbsp; D6&nbsp; D5 D4&nbsp;
+D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃　@　@　@┃　@┃　@┃　@　@　@┃　@┃　@┃　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th NOWRAP>ビット</th>
+
+<th ALIGN=LEFT NOWRAP WIDTH="100%">説明</th>
+</tr>
+
+<tr>
+<td>15～14</td>
+
+<td>縦サイズ(００：８ドット，０１：１６ドット，１０：３２ドット，１１：６４ドット）</td>
+</tr>
+
+<tr>
+<td>13</td>
+
+<td>カラーモード（０：１６×１６，１：２５６×１）</td>
+</tr>
+
+<tr>
+<td>12</td>
+
+<td>OBJモザイク（０：OFF，１：ON）</td>
+</tr>
+
+<tr>
+<td>11～10</td>
+
+<td>OBJモード（００：ノーマルOBJ，０１：半透明OBJ，１０：OBJウインドウ，１１：禁止コード）</td>
+</tr>
+
+<tr>
+<td>9</td>
+
+<td>回転拡大縮時の倍角フラグ（０：等倍，１：２倍角）</td>
+</tr>
+
+<tr>
+<td>8</td>
+
+<td>回転拡大縮小フラグ（０：OFF，１：ON）</td>
+</tr>
+
+<tr>
+<td>7～0</td>
+
+<td WIDTH="100%">Y座標</td>
+</tr>
+</table>
+
+<p>　@アトリビュート１（２バイトの内容）
+<p><tt>&nbsp;D15 D14 D13 D12 D11 D10 D9 D8 D7&nbsp; D6&nbsp; D5 D4&nbsp;
+D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃　@　@　@┃　@　@　@　@　@　@　@　@　@┃　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th NOWRAP>ビット</th>
+
+<th ALIGN=LEFT NOWRAP WIDTH="100%">説明</th>
+</tr>
+
+<tr>
+<td>15～14</td>
+
+<td>横サイズ(００：８ドット，０１：１６ドット，１０：３２ドット，１１：６４ドット）</td>
+</tr>
+
+<tr>
+<td>13</td>
+
+<td>水平反転フラグ</td>
+</tr>
+
+<tr>
+<td>12</td>
+
+<td>垂直反転フラグ</td>
+</tr>
+
+<tr>
+<td>11～9</td>
+
+<td>未使用</td>
+</tr>
+
+<tr>
+<td>8～0</td>
+
+<td WIDTH="100%">X座標</td>
+</tr>
+</table>
+
+<p>　@アトリビュート２（２バイトの内容）
+<p><tt>&nbsp;D15 D14 D13 D12 D11 D10 D9 D8 D7&nbsp; D6&nbsp; D5 D4&nbsp;
+D3&nbsp; D2&nbsp; D1&nbsp; D0</tt>
+<br><tt>┏━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┳━┓</tt>
+<br><tt>┃　@　@　@　@　@　@　@┃　@　@　@┃　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@　@┃</tt>
+<br><tt>┗━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┻━┛</tt>
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<th NOWRAP>ビット</th>
+
+<th ALIGN=LEFT NOWRAP WIDTH="100%">説明</th>
+</tr>
+
+<tr>
+<td>15～12</td>
+
+<td>カラーパレットNo.（256色時無効）</td>
+</tr>
+
+<tr>
+<td>11～10</td>
+
+<td>BGに対する優先指定（００：第１優先，０１：第２優先，１０：第３優先，１１：第４優先）</td>
+</tr>
+
+<tr>
+<td>9～0</td>
+
+<td WIDTH="100%">キャラクタネーム</td>
+</tr>
+</table>
+
+<br>&nbsp;
+<br>&nbsp;
+<p><b>シーケンスデータ</b>
+<p>データが順（ＩＮＴ，Ｎо、ＩＮＴ，Ｎо、ＩＮＴ，Ｎо、ＩＮＴ，Ｎо・・・）に入っています。
+<br>1シーケンスデータは１００Ｈバイト×１０Ｈ個＝１０００Ｈバイトあります。
+</body>
+</html>
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

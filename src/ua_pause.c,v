@@ -1,0 +1,738 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.21;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@ポーズ処理			*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "ua_common.h"
+#include "ua_score.h"
+#include "ua_stareffect.h"
+#include "m_game.h"
+#include "ua_game.h"
+#include "up_player.h"
+#include "ua_save.h"
+
+#include "ua_pause.h"
+
+#if DEBUG
+#define DEBPOS 1
+#else
+#define DEBPOS 0
+#endif
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+extern void pause_oam_set(void);
+
+/*--------------------------------------------------------------*/
+/*		ポーズＯＡＭデータ				*/
+/*--------------------------------------------------------------*/
+static u16 pause_oam_data[4*114] = {	//4*122
+    0x0048,0x0030,0x2326,0x0000,	//00 カーソル
+
+    0x8030,0x0070,0x1321,0x0000,	//01 百の位
+    0x8030,0x0078,0x1321,0x0000,	//02 十の位
+    0x8030,0x0080,0x1313,0x0000,	//03 一の位
+
+    0x8046,0x0038,0x2307,0x0000,	//04 continue
+	0x8046,0x0040,0x2308,0x0000,	//05 
+    0x8046,0x0048,0x2309,0x0000,	//06 
+
+	0x8056,0x0038,0x230A,0x0000,	//07 save and continue
+    0x8056,0x0040,0x230B,0x0000,	//08 
+    0x8056,0x0048,0x230C,0x0000,	//09 
+    0x8056,0x0050,0x2307,0x0000,	//0a 
+    0x8056,0x0058,0x2308,0x0000,	//0b 
+	0x8056,0x0060,0x2309,0x0000,	//0c 
+
+	0x8066,0x0038,0x230A,0x0000,	//0d save and quit
+    0x8066,0x0040,0x230B,0x0000,	//0e 
+    0x8066,0x0048,0x230C,0x0000,	//0f 
+    0x8066,0x0050,0x230D,0x0000,	//10
+    0x8066,0x0058,0x230E,0x0000,	//11
+    0x8066,0x0060,0x2312,0x0000,	//12
+
+    0x8076,0x0038,0x230f,0x0000,	//13 Try again
+    0x8076,0x0040,0x2310,0x0000,	//14 
+    0x8076,0x0048,0x2311,0x0000,	//15 
+    0x8018,0x0068,0x2303,0x0000,	//16 PAUSE
+    0x8018,0x0070,0x2304,0x0000,	//17 
+    0x8018,0x0078,0x2305,0x0000,	//18 
+ 
+   
+    0x0030,0x4058,0x135e,0x0000,	//21 コインマーク
+    0x0038,0x0068,0x2306,0x0000,	//22 ＝
+    0x8030,0x0088,0x135d,0x0000,	//23 ％
+
+    0x0010,0x4020,0x2300,0x0000,	//24
+    0x0010,0x4030,0x2301,0x0000,	//25
+    0x0010,0x4040,0x2301,0x0000,	//26
+    0x0010,0x4050,0x2301,0x0000,	//27
+    0x0010,0x4060,0x2301,0x0000,	//28
+    0x0010,0x4070,0x2301,0x0000,	//29
+    0x0010,0x4080,0x2301,0x0000,	//2a
+    0x0010,0x4090,0x2301,0x0000,	//2b
+    0x0010,0x40a0,0x2301,0x0000,	//2c
+    0x0010,0x40b0,0x2301,0x0000,	//2d
+    0x0010,0x50c0,0x2300,0x0000,	//2e
+
+    0x0020,0x4020,0x2320,0x0000,	//2f
+    0x0020,0x4030,0x2321,0x0000,	//30
+    0x0020,0x4040,0x2321,0x0000,	//31
+    0x0020,0x4050,0x2321,0x0000,	//32
+    0x0020,0x4060,0x2321,0x0000,	//33
+    0x0020,0x4070,0x2321,0x0000,	//34
+    0x0020,0x4080,0x2321,0x0000,	//35
+    0x0020,0x4090,0x2321,0x0000,	//36
+    0x0020,0x40a0,0x2321,0x0000,	//37
+    0x0020,0x40b0,0x2321,0x0000,	//38
+    0x0020,0x50c0,0x2320,0x0000,	//39
+
+    0x0030,0x4020,0x2320,0x0000,	//3a
+    0x0030,0x4030,0x2321,0x0000,	//3b
+    0x0030,0x4040,0x2321,0x0000,	//3c
+    0x0030,0x4050,0x2321,0x0000,	//3d
+    0x0030,0x4060,0x2321,0x0000,	//3e
+    0x0030,0x4090,0x2321,0x0000,	//3f
+    0x0030,0x40a0,0x2321,0x0000,	//40
+    0x0030,0x40b0,0x2321,0x0000,	//41
+    0x0030,0x50c0,0x2320,0x0000,	//42
+
+    0x0040,0x4020,0x2320,0x0000,	//43
+    0x0040,0x4030,0x2321,0x0000,	//44
+    0x0040,0x4040,0x2321,0x0000,	//45
+    0x0040,0x4050,0x2321,0x0000,	//46
+    0x0040,0x4060,0x2321,0x0000,	//47
+    0x0040,0x4070,0x2321,0x0000,	//48
+    0x0040,0x4080,0x2321,0x0000,	//49
+    0x0040,0x4090,0x2321,0x0000,	//4a
+    0x0040,0x40a0,0x2321,0x0000,	//4b
+    0x0040,0x40b0,0x2321,0x0000,	//4c
+    0x0040,0x50c0,0x2320,0x0000,	//4d
+
+    0x0050,0x4020,0x2320,0x0000,	//4e
+    0x0050,0x4030,0x2321,0x0000,	//4f
+    0x0050,0x4040,0x2321,0x0000,	//50
+    0x0050,0x4050,0x2321,0x0000,	//51
+    0x0050,0x4060,0x2321,0x0000,	//52
+    0x0050,0x4070,0x2321,0x0000,	//53
+    0x0050,0x4080,0x2321,0x0000,	//54
+    0x0050,0x4090,0x2321,0x0000,	//55
+    0x0050,0x40a0,0x2321,0x0000,	//56
+    0x0050,0x40b0,0x2321,0x0000,	//57
+    0x0050,0x50c0,0x2320,0x0000,	//58
+
+    0x0060,0x4020,0x2320,0x0000,	//59
+    0x0060,0x4030,0x2321,0x0000,	//5a
+    0x0060,0x4040,0x2321,0x0000,	//5b
+    0x0060,0x4050,0x2321,0x0000,	//5c
+    0x0060,0x4060,0x2321,0x0000,	//5d
+    0x0060,0x4070,0x2321,0x0000,	//5e
+    0x0060,0x4080,0x2321,0x0000,	//5f
+    0x0060,0x4090,0x2321,0x0000,	//60
+    0x0060,0x40a0,0x2321,0x0000,	//61
+    0x0060,0x40b0,0x2321,0x0000,	//62
+    0x0060,0x50c0,0x2320,0x0000,	//63
+
+    0x0070,0x4020,0x2320,0x0000,	//64
+    0x0070,0x4030,0x2321,0x0000,	//65
+    0x0070,0x4040,0x2321,0x0000,	//66
+    0x0070,0x4050,0x2321,0x0000,	//67
+    0x0070,0x4060,0x2321,0x0000,	//68
+    0x0070,0x4070,0x2321,0x0000,	//69
+    0x0070,0x4080,0x2321,0x0000,	//6a
+    0x0070,0x4090,0x2321,0x0000,	//6b
+    0x0070,0x40a0,0x2321,0x0000,	//6c
+    0x0070,0x40b0,0x2321,0x0000,	//6d
+    0x0070,0x50c0,0x2320,0x0000,	//6e
+
+	0x0080,0x6020,0x2300,0x0000,	//6f
+    0x0080,0x6030,0x2301,0x0000,	//70
+    0x0080,0x6040,0x2301,0x0000,	//71
+    0x0080,0x6050,0x2301,0x0000,	//72
+    0x0080,0x6060,0x2301,0x0000,	//73
+    0x0080,0x6070,0x2301,0x0000,	//74
+    0x0080,0x6080,0x2301,0x0000,	//75
+    0x0080,0x6090,0x2301,0x0000,	//76
+    0x0080,0x60a0,0x2301,0x0000,	//77
+    0x0080,0x60b0,0x2301,0x0000,	//78
+    0x0080,0x70c0,0x2300,0x0000,	//79
+};
+
+static u16 Ps_Num_Tbl[16] = {
+    0x323, 0x324, 0x325, 0x326, 0x327,
+    0x315, 0x316, 0x317, 0x335, 0x336,
+    0x304, 0x337, 0x330, 0x331, 0x307, 0x30B
+};
+
+/*--------------------------------------------------------------*/
+/*		ポーズＯＡＭセット処理				*/
+/*--------------------------------------------------------------*/
+#if 0
+void pause_oam_set(void)
+{
+    u16 Num, t_i;
+    u32 TEMP;
+
+    DmaArrayCopy(3, pause_oam_data, OamBak + 0x6, 16);
+
+    if((game.Trg & D_KEY) || (game.Trg & U_KEY)){
+	m4aSongNumStart( s_u_se_coin );
+	PAUSE_TIM = 0;
+	if(game.Trg & U_KEY){
+	    PAUSE_CUR--;
+	    if(PAUSE_CUR >= 3)
+		PAUSE_CUR = 2;
+	}
+	else{
+	    PAUSE_CUR++;
+	    if(PAUSE_CUR >= 3)
+		PAUSE_CUR = 0;
+	}
+    }
+    if((PAUSE_TIM & 0x10) == 0x10 && mGm_GMMODE == gm_pause){
+	OamBak[8].CharNo = 0x321;
+    }
+    else{
+	OamBak[8].VPos = PAUSE_CUR * 0x10 + 0x50;
+    }
+/************プレイヤーの現在地****************************/
+    OamBak[116].HPos = 0x10;
+    OamBak[117].HPos = 0x18;
+    OamBak[118].HPos = 0x28;
+    OamBak[119].HPos = 0x30;
+
+    OamBak[116].VPos = 0x8;
+    OamBak[117].VPos = 0x8;
+    OamBak[118].VPos = 0x8;
+    OamBak[119].VPos = 0x8;
+
+    for( t_i = 0; t_i < 2; t_i++ ){
+	Num = ((PLAY_PLXPOSH>>(4*(1-t_i)))>>4)&0xF;
+	OamBak[116+t_i].CharNo = Ps_Num_Tbl[Num];
+
+	Num = (((PLAY_PLYPOSH+0x10)>>(4*(1-t_i)))>>4)&0xF;
+	OamBak[118+t_i].CharNo = Ps_Num_Tbl[Num];
+    }
+/********************************************************/
+/********************************************************/
+    OamBak[120].HPos = 0x10;
+    OamBak[121].HPos = 0x18;
+    OamBak[122].HPos = 0x20;
+    OamBak[123].HPos = 0x28;
+    OamBak[124].HPos = 0x30;
+    OamBak[125].HPos = 0x38;
+    OamBak[126].HPos = 0x40;
+    OamBak[127].HPos = 0x48;
+
+    OamBak[120].VPos = 0x0;
+    OamBak[121].VPos = 0x0;
+    OamBak[122].VPos = 0x0;
+    OamBak[123].VPos = 0x0;
+    OamBak[124].VPos = 0x0;
+    OamBak[125].VPos = 0x0;
+    OamBak[126].VPos = 0x0;
+    OamBak[127].VPos = 0x0;
+
+    if( mGm_SCRCTL == 0 ){	// 縦スクロール
+	TEMP = (PLAY_PLYPOSH+0x10)&0x00F0;
+	TEMP |= (PLAY_PLXPOSH&0x00F0)>>4;
+	TEMP += (PLAY_PLYPOSH+0x10)&0xff00;
+	TEMP *= 2;
+	TEMP += 0x02000000;
+    }
+    else{			// 横スクロール
+	TEMP = (PLAY_PLXPOSH>>4)&0x000F;
+	TEMP |= (PLAY_PLYPOSH+0x10)&0x00F0;
+	TEMP += (PLAY_PLXPOSH>>8)*0x00f0;
+	TEMP *= 2;
+	TEMP += 0x02000000;
+    }
+    for( t_i = 0; t_i < 8; t_i++ ){
+	Num = (TEMP>>(4*(7-t_i)))&0xF;
+	OamBak[120+t_i].CharNo = Ps_Num_Tbl[Num];
+    }
+/********************************************************/
+}
+#endif
+
+void pause_oam_set(void)
+{
+    u16 bit_data;
+    u8 p_work0 = 0;
+    u8 p_work1;
+    u8 p_work2 = 0;
+    u8 p_work3 = 1;
+    u8 loop_ct;
+    u8 coin[13];
+    u8 byte_no,bit_no;
+
+    for(loop_ct = 0; loop_ct < 13; loop_ct++)
+	coin[loop_ct] = RED_COIN[loop_ct];
+
+    byte_no = (WORDNO * 5) / 8;
+    bit_no = (WORDNO * 5) % 8;
+    bit_data = REDCOIN << bit_no;
+    coin[byte_no] = coin[byte_no] | (bit_data & 0xff);
+    coin[byte_no + 1] = coin[byte_no + 1] | (bit_data >> 8);
+    
+    for(loop_ct = 0; loop_ct < 100; loop_ct++){
+	if((loop_ct % 8) == 0){
+	    p_work2 = coin[loop_ct / 8];
+	    p_work3 = 1;
+	}
+	if((p_work2 & p_work3) != 0)
+	    p_work0++;
+	p_work3 <<= 1;
+    }
+
+/*    if(mGm_TRG & B_BUTTON){
+	DmaArrayCopy(1, pause_oam_data, OamBak + 0x8, 16);
+    }
+    else if(mGm_TRG & R_BUTTON){
+	DmaArrayCopy(2, pause_oam_data, OamBak + 0x8, 16);
+    }
+    else if(mGm_TRG & L_BUTTON){
+	mGm_SOUNDFG = 1;
+    }
+    else{
+	DmaArrayCopy(3, pause_oam_data, OamBak + 0x8, 16);
+	*(vu32 *)REG_DMA3SAD = 0;
+	*(vu32 *)REG_DMA3DAD = 0;
+	*(vu32 *)REG_DMA3CNT = 0;
+	}*/
+
+    DmaArrayCopy(3, pause_oam_data, OamBak + 0x6, 16);
+
+    if(((PAUSE_TIM & 0x10) == 0x10) && (mGm_GMMODE == gm_pause)){
+	OamBak[6].CharNo = 0x321;
+    }
+    else{
+	OamBak[6].VPos = PAUSE_CUR * 0x10 + 0x48;
+    }
+
+    p_work1 = 0;
+    if((p_work0 / 100) != 0){
+	OamBak[7].CharNo = 0x314;
+	p_work0 -= 100;
+	p_work1 = 1;
+    }
+
+    if(((p_work0 / 10) != 0) || (p_work1 != 0)){
+	if((p_work0 / 10) < 5)
+	    OamBak[8].CharNo = (p_work0 / 10) + 0x313;
+	else
+	    OamBak[8].CharNo = (p_work0 / 10) + 0x353;
+	p_work0 %= 10;
+    }
+
+    if((p_work0 % 10) < 5)
+	OamBak[9].CharNo = (p_work0 % 10) + 0x313;
+    else
+	OamBak[9].CharNo = (p_work0 % 10) + 0x353;
+}
+
+/*--------------------------------------------------------------*/
+/*		ポーズイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void pause_init(void)
+{
+    PAUSE_GMMODE = mGm_GMMODE;
+    SORTFG = 0;
+    PAUSE_TIM = 0;
+    PAUSE_CUR = 0;
+    act_LifeSet();
+    pause_oam_set();
+    BLDCNT = 0x0e7;
+    BLDALPHA = 0x0000;
+    BLDY = 0x0004;
+    WIN0H = 0x4898;
+    WIN1H = 0x20d0;
+    WIN0V = 0x4858;
+    WIN1V = 0x1090;
+    WININ = 0x2f10;
+    WINOUT = 0x3f;
+    DISPCNT |= 0x6000;
+    game.GMMODE = gm_pause_open;
+    m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 100);
+    m4aSongNumStart( s_u_se_pause );
+    PLAY_WATMWK = PLAY_WATCHTM;
+    if(PLAY_WATCHTM != 0 && PLAY_WATMWK != 0)
+	m4aSongNumStop( s_u_se_timer );
+}
+
+/*--------------------------------------------------------------*/
+/*		ポーズウィンドウ開く処理			*/
+/*--------------------------------------------------------------*/
+void pause_open(void)
+{
+    char_change();
+    act_LifeSet();
+    pause_oam_set();
+    WIN0H = ((WIN0H & 0xff00) - 0x800) | ((WIN0H & 0x00ff) + 0x8);
+    WIN0V = ((WIN0V & 0xff00) - 0x800) | ((WIN0V & 0x00ff) + 0x8);
+//    WIN1H = WIN0H;
+//    WIN1V = WIN0V;
+    if((WIN0H & 0xff00) == 0x2000){
+	WIN0H = 0x23cd;
+	WIN0V = 0x138d;
+	WININ = 0x3f10;
+	game.GMMODE++;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ポーズ処理					*/
+/*--------------------------------------------------------------*/
+void pause(void)
+{
+    u16 i;
+    vu16 IeBak;
+    u8 byte_no,bit_no;
+    u16 bit_data;
+    u8 word_bak;
+
+    char_change();
+    act_LifeSet();
+    PAUSE_TIM++;
+    switch(SAVE_ON){
+    case 0:
+	if((game.Trg & D_KEY) || (game.Trg & U_KEY) || (game.Trg & SELECT_BUTTON)){
+	    m4aSongNumStart( s_u_se_coin );
+	    PAUSE_TIM = 0;
+	    if(game.Trg & U_KEY)
+		PAUSE_CUR--;
+	    else
+		PAUSE_CUR++;
+	    PAUSE_CUR &= 3;
+	}
+	if(!((mGm_CONT & SELECT_BUTTON) ||
+	     (mGm_CONT & R_BUTTON) ||
+	     (mGm_CONT & L_BUTTON) ||
+	     (mGm_CONT & B_BUTTON))){
+	    if(game.Trg == START_BUTTON || game.Trg == A_BUTTON){
+		if((PAUSE_CUR != 0) && (PAUSE_CUR != 3)){
+		    VSYNC_OFF = 1;
+		    SAVE_ON = 1;
+		    m4aMPlayAllStop();
+		}
+		else if(PAUSE_CUR == 0){
+		    WIN0H = 0x38b8;
+		    WIN0V = 0x2080;
+		    WININ = 0x2f10;
+		    m4aSongNumStart( s_u_se_pause );
+		    mGm_GMMODE = gm_pause_close;
+		}
+		else{
+		    fade_out_parameter_set();
+		    game.GMMODE = gm_pause_fade_out;
+		    m4aSongNumStart( s_u_se_pause );
+		}
+	    }
+	}
+	break;
+    case 1:
+	byte_no = (WORDNO * 5) / 8;
+	bit_no = (WORDNO * 5) % 8;
+	bit_data = REDCOIN << bit_no;
+	RED_COIN[byte_no] = RED_COIN[byte_no] | (bit_data & 0xff);
+	RED_COIN[byte_no + 1] = RED_COIN[byte_no + 1] | (bit_data >> 8);
+	word_bak = WORDNO;
+	WORDNO = MAX_WORDNO[FILE_NO];
+	*(vu16 *)REG_IME = 0;
+	file_save(FILE_NO);
+	WORDNO = word_bak;
+	SAVE_ON = 0;
+	*(vu16 *)REG_IME = 1;
+	V_blank_wait();
+	m4aSoundVSyncOn();
+
+	if(ERROR_NO != 0){
+	    mGm_FREE_usa_game();
+	    mGm_FREE_p_act();		// 敵フリー
+	    ply_free_set();			// プレイヤー領域フリー
+	    mGm_FREE_p_scr();		// スコアフリー
+	    mGm_FREE_p_eff();		// スコアフリー
+	    mGm_GC();
+	    m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 256);
+	    return;
+	}
+
+	if(PAUSE_CUR != 2){
+	    if(EXITFG == 0)
+		m4aSongNumContinue( BGBGM );
+	    if(PLAY_KENSHIRO > 8)
+		m4aSongNumContinue( s_u_star );		// [S] 無敵
+	}
+	PAUSE_TIM = 0;
+	m4aSongNumStart( s_u_se_save );
+	mGm_GMMODE++;
+    }
+
+/*	if(game.Trg == START_BUTTON || game.Trg == A_BUTTON){
+	    if((PAUSE_CUR != 0) && (PAUSE_CUR != 3)){
+		byte_no = (WORDNO * 5) / 8;
+		bit_no = (WORDNO * 5) % 8;
+		bit_data = REDCOIN << bit_no;
+		RED_COIN[byte_no] = RED_COIN[byte_no] | (bit_data & 0xff);
+		RED_COIN[byte_no + 1] = RED_COIN[byte_no + 1] | (bit_data >> 8);
+		word_bak = WORDNO;
+		WORDNO = MAX_WORDNO[FILE_NO];
+
+		m4aMPlayAllStop();
+		m4aSoundMain();
+		*(vu16 *)REG_IME = 0;
+		m4aSoundVSyncOff();
+		*(vu16 *)REG_DISPCNT &= 0xf8ff;
+		file_save(FILE_NO);
+		*(vu16 *)REG_IME = 1;
+		V_blank_wait();
+		*(vu16 *)REG_DISPCNT = DISPCNT;
+		WORDNO = word_bak;
+//		m4aSoundVSyncOff();
+		m4aSoundVSyncOn();
+		if(ERROR_NO != 0){
+		    mGm_FREE_usa_game();
+		    mGm_FREE_p_act();		// 敵フリー
+		    ply_free_set();		// プレイヤー領域フリー
+		    mGm_FREE_p_scr();		// スコアフリー
+		    mGm_FREE_p_eff();		// スコアフリー
+		    mGm_GC();
+		    m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 256);
+		    m4aMPlayAllStop();
+		    return;
+		}
+		if(PAUSE_CUR != 2){
+		    if(EXITFG == 0)
+			m4aSongNumContinue( BGBGM );
+		    if(PLAY_KENSHIRO > 8)
+			m4aSongNumContinue( s_u_star );		// [S] 無敵
+		}
+	    }
+
+	    if(PAUSE_CUR == 0){
+		WIN0H = 0x38b8;
+		WIN0V = 0x2080;
+		WININ = 0x2f10;
+		m4aSongNumStart( s_u_se_pause );
+		mGm_GMMODE = gm_pause_close;
+	    }
+	    else if(PAUSE_CUR == 3){
+		fade_out_parameter_set();
+		game.GMMODE = gm_pause_fade_out;
+		m4aSongNumStart( s_u_se_pause );
+	    }
+	    else{
+		PAUSE_TIM = 0;
+		m4aSongNumStart( s_u_se_save );
+		mGm_GMMODE++;
+	    }
+	}
+	else if((game.Trg & D_KEY) || (game.Trg & U_KEY)){
+	    m4aSongNumStart( s_u_se_coin );
+	    PAUSE_TIM = 0;
+	    if(game.Trg & U_KEY)
+	    PAUSE_CUR--;
+	    else
+		PAUSE_CUR++;
+	    PAUSE_CUR &= 3;
+	    }*/
+
+    pause_oam_set();
+}
+
+/*--------------------------------------------------------------*/
+/*		タイマー待ち処理				*/
+/*--------------------------------------------------------------*/
+void pause_timer(void)
+{
+    char_change();
+    act_LifeSet();
+    pause_oam_set();
+    PAUSE_TIM++;
+    if(PAUSE_TIM == 60 * 1){
+	if(PAUSE_CUR == 1){
+	    WIN0H = 0x28c8;
+	    WIN0V = 0x2080;
+	    WININ = 0x2f10;
+	    game.GMMODE++;
+	}
+	else{
+	    DebugMode_RamClear();
+	    WININ |= 0x2020;
+	    WINOUT |= 0x2020;
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ポーズウィンドウ閉じる処理			*/
+/*--------------------------------------------------------------*/
+void pause_close(void)
+{
+    char_change();
+    act_LifeSet();
+//    pause_oam_set();
+    WIN0H = ((WIN0H & 0xff00) + 0x800) | ((WIN0H & 0x00ff) - 0x8);
+    WIN0V = ((WIN0V & 0xff00) + 0x800) | ((WIN0V & 0x00ff) - 0x8);
+    if((WIN0H & 0xff00) == 0x5000){
+	mGm_GMMODE = PAUSE_GMMODE;
+	SORTFG = 1;
+	WIN0H = 0;
+	WIN0V = 0;
+	WIN1H = 0;
+	WIN1V = 0;
+	WININ = 0;
+	WINOUT = 0;
+	DISPCNT &= 0x1fff;
+	mGm_BLDMOD = 0;
+	m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 256);
+	if(PLAY_WATCHTM != 0 && PLAY_WATMWK != 0)
+	    m4aSongNumContinue( s_u_se_timer );
+//	*(vu16 *)REG_DISPCNT = *(vu16 *)REG_DISPCNT & 0x1fff;
+    }
+    else{
+	pause_oam_set();
+    }
+//    WIN1H = WIN0H;
+//    WIN1V = WIN0V;
+}
+
+/*--------------------------------------------------------------*/
+/*		ポーズフェードアウト処理			*/
+/*--------------------------------------------------------------*/
+void pause_fade_out(void)
+{
+    char_change();
+    act_LifeSet();
+    pause_oam_set();
+    fade_out();
+    if(game.fade_flag == 0){
+	WIN0H = 0;
+	WIN0V = 0;
+	WIN1H = 0;
+	WIN1V = 0;
+	WININ = 0;
+	WINOUT = 0;
+	DISPCNT &= 0x1fff;
+	m4aMPlayVolumeControl(&m4a_mplay030, 0x3f, 256);
+
+	if(PAUSE_CUR == 2){
+	    BRUSFG = MAIN_mode;
+	    game.SLMODE = 0;
+	    game.GMMODE = 0;
+	    PLAY_PLCMOD = 0;
+	    PLDSPNO = 0;
+	    mGm_FREE_usa_game();
+	    ply_free_set();	// プレイヤー領域フリー
+	    mGm_FREE_p_act();	// 敵フリー
+	    mGm_FREE_p_scr();	// スコアフリー
+	    mGm_FREE_p_eff();	// スター＆コインエフェクトフリー
+	    mGm_GC();
+	    m4aMPlayAllStop();	// 全ての音停止処理
+	}
+	else{
+	    PLAY_PLGMOD = PLGM_CACL;
+	    game_mode_check();
+	    save_pull();
+	}
+	VSYNC_OFF = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d30 2
+a31 2
+static u16 pause_oam_data[4*122] = {
+    0x0048,0x0030,0x232e,0x0000,	//00 カーソル
+d37 26
+a62 31
+    0x4048,0x0038,0x2328,0x0000,	//04 ＣＯ
+    0x0048,0x0048,0x232a,0x0000,	//05 Ｎ
+    0x0048,0x0050,0x230f,0x0000,	//06 Ｔ
+    0x0048,0x0058,0x230e,0x0000,	//07 Ｉ
+    0x0048,0x0060,0x232a,0x0000,	//08 Ｎ
+    0x0048,0x0068,0x230d,0x0000,	//09 Ｕ
+    0x0048,0x0070,0x230b,0x0000,	//0a Ｅ
+    0x4058,0x4038,0x2308,0x0000,	//0b ＳＡＶＥ
+    0x0058,0x0060,0x2309,0x0000,	//0c Ａ
+    0x4058,0x0068,0x232a,0x0000,	//0d ＮＤ
+    0x4058,0x0080,0x2328,0x0000,	//0e ＣＯ
+    0x0058,0x0090,0x232a,0x0000,	//0f Ｎ
+    0x0058,0x0098,0x230f,0x0000,	//10 Ｔ
+    0x0058,0x00a0,0x230e,0x0000,	//11 Ｉ
+    0x0058,0x00a8,0x232a,0x0000,	//12 Ｎ
+    0x0058,0x00b0,0x230d,0x0000,	//13 Ｕ
+    0x0058,0x00b8,0x230b,0x0000,	//14 Ｅ
+    0x4068,0x4038,0x2308,0x0000,	//15 ＳＡＶＥ
+    0x0068,0x0060,0x2309,0x0000,	//16 Ａ
+    0x4068,0x0068,0x232a,0x0000,	//17 ＮＤ
+    0x4068,0x4080,0x230c,0x0000,	//18 ＱＵＩＴ
+    0x4078,0x4038,0x230f,0x0000,	//19 ＴＲＹ
+    0x0078,0x0058,0x2309,0x0000,	//1a Ａ
+    0x0078,0x0060,0x232c,0x0000,	//1b Ｇ
+    0x0078,0x0068,0x2309,0x0000,	//1c Ａ
+    0x0078,0x0070,0x230e,0x0000,	//1d Ｉ
+    0x0078,0x0078,0x232a,0x0000,	//1e Ｎ
+
+    0x4018,0x8060,0x2303,0x0000,	//1f ＰＡＵＳ
+    0x8018,0x0080,0x2307,0x0000,	//20 Ｅ
+    
+d64 1
+a64 1
+    0x0038,0x0068,0x2332,0x0000,	//22 ＝
+d149 1
+a149 1
+    0x0080,0x6020,0x2300,0x0000,	//6f
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

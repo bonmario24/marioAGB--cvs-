@@ -1,0 +1,190 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *              
+ *	アクターヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __BA_ACT_H_
+#define __BA_ACT_H_
+
+/*----------------------- 敵構造体 ------------------------*/
+typedef struct act{
+    u16		acterID;	// ＩＤナンバー
+    u16		TBLNo;		// 登録されているテーブルナンバー
+    u8		mode;		// モードナンバー
+    u16		chrNO;		// パターンナンバー
+
+    u8		Priority:2;	// 表示優先
+    u8		Direction:1;	// 進行方向(0=左,1=右)
+    u8		BackFG:1;	// 仰向けフラグ(１：仰向け)
+    u8		OBJMode:2;	// ＯＢＪモード
+    u8		shellFG:1;	// 甲羅フラグ
+    u8		DokanBak:1;	// 自分が登場した土管(０:左 /１:右)
+
+    u8		SpdLevel:3;	// 移動速度レベル
+    u8		DeadFlag:1;	// 死亡フラグ(０：生存/１：死亡)
+    u8		NoUsed:4;	// 未使用
+
+    u8		HFlip:1;	// Ｈフリップ
+    u8		VFlip:1;	// Ｖフリップ
+    u8		JumpFG:1;	// ジャンプフラグ
+    u8		Pltt:4;		// パレット
+    u8		HitFG:1;	// 当るかフラグ ０：当る
+				//		１：当らない
+
+    u8		AnimeTM;	// アニメーションタイマー
+    u8		AnimeIDX;	// アニメーションインデックス
+
+    s32		Xpos;		// Ｘポジション
+    s32		Ypos;		// Ｙポジション
+    s32		Xspd;		// Ｘスピード
+    s32		Yspd;		// Ｙスピード
+
+    u8		XCenter;	// Ｘ方向の中心までの距離
+    u8		YCenter;	// Ｙ方向の中心までの距離
+    u8		XSize;		// 中心からのＸサイズ
+    u8		YSize;		// 中心からのＹサイズ
+
+    u16		Timer;		// 処理用タイマー
+    u8		Wait_Timer;	// 画面外待機@用タイマー
+    u8		KillMode;	// 自機@をやっつけて反転するモードＮｏ．
+    u8		KickMode;	// 自機@に蹴られて飛んでいくモードＮｏ．
+    s8		shakefg;	// 起き上がる前の揺れフラグ
+    void	(*BGJUMP)(struct act *);	//下から叩@かれたときの処理をする
+						//関数へのポインタ
+    void	(*PowJUMP)(struct act *);	//[POW]をたたいたときの処理をする
+						//関数へのポインタ
+    void	(*LastSet)(struct act *);	//最後の１匹になったときの処理をする
+						//関数へのポインタ
+    void	*other;		// 各敵固有の構造体ポインター登録用
+} acterDT_c;
+
+#define	a_ACTERID(p)		((p)->acterID)
+#define	a_TBLNO(p)		((p)->TBLNo)
+#define	a_MODE(p)		((p)->mode)
+#define	a_CHRNO(p)		((p)->chrNO)
+#define	a_HFLIP(p)		((p)->HFlip)
+#define	a_VFLIP(p)		((p)->VFlip)
+#define	a_JUMPFG(p)		((p)->JumpFG)
+#define	a_PLTT(p)		((p)->Pltt)
+#define	a_HITFG(p)		((p)->HitFG)
+#define	a_ANIMETM(p)		((p)->AnimeTM)
+#define	a_ANIMEIDX(p)		((p)->AnimeIDX)
+#define	a_XPOS(p)		((p)->Xpos)
+#define	a_YPOS(p)		((p)->Ypos)
+#define	a_XSPD(p)		((p)->Xspd)
+#define	a_YSPD(p)		((p)->Yspd)
+#define	a_XCENTER(p)		((p)->XCenter)
+#define	a_YCENTER(p)		((p)->YCenter)
+#define	a_XSIZE(p)		((p)->XSize)
+#define	a_YSIZE(p)		((p)->YSize)
+#define	a_PRIORITY(p)		((p)->Priority)
+#define	a_DIREC(p)		((p)->Direction)
+#define	a_BACKFG(p)		((p)->BackFG)
+#define	a_LEVEL(p)		((p)->SpdLevel)
+#define	a_OBJMODE(p)		((p)->OBJMode)
+#define	a_SELLFG(p)		((p)->shellFG)
+#define	a_DOKAN(p)		((p)->DokanBak)
+#define	a_DEAD(p)		((p)->DeadFlag)
+#define	a_TIMER(p)		((p)->Timer)
+#define	a_KILMODE(p)		((p)->KillMode)
+#define	a_KCKMODE(p)		((p)->KickMode)
+#define a_SHAKEFG(p)		((p)->shakefg)
+#define a_BGJUMP(p)		((p)->BGJUMP)
+#define a_POWJUMP(p)		((p)->PowJUMP)
+#define a_LASTSET(p)		((p)->LastSet)
+#define	a_OTHER(p)		((p)->other)
+#define a_WTIMER(p)		((p)->Wait_Timer)
+
+// テーブルＮＯ.によるアクターのメンバ参照方法@のdefineは、
+// m_main.hに移動いました。
+
+#define	MAX_ACTER		20
+
+enum {
+    NoActer,			// 登場物無し
+    EN_NOKOKAME,		// ノコノコ
+    EN_KANI,			// カニ
+    EN_FLY,			// ハエ
+    EN_KUPPA,			// クッパ
+    EN_KOURA,			// 甲羅
+    EN_TOGEZO,			// トゲゾー
+
+    StageEnemy,			//↑↑↑ステージ毎の敵として数える敵は
+				//これより上に登録
+
+    EN_COIN = StageEnemy,	// コイン
+    EN_BUCKET,			// バケツ
+    EN_ICE,				// 氷
+
+				//基本的に引っくり返る敵は（[POW]の影響を受ける敵）
+    TurnCheck,			//これより上に登録で、それ以外は
+				//これより下に登録すること
+
+    EN_BGYuKa = TurnCheck,	// ＢＧ床書き換え
+    EN_FIREBALL,		// ファ@イアボール
+    EN_PIPEWAVE,		// 土管アニメ
+    EN_POW,			// ＰＯＷブロック
+    EN_FISHBONE,		// 魚の骨
+    EN_EGG,			// 卵
+    EN_HEART,			// ハート
+    EN_STAR,			// 星
+    EN_KPPFIRE,			// クッパの炎
+    EN_ICICLE,			// つらら
+
+    EndActor,			// アクターの最終ナンバー
+};
+
+/*-------------------- ＥＸＴＥＲＮ ---------------------*/
+	extern  ObjAffineSrcData Sraffp;
+	extern  ObjAffineDestData Deaffp;
+
+extern	void		acter_init(void);
+extern	void		acterInit(acterDT_c *);
+extern	void		acter_main(void);
+extern	acterDT_c	acterInitDT;
+
+/*-------------------- クラス定義  ----------------------*/
+/*-------------------- 敵名前登録（クラス定義）----------*/
+
+
+#endif /* __BA_ACT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,831 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Archive member included       because of file (symbol)
+
+C:\agb\lib/libagbsyscall.a(AgbSysCpuSet.o)
+                              m4aLib.o (CpuSet)
+C:\agb\lib/libagbsyscall.a(AgbSysMidiKey2Freq.o)
+                              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o (MidiKey2Freq)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                              m4aLib.o (_call_via_r1)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o)
+                              m4aLib.o (__divsi3)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                              C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o) (__div0)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o (__udivsi3)
+C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_umodsi3.o)
+                              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o (__umodsi3)
+
+Allocating common symbols
+Common symbol       size              file
+
+c_bit               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_sound           0xfb0             m4aLib.o
+p_rev               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+p_bit               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay013        0x40              SoundDat.o
+m4a_mplay005        0x40              SoundDat.o
+m4a_mplay030        0x40              SoundDat.o
+c_mvg               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+AvrLinC             0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+c_mvo               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay009        0x40              SoundDat.o
+m4a_mplay006        0x40              SoundDat.o
+w_midibuf           0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+vcount              0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay000        0x40              SoundDat.o
+ExtMPlyJmpTbl       0x90              m4aLib.o
+Cont                0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+xcmdn               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+MaxLin              0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+c_mch               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+AvrLinT             0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+r_midibuf           0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+Trg                 0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+c_rev               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+sysex               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay014        0x40              SoundDat.o
+m4a_cgbchn          0x100             m4aLib.o
+MaxChnC             0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay031        0x40              SoundDat.o
+c_song              0x10              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+c_fre               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay007        0x40              SoundDat.o
+p_mch               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay001        0x40              SoundDat.o
+m4a_mplay002        0x40              SoundDat.o
+m4a_mplay010        0x40              SoundDat.o
+midibuf             0x100             C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+IntrMainBuf         0x800             C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+MaxChn              0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+c_mpr               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+midi_ma             0x40              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+midi_ta             0x500             C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+runst               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+KeyRep              0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay015        0x40              SoundDat.o
+m4a_mplay012        0x40              SoundDat.o
+OamBak              0x400             C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay004        0x40              SoundDat.o
+m4a_memacc_area     0x10              SoundDat.o
+m4a_mplay008        0x40              SoundDat.o
+p_song              0x10              C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+m4a_mplay003        0x40              SoundDat.o
+m4a_mplay011        0x40              SoundDat.o
+p_fre               0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+BgBak               0x800             C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+CurtCurs            0x4               C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\crt0.o
+LOAD m4aLib.o
+LOAD C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+LOAD C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SndMonDat.o
+LOAD SoundDat.o
+LOAD sn_g_kon.o
+LOAD sn_g_pisnare.o
+LOAD sn_g_lowcg.o
+LOAD sn_g_bsdrum.o
+LOAD sn_KEKKA0.o
+LOAD sn_STAGE1.o
+LOAD sn_STAGE2.o
+LOAD sn_CLEAR.o
+LOAD sn_KEKKA1.o
+LOAD sn_KEKKA2.o
+LOAD sn_KEKKA.o
+LOAD sn_KEKKA3.o
+LOAD sn_BATTLE_DEAD.o
+LOAD sn_HEART.o
+LOAD sn_COIN5.o
+LOAD sn_JUMP.o
+LOAD sn_SLIP.o
+LOAD sn_WALK_C.o
+LOAD sn_WALK_E.o
+LOAD sn_WALK_G.o
+LOAD sn_MR_DEAD.o
+LOAD sn_MR_DOWN.o
+LOAD sn_MR_NEXT.o
+LOAD sn_POW.o
+LOAD sn_PAUSE1UP.o
+LOAD sn_KAME.o
+LOAD sn_KANI.o
+LOAD sn_HAE.o
+LOAD sn_COIN_OUT.o
+LOAD sn_TEKI_ATTACK.o
+LOAD sn_TEKI_DEAD.o
+LOAD sn_DOBON.o
+LOAD sn_COIN_GET.o
+LOAD sn_FREEZER.o
+LOAD sn_FREEZ_DEAD.o
+LOAD sn_FIRE.o
+LOAD sn_boss_bros.o
+LOAD sn_star_bros.o
+LOAD sn_KUPPA.o
+LOAD sn_KUPPA_DOSIN.o
+LOAD sn_win1.o
+LOAD sn_lose1.o
+LOAD sn_win2.o
+LOAD sn_lose2.o
+LOAD sn_KEKKA4.o
+LOAD sn_battle2.o
+LOAD sn_battlekekka.o
+LOAD sn_zelda_fan.o
+LOAD sn_KUPPAFIRE.o
+LOAD sn_BAKETU.o
+LOAD sn_MOTI.o
+LOAD sn_NAGE.o
+LOAD sn_TAME.o
+LOAD sn_DAMAGE.o
+LOAD sn_TIBI.o
+LOAD sn_NORI.o
+LOAD sn_BUTUKARI.o
+LOAD sn_HEART_GET.o
+LOAD sn_DEKA.o
+LOAD sn_KAO.o
+LOAD sn_PUSH.o
+LOAD sn_KUPPA_DAMAGE.o
+LOAD sn_KUPPA_DEAD.o
+LOAD sn_SHIFT.o
+LOAD sn_SAVE.o
+LOAD sn_intro_battle.o
+LOAD sn_KAMEKERI1.o
+LOAD sn_KAMEKERI2.o
+LOAD sn_KAMEKERI3.o
+LOAD sn_KAMEKERI4.o
+LOAD sn_PINPON.o
+LOAD sn_BUU.o
+LOAD sn_battlekekka_intro.o
+LOAD sn_FIREDEAD.o
+LOAD sn_TURARA_DEAD.o
+LOAD C:\agb\lib/libagbsyscall.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libg.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/../../../../thumb-elf/lib/libc.a
+LOAD C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a
+Address of section .text set to 0x8000000
+Address of section .bss set to 0x3000000
+                0x00008000                .=0x8000
+
+.interp
+ *(.interp)
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.init
+ *(.init)
+
+.plt
+ *(.plt)
+
+.text           0x08000000     0x3aa8
+ *(.text)
+ .text          0x08000000      0x1d0 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\crt0.o
+                0x080001d0                seg_m4aLib_top
+                0x08000000                _start
+                0x080000c0                start_vector
+                0x080000fc                intr_main
+ .text          0x080001d0     0x2098 m4aLib.o
+                0x08001498                SoundVSyncOff_rev01
+                0x08001308                SampFreqSet_rev01
+                0x080001d0                umul3232H32
+                0x080010f0                MPlayExtender
+                0x08001444                SoundClear_rev01
+                0x080021fc                ply_xsust
+                0x0800122c                Clear64byte_rev
+                0x080021e8                ply_xdeca
+                0x08001214                MusicPlayerJumpTableCopy
+                0x080021c0                ply_xtype
+                0x08001da0                MPlayVolumeControl
+                0x08001598                MPlayStart_rev01
+                0x08000608                SoundMainBTM
+                0x08002250                ply_xswee
+                0x080014e4                SoundVSyncOn_rev01
+                0x08001098                m4aMPlayFadeOut
+                0x08001520                MPlayOpen_rev01
+                0x08000ad8                TrackStop_rev01
+                0x0800106c                m4aMPlayAllContinue
+                0x080021d4                ply_xatta
+                0x080017d4                MidiKey2CgbFr
+                0x08002224                ply_xiecv
+                0x08001000                m4aSongNumContinue
+                0x08001f78                MPlayLFOSpeedSet
+                0x08000e28                DummyFunc
+                0x08000e48                MPlayFadeOut
+                0x08000d34                ply_endtie_rev01
+                0x08001060                m4aMPlayContinue
+                0x08001d78                MPlayTempoControl
+                0x0800168c                FadeOutBody_rev01
+                0x0800187c                CgbOscOff
+                0x08002164                ply_xxx
+                0x08000dc4                MidiKey2fr
+                0x08000ef4                m4aSoundMain
+                0x08002178                ply_xwave
+                0x0800170c                TrkVolPitSet_rev01
+                0x08000f00                m4aSongNumStart
+                0x08000d9c                ply_lfos_rev01
+                0x08000e2c                MPlayContinue
+                0x08000db0                ply_mod_rev01
+                0x08001e08                MPlayPitchControl
+                0x08001ee4                MP_clear_modM
+                0x0800086c                MPlayMain_rev01
+                0x08000b1c                ply_note_rev01
+                0x08001240                SoundInit_rev01
+                0x08000f2c                m4aSongNumStartOrChange
+                0x08001f04                MPlayModDepthSet
+                0x08000f78                m4aSongNumStartOrContinue
+                0x08001934                CgbSound
+                0x0800164c                MPlayStop_rev01
+                0x08002264                DummyFunc_rev
+                0x08002144                ply_xcmd
+                0x080013ac                SoundMode_rev01
+                0x08001e7c                MPlayPanpotControl
+                0x08001218                ClearChain_rev
+                0x08000834                SoundVSync_rev01
+                0x08000e68                m4aSoundInit
+                0x08002230                ply_xiecl
+                0x0800223c                ply_xleng
+                0x080010a8                m4aMPlayImmInit
+                0x08001fec                ply_memacc
+                0x080001e0                SoundMain
+                0x08000264                SoundMainRAM
+                0x08001034                m4aMPlayAllStop
+                0x080018cc                CgbModVol
+                0x08000608                Clear64byte
+                0x08000fcc                m4aSongNumStop
+                0x08000670                MPlyJmpTblCopy
+                0x08002210                ply_xrele
+ .text          0x08002268     0x162c C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+                0x08002918                IntrDummy
+                0x08002ed0                ModeWrite
+                0x08002904                VBlankIntr
+                0x08002bac                ValueWrite
+                0x08003230                MidiInputMain
+                0x08002268                seg_m4aLib_end
+                0x08003218                unReadMidi
+                0x080028a4                KeyRead
+                0x08002f88                MidiWrite
+                0x08003180                MidiInIntr
+                0x08002cd0                SongWrite
+                0x08003858                MidiAllStop
+                0x0800291c                ValueChange
+                0x0800226c                _MPlayFadeOut
+                0x08002b84                StrWrite
+                0x0800314c                MidiPortInit
+                0x0800302c                MidiInputInit
+                0x08002c40                ValueWriteHex
+                0x080031e0                ReadMidi
+                0x08002270                AgbMain
+ .text          0x08003894        0x4 C:\agb\lib/libagbsyscall.a(AgbSysCpuSet.o)
+                0x08003894                CpuSet
+ .text          0x08003898        0x4 C:\agb\lib/libagbsyscall.a(AgbSysMidiKey2Freq.o)
+                0x08003898                MidiKey2Freq
+ .text          0x0800389c       0x3c C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_call_via_rX.o)
+                0x080038a4                _call_via_r2
+                0x080038b4                _call_via_r6
+                0x080038b0                _call_via_r5
+                0x080038a8                _call_via_r3
+                0x080038c8                _call_via_fp
+                0x080038bc                _call_via_r8
+                0x080038b8                _call_via_r7
+                0x0800389c                _call_via_r0
+                0x080038c4                _call_via_sl
+                0x080038d0                _call_via_sp
+                0x080038c0                _call_via_r9
+                0x080038ac                _call_via_r4
+                0x080038a0                _call_via_r1
+                0x080038cc                _call_via_ip
+                0x080038d4                _call_via_lr
+ .text          0x080038d8       0x94 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_divsi3.o)
+                0x080038d8                __divsi3
+ .text          0x0800396c        0x4 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_dvmd_tls.o)
+                0x0800396c                __div0
+ .text          0x08003970       0x78 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_udivsi3.o)
+                0x08003970                __udivsi3
+ .text          0x080039e8       0xc0 C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin/../lib/gcc-lib/thumb-elf/2.9-arm-000512/libgcc.a(_umodsi3.o)
+                0x080039e8                __umodsi3
+ *(.text.*)
+ *(.stub)
+ *(.gnu.warning)
+ *(.gnu.linkonce.t*)
+ *(.glue_7t)
+ *(.glue_7)
+                0x08003aa8                _etext=.
+                0x08003aa8                PROVIDE (etext, .)
+
+.fini
+ *(.fini)
+
+.rodata         0x08003aa8     0x56b4
+ *(.rodata)
+ .rodata        0x08003aa8        0x4 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\crt0.o
+                0x08003aac                seg_m4aLib_rodata_top
+ .rodata        0x08003aac      0x2d8 m4aLib.o
+                0x08003bf0                FreqTable
+                0x08003cbc                CgbFrTable
+                0x08003aac                MPlyJmpTbl
+                0x08003d10                Cgb3vol
+                0x08003b3c                ScaleTable
+                0x08003d54                xcmd_tbl
+                0x08003d20                clock_tbl_rev01
+                0x08003c38                CgbScTable
+                0x08003cd4                NoiseTable
+                0x08003c20                pcmVBtbl_rev
+ .rodata        0x08003d84     0x13c0 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+                0x080050d8                IntrTable
+                0x080042d0                OamData_Sample
+                0x08003d84                seg_m4aLib_rodata_end
+                0x08003da0                CurP
+                0x080042d8                PlttData_Sample
+                0x08003d86                FreTbl
+                0x080044d8                CharData_Sample
+                0x08003dd0                BgScData_Sample
+ .rodata        0x08005144      0x124 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SndMonDat.o
+                0x08005260                app_vgrp_table
+                0x08005268                seg_rodata_top
+                0x08005144                app_song_table
+ .rodata        0x08005268      0xa40 SoundDat.o
+                0x08005268                voicegroup000
+                0x08005868                voicegroup001
+                0x080058ec                mplay_table
+                0x08005a6c                song_table
+ .rodata        0x08005ca8      0x70c sn_g_kon.o
+                0x08005ca8                sn_g_kon
+ .rodata        0x080063b4      0x7c8 sn_g_pisnare.o
+                0x080063b4                sn_g_pisnare
+ .rodata        0x08006b7c      0x700 sn_g_lowcg.o
+                0x08006b7c                sn_g_lowcg
+ .rodata        0x0800727c      0x2f8 sn_g_bsdrum.o
+                0x0800727c                sn_g_bsdrum
+ .rodata        0x08007574       0x1c sn_KEKKA0.o
+                0x08007584                sn_KEKKA0
+ .rodata        0x08007590       0x74 sn_STAGE1.o
+                0x080075f4                sn_STAGE1
+ .rodata        0x08007604       0x4c sn_STAGE2.o
+                0x08007640                sn_STAGE2
+ .rodata        0x08007650       0xf0 sn_CLEAR.o
+                0x08007734                sn_CLEAR
+ .rodata        0x08007740       0x1c sn_KEKKA1.o
+                0x08007750                sn_KEKKA1
+ .rodata        0x0800775c       0x1c sn_KEKKA2.o
+                0x0800776c                sn_KEKKA2
+ .rodata        0x08007778       0x1c sn_KEKKA.o
+                0x08007788                sn_KEKKA
+ .rodata        0x08007794       0x1c sn_KEKKA3.o
+                0x080077a4                sn_KEKKA3
+ .rodata        0x080077b0       0xec sn_BATTLE_DEAD.o
+                0x08007890                sn_BATTLE_DEAD
+ .rodata        0x0800789c       0x2c sn_HEART.o
+                0x080078bc                sn_HEART
+ .rodata        0x080078c8       0xb0 sn_COIN5.o
+                0x0800796c                sn_COIN5
+ .rodata        0x08007978       0x40 sn_JUMP.o
+                0x080079ac                sn_JUMP
+ .rodata        0x080079b8       0x20 sn_SLIP.o
+                0x080079cc                sn_SLIP
+ .rodata        0x080079d8       0x1c sn_WALK_C.o
+                0x080079e8                sn_WALK_C
+ .rodata        0x080079f4       0x1c sn_WALK_E.o
+                0x08007a04                sn_WALK_E
+ .rodata        0x08007a10       0x1c sn_WALK_G.o
+                0x08007a20                sn_WALK_G
+ .rodata        0x08007a2c       0x34 sn_MR_DEAD.o
+                0x08007a54                sn_MR_DEAD
+ .rodata        0x08007a60       0x3c sn_MR_DOWN.o
+                0x08007a90                sn_MR_DOWN
+ .rodata        0x08007a9c       0x64 sn_MR_NEXT.o
+                0x08007af4                sn_MR_NEXT
+ .rodata        0x08007b00       0x40 sn_POW.o
+                0x08007b34                sn_POW
+ .rodata        0x08007b40       0x2c sn_PAUSE1UP.o
+                0x08007b60                sn_PAUSE1UP
+ .rodata        0x08007b6c       0x1c sn_KAME.o
+                0x08007b7c                sn_KAME
+ .rodata        0x08007b88       0x3c sn_KANI.o
+                0x08007bb8                sn_KANI
+ .rodata        0x08007bc4       0x6c sn_HAE.o
+                0x08007c24                sn_HAE
+ .rodata        0x08007c30       0x50 sn_COIN_OUT.o
+                0x08007c74                sn_COIN_OUT
+ .rodata        0x08007c80       0x40 sn_TEKI_ATTACK.o
+                0x08007cb4                sn_TEKI_ATTACK
+ .rodata        0x08007cc0       0x5c sn_TEKI_DEAD.o
+                0x08007d10                sn_TEKI_DEAD
+ .rodata        0x08007d1c       0x20 sn_DOBON.o
+                0x08007d30                sn_DOBON
+ .rodata        0x08007d3c       0x48 sn_COIN_GET.o
+                0x08007d78                sn_COIN_GET
+ .rodata        0x08007d84       0x54 sn_FREEZER.o
+                0x08007dcc                sn_FREEZER
+ .rodata        0x08007dd8       0x70 sn_FREEZ_DEAD.o
+                0x08007e3c                sn_FREEZ_DEAD
+ .rodata        0x08007e48       0x38 sn_FIRE.o
+                0x08007e74                sn_FIRE
+ .rodata        0x08007e80      0x114 sn_boss_bros.o
+                0x08007f80                sn_boss_bros
+ .rodata        0x08007f94       0xec sn_star_bros.o
+                0x08008068                sn_star_bros
+ .rodata        0x08008080      0x13c sn_KUPPA.o
+                0x080081a8                sn_KUPPA
+ .rodata        0x080081bc       0x68 sn_KUPPA_DOSIN.o
+                0x08008218                sn_KUPPA_DOSIN
+ .rodata        0x08008224       0xa4 sn_win1.o
+                0x080082ac                sn_win1
+ .rodata        0x080082c8       0xdc sn_lose1.o
+                0x0800838c                sn_lose1
+ .rodata        0x080083a4       0xd4 sn_win2.o
+                0x08008460                sn_win2
+ .rodata        0x08008478       0xa8 sn_lose2.o
+                0x08008508                sn_lose2
+ .rodata        0x08008520       0x1c sn_KEKKA4.o
+                0x08008530                sn_KEKKA4
+ .rodata        0x0800853c      0x290 sn_battle2.o
+                0x080087b0                sn_battle2
+ .rodata        0x080087cc      0x15c sn_battlekekka.o
+                0x0800890c                sn_battlekekka
+ .rodata        0x08008928       0x80 sn_zelda_fan.o
+                0x08008990                sn_zelda_fan
+ .rodata        0x080089a8       0x28 sn_KUPPAFIRE.o
+                0x080089c4                sn_KUPPAFIRE
+ .rodata        0x080089d0       0x1c sn_BAKETU.o
+                0x080089e0                sn_BAKETU
+ .rodata        0x080089ec       0x3c sn_MOTI.o
+                0x08008a1c                sn_MOTI
+ .rodata        0x08008a28       0x24 sn_NAGE.o
+                0x08008a40                sn_NAGE
+ .rodata        0x08008a4c       0x28 sn_TAME.o
+                0x08008a68                sn_TAME
+ .rodata        0x08008a74       0x60 sn_DAMAGE.o
+                0x08008ac8                sn_DAMAGE
+ .rodata        0x08008ad4       0x78 sn_TIBI.o
+                0x08008b40                sn_TIBI
+ .rodata        0x08008b4c       0x38 sn_NORI.o
+                0x08008b78                sn_NORI
+ .rodata        0x08008b84       0x30 sn_BUTUKARI.o
+                0x08008ba8                sn_BUTUKARI
+ .rodata        0x08008bb4       0x20 sn_HEART_GET.o
+                0x08008bc8                sn_HEART_GET
+ .rodata        0x08008bd4       0x50 sn_DEKA.o
+                0x08008c18                sn_DEKA
+ .rodata        0x08008c24       0xb8 sn_KAO.o
+                0x08008cd0                sn_KAO
+ .rodata        0x08008cdc       0x2c sn_PUSH.o
+                0x08008cfc                sn_PUSH
+ .rodata        0x08008d08       0x80 sn_KUPPA_DAMAGE.o
+                0x08008d7c                sn_KUPPA_DAMAGE
+ .rodata        0x08008d88       0xf4 sn_KUPPA_DEAD.o
+                0x08008e70                sn_KUPPA_DEAD
+ .rodata        0x08008e7c       0x2c sn_SHIFT.o
+                0x08008e9c                sn_SHIFT
+ .rodata        0x08008ea8       0x5c sn_SAVE.o
+                0x08008ef0                sn_SAVE
+ .rodata        0x08008f04       0xd0 sn_intro_battle.o
+                0x08008fbc                sn_intro_battle
+ .rodata        0x08008fd4       0x1c sn_KAMEKERI1.o
+                0x08008fe4                sn_KAMEKERI1
+ .rodata        0x08008ff0       0x1c sn_KAMEKERI2.o
+                0x08009000                sn_KAMEKERI2
+ .rodata        0x0800900c       0x1c sn_KAMEKERI3.o
+                0x0800901c                sn_KAMEKERI3
+ .rodata        0x08009028       0x1c sn_KAMEKERI4.o
+                0x08009038                sn_KAMEKERI4
+ .rodata        0x08009044       0x2c sn_PINPON.o
+                0x08009064                sn_PINPON
+ .rodata        0x08009070       0x24 sn_BUU.o
+                0x08009088                sn_BUU
+ .rodata        0x08009094       0x84 sn_battlekekka_intro.o
+                0x08009104                sn_battlekekka_intro
+ .rodata        0x08009118       0x1c sn_FIREDEAD.o
+                0x08009128                sn_FIREDEAD
+ .rodata        0x08009134       0x24 sn_TURARA_DEAD.o
+                0x0800914c                sn_TURARA_DEAD
+ *(.rodata.*)
+ .rodata.end    0x08009158        0x4 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SndMonDat.o
+                0x08009158                seg_rodata_end
+ *(.gnu.linkonce.r*)
+
+.rodata1
+ *(.rodata1)
+                0x0800925c                .=(ALIGN(0x100)+(.&0xff))
+
+.data           0x0800925c        0x0
+ *(.data)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+
+.data1
+ *(.data1)
+
+.ctors
+ EXCLUDE_FILE ( *crtend.o )*(.ctors)
+ *(SORT(.ctors.*))
+ *crtend(.ctors)
+
+.dtors
+ EXCLUDE_FILE ( *crtend.o )*(.dtors)
+ *(SORT(.dtors.*))
+ *crtend.o(.dtors)
+
+.got
+ *(.got.plt)
+ *(.got)
+
+.dynamic
+ *(.dynamic)
+
+.sdata
+ *(.sdata)
+ *(.sdata.*)
+                0x0800925c                _edata=.
+                0x0800925c                PROVIDE (edata, .)
+                0x0800925c                __bss_start=.
+                0x0800925c                __bss_start__=.
+
+.sbss
+ *(.sbss)
+ *(.scommon)
+
+.bss            0x03000000     0x3fc0
+ *(.dynbss)
+ *(.bss)
+ .bss           0x03000000      0xaf0 SoundDat.o
+ *(.bss.*)
+ .bss.code      0x03000af0      0x400 m4aLib.o
+                0x03000af0                SoundMainBuf
+ *(COMMON)
+ COMMON         0x03000ef0     0x1140 m4aLib.o
+                                  0x0 (size before relaxing)
+                0x03000ef0                m4a_sound
+                0x03001ea0                ExtMPlyJmpTbl
+                0x03001f30                m4a_cgbchn
+ COMMON         0x03002030     0x1af4 C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.o
+                                  0x0 (size before relaxing)
+                0x03002030                c_bit
+                0x03002034                p_rev
+                0x03002038                p_bit
+                0x0300203c                c_mvg
+                0x03002040                AvrLinC
+                0x03002044                c_mvo
+                0x03002048                w_midibuf
+                0x0300204c                vcount
+                0x03002050                Cont
+                0x03002054                xcmdn
+                0x03002058                MaxLin
+                0x0300205c                c_mch
+                0x03002060                AvrLinT
+                0x03002064                r_midibuf
+                0x03002068                Trg
+                0x0300206c                c_rev
+                0x03002070                sysex
+                0x03002074                MaxChnC
+                0x03002080                c_song
+                0x03002090                c_fre
+                0x03002094                p_mch
+                0x030020a0                midibuf
+                0x030021a0                IntrMainBuf
+                0x030029a0                MaxChn
+                0x030029a4                c_mpr
+                0x030029b0                midi_ma
+                0x030029f0                midi_ta
+                0x03002ef0                runst
+                0x03002ef4                KeyRep
+                0x03002f00                OamBak
+                0x03003300                p_song
+                0x03003310                p_fre
+                0x03003320                BgBak
+                0x03003b20                CurtCurs
+ *fill*         0x03003b24        0xc
+ COMMON         0x03003b30      0x490 SoundDat.o
+                                  0x0 (size before relaxing)
+                0x03003b30                m4a_mplay013
+                0x03003b70                m4a_mplay005
+                0x03003bb0                m4a_mplay030
+                0x03003bf0                m4a_mplay009
+                0x03003c30                m4a_mplay006
+                0x03003c70                m4a_mplay000
+                0x03003cb0                m4a_mplay014
+                0x03003cf0                m4a_mplay031
+                0x03003d30                m4a_mplay007
+                0x03003d70                m4a_mplay001
+                0x03003db0                m4a_mplay002
+                0x03003df0                m4a_mplay010
+                0x03003e30                m4a_mplay015
+                0x03003e70                m4a_mplay012
+                0x03003eb0                m4a_mplay004
+                0x03003ef0                m4a_memacc_area
+                0x03003f00                m4a_mplay008
+                0x03003f40                m4a_mplay003
+                0x03003f80                m4a_mplay011
+                0x03003fc0                .=ALIGN(0x4)
+                0x03003fc0                .=ALIGN(0x4)
+                0x03003fc0                _end=.
+                0x03003fc0                _bss_end__=.
+                0x03003fc0                __bss_end__=.
+                0x03003fc0                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.stack          0x00080000        0x0
+                0x00080000                _stack=.
+ *(.stack)
+OUTPUT(C:\WINDOWS\ﾃﾞｽｸﾄｯﾌﾟ\マリオブロス＆ＵＳＡ\テストなど\bros専用mks4agb1.05\SoundMon.elf elf32-littlearm)
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

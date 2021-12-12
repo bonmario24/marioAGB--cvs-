@@ -1,0 +1,293 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@;************************************************************************************
+;リビルドスイッチ（通常は 0、再構築する場合は 1 にする）
+rebuild = 0
+
+;波形データ入力ディレクトリ（.AIFファ@イルのある場所）
+aif_dir = aiff\
+
+;ソングデータ入力ディレクトリ（.MIDファ@イルのある場所）
+mid_dir = midi\
+
+;ソースファ@イルディレクトリ（.sファ@イル等が出力される場所）
+src_dir = src\
+
+;出力ディレクトリ（.oファ@イル等が出力される場所）
+out_dir = out\
+
+;ＡＧＢシステムのライブラリファ@イルのディレクトリ
+agb_lib = C:\agb\lib
+
+;実行パス
+cmd_path = C:\Program Files\Cygnus\thumbelf-000512\H-i686-cygwin32\bin;
+cmd_path = C:\Program Files\Cygnus\native-99r1\H-i686-cygwin32\bin;
+
+;************************************************************************************
+
+;各種サウンドモードの初期設定値
+;	poly,vol,  freq, D/Abit(good CGB 6<-->9 good PCM)
+mode_i =   6, 15, 10512,      8
+
+
+;音色設定（Ｐ：音程重視、Ｑ：音質重視）
+
+vgroup = 0
+p000 = P, sc2dt12,        99,  00,  35,  50		;(タイトル用)
+p001 = P, sc2dt50,        99,  99,  99,  99
+p002 = P, sc1dt50,        99,  99,  99,  99		;(完全伸ばし用)
+p003 = P, sc4st15,        99,  99,  99,  99
+p004 = P, sc1dt12,        99,  00,  35,  50,,,,0
+p005 = P, sc1dt50,        99,  99,  99,  99,,,,0	;(主に効果音)
+
+p006 = P, sc1dt50,        99,  99,  99,  99,,,,16
+p007 = P, sc1dt50,        99,  99,  99,  99,,,,2B
+p008 = P, sc1dt50,        99,  00,  35,  50,,,,0	;(タイトル用)
+p009 = P, sc1dt50,        99,  99,  99,  99,,,,3F
+p010 = P, sc1dt12,        99,  99,  99,  99,,,,3F
+
+p011 = P, sc3w001,        99,  20,  99,  90		;(タイトル用)
+p012 = P, sc3w002,        99,  99,  99,  99
+p013 = P, sc3w003,        99,  99,  99,  99
+p014 = P, sc3w004,        99,  60,  99,  90
+p015 = P, sc3w005,        99,  99,  99,  99
+
+p016 = P, sc4st07,        99,  99,  99,  99
+
+p017 = P, sc1dt50,        99,  10,  35,  50,,,,0	;(80%伸ばし用)
+p018 = P, sc2dt50,        99,  99,  99,  50		;(エコー有りサウンド２)
+
+p019 = P, sc1dt50,        90,  40,   0,  99,,,,0	;(エンディング用ゲート短い)
+p020 = P, sc2dt50,        99,  40,   0,  99,,,,0	;(エンディング用ゲート短い)
+
+
+;p099 = A, sn_o_fantasy.aif,    99,  99,  99,  99,60	;効果音用（プレイヤーダウン）
+
+;p100 = A, sn_o_brass3.aif,     85,  50,  60,  90,60	;ＢＧＭ用(地下)
+;p101 = A, sn_o_steeldr.aif,    99,  99,  99,  99,60
+;p102 = A, sn_o_brass3.aif,     96,  54,  12,  60,60	;(E0)
+;p103 = A, sn_o_brass3.aif,     96,  54,  99,  60,60	;地上ベースピッチ伸ばし用
+;p104 = A, sn_o_brass3.aif,     88,  54,   6,  60,60	;メロ用（アタック遅い）
+;p105 = A, sn_o_panflute.aif,   88,  80,  40,  50,60	;(E4)
+;p106 = A, sn_o_s5honky_3.aif,  96,  90,  99,  70,60	;(F#5)
+;p107 = A, sn_o_fantasy.aif,    99,  10,   3,  50,60	;(E5)伸ばし用
+;p108 = A, sn_o_marimba3.aif,   99,  96,   0,  99,60	;(E4+0.75)
+;p109 = A, sn_o_oud.aif,        99,  99,  40,  99,60	;(D4+0.75)
+;p110 = A, sn_o_brass3.aif,     96,  99,  99,  99,60	;効果音用
+;p111 = A, sn_o_fantasy.aif,    96,  99,  90,  90,60	;効果音用
+;p112 = A, sn_o_hits.aif,       99,  99,  99,  99,60	;効果音用
+;p113 = A, sn_o_pisnare.aif,    99,  99,  99,  99,60	;効果音用（扉など）
+;p114 = A, sn_o_cannon.aif,     99,  99,  99,  99,60	;効果音用（爆発など）
+;p115 = A, sn_o_marimba3.aif,   99,  40,   0,  99,60	;効果音用（コインなど）
+;p116 = A, sn_o_clarinet.aif,   99,  99,  99,  99,60	;効果音用（ボスの声など）
+;p117 = A, sn_o_panflute.aif,   10,  80,  40,  50,60	;効果音用（落下音などアタック弱い）
+;p118 = A, sn_o_panflute.aif,   99,  99,  99,  99,60	;効果音用（ボスやられなど）
+;p119 = A, sn_o_panflute.aif,   90,  95,  65,  75,60	;効果音用（ジャンプなど）
+
+;p120 = A, sn_o_kusa.aif,       99,  99,  99,  99,60	;効果音用（草音テスト）
+;p121 = A, sn_o_clarinet.aif,   96,  70,  90,  50,60	;ＢＧＭ用
+;p122 = A, sn_o_heavyguitar.aif,99,  99,  99,  99,60	;ＢＧＭ用
+;p123 = A, sn_o_fletbass.aif,   99,  54,  40,  80,60	;ＢＧＭ用
+;p124 = A, sn_o_lowcg.aif,      99,  99,  99,  99,60	;ＢＧＭ用
+;p125 = A, sn_o_stringsd5.aif,  85,  99,  99,  90,60	;ＢＧＭ用
+;p126 = A, sn_o_clhihat2.aif,   99,  99,  99,  90,60	;ＢＧＭ用
+
+;p127 = R, 1 ,c1
+
+
+;vgroup = 1
+
+;p000 = F, sn_o_bsdrum.aif,     99,  99,  99,  99,60	;C1
+;p001 = F, sn_o_rvsnare.aif,    99,  99,  99,  99,60	;C#1
+;p002 = F, sn_o_pisnare.aif,    99,  99,  99,  99,60	;D1
+;p003 = F, sn_o_lowcg.aif,      99,  99,  99,  99,60	;D#1
+;p004 = F, sn_o_slidcg1.aif,    99,  99,  99,  99,60	;E1
+;p005 = F, sn_o_slidcg2.aif,    99,  99,  99,  99,60	;F1
+;p006 = F, sn_o_clhihat1.aif,   99,  99,  99,  99,60	;F#1
+;p007 = F, sn_o_clhihat2.aif,   99,  99,  99,  99,60	;G1
+
+
+
+;サウンド３の波形設定
+
+w000 = 0011235689ACDEEFFFEEDCA986532110, sinewave
+w001 = 148BCCCCCCCCCCCCB841000000000000, bros_title
+w002 = 1369AAAAAAAAAAAA9631000000000000, bros_start
+w003 = 88888888888888840000000000000004, bros_perf_over
+w004 = 00000000000369CFFFFFFFFFFFFC9630, bros_bonus_count
+w005 = 8FFFFFFFFFFFFFFF8000000000000000, bros_mrnext_fire
+
+
+;ミュージックプレイヤーの設定（トラック数）
+
+mp00 = 6
+mp01 = 1
+mp02 = 1
+mp03 = 1
+
+
+;ソング設定
+;			       mp,vg,vol, pr,rev
+s000 = sn_TITLE.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「タイトル画面」
+s001 = sn_STAGE1.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「ステージ１スタート」
+s002 = sn_STAGE2.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「ステージ２スタート」
+s003 = sn_CLEAR.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「ステージクリア」
+s004 = sn_GAMEOVER.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「ゲームオーバー」
+s005 = sn_BONUS.mid,		3,0, 100, 10,OFF        ;マリオブラザーズ「ボーナス面タイムカウント」
+s006 = sn_KEKKA.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「結果コインカウント」
+s007 = sn_PERFECT.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「パーフェクト」
+
+s008 = sn_WIN.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「勝ち」
+s009 = sn_LOSE.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「負け」
+s010 = sn_DRAW.mid,		0,0, 100, 10,OFF        ;マリオブラザーズ「引き分け」
+
+s011 = sn_JUMP.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「ジャンプ」
+s012 = sn_SLIP.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「急ブレーキ」
+s013 = sn_WALK_C.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「歩き音Ｃ」
+s014 = sn_WALK_E.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「歩き音Ｅ」
+s015 = sn_WALK_G.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「歩き音Ｇ」
+s016 = sn_MR_DEAD.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「マリオやられた」
+s017 = sn_MR_DOWN.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「マリオ落下」
+s018 = sn_MR_NEXT.mid,		3,0, 100, 10,OFF        ;マリオブラザーズ「マリオ復活」
+s019 = sn_POW.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「ＰＯＷ」
+s020 = sn_PAUSE1UP.mid,		2,0, 100, 10,OFF        ;マリオブラザーズ「ポーズ・１ＵＰ」
+
+s021 = sn_KAME.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「カメ出現」
+s022 = sn_KANI.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「カニ出現」
+s023 = sn_HAE.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「ハエ出現」
+s024 = sn_COIN_OUT.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「コイン・フリーザ出現」
+s025 = sn_TEKI_ATTACK.mid,	1,0, 100, 10,OFF        ;マリオブラザーズ「敵ひっくりかえる」
+s026 = sn_TEKI_DEAD.mid,	1,0, 100, 10,OFF        ;マリオブラザーズ「敵倒す」
+s027 = sn_DOBON.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「ドボン」
+s028 = sn_COIN_GET.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「コイン取得」
+s029 = sn_FREEZER.mid,		1,0, 100, 10,OFF        ;マリオブラザーズ「フリーザ凍結」
+s030 = sn_FREEZ_DEAD.mid,	1,0, 100, 10,OFF        ;マリオブラザーズ「フリーザ倒す」
+s031 = sn_FIRE.mid,		3,0, 100, 10,OFF        ;マリオブラザーズ「火の玉移動」
+
+;s032 = sn_usa_title.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「タイトル画面」
+s032 = sn_tijou.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「地上面」
+;s034 = sn_chika.mid,		0,0,  80,  5,OFF        ;マリオＵＳＡ「地下面」
+;s035 = sn_ura.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「ボーナス面（裏側）」
+;s036 = sn_select.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「キャラセレクト画面」
+;s037 = sn_boss.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「ボス面（通常）」
+;s038 = sn_boss_mamu.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「ボス面（最終面）」
+
+;s039 = sn_boss_clear.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「ボス面クリア」
+;s040 = sn_suishou.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「水晶取った音、スロットで当たり」
+;s041 = sn_game_over.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「ゲームオーバー」
+;s042 = sn_slot_start.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「スロットファ@ンファ@ーレ」
+;s043 = sn_usa_dead.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「プレイヤーダウン」
+;s044 = sn_star.mid,		0,0, 100,  5,OFF        ;マリオＵＳＡ「プレイヤー無敵」
+;s045 = sn_yume_ura.mid,		0,0, 100,  5,OFF        ;夢工場      「ボーナス面（裏側）」
+;s046 = sn_usa_ending.mid,	0,0, 100,  5,OFF        ;マリオＵＳＡ「エンディング（一人）」
+;s047 = sn_yume_ending.mid,	0,0, 100,  5,OFF        ;夢工場      「エンディング（全員）」
+
+
+
+
+;s048 = sn_se_final.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「最後のPUSH START音」
+
+;s049 = sn_se_kettei.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「セレクト画面決定音」
+;s050 = sn_se_nage.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「草、敵投げ音」
+;s051 = sn_se_chery.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「チェリー取った音」
+;s052 = sn_se_tekidead.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「敵倒した音」
+;s053 = sn_se_hasigo.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「はしご登る音」
+;s054 = sn_se_damage.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「自機@ダメージ音」
+;s055 = sn_se_moti1.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「草を抜く音」
+;s056 = sn_se_moti2.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「敵を持つ音」
+;s057 = sn_se_timer.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「タイマー取った音」
+;s058 = sn_se_dooropen.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ドア開ける音」
+;s059 = sn_se_doorclose.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ドア閉める音」
+;s060 = sn_se_kamen.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「カメーン怒り音」
+;s061 = sn_se_kujira.mid,	1,0, 100, 10,OFF        ;マリオＵＳＡ「鯨潮ふき音」
+;s062 = sn_se_bomb.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「爆発音」
+;s063 = sn_se_coin.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「コイン取った音」
+;s064 = sn_se_tame.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「しゃがみため音」
+;s065 = sn_se_tuboin.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「つぼに入る音」
+;s066 = sn_se_tuboout.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「つぼから出る音」
+;s067 = sn_se_1up.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「１ＵＰ音」
+;s068 = sn_se_pow.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「ＰＯＷ音」
+;s069 = sn_se_pause.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「ポーズ音」
+;s070 = sn_se_toriopen.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「鳥開く音」
+;s071 = sn_se_toriclose.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「鳥閉じる音」
+;s072 = sn_se_kinoko.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「自機@大きくなる音」
+;s073 = sn_se_slotroll.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「スロット回ってる音」
+;s074 = sn_se_slotkettei.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「スロット決定音」
+;s075 = sn_se_slotdrum1.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「スロットドラム音（始め）」
+;s076 = sn_se_slotdrum2.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「スロットドラム音（終わり）」
+;s077 = sn_se_bossdamage.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ボスダメージ音」
+;s078 = sn_se_bosshaku.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ボス攻撃音」
+;s079 = sn_se_rakka.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「自機@落下音」
+;s080 = sn_se_bossdead.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ボスやられ音」
+;s081 = sn_se_kourakie.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「甲羅消え音」
+;s082 = sn_se_jump.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「ジャンプ音」
+;s083 = sn_se_rocket.mid,	1,0, 127, 10,OFF        ;マリオＵＳＡ「ロケット音」
+;s084 = sn_se_tibi.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「自機@小さくなる音」
+
+;s085 = sn_se_test.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「」
+
+;s086 = sn_se_kamekeri0.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音０」
+;s087 = sn_se_kamekeri1.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音１」
+;s088 = sn_se_kamekeri2.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音２」
+;s089 = sn_se_kamekeri3.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音３」
+;s090 = sn_se_kamekeri4.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音４」
+;s091 = sn_se_kamekeri5.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音５」
+;s092 = sn_se_kamekeri6.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音６」
+;s093 = sn_se_kamekeri7.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音７」
+;s094 = sn_se_kamekeri8.mid,	1,0, 127, 10,OFF        ;マリオシリーズ「カメ蹴り音８」
+
+;s095 = sn_se_mamu.mid,		1,0, 127, 10,OFF        ;マリオＵＳＡ「マムー攻撃音」
+
+;************************************************************************************
+
+;MIDI入力演奏の設定
+
+pbymidi = 1, 0, 120, 200, 120
+
+
+;ソングデータにおけるメモリ・アクセス・エリアのサイズ（ 0 ～ 255 ）
+
+memacc_s = 16
+
+
+;ＤＭＡ使用制限スイッチ（通常は 0、ＤＭＡを１系統にする場合は 1 にする）
+
+only_dma1 = 0
+
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,331 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 yoyo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2004.02.23.07.17.56;	author panda;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.02.02.07.28.20;	author panda;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/****************************************************************/
+/*		ゲームのメイン処理				*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_bgcheck.h"
+#include "m_title.h"
+#include "m_vs.h"
+#include "um_select.h"
+#include "um_bonus.h"
+#include "ua_game.h"
+#include "ua_warp.h"
+#include "m_game_sub.h"
+#include "ua_ending.h"
+#include "um_result.h"
+#include "m_erase.h"
+#include "um_yossy.h"
+#include "ba_player.h"
+
+#include "m_game.h"
+#include "m_score.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void usa_main(void);
+static void bros_main(void);
+
+extern void mGm_Main(void);
+
+/*-------------------- EXTURN  ----------------------*/
+extern void game_title(void);
+extern void game_play(void);
+////////extern void game_multi(void);
+
+/*--------------------------------------------------------------*/
+/*		ＵＳＡメインメニュー配列			*/
+/*--------------------------------------------------------------*/
+mfunc us_menu[] = {
+    M_game_select,
+    M_game_play,
+    M_game_bonus,
+    M_game_warp,
+    MU_ending,
+    M_game_result,
+    M_game_yossy,
+};
+
+/*--------------------------------------------------------------*/
+/*		ＵＳＡ処理					*/
+/*--------------------------------------------------------------*/
+void usa_main(void)
+{
+    if(mGm_SLMODE != ending_mode){
+	ObjVanishAll();			//ＯＡＭクリア処理
+	ObjVanishTemp();
+    }
+    us_menu[game.SLMODE]();
+}
+
+/*--------------------------------------------------------------*/
+/*		ブロスメインメニュー配列			*/
+/*--------------------------------------------------------------*/
+mfunc M_game_menu[] = {
+    game_title,		// タイトル
+    game_play,		// １Ｐゲーム
+////////    game_multi,		// ２Ｐゲーム
+};
+/*--------------------------------------------------------------*/
+/*		ブロス処理					*/
+/*--------------------------------------------------------------*/
+void bros_main(void)
+{
+    u16		TrgKey = mGm_TRG;
+
+    ObjVanishAll();
+    if( mGm_PAUSEFG ){
+	BrosPause(TrgKey);
+	switch(TrgKey){
+	default:
+	    break;
+#if DEBUG
+	case R_BUTTON:
+	    ObjVanishAll();			//ＯＡＭ全クリアー
+	    M_game_menu[mGm_SLMODE]();	//ゲームメニューセレクト
+	    break;
+#endif
+	case START_BUTTON:
+	    if( mGm_PAUSEFG == 2 ){		// 始めから？
+		WhiteOutInit();
+		if( mGm_PLTYPE )		// マルチゲーム？
+		    mGm_CLASSICOUT = 0;
+	    }
+	    mGm_PAUSEFG = 0;
+	    mGm_ENMYSTOPFG = 0;
+	    mGm_SCORECALC = 1;
+	    ScoreMain();
+#if SOUND_ON
+	    m4aSongNumStart(s_b_PAUSE1UP);
+	    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+#endif
+	    break;
+	case A_BUTTON:
+	    if( mGm_PAUSEFG == 2 ){		// 始めから？
+		WhiteOutInit();
+		if( mGm_PLTYPE )		// マルチゲーム？
+		    mGm_CLASSICOUT = 0;
+	    }
+	    mGm_PAUSEFG = 0;
+	    mGm_ENMYSTOPFG = 0;
+	    mGm_SCORECALC = 1;
+	    ScoreMain();
+#if SOUND_ON
+	    m4aSongNumStart(s_b_PAUSE1UP);
+	    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 256);
+#endif
+	    break;
+	}
+    } else {
+	if( (mGm_SLMODE == BROS_GAME_MODE) &&
+	    (mGm_GMMODE == GMPL_MOVE) &&
+	    (TrgKey & START_BUTTON) ){
+	    mGm_PAUSEFG = 1;
+	    mGm_ENMYSTOPFG = 1;
+	    mGm_SCORECALC = 1;
+	    ScoreMain();
+#if SOUND_ON
+	    m4aSongNumStart(s_b_PAUSE1UP);
+	    m4aMPlayVolumeControl(&m4a_mplay030, 0x1F, 100);
+#endif
+	}
+	M_game_menu[mGm_SLMODE]();		//ゲームメニューセレクト
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ブロス＆ＵＳＡテーブル				*/
+/*--------------------------------------------------------------*/
+mfunc MAIN_menu[] = {
+	M_iQue,
+    erase_check,
+    vs_game,
+    M_title,
+    usa_main,
+    bros_main,
+};
+
+/*--------------------------------------------------------------*/
+/*		システム処理					*/
+/*--------------------------------------------------------------*/
+#if !MARIO_USA_DEBUG	// ■■ こちらが本物 ■■
+
+void mGm_Main(void)
+{
+    vu16 IeBak;
+    vu16 DispCntBak;
+    
+    while(1) {
+	KeyRead();			//コントローラ入力処理
+
+/*------------- ソフトリセット処理 -------------*/
+	if(NO_RESET == 0){
+	    if((mGm_CONT & 0x3ff) == (START_BUTTON | SELECT_BUTTON | A_BUTTON | B_BUTTON)){
+		SoftReset(RESET_ALL_FLAG);
+		return;
+	    }
+	}
+
+/*------------- 何処でもスリープ処理 -------------*/
+	if(!NO_SLEEP){
+	    if(mGm_TRG == (R_BUTTON | SELECT_BUTTON)){
+		IeBak = *(vu16 *)REG_IE;
+		DispCntBak = *(vu16 *)REG_DISPCNT;
+		*(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;
+		*(vu16 *)REG_KEYCNT = L_BUTTON | SELECT_BUTTON | KEY_AND_INTR;
+		*(vu16 *)REG_IE = KEY_INTR_FLAG | CASSETTE_INTR_FLAG;
+		Stop();
+		*(vu16 *)REG_IE = IeBak;
+		*(vu16 *)REG_KEYCNT = 0;
+		*(vu16 *)REG_DISPCNT = DispCntBak;
+	    }
+	}
+
+	MAIN_menu[BRUSFG]();
+//	M_menu[game.SLMODE]();		//メニュー処理
+
+	game.nmiflg = 0;
+
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+	while(1) {
+/*	    halt();			//ＣＰＵ停止	*/
+	    if (game.IntrCheck & V_BLANK_INTR_FLAG)
+		break;
+	}
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+
+	if( !mGm_SOUNDFG )
+	    m4aSoundMain( );
+    }
+}
+
+#else	// ■■ ポーズ機@能付きデバッグバージョン(FUFUFU) ■■
+
+extern void mGm_Main(void)
+{
+    vu16 IeBak;
+    vu16 DispCntBak;
+    
+    while(1) {
+
+	KeyRead();			//コントローラ入力処理
+
+/*------------- ソフトリセット処理 -------------*/
+	if(NO_RESET == 0){
+	    if((mGm_CONT & 0x3ff) == (START_BUTTON | SELECT_BUTTON | A_BUTTON | B_BUTTON)){
+		SoftReset(RESET_ALL_FLAG);
+		return;
+	    }
+	}
+
+/*------------- 何処でもスリープ処理 -------------*/
+	if(!NO_SLEEP){
+	    if(mGm_TRG == (R_BUTTON | SELECT_BUTTON)){
+		IeBak = *(vu16 *)REG_IE;
+		DispCntBak = *(vu16 *)REG_DISPCNT;
+		*(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;
+		*(vu16 *)REG_KEYCNT = L_BUTTON | SELECT_BUTTON | KEY_AND_INTR;
+		*(vu16 *)REG_IE = KEY_INTR_FLAG | CASSETTE_INTR_FLAG;
+		Stop();
+		*(vu16 *)REG_IE = IeBak;
+		*(vu16 *)REG_KEYCNT = 0;
+		*(vu16 *)REG_DISPCNT = DispCntBak;
+	    }
+	}
+
+    if( BRUSFG==USA_mode && L_BUTTON_ON_T && R_BUTTON_ON_C ){
+	PAUSEF++;
+	mGm_TRG = 0;
+	mGm_SOUNDFG = 0;
+    }
+    if( R_BUTTON_ON_T || ((PAUSEF&0x01)==0) ){
+	MAIN_menu[BRUSFG]();
+//	M_menu[game.SLMODE]();		//メニュー処理
+
+//	game.nmiflg = 0;
+
+    }
+//    else{
+//	game.nmiflg = 1;
+//    }
+
+	game.nmiflg = 0;
+
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+	while(1) {
+/*	    halt();			//ＣＰＵ停止	*/
+	    if (game.IntrCheck & V_BLANK_INTR_FLAG)
+		break;
+	}
+	game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+
+	if( !mGm_SOUNDFG )
+	    m4aSoundMain( );
+    }
+}
+
+#endif
+
+/*--------------------------------------------------------------*/
+/*		Ｖ_ブランク待ち処理				*/
+/*--------------------------------------------------------------*/
+void V_blank_wait(void)
+{
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+    while(1) {
+	if (game.IntrCheck & V_BLANK_INTR_FLAG)
+	    break;
+    }
+    game.IntrCheck &= V_BLANK_INTR_FLAG ^ 0xffff;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d139 1
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,360 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.16;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_KUPPA_grp, voicegroup000
+	.equ	sn_KUPPA_pri, 10
+	.equ	sn_KUPPA_rev, 0
+	.equ	sn_KUPPA_mvl, 90
+	.equ	sn_KUPPA_key, 0
+	.equ	sn_KUPPA_tbs, 1
+	.equ	sn_KUPPA_exg, 0
+	.equ	sn_KUPPA_cmp, 1
+
+	.section .rodata
+	.global	sn_KUPPA
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_KUPPA_1:
+	.byte	KEYSH , sn_KUPPA_key+0
+sn_KUPPA_1_B1:
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 180*sn_KUPPA_tbs/2
+	.byte		VOICE , 8
+	.byte		VOL   , 100*sn_KUPPA_mvl/mxv
+	.byte		N06   , Gn3 , v064
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Gs3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Bn3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Gs3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        Bn3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Gn3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+@@ 002   ----------------------------------------
+sn_KUPPA_1_002:
+	.byte		N06   , Fs3 , v064
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        Gs3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        An3 
+	.byte	W06
+	.byte		        Fs3 
+	.byte	W06
+	.byte		        Gs3 
+	.byte	W06
+	.byte	PEND
+@@ 003   ----------------------------------------
+	.byte	PATT
+	 .word	sn_KUPPA_1_002
+@@ 004   ----------------------------------------
+sn_KUPPA_1_004:
+	.byte		N06   , As3 , v064
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Ds4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Cs4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Cs4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Cn4 
+	.byte	W06
+	.byte		        As3 
+	.byte	W06
+	.byte		        Cs4 
+	.byte	W06
+	.byte	PEND
+@@ 005   ----------------------------------------
+	.byte	PATT
+	 .word	sn_KUPPA_1_004
+	.byte	GOTO
+	 .word	sn_KUPPA_1_B1
+sn_KUPPA_1_B2:
+@@ 006   ----------------------------------------
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_KUPPA_2:
+	.byte	KEYSH , sn_KUPPA_key+0
+sn_KUPPA_2_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 20
+	.byte		VOL   , 100*sn_KUPPA_mvl/mxv
+	.byte	W06
+	.byte		N12   , Dn4 , v064
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Cn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Ds4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W06
+@@ 001   ----------------------------------------
+	.byte	W06
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Cn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Ds4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W06
+@@ 002   ----------------------------------------
+sn_KUPPA_2_002:
+	.byte	W06
+	.byte		N12   , Cs4 , v064
+	.byte	W12
+	.byte		        Cn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Dn4 
+	.byte	W12
+	.byte		        Cs4 
+	.byte	W12
+	.byte		        Cn4 
+	.byte	W06
+	.byte	PEND
+@@ 003   ----------------------------------------
+	.byte	PATT
+	 .word	sn_KUPPA_2_002
+@@ 004   ----------------------------------------
+sn_KUPPA_2_004:
+	.byte	W06
+	.byte		N12   , Fn4 , v064
+	.byte	W12
+	.byte		        Fs4 
+	.byte	W12
+	.byte		        Fn4 
+	.byte	W12
+	.byte		        En4 
+	.byte	W12
+	.byte		        Fn4 
+	.byte	W12
+	.byte		        En4 
+	.byte	W12
+	.byte		        Ds4 
+	.byte	W12
+	.byte		        En4 
+	.byte	W06
+	.byte	PEND
+@@ 005   ----------------------------------------
+	.byte	PATT
+	 .word	sn_KUPPA_2_004
+	.byte	GOTO
+	 .word	sn_KUPPA_2_B1
+sn_KUPPA_2_B2:
+@@ 006   ----------------------------------------
+	.byte	W06
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_KUPPA_3:
+	.byte	KEYSH , sn_KUPPA_key+0
+sn_KUPPA_3_B1:
+@@ 000   ----------------------------------------
+	.byte		VOICE , 11
+	.byte		VOL   , 127*sn_KUPPA_mvl/mxv
+	.byte		N96   , Ds3 , v100
+	.byte	W96
+@@ 001   ----------------------------------------
+	.byte		N48   , Dn3 
+	.byte	W48
+	.byte		        Fs3 
+	.byte	W48
+@@ 002   ----------------------------------------
+	.byte		N96   , Fn3 
+	.byte	W96
+@@ 003   ----------------------------------------
+	.byte		N48   , En3 
+	.byte	W48
+	.byte		        As3 
+	.byte	W48
+@@ 004   ----------------------------------------
+	.byte		        An3 
+	.byte	W48
+	.byte		        En3 
+	.byte	W48
+@@ 005   ----------------------------------------
+	.byte		        Ds3 
+	.byte	W48
+	.byte		        En3 
+	.byte	W48
+	.byte	GOTO
+	 .word	sn_KUPPA_3_B1
+sn_KUPPA_3_B2:
+@@ 006   ----------------------------------------
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_KUPPA:
+	.byte	3	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_KUPPA_pri	@@ Priority
+	.byte	sn_KUPPA_rev	@@ Reverb.
+
+	.word	sn_KUPPA_grp
+
+	.word	sn_KUPPA_1
+	.word	sn_KUPPA_2
+	.word	sn_KUPPA_3
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,85 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ヘッダーファ@イル				*/
+/****************************************************************/
+#ifndef __UM_RESULT_H_
+#define __UM_RESULT_H_
+
+typedef struct {
+    s32	xpos;
+    s32	ypos;
+    s16	xposh;
+    s16	yposh;
+    u16	hsize;
+    u16	vsize;
+    u16	angle;
+    u8	patrn;
+    u8	mode;
+    u32	timer;
+} Res_Yossy_obj_c;
+
+typedef struct {
+    u8  res_ipt;	// 結果用ＯＡＭナンバー
+    u8	res_affpt;	// 結果用拡縮パラメータナンバー
+    u8	eggnum;		// 卵の合計
+    u8	wldeggnum[7];	// 各ワールド毎の卵の数
+    u8	wldnum;		// 現在表示中のワールドナンバー
+    u8	bg2r;		// BG2の右端の番号
+    u8	bg2l;		// BG2の左端の番号
+    u8	scrtim;		// スクロール用タイマー
+    u8	scrmki;		// スクロール方向
+    u8	mode;		// セレクトモード
+    u8	waittimer;	// 待ち用タイマー
+    u16 size;		// カーソル用サイズデータ
+    u16	csltimer;	// カーソル用タイマー
+    u8	world;		// カーソル用ワールドナンバー
+    u8	fleggfg[7];	// 卵全部そろってるフラグ
+    Res_Yossy_obj_c rs_yossy[6];	// ヨッシーアニメーション用データ
+    u8	keyonfg;	// 左右キー入力あったかフラグ
+} Result_c;
+
+extern Result_c *RES_DATA;;
+
+/*------------- EXTERN -----------------------------------------*/
+extern  void M_game_result(void);
+extern void mGm_MALLOC_RES_DATA(void);
+extern void mGm_FREE_RES_DATA(void);
+
+#endif /* __UM_RESULT_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,2097 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*--------------------------------------------------------------*/
+/*		ゲーム選択用サブファ@イル			*/
+/*--------------------------------------------------------------*/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "m_title_sub.h"
+#include "ua_common.h"
+#include "ua_save.h"
+
+static u16 Num_Tbl[10] = {
+    0x8186, 0x8149, 0x814A, 0x814B, 0x814C,
+    0x814D, 0x814E, 0x814F, 0x8184, 0x8185,
+};
+
+Title_sel_obj_c Ts_obj_clr = {
+    0,0,0,0,0,0,0,0,0
+};
+
+/*  1パターン個数
+    x補正値, y補正値, キャラNo, その他設定(ua_commondt.cと同じ) */
+
+static u16 Hi_scoreDT[] = {
+    0x0006,
+    0x0000, 0x0000, 0x01EA, 0x420A,	// 00 USA用
+    0x0020, 0x0000, 0x01EE, 0x420A,
+    0x0040, 0x0000, 0x01F2, 0x000A,
+    0x0090, 0x0000, 0x01F2, 0x400A,
+    0x0000, 0x0000, 0x01EA, 0x420A,	// dummy
+    0x0000, 0x0000, 0x01EA, 0x420A,	// dummy
+    0x0000, 0x0000, 0x01F2, 0x000B,	// 00 Bros用
+    0x0048, 0x0000, 0x01EA, 0x420B,
+    0x0068, 0x0000, 0x01EE, 0x420B,
+    0x0088, 0x0000, 0x01F2, 0x000B,
+    0x00C0, 0x0000, 0x01F2, 0x000B,
+    0x00C8, 0x0000, 0x01F4, 0x400B,
+};
+static u16 USA_doorDT[] = {
+    0x0002,
+    0x0000, 0x0000, 0x0000, 0x8680,	// 00
+    0x0020, 0x0000, 0x0000, 0x8600,
+    0x0000, 0x0000, 0x0004, 0x8680,	// 01
+    0x0020, 0x0000, 0x0004, 0x8600,
+    0x0000, 0x0000, 0x0008, 0x8680,	// 02
+    0x0020, 0x0000, 0x0008, 0x8600,
+    0x0000, 0x0000, 0x000C, 0x8680,	// 03
+    0x0020, 0x0000, 0x000C, 0x8600,
+    0x0040, 0x0000, 0x000C, 0x8680,	// 04
+    0xFFE0, 0x0000, 0x000C, 0x8600,
+    0x0040, 0x0000, 0x0008, 0x8680,	// 05
+    0xFFE0, 0x0000, 0x0008, 0x8600,
+    0x0040, 0x0000, 0x0004, 0x8680,	// 06
+    0xFFE0, 0x0000, 0x0004, 0x8600,
+};
+static u16 USA_doorshadeDT[] = {
+    0x0007,
+    0x0000, 0x0000, 0x0214, 0x404A,	// 00
+    0x0010, 0x0000, 0x0215, 0x004A,
+    0x0018, 0x0000, 0x0215, 0x004A,
+    0x0020, 0x0000, 0x0215, 0x004A,
+    0x0028, 0x0000, 0x0215, 0x004A,
+    0x0030, 0x0000, 0x0215, 0x004A,
+    0x0038, 0x0000, 0x0216, 0x004A,
+};
+static u16 Bros_pipeDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0200, 0x0609,	// 00
+};
+static u16 Bros_pipeshadeDT[] = {
+    0x0006,
+    0x0000, 0x0000, 0x0234, 0x404A,	// 00
+    0x0000, 0x0008, 0x0234, 0x414A,
+    0x0018, 0x0000, 0x0234, 0x40CA,
+    0x0018, 0x0008, 0x0234, 0x41CA,
+    0x0010, 0x0000, 0x0236, 0x004A,
+    0x0010, 0x0008, 0x0236, 0x014A,
+};
+static u16 USA_titleDT[] ={
+    0x0003,
+    0xFFF0, 0xFFF8, 0x0208, 0x5C06,	// 00
+    0x0010, 0xFFF8, 0x020C, 0x5C06,
+    0x0030, 0xFFF8, 0x0210, 0x5C06,
+};
+static u16 Bros_titleDT[] ={
+    0x0003,
+    0xFFF0, 0xFFF8, 0x0248, 0x5C07,	// 00
+    0x0010, 0xFFF8, 0x024C, 0x5C07,
+    0x0030, 0xFFF8, 0x0250, 0x5C07,
+};
+static u16 MarioDT[] ={
+    0x0007,
+    0x0000, 0x0000, 0x0310, 0x440D,	// 00 正面
+    0xFFF8, 0x0020, 0x0318, 0x440E,
+    0x0018, 0x0020, 0x031C, 0x020E,
+    0x0000, 0x0030, 0x031E, 0x400D,
+    0x0010, 0x0030, 0x033E, 0x400D,
+    0x0000, 0x0010, 0x0314, 0x420D,
+    0x0000, 0x0018, 0x0334, 0x420E,
+    0x0000, 0x0000, 0x0302, 0x440D,	// 01 左向き
+    0x0000, 0x0020, 0x030A, 0x440E,
+    0x0000, 0x0030, 0x030E, 0x400D,
+    0x0010, 0x0030, 0x032E, 0x400D,
+    0x0000, 0x0018, 0x0326, 0x420E,
+    0x0000, 0x0010, 0x0306, 0x420D,
+    0xFFF0, 0x0010, 0x0300, 0x020E,
+    0xFFFF, 0x0000, 0x0340, 0x440D,	// 02 右向き
+    0xFFFF, 0x0010, 0x0344, 0x420D,
+    0xFFFF, 0x0018, 0x0364, 0x420E,
+    0x001F, 0x0010, 0x0348, 0x020E,
+    0xFFFF, 0x0020, 0x034A, 0x440E,
+    0xFFFF, 0x0030, 0x034E, 0x400D,
+    0x000F, 0x0030, 0x036E, 0x400D,
+};
+static u16 MarioshadeDT[] = {
+    0x0002,
+    0x0000, 0x0000, 0x0217, 0x020A,	// 00
+    0x0010, 0x0000, 0x0217, 0x028A,
+};
+static u16 CursolDT[] ={
+    0x0004,
+    0xFFFC, 0xFFFC, 0x015E, 0x0009,	// 00 左上
+    0x003C, 0xFFFC, 0x015F, 0x0009,	// 00 右上
+    0xFFFC, 0x003C, 0x017E, 0x0009,	// 00 左下
+    0x003C, 0x003C, 0x017F, 0x0009,	// 00 右下
+};
+static u16 USA_casalinDT[] ={
+    0x0008,
+    0x0008, 0x0008, 0x001A, 0x4462,	// 00 両目開き右足下
+    0x0008, 0x0018, 0x0016, 0x4462,
+    0x0000, 0x0028, 0x0010, 0x4462,
+    0x0008, 0x0000, 0x003E, 0x4062,
+    0x0018, 0x0000, 0x001F, 0x0062,
+    0x0000, 0x0020, 0x0035, 0x0062,
+    0x0028, 0x0020, 0x0034, 0x0062,
+    0x0020, 0x0028, 0x0014, 0x4062,
+    0x0008, 0x0008, 0x00D0, 0x4462,	// 01 両目閉じ右足下
+    0x0008, 0x0018, 0x0016, 0x4462,
+    0x0000, 0x0028, 0x0010, 0x4462,
+    0x0008, 0x0000, 0x003E, 0x4062,
+    0x0018, 0x0000, 0x001F, 0x0062,
+    0x0000, 0x0020, 0x0035, 0x0062,
+    0x0028, 0x0020, 0x0034, 0x0062,
+    0x0020, 0x0028, 0x0014, 0x4062,
+    0x0008, 0x0008, 0x005A, 0x4462,	// 02 両目開き右足上
+    0x0008, 0x0018, 0x0056, 0x4462,
+    0x0000, 0x0028, 0x0050, 0x4462,
+    0x0008, 0x0000, 0x007E, 0x4062,
+    0x0018, 0x0000, 0x005F, 0x0062,
+    0x0000, 0x0020, 0x0075, 0x0062,
+    0x0028, 0x0020, 0x0074, 0x0062,
+    0x0020, 0x0028, 0x0054, 0x4062,
+    0x0008, 0x0008, 0x009A, 0x4462,	// 03 片目開き右足下
+    0x0008, 0x0018, 0x0096, 0x4462,
+    0x0000, 0x0028, 0x0090, 0x4462,
+    0x0008, 0x0000, 0x00BE, 0x4062,
+    0x0018, 0x0000, 0x009F, 0x0062,
+    0x0000, 0x0020, 0x00B5, 0x0062,
+    0x0028, 0x0020, 0x00B4, 0x0062,
+    0x0020, 0x0028, 0x0094, 0x4062,
+    0x0008, 0x0008, 0x010A, 0x4465,	// 04 煙
+    0x0008, 0x0018, 0x0106, 0x4465,
+    0x0000, 0x0028, 0x0100, 0x4465,
+    0x0008, 0x0000, 0x012E, 0x4065,
+    0x0018, 0x0000, 0x010F, 0x0065,
+    0x0000, 0x0020, 0x0125, 0x0065,
+    0x0028, 0x0020, 0x0124, 0x0065,
+    0x0020, 0x0028, 0x0104, 0x4065,
+    0x0008, 0x0008, 0x011A, 0x4463,	// 05 黒焦げ目開き
+    0x0008, 0x0018, 0x0116, 0x4463,
+    0x0000, 0x0028, 0x0110, 0x4463,
+    0x0008, 0x0000, 0x013E, 0x4063,
+    0x0018, 0x0000, 0x011F, 0x0063,
+    0x0000, 0x0020, 0x0135, 0x0063,
+    0x0028, 0x0020, 0x0134, 0x0063,
+    0x0020, 0x0028, 0x0114, 0x4063,
+    0x0008, 0x0008, 0x00D4, 0x4463,	// 06 黒焦げ目閉じ
+    0x0008, 0x0018, 0x0116, 0x4463,
+    0x0000, 0x0028, 0x0110, 0x4463,
+    0x0008, 0x0000, 0x013E, 0x4063,
+    0x0018, 0x0000, 0x011F, 0x0063,
+    0x0000, 0x0020, 0x0135, 0x0063,
+    0x0028, 0x0020, 0x0134, 0x0063,
+    0x0020, 0x0028, 0x0114, 0x4063,
+};
+static u16 USA_smokbombDT[] = {
+    0x0003,
+    0x0008, 0x0008, 0x0156, 0x8005,	// 00
+    0x0010, 0x0008, 0x0156, 0x8085,
+    0x0010, 0x0008, 0x0174, 0x0000,	// dummy
+    0x0008, 0x0008, 0x0157, 0x8005,	// 01
+    0x0010, 0x0008, 0x0157, 0x8085,
+    0x0010, 0x0008, 0x0174, 0x0000,	// dummy
+    0x0008, 0x0008, 0x0158, 0x8005,	// 02
+    0x0010, 0x0008, 0x0158, 0x8085,
+    0x0010, 0x0008, 0x0174, 0x0000,	// dummy
+    0x0008, 0x0008, 0x0159, 0x8005,	// 03
+    0x0010, 0x0008, 0x0159, 0x8085,
+    0x0010, 0x0008, 0x0174, 0x0000,	// dummy
+    0x0006, 0x0007, 0x0159, 0x8005,	// 04
+    0x0012, 0x0007, 0x0159, 0x8085,
+    0x0008, 0x0008, 0x0146, 0x0201,
+};
+static u16 USA_eggDT[] ={
+    0x0002,
+    0x0000, 0x0000, 0x0140, 0x1A01,	// 00 通常
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0008, 0x0142, 0x0201,	// 01 割れてる１
+    0x0010, 0x0008, 0x0144, 0x0201,
+    0xFFFC, 0x000C, 0x0142, 0x0201,	// 01 割れてる２
+    0x0014, 0x000C, 0x0144, 0x0201,
+};
+static u16 USA_bombDT[] ={
+    0x0002,
+    0x0008, 0x0008, 0x0146, 0x0201,	// 00
+    0x0015, 0x0004, 0x015D, 0x0001,
+    0x0008, 0x0008, 0x0146, 0x0201,	// 01
+    0x0015, 0x0004, 0x017C, 0x0001,
+    0x0008, 0x0008, 0x0146, 0x0201,	// 02
+    0x0015, 0x0004, 0x017D, 0x0001,
+    0x0008, 0x0008, 0x0146, 0x0204,	// 03
+    0x0015, 0x0004, 0x015D, 0x0001,
+    0x0008, 0x0008, 0x0146, 0x0204,	// 04
+    0x0015, 0x0004, 0x017C, 0x0001,
+    0x0008, 0x0008, 0x0146, 0x0204,	// 05
+    0x0015, 0x0004, 0x017D, 0x0001,
+};
+static u16 USA_burnDT[] ={
+    0x0002,
+    0x0000, 0x0000, 0x0148, 0x4401,	// 00
+    0x0000, 0x0010, 0x014C, 0x4401,
+};
+static u16 USA_smokDT[] ={
+    0x000B,
+    0x0008, 0x0028, 0x0150, 0x02E5,	// 00
+    0x0018, 0x0024, 0x0150, 0x0265,
+    0x0014, 0x0018, 0x0150, 0x0265,
+    0x0018, 0x0008, 0x0150, 0x0265,
+    0x0004, 0x000C, 0x0150, 0x02E5,
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0008, 0x0028, 0x0150, 0x02E5,	// 01
+    0x0018, 0x0024, 0x0150, 0x0265,
+    0x0014, 0x0018, 0x0150, 0x0265,
+    0x0018, 0x0008, 0x0150, 0x0265,
+    0x0004, 0x000C, 0x0150, 0x02E5,
+    0x0008, 0x0004, 0x0150, 0x02E5,
+    0x001C, 0x0010, 0x0150, 0x0265,
+    0x0000, 0x001C, 0x0150, 0x02E5,
+    0x001C, 0x0028, 0x0150, 0x0265,
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0008, 0x0028, 0x0152, 0x02E5,	// 02
+    0x0018, 0x0024, 0x0152, 0x0265,
+    0x0014, 0x0018, 0x0152, 0x0265,
+    0x0004, 0x000C, 0x0152, 0x02E5,
+    0x0018, 0x0008, 0x0152, 0x0265,
+    0x001C, 0x0028, 0x0150, 0x0265,
+    0x001C, 0x0010, 0x0150, 0x0265,
+    0x0000, 0x001C, 0x0150, 0x02E5,
+    0x0008, 0x0004, 0x0150, 0x02E5,
+    0x0014, 0x0008, 0x0150, 0x0265,
+    0x000C, 0x0018, 0x0150, 0x02E5,
+    0x0008, 0x0028, 0x0152, 0x02E5,	// 03
+    0x0018, 0x0024, 0x0152, 0x0265,
+    0x0014, 0x0018, 0x0152, 0x0265,
+    0x0018, 0x0008, 0x0152, 0x0265,
+    0x0004, 0x000C, 0x0152, 0x02E5,
+    0x0008, 0x0004, 0x0152, 0x02E5,
+    0x0000, 0x001C, 0x0152, 0x02E5,
+    0x001C, 0x0028, 0x0152, 0x0265,
+    0x001C, 0x0010, 0x0152, 0x0265,
+    0x000C, 0x0018, 0x0150, 0x02E5,
+    0x0014, 0x0008, 0x0150, 0x0265,
+    0x0018, 0x0024, 0x0154, 0x0265,	// 04
+    0x0014, 0x0018, 0x0154, 0x0265,
+    0x0004, 0x000C, 0x0154, 0x02E5,
+    0x0018, 0x0008, 0x0154, 0x0265,
+    0x0008, 0x0028, 0x0154, 0x02E5,
+    0x0008, 0x0004, 0x0152, 0x02E5,
+    0x0000, 0x001C, 0x0152, 0x02E5,
+    0x001C, 0x0028, 0x0152, 0x0265,
+    0x001C, 0x0010, 0x0152, 0x0265,
+    0x0014, 0x0008, 0x0150, 0x0265,
+    0x000C, 0x0018, 0x0150, 0x02E5,
+    0x0004, 0x000C, 0x0154, 0x02E5,	// 05
+    0x0008, 0x0028, 0x0154, 0x02E5,
+    0x0018, 0x0024, 0x0154, 0x0265,
+    0x0014, 0x0018, 0x0154, 0x0265,
+    0x0018, 0x0008, 0x0154, 0x0265,
+    0x0008, 0x0004, 0x0154, 0x02E5,
+    0x001C, 0x0010, 0x0154, 0x0265,
+    0x001C, 0x0028, 0x0154, 0x0265,
+    0x0000, 0x001C, 0x0154, 0x02E5,
+    0x0014, 0x0008, 0x0152, 0x0265,
+    0x000C, 0x0018, 0x0152, 0x02E5,
+    0x0008, 0x0004, 0x0154, 0x02E5,	// 06
+    0x001C, 0x0010, 0x0154, 0x0265,
+    0x001C, 0x0028, 0x0154, 0x0265,
+    0x0000, 0x001C, 0x0154, 0x02E5,
+    0x0014, 0x0008, 0x0154, 0x0265,
+    0x000C, 0x0018, 0x0154, 0x02E5,
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0014, 0x0008, 0x0154, 0x0265,	// 07
+    0x000C, 0x0018, 0x0154, 0x02E5,
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+    0x0000, 0x0000, 0x0174, 0x0000,	// dummy
+};
+static u16 USA_heartDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x015A, 0x0A02,	// 00
+};
+static u16 USA_heihoDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0180, 0x030C,	// 00
+    0x0000, 0x0000, 0x0182, 0x030C,	// 01
+};
+static u16 USA_tobiDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0184, 0x030C,	// 00
+    0x0000, 0x0000, 0x0186, 0x030C,	// 01
+};
+static u16 USA_toriDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0188, 0x030C,	// 00
+    0x0000, 0x0000, 0x0188, 0x030C,	// 01
+};
+static u16 USA_ninjDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x018C, 0x030C,	// 00
+    0x0000, 0x0000, 0x018E, 0x030C,	// 01
+};
+static u16 USA_fishDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0190, 0x030C,	// 00
+    0x0000, 0x0000, 0x0190, 0x038C,	// 01
+};
+static u16 USA_maskDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0192, 0x030C,	// 00
+};
+static u16 USA_kinokoDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0194, 0x020C,	// 00
+};
+static u16 USA_coinDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0196, 0x020C,	// 00
+};
+static u16 USA_keyDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x0198, 0x020C,	// 00
+};
+static u16 USA_kouraDT[] ={
+    0x0001,
+    0x0000, 0x0000, 0x019A, 0x020C,	// 00
+};
+
+u16 *tlsel_objdt_tbl[] = {
+    Hi_scoreDT,
+    MarioDT,
+    USA_doorDT,
+    Bros_pipeDT,
+    CursolDT,
+    USA_titleDT,
+    Bros_titleDT,
+    USA_smokDT,
+    USA_heartDT,
+    USA_casalinDT,
+    USA_smokbombDT,
+    USA_eggDT,
+    USA_bombDT,
+    USA_burnDT,
+    USA_heihoDT,
+    USA_tobiDT,
+    USA_toriDT,
+    USA_ninjDT,
+    USA_fishDT,
+    USA_maskDT,
+    USA_kinokoDT,
+    USA_coinDT,
+    USA_keyDT,
+    USA_kouraDT,
+    USA_doorshadeDT,
+    Bros_pipeshadeDT,
+    MarioshadeDT,
+};
+
+/********************************************************/
+/*	ファ@イルロード用				*/
+/********************************************************/
+void ts_file_load(Title_sel_obj_c *tso_pt)
+{
+    u8 t_i;
+
+    *(vu16 *)REG_IME = 0;
+    file_load(FILE_NO);
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();
+    if(ERROR_NO != 0){
+	mGm_FREE_p_tsl();
+	return;
+    }
+    if( GAME_CLEAR &&
+	TITLE_WORLD[FILE_NO] == 20 ){
+	WORDNO = 0;
+    }
+    else if( TITLE_WORLD[FILE_NO] != 0xFF ){
+	WORDNO = TSWRDNO[FILE_NO];
+    }
+    
+    TSCCLFG = 0;
+    TSOMODE(tso_pt) = 2;
+    TSOBJDT[USA_casalin].mode = 3;	// キャサリンウィンク
+    TSOBJDT[USA_casalin].timer = 0;
+    // キャサリンと扉以外消す＆ＢＧ黒く
+    *(vu16 *)REG_BLDCNT = mGm_BLDMOD = 0xEF;
+    *(vu16 *)REG_BLDY = mGm_COLY = 0x10;
+    for( t_i = 0; t_i < TSOBJMAX; t_i++ ){
+	if( t_i != USA_casalin ){
+	    TSSTTBL[t_i] = 0;
+	    TSOBJDT[t_i] = Ts_obj_clr;
+	}
+    }
+    TSFLDFG = 0;
+}
+
+/********************************************************/
+/*	ファ@イルクリア用				*/
+/********************************************************/
+void ts_file_clear(u8 index)
+{
+    u8 t_i, failmax;
+    u8 rnd0, rnd1;
+    Title_sel_obj_c *brn_pt;
+    u8 fl_no;
+
+    fl_no = TSFCLFG - 1;
+
+    TSSTTBL[index] = 0;
+    m4aSongNumStart(s_u_se_bomb);
+    TSSTTBL[USA_burn] = 1;
+    TSTILT = 0x20;			// 画面ゆれ
+
+    FILE_SUM[fl_no] = 0;
+    TSEGNUM[fl_no] = 0;
+    TSWRDNO[fl_no] = 0;
+    TSWRDMAX[fl_no] = 0;
+    MAX_WORDNO[fl_no] = 0;
+    TSCLRFG[fl_no] = 0;
+    TITLE_WORLD[fl_no] = 0xFF;
+    TSEGGFG[fl_no*5 + 0] = 0;
+    TSEGGFG[fl_no*5 + 1] = 0;
+    TSEGGFG[fl_no*5 + 2] = 0;
+    TSEGGFG[fl_no*5 + 3] = 0;
+    TSEGGFG[fl_no*5 + 4] = 0;
+    *(vu16 *)REG_IME = 0;
+    file_clear(fl_no);
+    *(vu16 *)REG_IME = 1;
+    V_blank_wait();
+    m4aSoundVSyncOn();
+    if(ERROR_NO != 0){
+	mGm_FREE_p_tsl();
+	return;
+    }
+    // 落下敵セット
+    rnd0 = ENRND[0];
+    rnd1 = ENRND[1];
+    failmax = (rnd0&3)+3;
+    for( t_i = USA_heiho; t_i < TSOBJMAX; t_i++ ){
+	if( failmax != 0 && 
+	    ((rnd0>>((rnd1+t_i)&7))&1) ){
+	    TSSTTBL[t_i] = 1;
+	    TSOBJDT[t_i].x_pos = 0x80+failmax*0x10;
+	    TSOBJDT[t_i].y_pos = -(((rnd1+failmax)&3)*0x10);
+	    if( rnd1&1 )
+		TSOBJDT[t_i].x_spd = ((rnd0+t_i)&1);
+	    else
+		TSOBJDT[t_i].x_spd = -1*((rnd0+t_i)&1);
+	    TSOBJDT[t_i].y_spd = 1;
+	    failmax--;
+	}
+    }
+    // もしも落下敵が０のとき１匹セット
+    if( failmax == (rnd0&3)+3 ){
+	t_i = ((rnd0>>1)&7)+USA_heiho;
+	TSSTTBL[t_i] = 1;
+	TSOBJDT[t_i].x_pos = 0x80+failmax*0x10;
+	TSOBJDT[t_i].y_pos = -(((rnd1+failmax)&3)*0x10);
+	if( rnd1&1 )
+	    TSOBJDT[t_i].x_spd = ((rnd0+t_i)&1);
+	else
+	    TSOBJDT[t_i].x_spd = -1*((rnd0+t_i)&1);
+	TSOBJDT[t_i].y_spd = 1;
+    }
+    // キャサリン黒焦げ(煙)モード
+    TSOBJDT[USA_casalin].mode = 5;
+    TSOBJDT[USA_casalin].timer = 0;
+    // 爆発セット
+    TSOBJDT[USA_burn] = TSOBJDT[index];
+    brn_pt = &TSOBJDT[USA_burn];
+    TSOPTRN(brn_pt) = 0;
+    TSOMODE(brn_pt) = 0;
+    TSOTIM(brn_pt)  = 0;
+    TSFCLFG = 0;
+}
+
+/*■■■■■■■■■■■■■■■■■■■■■■■■■■■*/
+/********************************************************/
+/*	ハイスコア移動処理				*/
+/********************************************************/
+void objmove_Hi_score(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( TSOMODE(tso_pt) == 1 ){		// 上移動
+	if( TSOYPOS(tso_pt) > 0x98 ){
+	    TSOYPOS(tso_pt) -= 0x2;
+	}
+	else{
+	    TSOYPOS(tso_pt) = 0x98;
+	}
+    }
+    else if( TSOMODE(tso_pt) == 2 ){	// 下移動
+	if( TSOYPOS(tso_pt) < 0xA0 ){
+	    TSOYPOS(tso_pt) += 0x2;
+	}
+	else{
+	    TSOYPOS(tso_pt) = 0xA0;
+	    TSSTTBL[index] = 0;
+	}
+    }
+}
+
+/********************************************************/
+/*	ハイスコア表示用データセット			*/
+/********************************************************/
+void Hi_score_data_set( void )
+{
+    u16 t_i, Rem;
+    u32 t_SCORE;
+
+    if( MAIN_SELECT == 0 )
+	t_SCORE = U_HI_SCORE;
+    else
+	t_SCORE = B_HI_SCORE / 10;
+    TSSCRDT = 0;
+
+    for( t_i = 0; t_i < 8; t_i++ ){
+	Rem= DivRem(t_SCORE, 10);
+	TSSCRDT |= Rem<<(t_i*4);
+	t_SCORE = Div(t_SCORE, 10);
+	if( t_SCORE == 0 )
+	    break;
+    }
+}
+
+/********************************************************/
+/*	タイトルＵＳＡドア				*/
+/********************************************************/
+void objmove_USA_door(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( TSOMODE(tso_pt) == 1 ){		// 扉開く
+	if( TSOTIM(tso_pt) == 0 ){
+	    TSOTIM(tso_pt) = 4;
+	    if( TSOPTRN(tso_pt) == 6 ){
+		TSOPTRN(tso_pt) = 6;
+	    }
+	    else{
+		TSOPTRN(tso_pt)++;
+	    }
+	}
+	else{
+	    TSOTIM(tso_pt)--;
+	}
+    }
+    else if( TSOMODE(tso_pt) == 2 ){	// 扉閉じる
+	if( TSOTIM(tso_pt) == 0 ){
+	    TSOTIM(tso_pt) = 4;
+	    if( TSOPTRN(tso_pt) == 0 ){
+		TSOPTRN(tso_pt) = 0;
+		TSOBJDT[Mario].mode = 0;
+	    }
+	    else{
+		TSOPTRN(tso_pt)--;
+	    }
+	}
+	else{
+	    TSOTIM(tso_pt)--;
+	}
+    }
+    else if( TSOMODE(tso_pt) == 3 ){	// 扉左移動
+	TSOXPOS(tso_pt) -= LOGOSPDL;
+	if( TSOXPOS(tso_pt) < -0x60 ){
+	    TSOXPOS(tso_pt) = -0x60;
+	    TSSTTBL[index] = 0;
+	}
+    }
+    // 扉の影移動
+    TSOBJDT[USA_doorshade].x_pos = TSOXPOS(tso_pt)+1;
+    TSOBJDT[USA_doorshade].y_pos = TSOYPOS(tso_pt)+0x52;
+}
+
+/********************************************************/
+/*	タイトルマリオブロス土管			*/
+/********************************************************/
+void objmove_Bros_pipe(Title_sel_obj_c *tso_pt, u8 index)
+{
+    Title_sel_obj_c *shade_pt;
+    Title_sel_obj_c *logo_pt;
+
+    shade_pt = &(TSOBJDT[Bros_pipeshade]);
+    logo_pt = &(TSOBJDT[Bros_title]);
+
+    if( TSOMODE(tso_pt) == 1 ){		// 右移動
+	TSOXPOS(tso_pt) += TSOXSPD(tso_pt);
+	if( TSOXPOS(tso_pt) >= 0x100 ){
+	    TSOXPOS(tso_pt) = 0x100;
+	    TSOXSPD(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	else{
+	    TSOXSPD(tso_pt) = LOGOSPDR;
+	}
+	TSOXPOS(shade_pt) = TSOXPOS(tso_pt)+0xC;
+	TSOXPOS(logo_pt) = TSOXPOS(tso_pt)-2;
+    }
+    else if( TSOMODE(tso_pt) == 2 ){	// 左移動
+	TSOXPOS(tso_pt) += TSOXSPD(tso_pt);
+	if( TSOXPOS(tso_pt) <= 0x93 ){
+	    TSOXPOS(tso_pt) = 0x93;
+	    TSOXSPD(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	else{
+	    TSOXSPD(tso_pt) = -LOGOSPDL;
+	}
+	TSOXPOS(shade_pt) = TSOXPOS(tso_pt)+0xC;
+	TSOXPOS(logo_pt) = TSOXPOS(tso_pt)-2;
+    }
+}
+
+/********************************************************/
+/*	タイトルセレクトカーソル			*/
+/********************************************************/
+void objmove_Cursol(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( MAIN_SELECT == 0 ){	// USA
+	TSOXPOS(tso_pt) = 0x18;
+    }
+    else{			// Bros
+	TSOXPOS(tso_pt) = 0x93;
+    }
+}
+
+/********************************************************/
+/*	タイトルロゴUSA					*/
+/********************************************************/
+void objmove_USA_title(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( TSOMODE(tso_pt) == 1 ){			// 左移動
+	TSOXPOS(tso_pt) -= LOGOSPDL;
+	if( TSOXPOS(tso_pt) < -0x60 ){
+	    TSOXPOS(tso_pt) = -0x60;
+	    TSSTTBL[index] = 0;
+	}
+    }
+    else{
+	if( TSOXPOS(tso_pt) < 0x9 ){		// 右移動
+	    TSOXPOS(tso_pt) += TSOXSPD(tso_pt);
+	}
+    }
+
+    // 拡縮率セット
+    if( MAIN_SELECT == 0 ){
+	if( TSOBJDT[USA_door].patrn == 0 ){
+	    if( TSLGTM&0x8000 ){		// 拡大
+		TSOVSIZ(tso_pt) = 0x100 - ((TSLGTM&0xFF)*3);
+	    }
+	    else{				// 縮小
+		TSOVSIZ(tso_pt) = 0x08D + ((TSLGTM&0xFF)*3);
+	    }
+	}
+	else{
+	    TSOVSIZ(tso_pt) = 0x100;
+	}
+    }
+    else{
+	TSOVSIZ(tso_pt) = 0x100;
+    }
+}
+
+/********************************************************/
+/*	タイトルロゴブロス				*/
+/********************************************************/
+void objmove_Bros_title(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( TSOMODE(tso_pt) == 2 ){		// 左移動
+	TSOXPOS(tso_pt) += TSOXSPD(tso_pt);
+	if( TSOXPOS(tso_pt) <= 0x91 ){
+	    TSOXPOS(tso_pt) = 0x91;
+	    TSOXSPD(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+    }
+
+    // 拡縮率セット
+    if( (MAIN_SELECT == 1) &&
+	(TSOBJDT[Hi_score].mode != 1) ){
+	if( TSLGTM&0x8000 ){	// 拡大
+	    TSOVSIZ(tso_pt) = 0x100 - ((TSLGTM&0xFF)*3);
+	}
+	else{			// 縮小
+	    TSOVSIZ(tso_pt) = 0x08D + ((TSLGTM&0xFF)*3);
+	}
+    }
+    else{
+	TSOVSIZ(tso_pt) = 0x100;
+    }
+}
+
+/********************************************************/
+/*	タイトルマリオ					*/
+/********************************************************/
+void objmove_Mario(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u8 t_i;
+
+    if( MAIN_SELECT == 0 ){	// USA
+	TSOPTRN(tso_pt) = 1;
+	if( TSOBJDT[USA_door].patrn >= 5 ){
+	    TSOPTRN(tso_pt) = 2;	// 左向き
+	}
+	if( TSOBJDT[USA_casalin].patrn >= 4 ){
+	    TSOPTRN(tso_pt) = 0;	// 正面
+	}
+    }
+    else{			// Bros(右向き)
+	TSOPTRN(tso_pt) = 2;
+    }
+
+    if( TSOTIM(tso_pt) ){
+	TSOPTRN(tso_pt) = 0;
+	TSOTIM(tso_pt)--;
+    }
+
+    if( TSOMODE(tso_pt) == 1 ){
+	TSOPTRN(tso_pt) = 0;
+    }
+
+    // 影の位置移動
+#if 0
+    if( TSOPTRN(tso_pt) == 0 ){
+	TSOBJDT[Marioshade].x_pos = TSOXPOS(tso_pt);
+    }
+    else if( TSOPTRN(tso_pt) == 1 ){
+	TSOBJDT[Marioshade].x_pos = TSOXPOS(tso_pt)-6;
+    }
+    else{
+	TSOBJDT[Marioshade].x_pos = TSOXPOS(tso_pt)+6;
+    }
+#endif
+    TSOBJDT[Marioshade].x_pos = TSOXPOS(tso_pt);
+    TSOBJDT[Marioshade].y_pos = TSOYPOS(tso_pt)+0x30;
+}
+
+/********************************************************/
+/*	タイトルＵＳＡキャサリン			*/
+/********************************************************/
+void objmove_USA_casalin(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u16 TIM;
+    Title_sel_obj_c *heart_pt;
+
+    TIM = TSOTIM(tso_pt);
+    if( TSOMODE(tso_pt) < 3 ){
+	if( TSOXPOS(tso_pt) < 0x24 ){	// 右移動中は足踏み
+	    TSOXPOS(tso_pt) += 0x2;
+	    TSOPTRN(tso_pt) = (mGm_FRAME_COUNT>>1)&0x2;
+	    return;
+	}
+	else{
+	    TSOXPOS(tso_pt) = 0x24;
+	}
+    }
+
+    RDMSUB();
+    if( TSOMODE(tso_pt) == 1 ){		// 通常
+	if( TIM < 0x0A ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM < 0x14 ){
+	    TSOPTRN(tso_pt) = 2;
+	}
+	else if( TIM == 0x14 ){
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	TIM++;
+    }
+    else if( TSOMODE(tso_pt) == 2 ){	// 瞬き
+	if( TIM < 0x06 ){
+	    TSOPTRN(tso_pt) = 1;
+	}
+	else if( TIM < 0x42 ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM < 0x48 ){
+	    TSOPTRN(tso_pt) = 1;
+	}
+	else if( TIM < 0x4E ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM < 0x54 ){
+	    TSOPTRN(tso_pt) = 1;
+	}
+	else if( TIM == 0x54 ){
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	TIM++;
+    }
+    else if( TSOMODE(tso_pt) == 3 ){	// ファ@イル決定(ウィンク)
+	if( TSOXPOS(tso_pt) != 0x24 ){
+	    TSOXPOS(tso_pt) = 0x24;
+	}
+	if( TIM < 0x1E ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM == 0x1E ){
+	    TSOPTRN(tso_pt) = 3;
+	    // ウィンクした瞬間ハートセット
+	    TSSTTBL[USA_heart] = 1;
+	    m4aSongNumStart(s_u_se_chery);
+	    heart_pt = &TSOBJDT[USA_heart];
+	    TSOXPOS(heart_pt) = 0x2E;
+	    TSOYPOS(heart_pt) = 0x38;
+	    TSOHSIZ(heart_pt) = 0x200;
+	    TSOVSIZ(heart_pt) = 0x200;
+	    TSOMODE(heart_pt) = 0;
+	    TSOPTRN(heart_pt) = 0;
+	    TSOTIM(heart_pt)  = 0;
+	}
+	else if( TIM < 0x28 ){
+	    TSOPTRN(tso_pt) = 3;
+	}
+
+	else if( TIM < 0x46 ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM == 0x46 ){
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	TIM++;
+    }
+    else if( TSOMODE(tso_pt) == 4 ){	// ファ@イル消去(黒焦げ)
+	if( TSOTIM(tso_pt) >= 0x78 ){		// 左に引っ込む
+	    if( TSOXPOS(tso_pt) > -0x14 ){
+		TSOXPOS(tso_pt) -= 0x2;
+	    }
+	    else{
+		TSOXPOS(tso_pt) = -0x14;
+	    }
+	}
+
+	if( TIM < 0x3C ){
+	    TSOPTRN(tso_pt) = 5;
+	}
+	else if( TIM < 0x44 ){
+	    TSOPTRN(tso_pt) = 6;
+	}
+	else if( TIM < 0x80 ){
+	    TSOPTRN(tso_pt) = 5;
+	}
+	else if( TIM < 0x88 ){
+	    TSOPTRN(tso_pt) = 6;
+	}
+	else if( TIM < 0x90 ){
+	    TSOPTRN(tso_pt) = 5;
+	}
+	else if( TIM < 0xC0 ){	// 画面外での待ち時間調整
+	    TSOPTRN(tso_pt) = 6;
+	}
+	else if( TIM == 0xC0 ){	// 画面外での待ち時間調整
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	}
+	TIM++;
+    }
+    else if( TSOMODE(tso_pt) == 5 ){	// ファ@イル消去(煙)
+	if( TIM < 0x04 ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM == 0x4 ){		// かぶり煙セット
+	    TSSTTBL[USA_smok] = 1;
+	    TSOBJDT[USA_smok].timer = 0;
+	    TSOPTRN(tso_pt) = 4;
+	}
+	else if( TIM < 0x14 ){
+	    TSOPTRN(tso_pt) = 4;
+	}
+	else if( TIM < 0x20 ){
+	    TSOPTRN(tso_pt) = 5;
+	}
+	else if( TIM == 0x20 ){
+	    TSOPTRN(tso_pt) = 5;
+	    TSOMODE(tso_pt) = 4;
+	}
+	TIM++;
+    }
+    if( TSOMODE(tso_pt) == 0 ){			// モードチェンジ
+	if( (ENRND[0]&0x7) == 0 ){
+	    TSOMODE(tso_pt) = 2;		// 瞬き
+	    TIM = 0;
+	}
+	else{
+	    TSOMODE(tso_pt) = 1;		// 足踏み
+	    TIM = 0;
+	}
+    }
+    TSOTIM(tso_pt) = TIM;
+}
+
+/********************************************************/
+/*	タイトルＵＳＡ卵からでる煙			*/
+/********************************************************/
+void objmove_USA_smokbomb(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u16 TIM;
+    Title_sel_obj_c *bomb_pt;
+
+    TIM = TSOTIM(tso_pt);
+    if( TIM < 8 ){
+	TSOPTRN(tso_pt) = 0;
+    }
+    else if( TIM < 0x10 ){
+	TSOPTRN(tso_pt) = 1;
+    }
+    else if( TIM < 0x18 ){
+	TSOPTRN(tso_pt) = 2;
+    }
+    else if( TIM < 0x20 ){
+	TSOPTRN(tso_pt) = 3;
+    }
+    else if( TIM < 0x28 ){
+	TSOPTRN(tso_pt) = 4;
+    }
+    else{
+	// 爆弾セット
+	TSSTTBL[index] = 0;
+	TSSTTBL[USA_bomb] = 1;
+	bomb_pt = &TSOBJDT[USA_bomb];
+	TSOBJDT[USA_bomb] = TSOBJDT[index];
+	TSOMODE(bomb_pt) = 0;
+	TSOTIM(bomb_pt)  = 0;
+	TSOPTRN(bomb_pt)  = 0;
+	TSCCLFG = 0;
+	// ＢＧ２書き換え(CANCEL表示)
+	game.title_work[0] = 4;
+	NMI_NO = nmi_titleselect;
+    }
+    TIM++;
+    TSOTIM(tso_pt) = TIM;
+}
+
+/********************************************************/
+/*	タイトルＵＳＡ卵				*/
+/********************************************************/
+void objmove_USA_egg(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u8	t_i;
+    u16	TIM;
+    u8	line_num;
+    Title_sel_obj_c *smok_pt;
+
+    if( TSFLDFG ){
+	ts_file_load(tso_pt);
+	return;
+    }
+    TIM = TSOTIM(tso_pt);
+    if( TSOMODE(tso_pt) == 0 ){		// 通常
+	line_num = (TSOYPOS(tso_pt)-LINE1)>>4;
+
+	// 拡縮パラメータセット
+	if( mGm_FRAME_COUNT&0x8 ){
+	    TSOHSIZ(tso_pt) = 0x100-((mGm_FRAME_COUNT&0x07)<<3);
+	    TSOVSIZ(tso_pt) = TSOHSIZ(tso_pt);
+	}
+	else{
+	    TSOHSIZ(tso_pt) = 0xC0+((mGm_FRAME_COUNT&0x07)<<3);
+	    TSOVSIZ(tso_pt) = TSOHSIZ(tso_pt);
+	}
+
+	if( TSCHGTM ){
+	    TSCHGTM--;
+	    if( !(game.Trg & ALL_KEY_MASK) &&
+	    !(game.Cont & ALL_KEY_MASK) ){
+		TSCHGTM = 0;
+	    }
+	}
+	else{
+	    // ファ@イル決定
+	    if( (START_BUTTON_ON || A_BUTTON_ON_T) &&
+		(SOUND_TIMER < 0x58) ){
+		m4aSongNumStart(s_u_se_final);
+		if( TSOYPOS(tso_pt) == LINE4 ){	// ERASE FILE
+		    TIM = 0;
+		    TSOMODE(tso_pt) = 1;
+		}
+		else{				// FILE A-C
+		    // どのファ@イルを選んだか？
+		    FILE_NO = (TSOYPOS(tso_pt)>>4) - 2;
+		    VSYNC_OFF = 1;
+		    TSFLDFG = FILE_NO+1;
+		}
+		TSCCLFG = 0;
+	    }
+	    // 上下移動
+	    else if( U_KEY_ON_T || D_KEY_ON_T || SELECT_BUTTON_ON ){
+		if( U_KEY_ON_T ){
+		    m4aSongNumStart(s_u_se_kamekeri8);
+		    TSOYPOS(tso_pt) -= 0x10;
+		    if( TSOYPOS(tso_pt) < LINE1 )
+			TSOYPOS(tso_pt) = LINE4;
+		}
+		else{
+		    m4aSongNumStart(s_u_se_kamekeri8);
+		    TSOYPOS(tso_pt) += 0x10;
+		    if( TSOYPOS(tso_pt) > LINE4 )
+			TSOYPOS(tso_pt) = LINE1;
+		}
+		TSCHGTM = 0x20;
+	    }
+	    // ワールドセレクト
+	    else if( FILE_SUM[line_num] != 0 ){
+		if( R_KEY_ON_T || R_KEY_ON_C ||
+		    L_KEY_ON_T || L_KEY_ON_C ){
+		    if( R_KEY_ON_T || L_KEY_ON_T ){
+			TSCHGTM = 0x20;
+		    }
+		    else{
+			TSCHGTM = 0x08;
+		    }
+		    if( R_KEY_ON_T || R_KEY_ON_C ){
+			if( TSWRDMAX[line_num] != 0 )
+			    m4aSongNumStart(s_u_se_kamekeri8);
+			if( TITLE_WORLD[line_num] == 
+			    TSWRDMAX[line_num] )
+			    TITLE_WORLD[line_num] = 0;
+			else
+			    TITLE_WORLD[line_num]++;
+		    }
+		    else{
+			if( TSWRDMAX[line_num] != 0 )
+			    m4aSongNumStart(s_u_se_kamekeri8);
+			if( TITLE_WORLD[line_num] == 0 )
+			    TITLE_WORLD[line_num] = 
+				TSWRDMAX[line_num];
+			else
+			    TITLE_WORLD[line_num]--;
+		    }
+		    if( TITLE_WORLD[line_num] != TSWRDMAX[line_num] )
+			TSWRDNO[line_num] = TITLE_WORLD[line_num];
+		    TSWRDNO[line_num] = TITLE_WORLD[line_num];
+		    TITLE_WORK32(0) = 8;
+		    NMI_NO = nmi_titleselect;
+		}
+	    }
+	}
+    }
+    else if( TSOMODE(tso_pt) == 1 ){		// 割れ中
+	if( TIM < 30 ){
+	    TSOPTRN(tso_pt) = 0;
+	}
+	else if( TIM == 30 ){
+	    TSOHSIZ(tso_pt) = 0x100;
+	    TSOVSIZ(tso_pt) = 0x100;
+	    TSOPTRN(tso_pt) = 1;
+	    // 煙セット
+	    TSSTTBL[USA_smokbomb] = 1;
+	    smok_pt = &TSOBJDT[USA_smokbomb];
+	    TSOBJDT[USA_smokbomb] = TSOBJDT[index];
+	    TSOMODE(smok_pt) = 0;
+	    TSOTIM(smok_pt)  = 0;
+	}
+	else if( TIM < 40 ){
+	    TSOPTRN(tso_pt) = 1;
+	}
+	else if( TIM < 50 ){
+	    TSOPTRN(tso_pt) = 2;
+	}
+	else{
+	    TSOPTRN(tso_pt) = 0;
+	    TSOMODE(tso_pt) = 0;
+	    TSSTTBL[index] = 0;
+	}
+	TIM++;
+    }
+    TSOTIM(tso_pt) = TIM;
+}
+/********************************************************/
+/*	タイトルＵＳＡ爆弾				*/
+/********************************************************/
+void objmove_USA_bomb(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u8 t_i, failmax;
+    u8 rnd0, rnd1;
+    Title_sel_obj_c *brn_pt;
+
+    if( TSFCLFG ){
+	ts_file_clear(index);
+	return;
+    }
+    if( TSOMODE(tso_pt) == 0 ){		// 通常
+	// 火花アニメーション
+	if( (mGm_FRAME_COUNT&0x3) == 0 ){
+	    TSOPTRN(tso_pt)++;
+	    if( TSOPTRN(tso_pt) == 3 )
+		TSOPTRN(tso_pt) = 0;
+	}
+
+	// 上下移動
+	if( U_KEY_ON_T ){
+	    m4aSongNumStart(s_u_se_kamekeri8);
+	    TSOYPOS(tso_pt) -= 0x10;
+	    if( TSOYPOS(tso_pt) < LINE1 )
+		TSOYPOS(tso_pt) = LINE4;
+	}
+	else if( D_KEY_ON_T || SELECT_BUTTON_ON ){
+	    m4aSongNumStart(s_u_se_kamekeri8);
+	    TSOYPOS(tso_pt) += 0x10;
+	    if( TSOYPOS(tso_pt) > LINE4 )
+		TSOYPOS(tso_pt) = LINE1;
+	}
+
+	// ファ@イル決定
+	if( A_BUTTON_ON_T || game.Trg & START_BUTTON ){
+	    if( TSOYPOS(tso_pt) == LINE4 ){	// CANCEL
+		TSSTTBL[index] = 0;
+		m4aSongNumStart(s_u_se_bomb);
+		TSSTTBL[USA_burn] = 1;
+		TSOBJDT[USA_burn] = TSOBJDT[index];
+		brn_pt = &TSOBJDT[USA_burn];
+		TSOPTRN(brn_pt) = 0;
+		TSOMODE(brn_pt) = 0;
+		TSOTIM(brn_pt)  = 0;
+	    }
+	    else{				// FILE A-C
+		m4aSongNumStart(s_u_se_final);
+		// 決定サウンド待ち時間
+		TSOTIM(tso_pt) = 0x10;
+		// YES/NO ウィンドウ表示
+		game.title_work[0] = 6;
+		NMI_NO = nmi_titleselect;
+		TSOMODE(tso_pt) = 1;
+	    }
+	}
+	else if( B_BUTTON_ON_T ){		// CANCEL
+	    TSSTTBL[index] = 0;
+	    m4aSongNumStart(s_u_se_bomb);
+	    TSSTTBL[USA_burn] = 1;
+	    TSOBJDT[USA_burn] = TSOBJDT[index];
+	    brn_pt = &TSOBJDT[USA_burn];
+	    TSOPTRN(brn_pt) = 0;
+	    TSOMODE(brn_pt) = 0;
+	    TSOTIM(brn_pt)  = 0;
+	}
+    }
+    else{				// ファ@イル消去選択
+	if( TSOTIM(tso_pt) == 0 ){	// 決定サウンド終了待ち
+	    m4aSongNumStart(s_u_se_bombfire);	// 火花サウンド
+	    TSOTIM(tso_pt) = 0xFF;		// ダミータイマー
+	}
+	else if( TSOTIM(tso_pt) != 0xFF ){
+	    TSOTIM(tso_pt)--;
+	}
+
+	// 火花アニメーション＆爆弾色変化
+	if( (mGm_FRAME_COUNT&0x3) == 0 ){
+	    TSOPTRN(tso_pt)++;
+	    if( mGm_FRAME_COUNT&0x8 ){		// 色薄いほう
+		if( TSOPTRN(tso_pt) < 3 ){
+		    TSOPTRN(tso_pt) += 3;
+		}
+		if( TSOPTRN(tso_pt) == 6 )
+		    TSOPTRN(tso_pt) = 3;
+	    }
+	    else{				// 通常の色
+		if( TSOPTRN(tso_pt) >= 3 ){
+		    TSOPTRN(tso_pt) -= 3;
+		}
+		if( TSOPTRN(tso_pt) == 3 )
+		    TSOPTRN(tso_pt) = 0;
+	    }
+	}
+
+	// YES/NOカーソル上下移動
+	if( U_KEY_ON_T || D_KEY_ON_T || SELECT_BUTTON_ON ){
+	    m4aSongNumStart(s_u_se_kamekeri8);
+	    TSOMODE(tso_pt) ^= 3;
+	    NMI_NO = nmi_titleselect;
+	    game.title_work[0] = 6;
+	}
+
+	// YES/NO決定
+	if( B_BUTTON_ON_T ){			// NO
+	    m4aSongNumStart(s_u_se_cansel);
+	    TSOMODE(tso_pt) = 0;
+	    TSOPTRN(tso_pt) = 0;
+	    NMI_NO = nmi_titleselect;
+	    game.title_work[0] = 7;
+	}
+	else if( A_BUTTON_ON_T || game.Trg & START_BUTTON ){
+	    if( TSOMODE(tso_pt) == 1 ){		// NO
+		m4aSongNumStart(s_u_se_cansel);
+		TSOPTRN(tso_pt) = 0;
+		TSOMODE(tso_pt) = 0;
+		NMI_NO = nmi_titleselect;
+		game.title_work[0] = 7;
+	    }
+	    else{				// YES
+		VSYNC_OFF = 1;
+		TSFCLFG = (TSOYPOS(tso_pt)>>4) - 1;
+	    }
+	}
+    }
+}
+
+/********************************************************/
+/*	タイトルＵＳＡ爆発				*/
+/********************************************************/
+void objmove_USA_burn(Title_sel_obj_c *tso_pt, u8 index)
+{
+    Title_sel_obj_c *egg_pt;
+    u8 rnd0, rnd1;
+
+    if( TSTILT != 0 ){			// 画面揺れセット
+	TSTILT--;
+	RDMSUB();
+	rnd0 = ENRND[0];
+	rnd1 = ENRND[1];
+	if( (mGm_FRAME_COUNT&1) == 0 ){
+	    if( rnd0&1 )		// BG１横
+		mGm_SCCH1 += 3;
+	    else
+		mGm_SCCH1 -= 3;
+	    if( rnd1&1 )		// BG２横
+		mGm_SCCH2 += 3;
+	    else
+		mGm_SCCH2 -= 3;
+	    if( rnd1&2 )		// BG３横
+		mGm_SCCH3 += 1;
+	    else
+		mGm_SCCH3 -= 1;
+	    if( rnd0&2 )		// BG４横
+		mGm_SCCH4 += 1;
+	    else
+		mGm_SCCH4 -= 1;
+
+	    if( rnd0&2 )		// BG１縦
+		mGm_SCCV1 += 2;
+	    else
+		mGm_SCCV1 -= 2;
+	    if( rnd1&2 )		// BG２縦
+		mGm_SCCV2 += 2;
+	    else
+		mGm_SCCV2 -= 2;
+	    if( rnd1&1 )		// BG３縦
+		mGm_SCCV3 += 1;
+	    else
+		mGm_SCCV3 -= 1;
+	    if( rnd0&1 )		// BG４縦
+		mGm_SCCV4 += 1;
+	    else
+		mGm_SCCV4 -= 1;
+	}
+    }
+
+    // 爆発終了処理
+    if( TSOTIM(tso_pt) > 0x20 && TSTILT == 0 ){
+	// ファ@イルセレクト画面に書き換え
+	NMI_NO = nmi_titleselect;
+	game.title_work[0] = 5;
+	TSSTTBL[index] = 0;
+	// 卵セット
+	TSSTTBL[USA_egg] = 1;
+	TSOBJDT[USA_egg] = TSOBJDT[index];
+	egg_pt = &TSOBJDT[USA_egg];
+	TSOYPOS(egg_pt) = LINE1;
+	TSOPTRN(egg_pt) = 0;
+	TSOMODE(egg_pt) = 0;
+	TSOTIM(egg_pt)  = 0;
+	// 画面位置を元に戻す
+	mGm_SCCH1 = 0;
+	mGm_SCCH2 = 0x78;
+	mGm_SCCH3 = 0;
+	mGm_SCCH4 = 0;
+	mGm_SCCV1 = 0;
+	mGm_SCCV2 = 0;
+	mGm_SCCV3 = 0;
+	mGm_SCCV4 = 0;
+
+	TSCCLFG = 1;
+    }
+    TSOTIM(tso_pt)++;
+}
+
+/********************************************************/
+/*	タイトルＵＳＡキャサリンにかぶる煙		*/
+/********************************************************/
+void objmove_USA_smok(Title_sel_obj_c *tso_pt, u8 index)
+{
+    u16 TIM;
+
+    TSOXPOS(tso_pt) = TSOBJDT[USA_casalin].x_pos;
+    TSOYPOS(tso_pt) = TSOBJDT[USA_casalin].y_pos;
+    TIM = TSOTIM(tso_pt);
+    if( TIM < 0x4 ){
+	TSOPTRN(tso_pt) = 0;
+    }
+    else if( TIM < 0x8 ){
+	TSOPTRN(tso_pt) = 1;
+    }
+    else if( TIM < 0xC ){
+	TSOPTRN(tso_pt) = 2;
+    }
+    else if( TIM < 0x10 ){
+	TSOPTRN(tso_pt) = 3;
+    }
+    else if( TIM < 0x14 ){
+	TSOPTRN(tso_pt) = 4;
+    }
+    else if( TIM < 0x18 ){
+	TSOPTRN(tso_pt) = 5;
+    }
+    else if( TIM < 0x1C ){
+	TSOPTRN(tso_pt) = 6;
+    }
+    else if( TIM < 0x20 ){
+	TSOPTRN(tso_pt) = 7;
+    }
+    else if( TIM == 0x20 ){
+	TSSTTBL[index] = 0;
+    }
+    TIM++;
+    TSOTIM(tso_pt) = TIM;
+}
+
+/********************************************************/
+/*	タイトルＵＳＡファ@イル決定時のハート		*/
+/********************************************************/
+void objmove_USA_heart(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( TSOTIM(tso_pt) < 70 ){	// 待ち時間を変更するときはここ
+	if( TSOTIM(tso_pt) < 40 ){	// ハート拡大までの時間
+	    if( (mGm_FRAME_COUNT&0x3) == 0 ){
+		TSOXPOS(tso_pt)--;
+		TSOYPOS(tso_pt)--;
+	    }
+	    if( TSOTIM(tso_pt) <= 0x20 ){
+		TSOHSIZ(tso_pt) = 0x200-(TSOTIM(tso_pt)<<3);
+		TSOVSIZ(tso_pt) = 0x200-(TSOTIM(tso_pt)<<3);
+	    }
+	    else{
+		TSOHSIZ(tso_pt) = 0x100;
+		TSOVSIZ(tso_pt) = 0x100;
+	    }
+	}
+	TSOTIM(tso_pt)++;
+    }
+}
+
+/********************************************************/
+/*	タイトルＵＳＡ落下敵処理			*/
+/********************************************************/
+void objmove_fail(Title_sel_obj_c *tso_pt, u8 index)
+{
+    if( index < USA_mask )
+	TSOPTRN(tso_pt) = (mGm_FRAME_COUNT & 0x4) >> 2;
+
+    if( (mGm_FRAME_COUNT & 0x1) == 0 )
+	TSOXPOS(tso_pt) += TSOXSPD(tso_pt);
+
+    if( (mGm_FRAME_COUNT & 0x1F) == 0 )
+	TSOYSPD(tso_pt)++;
+    TSOYPOS(tso_pt) += TSOYSPD(tso_pt);
+
+    if( TSOYPOS(tso_pt) >= 0xA0 ){
+	TSSTTBL[index] = 0;
+	TSOBJDT[index] = Ts_obj_clr;
+    }
+}
+
+/********************************************************/
+/*	オブジェクト移動ダミー関数			*/
+/********************************************************/
+void objmove_dummy(Title_sel_obj_c *tso_pt, u8 index)
+{
+}
+
+void (*title_obj_move_tbl[])(Title_sel_obj_c *tso_pt, u8 index) = {
+    objmove_Hi_score,		// 0
+    objmove_Mario,		// 1
+    objmove_USA_door,		// 2
+    objmove_Bros_pipe,		// 3
+    objmove_Cursol,		// 4
+    objmove_USA_title,		// 5
+    objmove_Bros_title,		// 6
+    objmove_USA_smok,		// 7
+    objmove_USA_heart,		// 8
+    objmove_USA_casalin,	// 9
+    objmove_USA_smokbomb,	// A
+    objmove_USA_egg,		// B
+    objmove_USA_bomb,		// C
+    objmove_USA_burn,		// D
+    objmove_fail,		// E
+    objmove_fail,		// F
+    objmove_fail,		// 10
+    objmove_fail,		// 11
+    objmove_fail,		// 12
+    objmove_fail,		// 13
+    objmove_fail,		// 14
+    objmove_fail,		// 15
+    objmove_fail,		// 16
+    objmove_fail,		// 17
+    objmove_dummy,		// 18
+    objmove_dummy,		// 19
+    objmove_dummy,		// 1A
+};
+
+/********************************************************/
+/*	共通ＯＡＭセット				*/
+/********************************************************/
+void objoam_common(u8 t_i)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    if( TSTILT ){			// 揺れセット
+	base_xps += ((ENRND[0]&3)-2);
+	base_yps += ((ENRND[1]&3)-2);
+    }
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[TSIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+/*	回転拡縮関係ＯＡＭセット	*/
+	if (((work3 >> 11) & 0x01) == 0){
+	    p_oam->AffineParamNo_L = 
+		(work3 >> 4) & 0x0018;
+	}
+	else{
+	    p_oam->AffineMode = (work3 >> 11) & 0x03;
+	    p_oam->VFlip = TSAPT >> 6;
+	    p_oam->HFlip = TSAPT >> 5;
+	    p_oam->AffineParamNo_L = TSAPT >> 2;
+	    Sraffp.RatioX = TSOHSIZ(tso_pt);
+	    Sraffp.RatioY = TSOVSIZ(tso_pt);
+	    Sraffp.Theta = 0;
+	    a_affinset(TSAPT);
+	    TSAPT += 0x04;
+	}		
+	TSIPT++;
+    }
+}
+
+/********************************************************/
+/*	ハイスコア用ＯＡＭセット			*/
+/********************************************************/
+void Hi_score_oamset(u8 t_i)
+{
+    u8  loop_ct, i, flip_num;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    if( TSTILT ){			// 揺れセット
+	base_xps += ((ENRND[0]&3)-2);
+	base_yps += ((ENRND[1]&3)-2);
+    }
+
+    // 得点以外の部分セット
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[TSIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+	TSIPT++;
+    }
+    // 得点の部分セット
+    Hi_score_data_set();
+    if( TSOBJDT[Hi_score].patrn == 0 ){ // USA
+	p_oam = &OamBak[TSIPT];
+	p_oam->HPos = 0x88;		// Ｘ座標
+	p_oam->VPos = base_yps;		// Ｙ座標
+	p_oam->CharNo = 0x1E0;
+	p_oam->Pltt = 0xA;
+	TSIPT++;
+	for( t_i = 0; t_i < 8; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0x80-(t_i<<3);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    if( t_i == 7 ){
+		if( (TSSCRDT>>(4*t_i))&0xF ){
+		    p_oam->CharNo = 0x1E0+((TSSCRDT>>(4*t_i))&0xF);
+		}
+		else{
+		    p_oam->CharNo = 0x1F2;
+		}
+	    }
+	    else{
+		p_oam->CharNo = 0x1E0+((TSSCRDT>>(4*t_i))&0xF);
+	    }
+	    p_oam->Pltt = 0xA;
+	    TSIPT++;
+	}
+
+	if( TSSCRDT >= 0x2000000 ){
+	    loop_ct = 5;
+	    flip_num = 5;
+	}
+	else if( TSSCRDT >= 0x1000000 ){
+	    loop_ct = 5;
+	    flip_num = ((TSSCRDT>>20)&0xF)>>1;
+	}
+	else{
+	    loop_ct = ((TSSCRDT>>20)&0xF)>>1;
+	    flip_num = 0;
+	}
+	for( t_i = 0; t_i < loop_ct; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xA0+(t_i<<4);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1F6;
+	    p_oam->Pltt = 0x4;
+	    if( t_i >= (5 - flip_num) )
+		p_oam->HFlip = 1;
+	    else
+		p_oam->HFlip = 0;
+	    p_oam->Shape = 1;	// ＯＢＪ形状
+	    TSIPT++;
+	}
+	for( t_i = loop_ct; t_i < 5; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xA0+(t_i<<4);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1F2;
+	    p_oam->Pltt = 0xA;
+	    p_oam->Shape = 1;	// ＯＢＪ形状
+	    TSIPT++;
+	}
+    }
+    else{				// Bros
+	p_oam = &OamBak[TSIPT];
+	p_oam->HPos = 0xB8;		// Ｘ座標
+	p_oam->VPos = base_yps;		// Ｙ座標
+	p_oam->CharNo = 0x1E0;
+	p_oam->Pltt = 0xB;
+	TSIPT++;
+	for( t_i = 0; t_i < 5; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xB0-(t_i<<3);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1E0+((TSSCRDT>>(4*t_i))&0xF);
+	    p_oam->Pltt = 0xB;
+	    TSIPT++;
+	}
+	// 最高画面数
+	if( BROS_MAX < 0xA ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xD8;			// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x01F2;
+	    p_oam->Pltt = 0xB;
+	    TSIPT++;
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xE0;			// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1E0+BROS_MAX;
+	    p_oam->Pltt = 0xB;
+	    TSIPT++;
+	}
+	else{
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xD8;			// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1E0+Div(BROS_MAX,10);
+	    p_oam->Pltt = 0xB;
+	    TSIPT++;
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0xE0;			// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1E0+DivRem(BROS_MAX,10);
+	    p_oam->Pltt = 0xB;
+	    TSIPT++;
+	}
+	p_oam = &OamBak[TSIPT];
+	p_oam->HPos = 0xE8;			// Ｘ座標
+	p_oam->VPos = base_yps;		// Ｙ座標
+	p_oam->CharNo = 0x1F2;
+	p_oam->Pltt = 0xB;
+	TSIPT++;
+
+	loop_ct = ((TSSCRDT>>16)&0xF)>>1;
+	for( t_i = 0; t_i < loop_ct; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0x08+(t_i<<4);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1F8;
+	    p_oam->Pltt = 0x4;
+	    p_oam->Shape = 1;	// ＯＢＪ形状
+	    TSIPT++;
+	}
+	for( t_i = loop_ct; t_i < 4; t_i++ ){
+	    p_oam = &OamBak[TSIPT];
+	    p_oam->HPos = 0x08+(t_i<<4);	// Ｘ座標
+	    p_oam->VPos = base_yps;		// Ｙ座標
+	    p_oam->CharNo = 0x1F2;
+	    p_oam->Pltt = 0xB;
+	    p_oam->Shape = 1;	// ＯＢＪ形状
+	    TSIPT++;
+	}
+    }
+}
+
+/********************************************************/
+/*	爆弾用ＯＡＭセット				*/
+/********************************************************/
+void objoam_bomb(u8 t_i)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+//	if( !(TSOMODE(tso_pt) == 0 && (i&1)) ){
+	    p_oam = &(OamBak[TSIPT]);
+	    p_oam->HPos = work0;		// Ｘ座標
+	    p_oam->VPos = work1;		// Ｙ座標
+	    p_oam->CharNo = work2;		// キャラクタＮｏ
+	    p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	    p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	    p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	    p_oam->HFlip = (work3 >> 7) & 0x01;
+	    p_oam->VFlip = (work3 >> 8) & 0x01;	
+	    p_oam->Pltt = work3 & 0x000F;
+	    TSIPT++;
+//	}
+    }
+}
+
+/********************************************************/
+/*	扉用ＯＡＭセット				*/
+/********************************************************/
+void objoam_door(u8 t_i)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[TSIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	if( MAIN_SELECT == 0 ){
+	    p_oam->Pltt = 0;
+	}
+	else{
+	    p_oam->Pltt = 0xF;
+	}
+	TSIPT++;
+    }
+}
+
+/********************************************************/
+/*	土管用ＯＡＭセット				*/
+/********************************************************/
+void objoam_pipe(u8 t_i)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[TSIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	if( MAIN_SELECT == 1 ){
+	    p_oam->Pltt = 9;
+	}
+	else{
+	    p_oam->Pltt = 7;
+	}
+	TSIPT++;
+    }
+}
+
+/********************************************************/
+/*	共通ＯＡＭセット				*/
+/********************************************************/
+void objoam_shade(u8 t_i)
+{
+    u8  loop_ct, i;
+    s16 work0,work1;
+    s16 base_xps,base_yps;
+    u16 work2,work3;
+    u16 *obj_pt;
+    OamData *p_oam;
+    Title_sel_obj_c *tso_pt;
+
+    tso_pt = &TSOBJDT[t_i];
+    obj_pt = tlsel_objdt_tbl[t_i];
+    loop_ct = *obj_pt;
+    obj_pt = (TSOPTRN(tso_pt) * (loop_ct << 2)) + obj_pt + 1;
+    base_xps = TSOXPOS(tso_pt);
+    base_yps = TSOYPOS(tso_pt);
+    if( TSTILT ){			// 揺れセット
+	base_xps += ((ENRND[0]&3)-2);
+	base_yps += ((ENRND[1]&3)-2);
+    }
+    for (i=0; i<loop_ct; i++){
+	work0 = base_xps + *obj_pt;
+	obj_pt++;
+	work1 = base_yps + *obj_pt;
+	obj_pt++;
+	work2 = *obj_pt;
+	obj_pt++;
+	work3 = *obj_pt;
+	obj_pt++;
+	
+	p_oam = &(OamBak[TSIPT]);
+	p_oam->HPos = work0;		// Ｘ座標
+	p_oam->VPos = work1;		// Ｙ座標
+	p_oam->CharNo = work2;		// キャラクタＮｏ
+	p_oam->Shape = work3 >> 14;	// ＯＢＪ形状
+	p_oam->Size = (work3 >> 9) & 0x03;// ＯＢＪサイズ
+	p_oam->Priority = ((work3 >> 5) & 0x03);// 表示優先
+	p_oam->HFlip = (work3 >> 7) & 0x01;
+	p_oam->VFlip = (work3 >> 8) & 0x01;	
+	p_oam->Pltt = work3 & 0x000F;
+	p_oam->ObjMode = 1;
+	TSIPT++;
+    }
+}
+
+void (*title_obj_oam_tbl[])(u8 t_i) = {
+    Hi_score_oamset,		// 0  Hi_score
+    objoam_common,		// 1  Mario
+    objoam_door,		// 2  USA_door
+    objoam_pipe,		// 3  Bros_pipe
+    objoam_common,		// 4  Cursol
+    objoam_common,		// 5  USA_title
+    objoam_common,		// 6  Bros_title
+    objoam_common,		// 7  USA_smok
+    objoam_common,		// 8  USA_heart
+    objoam_common,		// 9  USA_casalin
+    objoam_common,		// A  USA_smokbomb
+    objoam_common,		// B  USA_egg
+    objoam_bomb,		// C  USA_bomb
+    objoam_common,		// D  USA_burn
+    objoam_common,		// E  USA_heiho
+    objoam_common,		// F  USA_tobi
+    objoam_common,		// 10 USA_tori
+    objoam_common,		// 11 USA_ninj
+    objoam_common,		// 12 USA_fish
+    objoam_common,		// 13 USA_mask
+    objoam_common,		// 14 USA_kinoko
+    objoam_common,		// 15 USA_coin
+    objoam_common,		// 16 USA_key
+    objoam_common,		// 17 USA_koura
+    objoam_shade,		// 18 USA_doorshade
+    objoam_shade,		// 19 Bros_pipeshade
+    objoam_shade,		// 1A Bros_pipeshade
+};
+
+/********************************************************/
+/*	ファ@イルセレクト用文字セット			*/
+/********************************************************/
+void FileData_Set(u8 file_no)
+{
+    u8 i;
+
+    if( TSCLRFG[file_no] ){		// extra
+	TITLE_WORLD[file_no] = TSWRDMAX[file_no] = 20;	// EXTRA表示
+	TSEGNUM[file_no] = 0;
+	for( i = 0; i < 8; i++ ){
+	    TSEGNUM[file_no] += ((TSEGGFG[file_no*5+0]>>i)&1);
+	    TSEGNUM[file_no] += ((TSEGGFG[file_no*5+1]>>i)&1);
+	    TSEGNUM[file_no] += ((TSEGGFG[file_no*5+2]>>i)&1);
+	    TSEGNUM[file_no] += ((TSEGGFG[file_no*5+3]>>i)&1);
+	    TSEGNUM[file_no] += ((TSEGGFG[file_no*5+4]>>i)&1);
+	    if( (TSEGNUM[file_no]&0xF) >= 10 ){
+		TSEGNUM[file_no] -= 10;
+		TSEGNUM[file_no] += 0x10;
+	    }
+	}
+	File_Extra(file_no);
+    }
+    else{
+	if( FILE_SUM[file_no] == 0 ){	// new
+	    TITLE_WORLD[file_no] = 0xFF;
+	    File_New(file_no);
+	}
+	else{			// world
+	    TITLE_WORLD[file_no] = TSWRDMAX[file_no];
+	    File_World(file_no);
+	}
+    }
+}
+/********************************************************/
+/*	ファ@イルセレクト用文字セットサブ		*/
+/********************************************************/
+void File_Extra(u8 line)
+{
+    u16 LINE;
+
+    LINE = 0xd800 + line*0x80;
+
+    // EXTRA
+    *(u16 *)(BG_VRAM + 0x948 + LINE) = 0x41AC;
+    *(u16 *)(BG_VRAM + 0x94A + LINE) = 0x41AD;
+    *(u16 *)(BG_VRAM + 0x94C + LINE) = 0x41AE;
+    *(u16 *)(BG_VRAM + 0x988 + LINE) = 0x41BC;
+    *(u16 *)(BG_VRAM + 0x98A + LINE) = 0x41BD;
+    *(u16 *)(BG_VRAM + 0x98C + LINE) = 0x41BE;
+    
+    // 卵の数10の位
+    if( TSEGNUM[line]&0xF0 ){	// 0以外
+	*(u16 *)(BG_VRAM + 0x94E + LINE) = Num_Tbl[TSEGNUM[line]>>4];
+	*(u16 *)(BG_VRAM + 0x98E + LINE) = Num_Tbl[TSEGNUM[line]>>4]+0x10;
+    }
+    else{		// 0
+	*(u16 *)(BG_VRAM + 0x94E + LINE) = 0x816F;
+	*(u16 *)(BG_VRAM + 0x98E + LINE) = 0x817F;
+    }
+    // 卵の数1の位
+    *(u16 *)(BG_VRAM + 0x950 + LINE) = Num_Tbl[TSEGNUM[line]&0xF];
+    *(u16 *)(BG_VRAM + 0x990 + LINE) = Num_Tbl[TSEGNUM[line]&0xF]+0x10;
+    
+    // /40
+    *(u16 *)(BG_VRAM + 0x952 + LINE) = 0x81AB;
+    *(u16 *)(BG_VRAM + 0x992 + LINE) = 0x81BB;
+    *(u16 *)(BG_VRAM + 0x954 + LINE) = 0x814C;
+    *(u16 *)(BG_VRAM + 0x994 + LINE) = 0x815C;
+    *(u16 *)(BG_VRAM + 0x956 + LINE) = 0x8186;
+    *(u16 *)(BG_VRAM + 0x996 + LINE) = 0x8196;
+}
+
+void File_World(u8 line)
+{
+    u8 num, num2;
+    u16 LINE;
+
+    LINE = 0xd800 + line*0x80;
+
+    // WORLD
+    *(u16 *)(BG_VRAM + 0x948 + LINE) = 0x4145;
+    *(u16 *)(BG_VRAM + 0x94A + LINE) = 0x4146;
+    *(u16 *)(BG_VRAM + 0x94C + LINE) = 0x4147;
+    *(u16 *)(BG_VRAM + 0x988 + LINE) = 0x4155;
+    *(u16 *)(BG_VRAM + 0x98A + LINE) = 0x4156;
+    *(u16 *)(BG_VRAM + 0x98C + LINE) = 0x4157;
+    
+    //   -  
+    *(u16 *)(BG_VRAM + 0x94E + LINE) = 0x816F;// space
+    *(u16 *)(BG_VRAM + 0x98E + LINE) = 0x817F;// space
+    *(u16 *)(BG_VRAM + 0x956 + LINE) = 0x816F;// space
+    *(u16 *)(BG_VRAM + 0x996 + LINE) = 0x817F;// space
+    *(u16 *)(BG_VRAM + 0x952 + LINE) = 0x8148;// -
+    *(u16 *)(BG_VRAM + 0x992 + LINE) = 0x8158;// -
+    
+    // CHAPTN & COSUNO
+    num = Div(TSWRDNO[line], 3)+1;
+    num2 = DivRem(TSWRDNO[line], 3)+1;
+    *(u16 *)(BG_VRAM + 0x950 + LINE) = Num_Tbl[num];
+    *(u16 *)(BG_VRAM + 0x990 + LINE) = Num_Tbl[num]+0x10;
+    *(u16 *)(BG_VRAM + 0x954 + LINE) = Num_Tbl[num2];
+    *(u16 *)(BG_VRAM + 0x994 + LINE) = Num_Tbl[num2]+0x10;
+}
+
+void File_New(u8 line)
+{
+    u16 LINE;
+
+    LINE = 0xd800 + line*0x80;
+
+    *(u16 *)(BG_VRAM + 0x948 + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x988 + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x94A + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x98A + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x94C + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x98C + LINE) = 0x81AA;
+    
+    *(u16 *)(BG_VRAM + 0x94E + LINE) = 0x8180;
+    *(u16 *)(BG_VRAM + 0x98E + LINE) = 0x8190;
+    *(u16 *)(BG_VRAM + 0x950 + LINE) = 0x8181;
+    *(u16 *)(BG_VRAM + 0x990 + LINE) = 0x8191;
+    *(u16 *)(BG_VRAM + 0x952 + LINE) = 0x8182;
+    *(u16 *)(BG_VRAM + 0x992 + LINE) = 0x8192;
+    
+    *(u16 *)(BG_VRAM + 0x954 + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x994 + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x956 + LINE) = 0x81AA;
+    *(u16 *)(BG_VRAM + 0x996 + LINE) = 0x81AA;
+}
+/*--------------------------------------------------------------*/
+/*	タイトルセレクト用領域確保				*/
+/*--------------------------------------------------------------*/
+void mGm_MALLOC_p_tsl(void)
+{
+    if( p_tsl == NULL ){
+	p_tsl = (Title_sel_c *)mGm_MALLOC(sizeof(Title_sel_c));
+    }
+    DmaClear(3, 0, p_tsl, sizeof(Title_sel_c), 16);
+}
+/*--------------------------------------------------------------*/
+/*	タイトルセレクト用領域開放				*/
+/*--------------------------------------------------------------*/
+void mGm_FREE_p_tsl(void)
+{
+    if( p_tsl != NULL ){
+	mGm_FREE(p_tsl);
+	p_tsl = NULL;
+    }
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

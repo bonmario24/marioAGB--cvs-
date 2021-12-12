@@ -1,0 +1,129 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.22;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __UCA_ACTERS_H_
+#define __UCA_ACTERS_H_
+
+#include "uca_act.h"
+
+
+#define	A_ENMY_NO	13		/* 敵ＭＡＸ数 */
+#define	A_NORM_ENMY_NO	 9		/* 通常敵ＭＡＸ数 */
+#define	A_BULT_ENMY_NO	12		/* 弾含む敵ＭＡＸ数 */
+#define STAR_INDEX	12		/* スターINDEXNO */
+
+/*------------- メイン基本構造体 -------------------------------*/
+typedef struct{				/* 敵構造体 */
+    aAC_base_c a_base[A_ENMY_NO];	// アクター構造体
+    ObjAffineSrcData Objafs;
+    ObjAffineDestData Objafd;
+    u8  enty_table[A_ENMY_NO];		// 敵モード
+    u16 enty_name[A_ENMY_NO];		// 敵Ｎｏ．
+    u8  enty_oampt;			// OAMインデックス
+    u8  enty_afnpt;
+    u8  enty_scrdtno[A_ENMY_NO];	// 敵Ｎｏ．
+    u8  fires_num;                      // ボス火子の生存数
+    u8  dreamcnt;                       // ドリームマシンcnt
+    u8  enmy_setfg[64];                 // 敵セットフラグ
+    u8  exitfg;                         // 出口セットフラグ
+    u8  excont;                         // マスク出口フラグ
+    u8  extime;                         // 出口sound timer
+    u8  exopen;                         // マスク出口フラグ
+    u8  esetfg;                         // 敵任意set flag
+    u8  failcnt;                        // 敵死亡数
+    u8  oam_no[A_ENMY_NO];              // OAMインデックスNo
+    u8  bsdmcrl;                        // BOSS FLUSH COUNTER
+    u8  msmode;                         // MASK移動前カウンター
+    u8  casalin_fg;                     // キャサリンボイスフラグ
+    u8  bubble_num;                     // BOSSデモ シャボン数
+    u16 boss_demotim;			// BOSSデモ タイマー
+    u16 egg_demotim;			// 玉子デモ タイマー
+    u8  clear_exit;			// コースクリア出口フラグ
+    u8  clear_cnt;			// コースクリアカウント
+    u8  eggmode;			// BGM再開カウント
+    u8  bgmstart;			// 玉子メーターモード
+    s32 eggmt_ypos;			// 玉子メーター
+    s32 eggmt_yspd;			// 玉子メーター
+    u8  eggmt_tim;			// 玉子メーター
+    u8  akadama_fg;			// 赤玉出現フラグ
+    u8  bkdn_timer;			// 画面移動時爆弾タイマー保存
+    u8  kamen_room;			// BGカメーンの部屋？
+}aAll_str_c;
+
+/*------------- マクロ定義 -------------------------------------*/
+#define ENTY_ENBASE(pt)	(((aAll_str_c *)(pt)) -> a_base)
+#define ENTY_ENCMOD(pt)	(((aAll_str_c *)(pt)) -> enty_table)
+#define ENTY_ENSYNO(pt)	(((aAll_str_c *)(pt)) -> enty_name)
+#define ENTY_OAMPT(pt)	(((aAll_str_c *)(pt)) -> enty_oampt)
+#define ENTY_AFBPT(pt)	(((aAll_str_c *)(pt)) -> enty_afnpt)
+#define ENTY_SCRDTNO(pt) (((aAll_str_c *)(pt)) -> enty_scrdtno)
+#define ENMY_SETFG(pt)  (((aAll_str_c *)(pt)) -> enmy_setfg)
+#define ENMY_OAMNO(pt)  (((aAll_str_c *)(pt)) -> oam_no)
+
+/*------------- ＥＸＴＥＲＮ -----------------------------------*/
+extern	aAll_str_c	*p_act;
+
+/*------------- マクロ定義 -------------------------------------*/
+#define EXITFG		(p_act->exitfg)
+#define EXCONT		(p_act->excont)
+#define EXTIME		(p_act->extime)
+#define EXOPEN		(p_act->exopen)
+#define ESETFG		(p_act->esetfg)
+#define FIRESCT		(p_act->fires_num)
+#define FAILCNT		(p_act->failcnt)
+#define DREAMCT		(p_act->dreamcnt)
+#define a_Enscrnfg      (((aAll_str_c *)(p_act)) -> enmy_setfg)
+#define BSDMCRL		(p_act->bsdmcrl)
+#define MSMODE		(p_act->msmode)
+#define CASALIN_FG	(p_act->casalin_fg)
+#define BUBBLECT	(p_act->bubble_num)
+#define BOSS_DEMOTIM	(p_act->boss_demotim)
+#define EGG_DEMOTIM	(p_act->egg_demotim)
+#define CLEAR_EXIT	(p_act->clear_exit)
+#define CLEAR_CNT	(p_act->clear_cnt)
+#define BGMSTART	(p_act->bgmstart)
+#define EGGMODE		(p_act->eggmode)
+#define EGGMT_YPOS	(p_act->eggmt_ypos)
+#define EGGMT_YSPD	(p_act->eggmt_yspd)
+#define EGGMT_TIM	(p_act->eggmt_tim)
+#define AKADAMA_FG      (p_act->akadama_fg)
+#define BKDN_TIMER	(p_act->bkdn_timer)
+#define KAMEN_ROOM	(p_act->kamen_room)
+
+#endif /* __UCA_ACTERS_H_ */
+
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

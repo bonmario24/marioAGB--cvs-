@@ -1,0 +1,216 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.include "MPlayDef.s"
+
+	.equ	sn_intro_battle_grp, voicegroup000
+	.equ	sn_intro_battle_pri, 10
+	.equ	sn_intro_battle_rev, 0
+	.equ	sn_intro_battle_mvl, 100
+	.equ	sn_intro_battle_key, 0
+	.equ	sn_intro_battle_tbs, 1
+	.equ	sn_intro_battle_exg, 0
+	.equ	sn_intro_battle_cmp, 1
+
+	.section .rodata
+	.global	sn_intro_battle
+	.align	2
+
+@@**************** Track 1 (Midi-Chn.1) ****************@@
+
+sn_intro_battle_1:
+	.byte	KEYSH , sn_intro_battle_key+0
+@@ 000   ----------------------------------------
+	.byte	TEMPO , 150*sn_intro_battle_tbs/2
+	.byte		VOICE , 2
+	.byte		VOL   , 100*sn_intro_battle_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		LFODL , 16
+	.byte		LFOS  , 32
+	.byte		MOD   , 4
+	.byte		N24   , Cn4 , v064
+	.byte	W24
+	.byte		        Ds4 
+	.byte	W24
+	.byte		        Fn4 
+	.byte	W24
+	.byte		N92   , Fs4 
+	.byte	W24
+@@ 001   ----------------------------------------
+	.byte	W68
+	.byte	W03
+	.byte	FINE
+
+@@**************** Track 2 (Midi-Chn.2) ****************@@
+
+sn_intro_battle_2:
+	.byte	KEYSH , sn_intro_battle_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 18
+	.byte		VOL   , 100*sn_intro_battle_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N24   , En3 , v064
+	.byte	W24
+	.byte		        Gn3 
+	.byte	W24
+	.byte		        An3 
+	.byte	W24
+	.byte		VOICE , 29
+	.byte		N04   , Fs3 , v008
+	.byte	W04
+	.byte		        Fs2 , v012
+	.byte	W04
+	.byte		        Fs3 , v016
+	.byte	W04
+	.byte		        Fs2 , v020
+	.byte	W04
+	.byte		        Fs3 , v028
+	.byte	W04
+	.byte		        Fs2 , v032
+	.byte	W04
+@@ 001   ----------------------------------------
+	.byte		        Fs3 , v036
+	.byte	W04
+	.byte		        Fs2 , v040
+	.byte	W04
+	.byte		        Fs3 , v048
+	.byte	W04
+	.byte		        Fs2 , v052
+	.byte	W04
+	.byte		        Fs3 , v056
+	.byte	W04
+	.byte		        Fs2 , v060
+	.byte	W04
+	.byte		        Fs3 , v064
+	.byte	W04
+	.byte		        Fs2 
+	.byte	W04
+	.byte		        Fs3 
+	.byte	W04
+	.byte		        Fs2 
+	.byte	W04
+	.byte		        Fs3 
+	.byte	W04
+	.byte		        Fs2 
+	.byte	W04
+	.byte		        Fs3 
+	.byte	W04
+	.byte	FINE
+
+@@**************** Track 3 (Midi-Chn.3) ****************@@
+
+sn_intro_battle_3:
+	.byte	KEYSH , sn_intro_battle_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 11
+	.byte		PAN   , c_v+0
+	.byte		VOL   , 127*sn_intro_battle_mvl/mxv
+	.byte		LFODL , 16
+	.byte		LFOS  , 32
+	.byte		MOD   , 4
+	.byte		N24   , Gn3 , v100
+	.byte	W24
+	.byte		        As3 
+	.byte	W24
+	.byte		        Cn4 
+	.byte	W24
+	.byte		N92   , Cs4 
+	.byte	W24
+@@ 001   ----------------------------------------
+	.byte	W68
+	.byte	W03
+	.byte	FINE
+
+@@**************** Track 4 (Midi-Chn.4) ****************@@
+
+sn_intro_battle_4:
+	.byte	KEYSH , sn_intro_battle_key+0
+@@ 000   ----------------------------------------
+	.byte		VOICE , 127
+	.byte		VOL   , 127*sn_intro_battle_mvl/mxv
+	.byte		PAN   , c_v+0
+	.byte		N12   , Dn1 , v080
+	.byte	W24
+	.byte		N12   
+	.byte	W24
+	.byte		N12   
+	.byte	W24
+	.byte		N06   , Dn1 , v028
+	.byte	W12
+	.byte		        Dn1 , v036
+	.byte	W12
+@@ 001   ----------------------------------------
+	.byte		        Dn1 , v048
+	.byte	W12
+	.byte		        Dn1 , v056
+	.byte	W12
+	.byte		        Dn1 , v068
+	.byte	W06
+	.byte		        Dn1 , v072
+	.byte	W06
+	.byte		        Dn1 , v076
+	.byte	W06
+	.byte		        Dn1 , v080
+	.byte	W06
+	.byte		        Dn1 , v088
+	.byte	W06
+	.byte		        Dn1 , v092
+	.byte	W06
+	.byte		        Dn1 , v096
+	.byte	W06
+	.byte		N05   , Dn1 , v100
+	.byte	W05
+	.byte	FINE
+
+@@******************************************************@@
+	.align	2
+
+sn_intro_battle:
+	.byte	4	@@ NumTrks
+	.byte	0	@@ NumBlks
+	.byte	sn_intro_battle_pri	@@ Priority
+	.byte	sn_intro_battle_rev	@@ Reverb.
+
+	.word	sn_intro_battle_grp
+
+	.word	sn_intro_battle_1
+	.word	sn_intro_battle_2
+	.word	sn_intro_battle_3
+	.word	sn_intro_battle_4
+
+	.end
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

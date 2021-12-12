@@ -1,0 +1,1309 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@コースセットプログラム		*/
+/****************************************************************/
+#include "m_main.h"
+#include "ua_bg.h"
+#include "ua_unit_change.h"
+#include "ua_color.h"
+#include "up_player.h"
+#include "up_commondt.h"
+#include "ua_bg3_set.h"
+#include "ua_char_set.h"
+#include "ua_act.h"
+#include "ua_score.h"
+
+#include "ud_cos.h"
+#include "ud_course_data.h"
+#include "ud_cad.h"
+#include "ud_bg3.h"
+
+#include "ua_course.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void DeCompress16( u16* i_cos_data, u16 t_ConvdataNo );
+static void DeCompress8( u8* i_cos_data, u16 t_ConvdataNo );
+static void BG1_h_set(void);
+static void BG2_h_set(void);
+static void BG3_h_set(void);
+static void BG1_v_set(void);
+static void BG2_v_set(void);
+static void BG3_v_set(void);
+static void scroll_pos_set(void);
+static void scroll_pos_set(void);
+static void tubo_in_init(void);
+static void tubo_out_init(void);
+static void ura_in_init(void);
+static void ura_out_init(void);
+static void tubo_in_init2(void);
+static void tubo_out_init2(void);
+
+/*--------------------------------------------------------------*/
+/*		ユニットデータのテーブル			*/
+/*--------------------------------------------------------------*/
+u16 *unit_table[3] = {
+    unit_data0,
+    unit_data1,
+    unit_data2,
+};
+
+/*--------------------------------------------------------------*/
+/*		ボスルームデータ				*/
+/*--------------------------------------------------------------*/
+u8 BOSROM[7] = {
+    0x1A,0x3D,0x60,0x80,0x9F,0xC1,0xD6,
+};
+
+/*--------------------------------------------------------------*/
+/*		ＢＧＭデータ					*/
+/*--------------------------------------------------------------*/
+static u16 BGM_data[4] = {
+//    48,34,37,37,
+
+    s_u_tijou,		// 地上面
+    s_u_chika,		// 地下面
+    s_u_boss,		// ボス面（通常）
+    s_u_boss_mamu,	// ボス面（最終面）
+};
+
+/*--------------------------------------------------------------*/
+/*		圧縮されたデータの展開				*/
+/*--------------------------------------------------------------*/
+void DeCompress16( u16* i_cos_data, u16 t_ConvdataNo )
+{
+    u16 t_i = 0, t_j;
+    u16 t_LoopMax;
+
+    while( *(i_cos_data+t_i) != 0 ){
+	if( (*(i_cos_data+t_i)&0xC000) == 0x8000 ){
+	    t_LoopMax = (*(i_cos_data+t_i)&0x3FFF);
+	    for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+		*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = 
+		    *(i_cos_data+t_i+1);
+		t_ConvdataNo++;
+	    }
+	    t_i += 2;
+	}
+	else if( (*(i_cos_data+t_i)&0xC000) == 0x4000 ){
+	    t_LoopMax = (*(i_cos_data+t_i)&0x3FFF);
+	    for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+		*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = 
+		    *(i_cos_data+t_i+1);
+		t_ConvdataNo++;
+		*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = 
+		    *(i_cos_data+t_i+2);
+		t_ConvdataNo++;
+	    }
+	    t_i += 3;
+	}
+	else{
+	    t_LoopMax = (*(i_cos_data+t_i)&0x3FFF);
+	    for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+		*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = 
+		    *(i_cos_data+t_i+t_j+1);
+		if(*(i_cos_data+t_i+t_j+1) == DOA2){
+		    if(KEY0FG != 0)
+			*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = DOA3;
+		}
+		else if(*(i_cos_data+t_i+t_j+1) == YEGG){
+		    if(GAME_CLEAR == 0 ||
+		       TITLE_WORLD[FILE_NO] != 20 )
+			*(u16 *)(BG1_UNIT_BUFFER+t_ConvdataNo*2) = SPA1;
+		}
+		t_ConvdataNo++;
+	    }
+	    t_i += (t_LoopMax+1);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		圧縮されたデータの展開				*/
+/*--------------------------------------------------------------*/
+void DeCompress8( u8* i_cos_data, u16 t_ConvdataNo )
+{
+	u16 t_i = 0, t_j;
+	u16 t_LoopMax;
+
+	while( *(i_cos_data+t_i) != 0 ){
+		if( (*(i_cos_data+t_i)&0xC0) == 0x80 ){
+			t_LoopMax = (*(i_cos_data+t_i)&0x3F);
+			for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+				*(u8 *)(BG2_UNIT_BUFFER+t_ConvdataNo) = 
+					 *(u8 *)(i_cos_data+t_i+1);
+				t_ConvdataNo++;
+			}
+			t_i += 2;
+		}
+		else if( (*(i_cos_data+t_i)&0xC0) == 0x40 ){
+			t_LoopMax = (*(i_cos_data+t_i)&0x3F);
+			for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+				*(u8 *)(BG2_UNIT_BUFFER+t_ConvdataNo) = 
+					 *(u8 *)(i_cos_data+t_i+1);
+				t_ConvdataNo++;
+				*(u8 *)(BG2_UNIT_BUFFER+t_ConvdataNo) = 
+					 *(u8 *)(i_cos_data+t_i+2);
+				t_ConvdataNo++;
+			}
+			t_i += 3;
+		}
+		else{
+			t_LoopMax = (*(i_cos_data+t_i)&0x3F);
+			for( t_j = 0; t_j < t_LoopMax; t_j++ ){
+				*(u8 *)(BG2_UNIT_BUFFER+t_ConvdataNo) = 
+					 *(u8 *)(i_cos_data+t_i+t_j+1);
+				t_ConvdataNo++;
+			}
+			t_i += (t_LoopMax+1);
+		}
+	}
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ１　@Ｈスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG1_h_set(void)
+{
+    u16 j;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) + 
+		     ((SCCH1_CHK & 0x0100 ) * 8) +
+		     ((SCCH1_CHK & 0x00f0 ) / 4) + VRAM);
+    for(j = 0; j <= 0x380; j+=0x40){
+	unit_No = *(u16 *)(BG1_UNIT_BUFFER +
+			   (((SCCH1_CHK / 0x100) * 0xf0) +
+			   (((SCCH1_CHK & 0xf0) / 0x10) + j / 4)) * 2);
+	unit_point = unit_table[unit_No / 0x100];
+	if((CHAPTN == 3) && (unit_No >= 0x26e) && (unit_No < TUB7) && (TSBOFG == 0) ||
+	    (IWACFG == 1) && (unit_No >= 0x26e) && (unit_No < TUB7)){
+	    if(IWACFG == 1){
+		if(TSBIN != 2){
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0x1ff) +
+						     0x6000);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0x1ff) +
+						     0x6000);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0x1ff) +
+							0x6000);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0x1ff) +
+							0x6000);
+		}
+		else{
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0x1ff) +
+						     0x6400);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0x1ff) +
+						     0x6400);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0x1ff) +
+							0x6400);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0x1ff) +
+							0x6400);
+		}
+	    }
+	    else{
+		if(TSBIN != 2){
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0xff) +
+						     0x2200);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0xff) +
+						     0x2200);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0xff) +
+							0x2200);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0xff) +
+							0x2200);
+		}
+		else{
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0xff) +
+						     0x2600);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0xff) +
+						     0x2600);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0xff) +
+							0x2600);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0xff) +
+							0x2600);
+		}
+	    }
+	}
+	else{
+	    if(TSBIN != 2){
+		*(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 0);
+		*(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 1);
+		*(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 2);
+		*(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 3);
+	    }
+	    else{
+		*(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 1) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 0) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 3) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 2) ^ 0x400;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ２　@Ｈスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG2_h_set(void)
+{
+    u16 j;
+    u8  k;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG1CNT & BG_SCR_BASE_1F) * 8) + 
+		       ((SCCH2_CHK & 0x0100 ) * 8) + 
+		       ((SCCH2_CHK & 0x00f0 ) / 4) + VRAM);
+
+    for(j = 0; j <= 0x380; j+=0x40){
+	unit_No = *(u8 *)(BG2_UNIT_BUFFER +
+			  ((SCCH2_CHK / 0x100) * 0xf0) +
+			  (((SCCH2_CHK & 0xf0) / 0x10) + j / 4));
+	k = cos_unit2_dat[WORDNO * COS_MAX + COSUNO];
+	unit_point = unit2_table[k];
+
+	if(unit_No == 0x00ff){
+	    *(u16 *)(vram_adr + ( j + 0)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 1)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x20)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x21)) = 0x00bf;
+	}
+	else{
+	    *(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 0);
+	    *(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 1);
+	    *(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 2);
+	    *(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 3);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ３　@Ｈスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG3_h_set(void)
+{
+    u16 j;
+    u8  k;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG2CNT & BG_SCR_BASE_1F) * 8) + 
+		       ((SCCH3_CHK & 0x0100 ) * 8) + 
+		       ((SCCH3_CHK & 0x00f0 ) / 4) + VRAM);
+
+    for(j = 0; j <= 0x380; j+=0x40){
+	unit_No = *(u8 *)(BG3_UNIT_BUFFER +
+			  ((SCCH3_CHK / 0x100) * 0xf0) +
+			  (((SCCH3_CHK & 0xf0) / 0x10) + j / 4));
+	k = unit3_table_COSDAT3[WORDNO * COS_MAX + COSUNO];
+	unit_point = unit3_table[k];
+
+	if(unit_No == 0x00ff){
+	    *(u16 *)(vram_adr + (j + 0)) = 0x00bf;
+	    *(u16 *)(vram_adr + (j + 1)) = 0x00bf;
+	    *(u16 *)(vram_adr + (j + 0x20)) = 0x00bf;
+	    *(u16 *)(vram_adr + (j + 0x21)) = 0x00bf;
+	}
+	else{
+	    *(u16 *)(vram_adr + (j + 0)) = *(unit_point +
+					     (unit_No & 0xff) * 4 + 0);
+	    *(u16 *)(vram_adr + (j + 1)) = *(unit_point +
+					     (unit_No & 0xff) * 4 + 1);
+	    *(u16 *)(vram_adr + (j + 0x20)) = *(unit_point +
+						(unit_No & 0xff) * 4 + 2);
+	    *(u16 *)(vram_adr + (j + 0x21)) = *(unit_point +
+						(unit_No & 0xff) * 4 + 3);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ１　@Ｖスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG1_v_set(void)
+{
+    u16 j;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG0CNT & BG_SCR_BASE_1F) * 8) +
+		       ((SCCV1_CHK & 0x00f0 ) * 8) + VRAM);
+    for(j = 0; j < 0x20; j+=2){
+	unit_No = *(u16 *)(BG1_UNIT_BUFFER + ((SCCV1_CHK & 0xfff0) + j / 2) * 2);
+
+	unit_point = unit_table[unit_No / 0x100];
+	if((CHAPTN == 3) && (unit_No >= 0x26e) && (unit_No < TUB7) && (TSBOFG == 0) ||
+	    (IWACFG == 1) && (unit_No >= 0x26e) && (unit_No < TUB7)){
+	    if(IWACFG == 1){
+		if(TSBIN != 2){
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0x1ff) +
+						     0x6000);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0x1ff) +
+						     0x6000);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0x1ff) +
+							0x6000);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0x1ff) +
+							0x6000);
+		}
+		else{
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0x1ff) +
+						     0x6400);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0x1ff) +
+						     0x6400);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0x1ff) +
+							0x6400);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0x1ff) +
+							0x6400);
+		}
+	    }
+	    else{
+		if(TSBIN != 2){
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0xff) +
+						     0x2200);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0xff) +
+						     0x2200);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0xff) +
+							0x2200);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0xff) +
+							0x2200);
+		}
+		else{
+		    *(u16 *)(vram_adr + ( j + 0)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 1) & 0xff) +
+						     0x2600);
+		    *(u16 *)(vram_adr + ( j + 1)) = ((*(unit_point +
+							(unit_No & 0xff) * 4 + 0) & 0xff) +
+						     0x2600);
+		    *(u16 *)(vram_adr + ( j + 0x20)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 3) & 0xff) +
+							0x2600);
+		    *(u16 *)(vram_adr + ( j + 0x21)) = ((*(unit_point +
+							   (unit_No & 0xff) * 4 + 2) & 0xff) +
+							0x2600);
+		}
+	    }
+	}
+	else{
+	    if(TSBIN != 2){
+		*(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 0);
+		*(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 1);
+		*(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 2);
+		*(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 3);
+	    }
+	    else{
+		*(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 1) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+						  (unit_No & 0xff) * 4 + 0) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 3) ^ 0x400;
+		*(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						     (unit_No & 0xff) * 4 + 2) ^ 0x400;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ２　@Ｖスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG2_v_set(void)
+{
+    u16 j;
+    u8  k;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG1CNT & BG_SCR_BASE_1F) * 8) +
+		       ((SCCV2_CHK & 0x00f0 ) * 8) + VRAM);
+    for(j = 0; j < 0x20; j+=2){
+	unit_No = *(u8 *)(BG2_UNIT_BUFFER + ((SCCV2_CHK & 0xfff0) + j / 2));
+
+	k = cos_unit2_dat[WORDNO * COS_MAX + COSUNO];
+	unit_point = unit2_table[k];
+
+	if(unit_No == 0x00ff){
+	    *(u16 *)(vram_adr + ( j + 0)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 1)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x20)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x21)) = 0x00bf;
+	}
+	else{
+	    *(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 0);
+	    *(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 1);
+	    *(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 2);
+	    *(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 3);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧ３　@Ｖスクロールキャラバッファ@セット処理	*/
+/*--------------------------------------------------------------*/
+void BG3_v_set(void)
+{
+    u16 j;
+    u8  k;
+    u16 *unit_point;
+    u16 *vram_adr;
+
+    vram_adr = (u16 *)(((*(vu16 *)REG_BG2CNT & BG_SCR_BASE_1F) * 8) +
+		       ((SCCV3_CHK & 0x00f0 ) * 8) + VRAM);
+
+    for(j = 0; j < 0x20; j+=2){
+	unit_No = *(u8 *)(BG3_UNIT_BUFFER + ((SCCV3_CHK & 0xfff0) + j / 2));
+	k = unit3_table_COSDAT3[WORDNO * COS_MAX + COSUNO];
+	unit_point = unit3_table[k];
+
+	if(unit_No == 0x00ff){
+	    *(u16 *)(vram_adr + ( j + 0)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 1)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x20)) = 0x00bf;
+	    *(u16 *)(vram_adr + ( j + 0x21)) = 0x00bf;
+	}
+	else{
+	    *(u16 *)(vram_adr + ( j + 0)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 0);
+	    *(u16 *)(vram_adr + ( j + 1)) = *(unit_point +
+					      (unit_No & 0xff) * 4 + 1);
+	    *(u16 *)(vram_adr + ( j + 0x20)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 2);
+	    *(u16 *)(vram_adr + ( j + 0x21)) = *(unit_point +
+						 (unit_No & 0xff) * 4 + 3);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ＢＧスクロール書き換え処理			*/
+/*--------------------------------------------------------------*/
+void m_scroll_BG_chenge(void)
+{
+/*------------- ＢＧ２のスクロール値セット -------------*/
+    if(mGm_SCRCTL == 1){
+	if(BG2_scroll_type == 0){
+	    game.scch2 = game.scch1 / 2;
+	}
+	else{
+	    game.scch2 = game.scch1;
+	}
+
+	if(BG3_scroll_type != 3){
+	    if(BG3_scroll_type != 1){
+		game.scch3 = game.scch1 / 4;
+	    }
+	    else{
+		game.scch3 = game.scch1;
+	    }
+	}
+    }
+    else{
+	if(BG2_scroll_type == 0){
+	    game.sccv2 = game.sccv1 / 2;
+	}
+	else{
+	    game.sccv2 = game.sccv1;
+	}
+
+	if(BG3_scroll_type != 3){
+	    if(BG3_scroll_type != 1){
+		game.sccv3 = game.sccv1 / 4;
+	    }
+	    else{
+		game.sccv3 = game.sccv1;
+	    }
+	}
+    }
+/*------------- ＢＧ書き換えチェック（Ｈスクロール） -----------*/
+    if(mGm_SCRCTL == 1){
+	if((game.scch1 & 0xfff0) != SCCH1_CHK){
+	    if(game.scch1 < SCCH1_CHK){
+		SCCH1_CHK = (game.scch1 & 0xfff0) - 0x0020;
+	    }
+	    else{
+		SCCH1_CHK = (game.scch1 & 0xfff0) + 0x0100;
+	    }
+
+	    BG1_h_set();
+	    SCCH1_CHK = game.scch1 & 0xfff0;
+	}
+
+	if((game.scch2 & 0xfff0) != SCCH2_CHK){
+	    if(game.scch2 < SCCH2_CHK){
+		SCCH2_CHK = (game.scch2 & 0xfff0) - 0x0020;
+	    }
+	    else{
+		SCCH2_CHK = (game.scch2 & 0xfff0) + 0x0100;
+	    }
+
+	    BG2_h_set();
+	    SCCH2_CHK = game.scch2 & 0xfff0;
+	}
+
+	if(BG3_scroll_type != 3){
+	    if((game.scch3 & 0xfff0) != SCCH3_CHK){
+		if(game.scch3 < SCCH3_CHK){
+		    SCCH3_CHK = (game.scch3 & 0xfff0) - 0x0020;
+		}
+		else{
+		    SCCH3_CHK = (game.scch3 & 0xfff0) + 0x0100;
+		}
+
+		BG3_h_set();
+		SCCH3_CHK = game.scch3 & 0xfff0;
+	    }
+	}
+    }
+
+/*------------- ＢＧ書き換えチェック（Ｖスクロール） -----------*/
+    else{
+	if((game.sccv1 & 0xfff0) != SCCV1_CHK){
+	    if(game.sccv1 < SCCV1_CHK){
+		SCCV1_CHK = (game.sccv1 & 0xfff0) - 0x0020;
+	    }
+	    else{
+		SCCV1_CHK = (game.sccv1 & 0xfff0) + 0x00b0;
+	    }
+
+	    BG1_v_set();
+	    SCCV1_CHK = game.sccv1 & 0xfff0;
+	}
+
+	if((game.sccv2 & 0xfff0) != SCCV2_CHK){
+	    if(game.sccv2 < SCCV2_CHK){
+		SCCV2_CHK = (game.sccv2 & 0xfff0) - 0x0020;
+	    }
+	    else{
+		SCCV2_CHK = (game.sccv2 & 0xfff0) + 0x00b0;
+	    }
+
+	    BG2_v_set();
+	    SCCV2_CHK = game.sccv2 & 0xfff0;
+	}
+
+	if(BG3_scroll_type != 3){
+	    if((game.sccv3 & 0xfff0) != SCCV3_CHK){
+		if(game.sccv3 < SCCV3_CHK){
+		    SCCV3_CHK = (game.sccv3 & 0xfff0) - 0x0020;
+		}
+		else{
+		    SCCV3_CHK = (game.sccv3 & 0xfff0) + 0x00b0;
+		}
+
+		BG3_v_set();
+		SCCV3_CHK = game.sccv3 & 0xfff0;
+	    }
+	}
+    }
+
+    gradation_set();
+}
+
+/*--------------------------------------------------------------*/
+/*		スクロールのイニシャルポジションセット		*/
+/*--------------------------------------------------------------*/
+void scroll_pos_set(void)
+{
+    if(mGm_SCRCTL == 1){
+	if(BG2_scroll_type == 0)
+	    game.scch2 = game.scch1 / 2;
+	else
+	    game.scch2 = game.scch1;
+
+	if(BG3_scroll_type != 3){
+	    if(BG3_scroll_type != 1)
+		game.scch3 = game.scch1 / 4;
+	    else
+		game.scch3 = game.scch1;
+	}
+
+	SCCH1_CHK = game.scch1 - 0x20;
+	SCCH2_CHK = game.scch2 - 0x20;
+	SCCH3_CHK = game.scch3 - 0x20;
+	
+    }
+    else{
+	if(BG2_scroll_type == 0)
+	    game.sccv2 = game.sccv1 / 2;
+	else
+	    game.sccv2 = game.sccv1;
+
+	if(BG3_scroll_type != 3){
+	    if(BG3_scroll_type != 1)
+		game.sccv3 = game.sccv1 / 4;
+	    else
+		game.sccv3 = game.sccv1;
+	}
+
+	SCCV1_CHK = game.sccv1 - 0x20;
+	SCCV2_CHK = game.sccv2 - 0x20;
+	SCCV3_CHK = game.sccv3 - 0x20;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		コースＢＧイニシャルセット処理			*/
+/*--------------------------------------------------------------*/
+void cos_vram_set(void)
+{
+    u16 loop_cnt;
+
+/*------------- スクロール値セット -------------*/
+    if(TSBIN == 0)
+	scroll_pos_set();
+
+/*------------- ＶＲＡＭ書きこみ処理 -------------*/
+    if(TSBIN == 3){
+	if(mGm_SCRCTL == 1){
+	    for(loop_cnt = 0; loop_cnt < 0x14; loop_cnt++){
+		BG1_h_set();
+		SCCH1_CHK += 0x10;
+	    }
+	}
+	else{
+	    for(loop_cnt = 0; loop_cnt < 0x0e; loop_cnt++){
+		BG1_v_set();
+		SCCV1_CHK += 0x10;
+	    }
+	}
+    }
+    else{
+	if(mGm_SCRCTL == 1){
+	    for(loop_cnt = 0; loop_cnt < 0x14; loop_cnt++){
+		BG1_h_set();
+		BG2_h_set();
+		BG3_h_set();
+		SCCH1_CHK += 0x10;
+		SCCH2_CHK += 0x10;
+		SCCH3_CHK += 0x10;
+	    }
+	}
+	else{
+	    for(loop_cnt = 0; loop_cnt < 0x0e; loop_cnt++){
+		BG1_v_set();
+		BG2_v_set();
+		BG3_v_set();
+		SCCV1_CHK += 0x10;
+		SCCV2_CHK += 0x10;
+		SCCV3_CHK += 0x10;
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		コースキャラクターセット処理			*/
+/*--------------------------------------------------------------*/
+void m_course_init(void)
+{
+    u16 init_cnt;
+    u16 char_address;
+    u16 *init_address;
+    u16 init_data;
+    u16 *cos_address;
+    u8  *cos_address2;
+    u16 pl_col;
+    u16 BGM_NO;
+
+    if(((WORDNO == 0x3) && (COSUNO == 0)) ||
+       ((WORDNO == 0xd) && (COSUNO == 2)) ||
+       ((WORDNO == 0xd) && (COSUNO == 3)) ||
+       ((WORDNO == 0xd) && (COSUNO == 4)) ||
+       ((WORDNO == 0x11) && (COSUNO == 3)) ||
+       ((WORDNO == 0x11) && (COSUNO == 4)))
+	HOSIFG = 1;
+    else
+	HOSIFG = 0;
+
+    if(((WORDNO == 0xa) && (COSUNO == 0)) ||
+       ((WORDNO == 0xa) && (COSUNO == 4)) ||
+       ((WORDNO == 0xb) && (COSUNO == 0)) ||
+       ((WORDNO == 0xb) && (COSUNO >= 6)))
+	ICERFLG = 1;
+    else
+	ICERFLG = 0;
+    ICETIM1 = 0;
+    ICETIM2 = 0;
+
+    if((WORDNO == 0x6) && (COSUNO == 1))
+	TAKIFLG = 1;
+    else
+	TAKIFLG = 0;
+
+    if(((WORDNO == 0x13) && (COSUNO > 0)) || ((WORDNO == 0x13) && (COSUNO < 6)))
+	TOURFG = 1;
+    else
+	TOURFG = 0;
+    TOUTIM1 = 0;
+
+/*------------- コースイニシャルデータセット -------------*/
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = (init_data & C_SCR2_1) / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+    BGM_NO = BGM_data[(init_data & C_BGM_3) / C_BGM_1];
+    if(((init_data & C_BGM_3) / C_BGM_1) >= 2){
+	if(!((WORDNO == 0x5 && COSUNO == 0x5) ||
+	     (WORDNO == 0x8 && COSUNO == 0x7) ||
+	     (WORDNO == 0x9 && COSUNO == 0x1) ||
+	     (WORDNO == 0xb && COSUNO == 0x6) ||
+	     (WORDNO == 0x13 && COSUNO == 0x4))){
+	    if(BOSS_DEMOFG == 0){
+		if((boss_grand_no[WORDNO] == 0) ||
+		   (WORDNO == 0xe && COSUNO == 0x4))
+		    BGM_NO = s_u_boss_mae;
+		else
+		    BGM_NO = s_u_boss_mae_r;
+	    }
+	    else if(((init_data & C_BGM_3) / C_BGM_1) != 3){
+		if(boss_grand_no[WORDNO] == 0)
+		    BGM_NO = s_u_boss;
+		else
+		    BGM_NO = s_u_boss_r;
+	    }
+	}
+	else{
+	    if((WORDNO == 0x13 && COSUNO == 0x4) ||
+	       (WORDNO == 0xb && COSUNO == 0x6) ||
+	       (WORDNO == 0x5 && COSUNO == 0x5))
+		BGM_NO = s_u_boss_r;
+	}
+    }
+    DmaCopy(3, next_data + (WORDNO * 10 + COSUNO) * 10, BGCHDAT, 20, 16);
+
+/*------------- キャラクターセット（ＢＧ） -------------*/
+    game_char_set(COSUNO);
+
+/*------------- カラーセット -------------*/
+    game_color_set(init_data, COSUNO);
+
+/*------------- コースセット -------------*/
+    cos_address = cos_buf_table1[WORDNO * COS_MAX + COSUNO];
+	DeCompress16( cos_address, 0 );
+    cos_address2 = cos_buf_table2[WORDNO * COS_MAX + COSUNO];
+	DeCompress8( cos_address2, 0 );
+    if(BG3_scroll_type != C_SCR3_3 / C_SCR3_1){
+	BG3_buffer_set();
+    }
+
+    *(vu16 *)REG_BG0CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_1E
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_1;
+    *(vu16 *)REG_BG1CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_1C
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_2;
+    *(vu16 *)REG_BG2CNT = BG_SCR_SIZE_1 | BG_SCR_BASE_1A
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_3;
+    *(vu16 *)REG_BG3CNT = BG_SCR_SIZE_0 | BG_SCR_BASE_19
+			| BG_COL_MODE_16 | BG_MOSAIC_OFF
+	 		| BG_CHR_BASE_0 | BG_PRIORITY_0;
+
+/*------------- グラデーション -------------*/
+    gradation_init();
+
+/*------------- スコアセット -------------*/
+    DmaClear(3, 0x00bf, VRAM + 0xc800, 0x800, 16);
+    u_score_disp();
+
+/*------------- ＢＧＭセット -------------*/
+    if(TSBOFG != 0)
+	BGM_NO = s_u_tubo;
+
+    if(BGBGM != BGM_NO){
+	BGBGM = BGM_NO;
+//	if((PLAY_KENSHIRO <= 8) || (PLAY_WATCHTM == 0))
+//	    m4aSongNumStart( BGM_NO );
+    }
+
+/*------------- 初期値セット -------------*/
+    NMI_NO = nmi_game;
+    game.scch4 = 0;
+    game.sccv4 = 0;
+
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼインイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void tubo_in_init(void)
+{
+    u16 loop_cnt;
+    u16 *tubo_address;
+    u8 *tubo_address2;
+    u16 *init_address;
+    u16 init_data;
+
+    MVCOSUNO = COSUNO;
+    if((WORDNO == 0xf) && (COSUNO == 0))
+       COSUNO = 6;
+    else
+	COSUNO = 4;
+
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = C_SCR2_1 / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+
+/*------------- キャラクターセット -------------*/
+    game_char_set(COSUNO);
+
+/*------------- カラーセット -------------*/
+    game_color_set(init_data, COSUNO);
+
+/*------------- コースセット -------------*/
+    mGm_SCRCTL = H_SCROLL;
+    tubo_address = cos_buf_table1[WORDNO * COS_MAX + COSUNO];
+    DeCompress16( tubo_address, 0xa * 0xf0 );
+    tubo_address2 = cos_buf_table2[WORDNO * COS_MAX + COSUNO];
+    DeCompress8( tubo_address2, 0xa * 0xf0 );
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = s_u_tubo;
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGBGM );
+
+/*------------- 初期値セット -------------*/
+    BLDCNT = BLDALPHA = BLDY = 0;
+
+    SCCH1_CHK = 0x0a00 - 0x20;
+    SCCH2_CHK = 0x0a00 - 0x20;
+    SCCH3_CHK = 0x0400 - 0x20;
+    game.scch1 = 0x0a08;
+    game.scch2 = 0x0a00;
+    game.scch3 = 0x0000;
+    game.sccv1 = 0x0000;
+    game.sccv2 = 0x0000;
+    game.sccv3 = 0x0000;
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_BG3_ON | DISP_OBJ_ON;
+
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼアウトイニシャル処理			*/
+/*--------------------------------------------------------------*/
+void tubo_out_init(void)
+{
+    u16 loop_cnt;
+    u16 *init_address;
+    u16 init_data;
+    u16 BGM_NO;
+    u16 *cos_address;
+
+    COSUNO = MVCOSUNO;
+
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = (init_data & C_SCR2_1) / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+    BGM_NO = BGM_data[(init_data & C_BGM_3) / C_BGM_1];
+    if(((init_data & C_BGM_3) / C_BGM_1) >= 2){
+	if(!((WORDNO == 0x5 && COSUNO == 0x5) ||
+	     (WORDNO == 0x8 && COSUNO == 0x7) ||
+	     (WORDNO == 0x9 && COSUNO == 0x1) ||
+	     (WORDNO == 0xb && COSUNO == 0x6) ||
+	     (WORDNO == 0x13 && COSUNO == 0x4))){
+	    if(BOSS_DEMOFG == 0){
+		if(boss_grand_no[WORDNO] == 0)
+		    BGM_NO = s_u_boss_mae;
+		else
+		    BGM_NO = s_u_boss_mae_r;
+	    }
+	}
+    }
+/*------------- キャラクターセット -------------*/
+    game_char_set(COSUNO);
+
+/*------------- カラーセット -------------*/
+    game_color_set(init_data, COSUNO);
+
+/*------------- グラデーション -------------*/
+    gradation_init();
+
+/*------------- コースセット -------------*/
+    cos_address = cos_buf_table1[WORDNO * COS_MAX + COSUNO];
+    DeCompress16( cos_address, 0 );
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = BGM_NO;
+//	if(PLAY_KENSHIRO == 0)
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGM_NO );
+
+/*------------- 初期値セット -------------*/
+    NMI_NO = nmi_game;
+}
+
+/*--------------------------------------------------------------*/
+/*		裏画面イン処理					*/
+/*--------------------------------------------------------------*/
+void ura_in_init(void)
+{
+    u16 ura_read, ura_write;
+    u16 loop_x, loop_y;
+    u16 *kino_address;
+
+/*------------- コースセット -------------*/
+    if(mGm_SCRCTL == H_SCROLL){
+	ura_read = (game.scch1 + 8) & 0xfff0;
+	if(ura_read >= (MAX_disp * 0x100))
+	    ura_read = MAX_disp * 0x100;
+
+	ura_read = ((ura_read >> 8) * 0xf0 |
+		    ((ura_read & 0xf0) >> 4)) * 2;
+
+	for(loop_x = 0; loop_x < 0x20; loop_x += 2){
+	    ura_write = 0x1e - loop_x;
+	    for(loop_y = 0; loop_y < 0x1e0; loop_y += 0x20){
+		unit_No = *(u16 *)(BG1_UNIT_BUFFER + ura_read + loop_y);
+		if((unit_No == HAT1) || (unit_No == HAT2) ||
+		   (unit_No == HAT3) || (unit_No == THT3))
+		    HEARTST( ura_write, loop_y );		// キノコ出現処理
+		if(unit_No == YOSI)
+		    EGGST( ura_write, loop_y, 0);			// ヨッシー卵出現処理
+		else if(unit_No == YOS2)
+		    EGGST( ura_write, loop_y, 1);			// ヨッシー卵出現処理
+		else if(unit_No == SPAX)
+		    unit_No = SPA1;
+		*(u16 *)(BG1_UNIT_BUFFER + 0x12c0 + ura_write + loop_y) = unit_No;
+	    }
+
+	    ura_read += 2;
+	    if((ura_read & 0x1e) == 0)
+		ura_read += 0x1c0;
+	}
+    }
+
+    else{
+	ura_read = (game.sccv1 + 8) & 0xfff0;
+
+	ura_read *= 2;
+
+	for(loop_x = 0; loop_x < 0x20; loop_x += 2){
+	    ura_write = 0x1e - loop_x;
+	    for(loop_y = 0; loop_y < 0x140; loop_y += 0x20){
+		unit_No = *(u16 *)(BG1_UNIT_BUFFER + ura_read + loop_y);
+		if((unit_No == HAT1) || (unit_No == HAT2) || (unit_No == HAT3) || (unit_No == THT3))
+		    HEARTST( ura_write, loop_y );
+		if(unit_No == YOSI) 
+		    EGGST( ura_write, loop_y, 0);
+		else if (unit_No == YOS2)
+		    EGGST( ura_write, loop_y, 1);
+		*(u16 *)(BG1_UNIT_BUFFER + 0x12c0 + ura_write + loop_y) = unit_No;
+	    }
+
+	    ura_read += 2;
+	}
+	DmaClear(3, 0x0022, BG1_UNIT_BUFFER + 0x12c0 + 0x140, 0xa0, 16);
+    }
+
+    DmaClear(3, 0x00bf, VRAM + 0xf800, 0x800, 16);
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = s_u_ura;
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGBGM );
+
+/*------------- 初期値セット -------------*/
+    BLDCNT = 0x00c1;
+    BLDALPHA = 0x0000;
+    BLDY = 0x0008;
+    *(vu16 *)REG_BLDCNT = BLDCNT;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA;
+    *(vu16 *)REG_BLDY = BLDY;
+
+    *(u16 *)(COL_BUF) = 0x55eb;		// 抜きカラーセット（0x3d25）
+    COL_FLAG = 1;
+
+    if(mGm_SCRCTL == H_SCROLL){
+	SCCH1_CHK = 0xa00 - 0x20;
+	SCCH2_CHK = 0xa00 - 0x20;
+	SCCH3_CHK = 0xa00 - 0x20;
+	game.scch1 = 0xa00;
+	game.scch2 = 0xa00;
+	game.scch3 = 0xa00;
+    }
+    else{
+	SCCV1_CHK = 0x960 - 0x20;
+	SCCV2_CHK = 0x960 - 0x20;
+	SCCV3_CHK = 0x960 - 0x20;
+	game.sccv1 = 0x960;
+	game.sccv2 = 0x960;
+	game.sccv3 = 0x960;
+    }
+
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG3_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		裏画面アウト処理				*/
+/*--------------------------------------------------------------*/
+void ura_out_init(void)
+{
+    u16 loop_cnt;
+    u16 *init_address;
+    u16 init_data;
+    u16 BGM_NO;
+//    vu16 IeBak;
+//    vu16 DispCntBak;
+
+/*    if(COSUNO > COS_MAX){
+	IeBak = *(vu16 *)REG_IE;
+	DispCntBak = *(vu16 *)REG_DISPCNT;
+	*(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;
+	*(vu16 *)REG_KEYCNT = L_BUTTON | SELECT_BUTTON | KEY_AND_INTR;
+	*(vu16 *)REG_IE = KEY_INTR_FLAG;
+	Stop();
+	*(vu16 *)REG_IE = IeBak;
+	*(vu16 *)REG_KEYCNT = 0;
+	*(vu16 *)REG_DISPCNT = DispCntBak;
+	}*/
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = (init_data & C_SCR2_1) / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+    BGM_NO = BGM_data[(init_data & C_BGM_3) / C_BGM_1];
+
+/*------------- カラーセット -------------*/
+    game_color_set(init_data, COSUNO);
+
+/*------------- グラデーション -------------*/
+    gradation_init();
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = BGM_NO;
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGM_NO );
+
+/*------------- 初期値セット -------------*/
+    NMI_NO = nmi_game;
+    
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼインイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void tubo_in_init2(void)
+{
+    u16 loop_cnt;
+    u16 *tubo_address;
+    u8 *tubo_address2;
+    u16 *init_address;
+    u16 init_data;
+
+    MVCOSUNO = COSUNO;
+    COSUNO = 10;
+
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = C_SCR2_1 / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+
+/*------------- キャラクターセット -------------*/
+    tubo_char_set();
+
+/*------------- カラーセット -------------*/
+    tubo_col_set();
+
+/*------------- コースセット -------------*/
+    mGm_SCRCTL = H_SCROLL;
+    tubo_address = cos_buf_table1[WORDNO * COS_MAX + COSUNO];
+    DeCompress16( tubo_address, 0xa * 0xf0 );
+    DmaCopy(3, ud_gondola_BG2_sscDT, VRAM + 0xe000, 0x800, 16);
+    DmaCopy(3, ud_gondola_BG3_sscDT, VRAM + 0xd000, 0x800, 16);
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = s_u_tubo;
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGBGM );
+
+/*------------- 初期値セット -------------*/
+    BLDCNT = BLDALPHA = BLDY = 0;
+
+    SCCH1_CHK = 0x0a00 - 0x20;
+    game.scch1 = 0x0a08;
+    game.scch2 = 0x0a00;
+    game.scch3 = 0x0400;
+    game.sccv1 = 0x0000;
+    game.sccv2 = 0x0000;
+    game.sccv3 = 0x0000;
+    
+    DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON
+	| DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼアウトイニシャル処理			*/
+/*--------------------------------------------------------------*/
+void tubo_out_init2(void)
+{
+    u16 loop_cnt;
+    u16 *init_address;
+    u16 init_data;
+    u16 BGM_NO;
+    u16 *cos_address;
+
+    COSUNO = MVCOSUNO;
+
+//    init_address = cos_init_table[WORDNO];
+//    init_data = *(init_address + COSUNO);
+    init_data = cos_init_table[WORDNO * COS_MAX + COSUNO];
+    mGm_SCRCTL = (init_data & C_H_scroll) / C_H_scroll;
+    BG2_scroll_type = (init_data & C_SCR2_1) / C_SCR2_1;
+    BG3_scroll_type = (init_data & C_SCR3_3) / C_SCR3_1;
+    MAX_disp = (init_data & C_MAX_f) / C_MAX_1;
+    BGM_NO = BGM_data[(init_data & C_BGM_3) / C_BGM_1];
+
+/*------------- キャラクターセット -------------*/
+    game_char_set(COSUNO);
+
+/*------------- カラーセット -------------*/
+    game_color_set(init_data, COSUNO);
+
+/*------------- グラデーション -------------*/
+    gradation_init();
+
+/*------------- コースセット -------------*/
+    cos_address = cos_buf_table1[WORDNO * COS_MAX + COSUNO];
+    DeCompress16( cos_address, 0 );
+
+/*------------- ＢＧＭセット -------------*/
+    BGBGM = BGM_NO;
+//	if(PLAY_KENSHIRO == 0)
+//    if(PLAY_KENSHIRO <= 8)
+//	m4aSongNumStart( BGM_NO );
+
+/*------------- 初期値セット -------------*/
+    NMI_NO = nmi_game;
+}
+
+/*--------------------------------------------------------------*/
+/*		１画面イン処理テーブル				*/
+/*--------------------------------------------------------------*/
+mfunc one_room_in[] = {
+    tubo_in_init,
+    ura_in_init,
+    tubo_in_init2,
+};
+
+/*--------------------------------------------------------------*/
+/*		１画面イン処理					*/
+/*--------------------------------------------------------------*/
+void one_room_in_set(void)
+{
+    one_room_in[TSBIN - 1]();
+}
+
+/*--------------------------------------------------------------*/
+/*		１画面アウト処理テーブル			*/
+/*--------------------------------------------------------------*/
+mfunc one_room_out[] = {
+    tubo_out_init,
+    ura_out_init,
+    tubo_out_init2,
+};
+
+/*--------------------------------------------------------------*/
+/*		１画面アウト処理				*/
+/*--------------------------------------------------------------*/
+void one_room_out_set(void)
+{
+    one_room_out[STTSBIN - 1]();
+    if(BG3_scroll_type == 3)
+	mGm_SCCV3 = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

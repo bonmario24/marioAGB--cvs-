@@ -1,0 +1,686 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@プログラム			*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_game.h"
+#include "ua_bg.h"
+
+#include "ud_cad.h"
+#include "ad_cad.h"
+
+#include "um_select_sub.h"
+#include "m_classic_sub.h"
+#include "m_game_sub.h"
+#include "m_title_sub.h"
+#include "ua_save.h"
+
+/*--------------------------------------------------------------*/
+/*		関数のプロトタイプ宣言				*/
+/*--------------------------------------------------------------*/
+static void normal_nmi(void);
+static void game_nmi(void);
+static void divide_nmi(void);
+static void hajimari_nmi(void);
+static void coinup_nmi(void);
+static void bros_nmi(void);
+static void TitleSel_nmi(void);
+static void opening_nmi(void);
+static void bonus_nmi(void);
+static void Dummy(void);
+static void Divide( void );
+static void Coinup( void );
+static void Gradation(void);
+static void IntrDummy(void);
+
+extern void AgbMain(void);
+extern OamData Oamclr;
+
+/*--------------------------------------------------------------*/
+OamData	OamBak[128];
+OamData OAMTEMP[128];			// 並び替え用OAM
+gameDT_c game;
+usa_gameDT_c *usa_game;
+
+/*------------- デバック用グローバル変数  ----------------------*/
+//char string[20];
+
+/*------------- サブルーチン -----------------------------------*/
+void KeyRead(void);
+extern void act_objsort(void);
+extern void mGm_Main(void);
+
+/*--------------------------------------------------------------*/
+/*		割り込みテーブル				*/
+/*--------------------------------------------------------------*/
+void VBlankIntr(void);
+void HBlankIntr(void);
+void VCountIntr(void);
+
+const IntrFuncp IntrTable[14] = {
+    VBlankIntr,
+//    MultiSioIntr,   // シリアル通信割り込み
+//    MultiSioIntr,   // マルチプレイ通信用タイマー割り込み
+    ConnectSioIntr,   // 接続中通信割り込み
+    ConnectSioIntr,   // 接続中通信割り込み
+    HBlankIntr,
+    VCountIntr,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+    IntrDummy,
+};
+IntrFuncp IntrTableBuf[14];
+/*--------------------------------------------------------------*/
+/*		Ｖカウント割り込み時のサブルーチンテーブル	*/
+/*--------------------------------------------------------------*/
+void Dummy(void);
+void Divide(void);
+void Coinup(void);
+void Gradation(void);
+
+mfunc VCountIntr_menu[] = {
+    Dummy,	//ダミー
+    Divide,	//プレイヤーセレクト画面分割処理
+    Coinup,	//コイン３ＵＰ用カラー転送処理
+    Gradation	//グラデーション処理
+};
+
+/*--------------------------------------------------------------*/
+/*		メインルーチン					*/
+/*--------------------------------------------------------------*/
+void AgbMain(void)
+{
+    mgm_boot();
+//    DmaCopy(3,IntrTable,IntrTableBuf,sizeof(IntrTableBuf),32);
+    mGm_Main();
+}
+
+/*--------------------------------------------------------------*/
+/*		ノーマルＮＭＩ処理				*/
+/*--------------------------------------------------------------*/
+void normal_nmi(void)
+{
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲーム中のＮＭＩ処理				*/
+/*--------------------------------------------------------------*/
+void game_nmi(void)
+{
+    u8 nmi_v_pot;
+    u16 nmi_g_pot;
+    u16 nmi_v_cnt;
+    
+//    BG_tenso();
+    DMA_tenso();
+//    BG_char_chenge();
+    
+    if(IRQ_NO == irq_game){
+	nmi_v_pot = *(u8 *)(V_point + ((FRCNT ^ 0xffff) & 1));
+	nmi_g_pot = *(u16 *)(V_diff + ((FRCNT & 0x1) ^ 1) * 2);
+	*(u16 *)(BG_PLTT) = *(u16 *)(GRADA_BUF + (nmi_v_pot * 2));
+	nmi_v_cnt = *(u16 *)(V_CONT_BUF + (nmi_v_pot + 1) * 2) - nmi_g_pot;
+	*(vu16 *)REG_STAT = STAT_V_COUNT_IF_ENABLE | STAT_V_BLANK_IF_ENABLE |
+	     (*(u16 *)(V_CONT_BUF + (nmi_v_pot + 1) * 2) - nmi_g_pot) * 0x100;
+//	*(vu16 *)REG_IE = V_COUNT_INTR_FLAG | V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    }
+//    else{
+//	*(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+//    }
+    *(vu16 *)REG_IE = *(vu16 *)REG_STAT >> 3 & 0x7 | CASSETTE_INTR_FLAG;
+ }
+
+/*--------------------------------------------------------------*/
+/*		画面分割中のＮＭＩ処理				*/
+/*--------------------------------------------------------------*/
+void divide_nmi(void)
+{
+    *(vu16 *)REG_IE = V_COUNT_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = 0x8000 | STAT_V_COUNT_IF_ENABLE | STAT_V_BLANK_IF_ENABLE;
+    game.sccv1 = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		始まりの画面のＮＭＩ処理			*/
+/*--------------------------------------------------------------*/
+void hajimari_nmi(void)
+{
+    if( (mGm_FRAME_COUNT&0x7) == 0x7 ){
+	DmaCopy(3, (d_hajimari_tenso_schDT+((mGm_FRAME_COUNT>>3)&0x7)*0x80), BG_VRAM, 0x40, 32); 
+	DmaCopy(3, (d_hajimari_tenso_schDT+((mGm_FRAME_COUNT>>3)&0x7)*0x80)+0x10, BG_VRAM+0x360, 0x100, 32); 
+	DmaCopy(3, (d_hajimari_tenso_schDT+((mGm_FRAME_COUNT>>3)&0x7)*0x80)+0x50, BG_VRAM+0x1F80, 0x40, 32); 
+//	DmaCopy(3, (d_hajimari_tenso_schDT+((mGm_FRAME_COUNT>>3)&0x7)*0x200), BG_VRAM, 0x800, 32); 
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		コイン３ＵＰ中のＮＭＩ処理			*/
+/*--------------------------------------------------------------*/
+void coinup_nmi(void)
+{
+    DmaCopy(3, title_sclDT, BG_PLTT, 0x200, 16);
+    *(vu16 *)REG_IE = V_COUNT_INTR_FLAG | V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = 0x7700 | STAT_V_COUNT_IF_ENABLE | STAT_V_BLANK_IF_ENABLE;
+}
+/*--------------------------------------------------------------*/
+/*		ブロス用のＮＭＩ処理				*/
+/*--------------------------------------------------------------*/
+void	bros_nmi(void)
+{
+    BrosBGCoinAnime();
+    BackBGAnime();
+    BrosBGWaterFace();
+}
+
+/*--------------------------------------------------------------*/
+/*		タイトルセレクト用のＮＭＩ処理			*/
+/*--------------------------------------------------------------*/
+void TitleSel_nmi(void)
+{
+    u16 i;
+
+    switch(game.title_work[0]){
+    case 2:
+	// BG1を GAME SELECT に書き換え
+	DmaArrayCopy(3, ad_selectbg1_game_sscDT,
+		     BG_VRAM + 0xd000, 16);
+	break;
+    case 3:
+	// BG1を File Select に書き換え
+	DmaArrayCopy(3, ad_selectbg1_file_sscDT,
+		     BG_VRAM + 0xd000, 16);
+	break;
+    case 4:
+	// BG2のERASE FILEをCANCELに書き換え
+	DmaCopy(3, ad_selectbg2_2_sscDT,
+		BG_VRAM + 0xd800 + 0xAC0, 0x80, 16);
+	break;
+    case 5:
+	// BG2を元に戻す
+	DmaArrayCopy(3, ad_selectbg2_sscDT, BG_VRAM + 0xe100, 16);
+	for( i = 0; i < 3; i++ ){
+	    FileData_Set(i);
+	}
+	for( i = 0; i < 0x240; i++ ){
+	    *(u16 *)(BG_VRAM+0xe380+(i<<1)) = 0x00A0;
+	}
+	break;
+    case 6:
+	// BG2にOK? NO YES 画面を追加
+	DmaCopy(3, ad_selectbg2_2_sscDT+0x40,
+		BG_VRAM + 0xd800 + 0xB80, 0x140, 16);
+	if( (TSOBJDT[USA_bomb].mode) == 2 ){
+	    *(u16 *)(BG_VRAM+0xd800+0xC0A) = 0x019F;
+	    *(u16 *)(BG_VRAM+0xd800+0xC4A) = 0x018F;
+	}
+	break;
+    case 7:
+	// BG2のOK? NO YES 画面を消す
+	for( i = 0; i < 0x240; i++ ){
+	    *(u16 *)(BG_VRAM+0xe380+(i<<1)) = 0x00A0;
+	}
+	break;
+    case 8:
+	// ファ@イル選択画面でのワールドセレクト用
+	for( i = 0; i < 3; i++ ){
+	    if( TITLE_WORLD[i] != 0xFF ){
+		if( TITLE_WORLD[i] == 20 ){
+		    File_Extra(i);
+		}
+		else{
+		    File_World(i);
+		}
+	    }
+	}
+	break;
+    case 10:
+	// 扉の部分を隠す
+	DmaCopy(3, ad_selectbg2_2_sscDT+0xE0,
+		BG_VRAM + 0xE800 + 0x180, 0x200, 16);
+	break;
+    default:
+	break;
+    }
+    game.title_work[0] = 1;
+    NMI_NO = nmi_title;
+}
+
+/*--------------------------------------------------------------*/
+/*		オープニング用のＮＭＩ処理			*/
+/*--------------------------------------------------------------*/
+void opening_nmi(void)
+{
+    u32 start, end;
+    u16 i, j;
+
+    if( (mGm_FRAME_COUNT&0xF) == 0 ){
+	start = BG_VRAM;
+	end = BG_VRAM+0x80;
+	i = 0;
+	j = ((mGm_FRAME_COUNT>>4)&7)<<5;
+	while( start < end ){
+	    *(vu32 *)start = d_demo_4bit_schDT[j+i];
+	    i++;
+	    start += 4;
+	}
+    }
+
+    if( TITLE_WORK32(0) == 1 ){ 	// minititle 転送
+	DmaArrayCopy(3, d_demo_minititle_sscDT,
+		     BG_VRAM + 0xe380, 32);
+	TITLE_WORK32(0) = 0;
+    }
+    else if( TITLE_WORK32(0) == 2 ){	// title 転送
+	DmaArrayCopy(3, d_demo_usatitle_sscDT,
+		     BG_VRAM + 0xe380, 32);
+	TITLE_WORK32(0) = 0;
+    }
+    else if( TITLE_WORK32(0) == 3 ){
+	for( i = 0; i < 4; i++ ){
+	    *(vu16 *)(BG_VRAM+0xfE52+(i<<3)) = 0x004F;
+	    *(vu16 *)(BG_VRAM+0xfE54+(i<<3)) = 0x004F;
+	}
+	TITLE_WORK32(0) = 0;
+    }
+    else if( TITLE_WORK32(0) == 4 ){
+	for( i = 0; i < 4; i++ ){
+	    *(vu16 *)(BG_VRAM+0xfE52+(i<<3)) = 0x8000;
+	    *(vu16 *)(BG_VRAM+0xfE54+(i<<3)) = 0x8001;
+	}
+	start = BG_VRAM+0xe380;
+	end = BG_VRAM+0xe800;
+	while( start < end ){
+	    *(vu32 *)start = 0x017f017f;
+	    start += 4;
+	}
+	TITLE_WORK32(0) = 0;
+    }
+    else if( TITLE_WORK32(0) == 5 ){
+	DmaArrayCopy(3, d_demo_usatitle_sscDT,
+		     BG_VRAM + 0xe380, 32);
+	TITLE_WORK32(0) = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ボーナス用のＮＭＩ処理				*/
+/*--------------------------------------------------------------*/
+void bonus_nmi(void)
+{
+    *(vu16 *)(BG_VRAM+0xFBA0) = 0xD0EF;
+    *(vu16 *)(BG_VRAM+0xFBA2) = 0xD0EF;
+    *(vu16 *)(BG_VRAM+0xFBA4) = 0xD0EF;
+    if( TITLE_WORK32(1) ){
+	*(vu16 *)(BG_VRAM+0xFBA0+((TITLE_WORK32(1)-1)<<1)) = 0xD0EE;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		NMI_NO別の処理テーブル				*/
+/*--------------------------------------------------------------*/
+mfunc nmi_sub[] = {
+    normal_nmi,
+    game_nmi,
+    divide_nmi,
+    hajimari_nmi,
+    coinup_nmi,
+    bros_nmi,
+    TitleSel_nmi,
+    opening_nmi,
+    bonus_nmi,
+};
+
+/*--------------------------------------------------------------*/
+/*		地震データ					*/
+/*--------------------------------------------------------------*/
+const u16 TILTDT[4] = {
+    0x0000,0x0003,
+    0x0000,0xfffd,
+};
+
+/*--------------------------------------------------------------*/
+/*		Ｖブランク割り込み処理				*/
+/*--------------------------------------------------------------*/
+void VBlankIntr(void)
+{
+    u8 nmi_v_pot;
+    u16 nmi_g_pot;
+    u16 nmi_v_cnt;
+
+//    if(VS_flag == 0){
+    if(game.nmiflg !=1){
+	if( !mGm_SOUNDFG )
+	    m4aSoundVSync( );
+    }
+    if(VSYNC_OFF != 0){
+	m4aSoundVSyncOff();
+	VSYNC_OFF = 0;
+    }
+
+    if(game.nmiflg == 0){
+
+	game.nmiflg = 1;
+	mGm_FRAME_COUNTER();		// フレームカウンターＩＮＣ
+/* ＯＡＭセット */
+	if(BRUSFG == USA_mode){
+	    act_objsort(); // 並び替え自体はact_objsort_subで行う
+	}else {
+	    DmaArrayCopy( 3, OamBak, OAM, 32 );
+	    mGm_OAMIDX = 0;
+	}
+
+//	    V_ram_tr();
+	if(COL_FLAG != 0){
+//	    if(BRUSFG != BROS_mode){
+	    if(BRUSFG == USA_mode){
+		DmaCopy(3, COL_BUF, BG_PLTT, 0x400, 16);
+	    }else{
+		if( (COL_FLAG & BG_COL_TRANS) ){
+		    CpuArrayCopy(mGm_ColBufBG, BG_PLTT, 16);
+		}
+		if( (COL_FLAG & OBJ_COL_TRANS) ){
+		    CpuArrayCopy(mGm_ColBufOBJ, OBJ_PLTT, 16);
+		}
+	    }
+	    COL_FLAG = 0;
+	}
+
+	nmi_sub[NMI_NO]();
+
+	*(vu16 *)REG_DISPCNT = DISPCNT;
+
+	if(BRUSFG == USA_mode){
+	    if(TILTFG != 0)
+		TILTFG--;
+	    if(BOSSTILTFG != 0)
+		BOSSTILTFG--;
+
+	    *(vu16 *)REG_BG0VOFS = game.sccv1 + TILTDT[(TILTFG & 0x2) >> 1];
+	}else{
+	    *(vu16 *)REG_BG0VOFS = game.sccv1;
+	}
+	*(vu16 *)REG_BG0HOFS = mGm_SCCH1;
+	*(vu16 *)REG_BG1HOFS = mGm_SCCH2;
+	*(vu16 *)REG_BG1VOFS = mGm_SCCV2;
+	*(vu16 *)REG_BG2HOFS = mGm_SCCH3;
+	*(vu16 *)REG_BG2VOFS = mGm_SCCV3;
+	*(vu16 *)REG_BG3HOFS = mGm_SCCH4;
+	*(vu16 *)REG_BG3VOFS = mGm_SCCV4;
+
+	*(vu16 *)REG_BLDCNT = BLDCNT;
+	*(vu16 *)REG_BLDALPHA = BLDALPHA;
+	*(vu16 *)REG_BLDY = BLDY;
+	*(vu16 *)REG_MOSAIC = MOSAIC_DATA;
+
+	*(vu16 *)REG_WIN0H = WIN0H;
+	*(vu16 *)REG_WIN1H = WIN1H;
+	*(vu16 *)REG_WIN0V = WIN0V;
+	*(vu16 *)REG_WIN1V = WIN1V;
+	*(vu16 *)REG_WININ = WININ;
+	*(vu16 *)REG_WINOUT = WINOUT;
+
+    }
+    else{
+	if(IRQ_NO == irq_game){
+	    *(u16 *)(V_diff + ((FRCNT & 0x1) * 2)) = 0;
+	    *(u8 *)(V_point + (FRCNT & 0x1)) = 0;
+	    nmi_v_pot = *(u8 *)(V_point + ((FRCNT ^ 0xffff) & 1));
+	    nmi_g_pot = *(u16 *)(V_diff + ((FRCNT & 0x1) ^ 1) * 2);
+	    *(u16 *)(BG_PLTT) = *(u16 *)(GRADA_BUF + (nmi_v_pot * 2));
+	    nmi_v_cnt = *(u16 *)(V_CONT_BUF + (nmi_v_pot + 1) * 2) - nmi_g_pot;
+	    *(vu16 *)REG_STAT = STAT_V_COUNT_IF_ENABLE | STAT_V_BLANK_IF_ENABLE |
+		(*(u16 *)(V_CONT_BUF + (nmi_v_pot + 1) * 2) - nmi_g_pot) * 0x100;
+	}
+	*(vu16 *)REG_IE = (*(vu16 *)REG_IE & 0xfff8) | (*(vu16 *)REG_STAT >> 3 & 0x7) | CASSETTE_INTR_FLAG;
+#if MARIO_USA_DEBUG
+	*(vu16 *)REG_DISPCNT = DISPCNT & 0xe0ff;
+#endif
+    }
+//    }else{
+//
+/*------ マリオブロス対戦中Ｖブランク処理 --------*/
+//#if SOUND_ON
+//	if(!mGm_SOUNDFG)
+//	    m4aSoundVSync();
+//#endif
+//	/******** スクロール値セット ********/
+//	scroll_set();
+//
+//	/******** 回転拡縮パラメータセット ********/
+//	m_angpra();
+//
+//	/******* カラー特殊効果設定 ********/
+//	if( mGm_BLDMOD ){
+//	    *(vu16 *)REG_BLDCNT = mGm_BLDMOD;
+//	    *(vu16 *)REG_BLDALPHA = mGm_COLEV;
+//	    *(vu16 *)REG_BLDY = mGm_COLY;
+//	}
+//    }
+
+    *(vu16 *)REG_IF = V_BLANK_INTR_FLAG;
+    game.IntrCheck = V_BLANK_INTR_FLAG;
+}
+
+/*--------------------------------------------------------------*/
+/*		Ｈブランク割り込み処理				*/
+/*--------------------------------------------------------------*/
+void HBlankIntr(void)
+{
+    *(vu16 *)REG_BG0HOFS = HDMABF4[*(vu16*)REG_VCOUNT];
+    *(vu16 *)REG_IF = H_BLANK_INTR_FLAG;
+}
+/*--------------------------------------------------------------*/
+/*		Ｖカウンタ割り込み処理				*/
+/*--------------------------------------------------------------*/
+void VCountIntr(void)
+{
+    VCountIntr_menu[IRQ_NO]();
+}
+/*--------------------------------------------------------------*/
+/*		ダミー割り込み処理				*/
+/*--------------------------------------------------------------*/
+void IntrDummy(void)
+{
+}
+/*--------------------------------------------------------------*/
+/*		関数名	:ObjVanishAll				*/
+/*		内容	:ＯＢＪを全て非表示にする		*/
+/*		入力	:なし					*/
+/*		備考	:なし					*/
+/*--------------------------------------------------------------*/
+OamData	Oamclr = { 160,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+void	ObjVanishAll(void)
+{
+    register OamData *pt;
+    register OamData *c_pt;
+    register OamData clrdata;
+    int	i;
+    
+    clrdata = Oamclr;
+    pt = OamBak;
+    c_pt = &(OamBak[128]);
+    while(pt<c_pt){
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+    }
+}
+
+/***************並び替え用ＯＡＭクリア関数****************/
+void ObjVanishTemp(void)
+{
+    register OamData *pt;
+    register OamData *c_pt;
+    register OamData clrdata;
+    int	i;
+    
+    clrdata = Oamclr;
+    pt = OAMTEMP;
+    c_pt = &(OAMTEMP[128]);
+     while(pt<c_pt){
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+	*pt++ = clrdata;
+    }
+}
+/*--------------------------------------------------------------*/
+/*		キー読み込み					*/
+/*--------------------------------------------------------------*/
+void KeyRead(void)
+{
+    u16 ReadData = (*(vu16 *)REG_KEYINPUT ^ 0xffff);
+    game.Trg = ReadData & (ReadData ^ game.Cont);
+    game.Cont = ReadData;
+}
+
+
+/*--------------------------------------------------------------*/
+/*	Vカウント割り込み用ダミー関数				*/
+/*--------------------------------------------------------------*/
+void Dummy(void)
+{
+}
+
+/*--------------------------------------------------------------*/
+/*	プレイヤーセレクト画面分割処理				*/
+/*--------------------------------------------------------------*/
+void Divide( void )
+{
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG; 	//V_COUNT割り込み禁止
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;	// V_COUNT値クリア
+    *(vu16 *)REG_BG0VOFS = -(usa_game->work[1]);// BG0 移動
+    *(vu16 *)REG_IF = V_COUNT_INTR_FLAG; // 割り込み要求クリア
+}
+/*--------------------------------------------------------------*/
+/*		コイン３ＵＰ用カラー転送処理			*/
+/*--------------------------------------------------------------*/
+void Coinup( void )
+{
+    if( ((*(vu16 *)REG_STAT)>>8) == 0x77 ){
+	DmaCopy(3, d_coinup_sclDT+0x10*((mGm_FRAME_COUNT&0x1F)>>3), BG_PLTT+0xA0, 0x20, 16);
+	*(vu16 *)REG_IE = V_COUNT_INTR_FLAG | V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+	*(vu16 *)REG_STAT = *(vu16 *)REG_STAT+0x800 | STAT_V_BLANK_IF_ENABLE | STAT_V_COUNT_IF_ENABLE;
+	*(vu16 *)REG_IF = V_COUNT_INTR_FLAG;
+    }
+    else{
+	DmaCopy(3, title_sclDT+0x50, BG_PLTT+0xA0, 0x20, 16);
+	*(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+	*(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+	*(vu16 *)REG_IF = V_COUNT_INTR_FLAG;
+    }
+}
+#if 0	//■■　@旧バージョン　@■■■■■■■■■■■■■■■■■■
+void ObjVanishAll(void)
+{
+    int	i;
+    for (i=0; i<128; i++)
+	OamBak[i].VPos = 160;
+}
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+/*--------------------------------------------------------------*/
+/*		グラデーション処理				*/
+/*--------------------------------------------------------------*/
+void Gradation(void)
+{
+    u8 v_pot;
+    u16 g_pot;
+    
+//    while(*(vu16 *)(REG_STAT) & 0x2 == 0x2){
+    v_pot = *(u8 *)(V_point + ((FRCNT ^ 0xffff) & 1)) + 1;
+    *(u16 *)(BG_PLTT) = *(u16 *)(GRADA_BUF + (v_pot * 2));
+    g_pot = *(u16 *)(V_diff + (((FRCNT & 0x1) ^ 1) * 2));
+    
+    if(v_pot < 15){
+	*(vu16 *)REG_IE = V_COUNT_INTR_FLAG | V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+	*(vu16 *)REG_STAT = STAT_V_COUNT_IF_ENABLE | STAT_V_BLANK_IF_ENABLE |
+	     (*(u16 *)(V_CONT_BUF + ((v_pot + 1) * 2)) - g_pot) * 0x100; 
+	*(vu16 *)REG_IF = V_COUNT_INTR_FLAG;
+	*(u8 *)(V_point + ((FRCNT ^ 0xffff) & 1)) = v_pot;
+    }
+    else{
+	*(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+	*(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+	*(vu16 *)REG_IF = V_COUNT_INTR_FLAG;
+    }
+//    }
+}
+
+/*--------------------------------------------------------------*/
+/*		usa_gameのマロック処理				*/
+/*--------------------------------------------------------------*/
+void mGm_MALLOC_usa_game(void)
+{
+    if(usa_game == NULL){
+	 usa_game = (usa_gameDT_c *)mGm_MALLOC(sizeof(usa_gameDT_c));
+    }
+    DmaClear(3, 0, usa_game, sizeof(usa_gameDT_c), 16);
+}
+
+/*--------------------------------------------------------------*/
+/*		usa_gameのフリー処理				*/
+/*--------------------------------------------------------------*/
+void mGm_FREE_usa_game(void)
+{
+    if(usa_game != NULL){
+	mGm_FREE(usa_game);
+	usa_game = NULL;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

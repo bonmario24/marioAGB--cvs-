@@ -1,0 +1,117 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*								*/
+/*		効果アクターメインプログラム			*/
+/*								*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "ba_effect.h"
+#include "ba_mutekiStar.h"
+#include "ba_point.h"
+#include "ba_reach.h"
+#include "ba_smoke.h"
+#include "ba_spark.h"
+#include "ba_splash.h"
+#include "ba_powsmk.h"
+
+/*
+ ****************************************************************
+ *	イニシャルデータ
+ ****************************************************************
+ */
+effectDT_c	effectActInitDT = {
+    NoEffect,0,0,
+    0,0,0,
+    0,0,0,0,
+    0,0,
+    0,0,0,0,
+    0,
+    NULL,
+};
+
+/*
+ ****************************************************************
+ *	イニシャル処理
+ ****************************************************************
+ */
+void	effectAct_init(void)
+{
+    int		i;
+
+    for( i = 0; i < MAX_EFFECT; i++ ){
+	if( mGm_EFFECTACT(i) == NULL ){
+	    mGm_EFFECTACT(i) = mGm_MALLOC(sizeof(effectDT_c));
+	}
+	*mGm_EFFECTACT(i) = effectActInitDT;
+    }
+}
+/*
+ ****************************************************************
+ *	メニュー配列
+ ****************************************************************
+ */
+void	(*effectAct_menu[])(effectDT_c *p) = {
+    smoke_main,
+    Splash_main,
+    Point_main,
+    spark_main,
+    reach_main,
+    mutekiStar_main,
+    Powsmk_main,
+};
+/*
+ ****************************************************************
+ *	メイン処理
+ ****************************************************************
+ */
+void	effectAct_main(void)
+{
+    u8		i;
+    u16		id;
+
+    for (i = 0; i < MAX_EFFECT; i++){
+	id = mGm_EFFECTACTID(i);
+	if( id != NoEffect ){
+	    id--;
+	    effectAct_menu[id](mGm_EFFECTACT(i));
+	}
+    }
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

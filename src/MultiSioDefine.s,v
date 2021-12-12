@@ -1,0 +1,49 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@@********************************************************************
+@@*          MultiSioDefine.s                                        *
+@@*            マルチプレイ通信ライブラリ定数	                    *
+@@*            （タイマー割り込み送信バージョン）                    *
+@@*                                                                  *
+@@********************************************************************
+
+
+MULTI_SIO_TIMER_NO              =   3               @@ タイマーＮｏ
+MULTI_SIO_TIMER_INTR_FLAG       =   (TIMER0_INTR_FLAG << MULTI_SIO_TIMER_NO)
+                                                    @@ タイマー割り込みフラグ
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

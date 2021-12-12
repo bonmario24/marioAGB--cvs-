@@ -1,0 +1,63 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef __CLIENT_SUB_H_
+#define __CLIENT_SUB_H_
+
+
+#include "client_main.h"
+
+
+/*-------------------- EXTURN  ----------------------*/
+extern	void	m_lcdcoff(void);
+extern	u8	WhiteIn(void);
+extern	u8	WhiteOut(void);
+extern	u8	BlendOut(void);
+#if SKYFADE
+extern	void	ColorMove(u16 *, u16 *);
+#else
+extern	void	ColMvSet(u16 *, u16 *);
+extern	void	ColorMove(u16 *);
+#endif
+#if DEBUG
+extern	u16	numchange(u16 x);
+#endif
+
+
+
+#endif /* __CLIENT_SUB_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

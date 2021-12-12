@@ -1,0 +1,153 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		ÇnÇaÇiã§í 					*/
+/****************************************************************/
+#ifndef __UA_COMMON_H_
+#define __UA_COMMON_H_
+
+#include "m_main.h"
+#include "uca_acters.h"
+#include "ua_commondt.h"
+#include "ua_endat0a.h"
+#include "ua_endat0b.h"
+#include "up_player.h"
+#include "ua_bg.h"
+#include "ua_act.h"
+
+/*------------- ÇdÇwÇsÇdÇqÇm -----------------------------------*/
+extern u8 act_enmyset(u16 name, u8 num);
+extern u8 act_objset(u16 name, u8 num);
+extern u8 act_objset2(u16 name, u8 num);
+extern u8 act_kyouseiset(u16 name);
+
+extern void act_enmyclr(u8 my_index);
+extern void a_affinset(u8 affinpt);
+extern void act_speedclc( s32* spd, s32 max );
+extern void act_xclc(aAC_base_c *abs_pt);
+extern void act_yclc(aAC_base_c *abs_pt);
+// ï‚ê≥èàóù
+extern void act_xRevision(aAC_base_c *abs_pt);
+extern void act_yRevision(aAC_base_c *abs_pt);
+extern void act_xRevision2(aAC_base_c *abs_pt);
+extern void act_yRevision2(aAC_base_c *abs_pt);
+
+extern void act_oamset(aAC_base_c *abs_pt,u8 my_index);
+
+extern void a_CRFGset(aAC_base_c *abs_pt, u8 index);
+extern void a_BIGCRFGset(aAC_base_c *abs_pt, u8 index);
+extern void a_BIGCRFGset2(aAC_base_c *abs_pt, u8 index);
+extern void a_SBTNCRFGset(aAC_base_c *abs_pt, u8 index);
+extern u8 WHATSBGCK_sub(u16 unit_no);
+
+extern void a_EnMuki(aAC_base_c *abs_pt);
+extern void a_EnMoveSB(aAC_base_c *abs_pt, u8 index);
+extern void a_EnTurn(aAC_base_c *abs_pt);
+extern u8 ONPLCK(aAC_base_c *abs_pt,u8 index);
+
+// ê‘ã ÅAê¬ã èàóù
+extern void GOHOUBISET(u8 index1, u8 index2);
+extern void TAMA_BENTIT(aAC_base_c *abs_pt,u8 index);
+extern void TAMA_RIDEIT(aAC_base_c *abs_pt,u8 index);
+extern void AKADAMA_BOUND(aAC_base_c *abs_pt);
+
+extern void EGG_ONPLIT(aAC_base_c *abs_pt,u8 index);
+extern void WALK_RIDECK(aAC_base_c *abs_pt);
+extern void WALK_ONPLMV(aAC_base_c *abs_pt);
+extern void BIGCOIN_GET(aAC_base_c *abs_pt,u8 index);
+extern void Kamen_Eye_Flash(void);
+extern void RIBONSET(void);
+extern void REDCOIN_DTRD(void);
+extern void EGGFG_DTSV(void);
+
+// É{ÉXã§í ÉfÉÇèàóù
+extern void enmove_BOSSDEMO(aAC_base_c *abs_pt, u8 index);
+extern void BOSS_DEMOSPEAK(aAC_base_c *abs_pt, u8 index);
+extern void BOSS_FAILVOICE(aAC_base_c *abs_pt, u8 index);
+extern void BOSS_SCRFG_SET(aAC_base_c *abs_pt);
+
+/* ENCMODèàóù */
+extern void act_sub_down(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_blak(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_burn(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_smok(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_sund(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_suna(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_pwbk(aAC_base_c *abs_pt,u16 name,u8 index);
+extern void act_sub_frfl(aAC_base_c *abs_pt,u16 name,u8 index);
+/* ENCMOD END*/
+
+extern void act_objsort( void );
+extern void act_objsort_sub( void );
+extern void act_LifeSet( void );
+
+extern u8 act_enemy_search(void);
+extern void ENINT01(aAC_base_c *abs_pt,u8 index);
+extern void ENIT00(aAC_base_c *abs_pt,u8 index);
+extern void WENIT50(aAC_base_c *abs_pt,u8 index);
+extern void ENCLST(aAC_base_c *abs_pt,u8 index);
+extern void ENCLER(aAC_base_c *abs_pt,u8 index);
+extern void CPTSET(aAC_base_c *abs_pt,u8 index);
+
+extern void SMOKST(aAC_base_c *abs_pt,u8 index);
+extern void SMOKST2(aAC_base_c *abs_pt,u8 index);
+extern void ALLSMK(u8 index);
+
+/* ìäÇ∞ÇÁÇÍèàóù */
+extern int SHOTCK(aAC_base_c *abs_pt,u8 index);
+extern void SHOTCK2(aAC_base_c *abs_pt,u8 index);
+
+extern void OBJUP(aAC_base_c *abs_pt, u8 index);
+
+/*---p_player.c---*/
+extern    aPL_base_c *p_ply;
+
+/*---a_cros.c---*/
+extern void a_CROSSCK(aAC_base_c *abs_pt, u8 index);
+extern void BRNCROS(aAC_base_c *abs_pt, u8 index);
+
+/*---a_game.c---*/
+extern void BGM_RETURN(u16 bgm_no);
+
+/*---a_eggmeter.c---*/
+extern void act_EGGMeterMain(u8 life_no);
+extern void m_eggmeter_clear(void);
+extern void act_EGGMeterMV(void);
+
+#endif /* __UA_COMMON_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,1975 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.21;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/****************************************************************/
+/*		マリオＵＳＡ　@ゲームのメイン処理		*/
+/****************************************************************/
+#include "m_main.h"
+#include "m_sub.h"
+#include "m_game.h"
+#include "ua_course.h"
+#include "uca_acters.h"
+#include "uca_act.h"
+#include "up_player.h"
+#include "um_tscr.h"
+#include "um_yscr.h"
+#include "ua_color.h"
+#include "ua_game_over.h"
+#include "ua_pause.h"
+#include "um_mosaic.h"
+#include "um_courseclear.h"
+
+#include "ud_cad.h"
+#include "ua_endt.h"
+#include "ua_common.h"
+#include "ua_score.h"
+#include "up_exst.h"
+#include "ua_stareffect.h"
+#include "up_commondt.h"
+#include "up_common.h"
+#include "um_tscr.h"
+#include "up_exst.h"
+#include "ua_game.h"
+#include "um_select_sub.h"
+
+#if DEBUG
+#define DEBMETER 0  // デバック用処理メータ切り替え
+#else
+#define DEBMETER 0  // デバック用処理メータ切り替え
+#endif
+
+/*==============================================================*/
+/*		関数のプロトタイプ宣言				*/
+/*==============================================================*/
+static void game_init(void);
+static void game_main(void);
+static void m_enemy_init(void);
+static void m_enemy_clear(void);
+static void scroll_main(void);
+static void GMPLAY(void);
+static void GMPLYH(void);
+static void SCRSET(void);
+static void player_TMCALC(void);
+static void game_next_init(void);
+static void NEXTCALC(void);
+static void COUSEIT(void);
+static void COSINIT(void);
+static void RAMCLS(void);
+static void TATESET(void);
+static void YOKOSET(void);
+static void BGPTINT_V(void);
+static void BGPTINT_H(void);
+static void HScr_Limit_check(void);
+static void PLYDOWN(void);
+static void CONTUNE(void);
+static void COUSCLR(void);
+static void PLYWARP(void);
+static void PLCANCL(void);
+static void FLGCLEAR_COMMON(void);
+static void game_tsubo_init(void);
+static void game_tsubo_move(void);
+static void game_tsubo_out_init(void);
+static void RAMREV(void);
+static void TUBOCHK(void);
+static void ENKYSV(void);
+static void BGDTPSHB(void);
+static void BGDTPOPB(void);
+static void player_scroll_offset(void);
+static void player_Hscroll_offset_TATE(void);
+static void player_Vscroll_offset_YOKO(void);
+static void player_scroll_offset_key(void);
+static void player_scroll_offset_key_TATE(void);
+static void player_scroll_offset_key_YOKO(void);
+static void scr_lock_cancel(void);
+static void scr_muki_set(void);
+
+/*--------------------------------------------------------------*/
+/*		ゲームイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void game_init(void)
+{
+//    u8 t_i;
+    u16 bgm_bak;
+
+    lcdc_off();			//強制ブランキング処理
+
+//    m4aSoundVSyncOff();
+
+    bgm_bak = BGBGM;
+
+    m_enemy_clear();		//敵クリア処理
+
+    m_course_init();		//コースセット処理
+    player_init();		//プレイヤーイニシャル
+    COUSEIT();			//コースイニシャル
+    vscr_updown_set();		// 縦画面スクロール開始位置セット
+    cos_vram_set();		//コースＢＧイニシャルセット
+    player_PLOBJ_set();		// ＯＢＪ表示位置セット
+    m_enemy_init();		//敵セット処理（テスト）
+    ex_mode_clear();		// 効果クリア
+
+    if( STTSBIN ||		// つぼＯＵＴ？
+	PLAY_PLCMOD == PLTA ){	// つる自動移動？
+//(2000-01-13)	PLAY_PLSAFT = 60;	// ＹＥＳ
+	STTSBIN = 0;
+    }
+//    if( EFFECT_NO != 0 ){	// star&coin effect clear
+//	for( t_i = 0; t_i < EFFECT_MAX; t_i++ ){
+//	    Effect_Clear(t_i);
+//	}
+//    }
+    All_Effect_Clear();		// star&coin effect clear
+
+    KAMTIM1 = KAMTIM2 = 0;
+    BLDCNT = 0;
+    BLDALPHA = 0;
+    BLDY = 0;
+    MOSAIC_TIM = 0;
+    MOSAIC_DATA = 0;
+	if(CAPFLG == 1){ 
+		CAPFLG = 0;
+	}
+	if(BALLFLG == 1){
+		BALLFLG = 0;
+	}
+
+/*    if( TSBOFG != 0 ){
+	BLDCNT = 0x00e6;
+	BLDALPHA = 0x0000;
+	BLDY = 0x0004;
+    }
+    else{
+	BLDCNT = 0;
+	BLDALPHA = 0;
+	BLDY = 0;
+	}*/
+    *(vu16 *)REG_BLDCNT = BLDCNT;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA;
+    *(vu16 *)REG_BLDY = BLDY;
+    *(vu16 *)REG_MOSAIC = MOSAIC_DATA;
+    game.fade_flag = 0;
+
+    DISPCNT = 0;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+    if(BG3_scroll_type == 3){
+	DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_BG3_ON
+	    | DISP_OBJ_ON;
+    }
+    else{
+	DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON
+	    | DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+    }
+
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    if(bgm_bak == 0xffff)
+	m4aSongNumStart( BGBGM );
+    else
+	m4aSongNumStartOrContinue( BGBGM );
+    if(PLAY_KENSHIRO > 8)
+	m4aSongNumStartOrContinue( s_u_star );
+
+    if(PLAY_WATCHTM != 0 && PLAY_WATMWK != 0)
+	m4aSongNumStartOrContinue( s_u_se_timer );
+
+    game.GMMODE++;
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲーム処理					*/
+/*--------------------------------------------------------------*/
+void game_main(void)
+{
+
+    if( TSBIN != 0 ){			// つぼ・裏画面ＩＮ？
+	VSYNC_OFF = 1;
+	mGm_GMMODE = gm_tsubo_init;	// ＹＥＳ
+	return;
+    }
+
+    if( game.Trg & START_BUTTON &&
+	BOSS_DEMOTIM == 0 &&		// ボスデモフラグＯＮ？
+	SKFLG == 0 &&			// スクロール中？
+	PLAY_PLCMOD != PLFL &&		// プレイヤーやられた？
+	PLAY_PLCMOD != PLTA &&		// プレイヤーが自動でつたを上っている？
+	PLAY_PLCMOD != PLDRIN &&	// プレイヤーがドアに入っている？
+	PLAY_PLCMOD != PLDROUT &&	// プレイヤーがドアから出ている？
+	RKETFG == 0 &&			// ロケットの中？
+	EXOPEN == 0 &&			// 顔の出口処理中？
+	PLAY_PLSTFG == 0 &&		// プレイヤーストップ中？
+	PLAY_DRINFG == 0 &&		// プレイヤードアに入っている？
+	CLEAR_CNT == 0 ){		// コースクリアの文字が出ている？
+	pause_init();
+	return;
+    }
+
+    scr_lock_cancel();		// スクロール固定解除
+
+#if SFC_VSCROLL	//■■　@ＳＦＣ版スクロール　@■■■■■■■■■■■■■■■
+    if( mGm_SCRCTL == V_SCROLL ){
+	SCRSET();			// スクロールフラグセット
+    }
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+
+    if( RKETFG == 0 ){		// ロケット乗ってる？
+	player_scroll_offset_key();	// キー入力補正
+	u_player_main();	// プレイヤーメイン
+	scroll_main();		// スクロールメイン
+	player_PLPOSCK();	// プレイヤー位置チェック
+    }
+
+    if( BOSS_DEMOTIM > 0 )
+	BOSS_DEMOTIM--;
+
+    player_oamset(p_ply);	// プレイヤーＯＡＭセット
+    player_scroll_offset();	// スクロール補正
+    PLAY_OBJONFG = 0;		// 敵乗りフラグクリア
+    scr_muki_set();		// スクロール向きセット
+    act_main();			// 敵（アクター）メイン
+    u_score_disp();
+    m_scroll_BG_chenge();	// ＢＧスクロール書き換え処理
+//    player_scroll_offset();	// スクロール補正
+    player_TMCALC();		// プレイヤータイマー計算
+    tubo_hosi_color();
+    ice_color();
+    Kamen_Eye_Flash();		// BG仮面の目を光らせる
+    mosaic_main();			//モザイク処理
+
+/*------------- テスト -------------*/
+    *(u16 *)(DMA_INDEX) = 0;
+    char_change();
+    COUSECLEAR_MAIN();
+
+    if( PLAY_PLGMOD != 0 ){			// ＳＦＣではGMMODE
+	PLAY_KENSHIRO = 0;
+	KABUCT = 0;
+	CRYCNT = 0;
+//	CRYCNT2 = 0;
+	PLAY_WATCHTM = 0;
+	mGm_GMMODE = gm_mode_check;
+    }
+    else if( (BGCHGFG != 0) && (PLAY_FRONTTM == 0) ){
+	VSYNC_OFF = 1;
+	mGm_GMMODE = gm_next_init;
+    }
+    else{
+	return;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームモードテーブル				*/
+/*--------------------------------------------------------------*/
+mfunc game_menu[] = {
+    game_init,
+    game_main,
+    game_next_init,		// 次のコースイニシャル
+    game_mode_check,		// モードチェック
+    game_over_init,		// ゲームオーバーイニシャル処理
+    fade_in,
+    game_over_disp,		// ゲームオーバー処理
+    over_open,
+    over_key_wait,
+
+    game_tsubo_init,		// つぼ（固定）・裏画面イニシャル
+    game_tsubo_move,		// つぼ（固定）・裏画面ＭＯＶＥ
+    game_tsubo_out_init,
+
+    pause_open,
+    pause,
+    pause_timer,
+    pause_close,
+    pause_fade_out,
+};
+
+/*--------------------------------------------------------------*/
+/*		システム処理					*/
+/*--------------------------------------------------------------*/
+u8 sort_flag_data[] = {
+    0,		// gm_init,
+    1,		// gm_move
+    1,		// gm_next_init
+    1,		// gm_mode_check
+    0,		// gm_over_init
+    0,		// gm_over_fade_in
+    0,		// gm_over_disp
+    0,		// gm_over_open
+    0,		// gm_over_key_wait
+
+    0,		// gm_tsubo_init,
+    1,		// gm_tsubo_move,
+    0,		// gm_tsubo_out_init,
+
+    0,		// gm_pause_open,
+    0,		// gm_pause,
+    0,		// gm_pause_timer,
+    0,		// gm_pause_close,
+    0,		// gm_pause_fade_out,
+};
+
+void M_game_play(void)
+{
+#if DEBMETER
+    /* デバッグ用処理メータ */
+    if( L_BUTTON_ON_C || R_BUTTON_ON_C ){
+	*(vu16 *)REG_BLDCNT = 0xFF; 
+	*(vu16 *)REG_BLDY = 0x7;
+    }
+#endif
+
+    ENTY_OAMPT(p_act) = 0;	// ＯＡＭインデックスクリア
+    ENTY_AFBPT(p_act) = 0;	// Affinインデックスクリア
+    SCORE_OAMPT = 127;
+    SORTFG = sort_flag_data[game.GMMODE];
+
+    game_menu[game.GMMODE]();
+
+    gradation_set();
+
+#if DEBMETER
+    /* デバッグ用処理メータ */
+    if( ((*(vu16 *)REG_BLDCNT)&0xC0) == 0xC0 ){
+	*(vu16 *)REG_BLDCNT = 0x0; 
+	*(vu16 *)REG_BLDY = 0x0; 
+    }
+#endif
+}
+/*--------------------------------------------------------------*/
+/*		敵クリア処理					*/
+/*--------------------------------------------------------------*/
+void m_enemy_clear(void)
+{
+    u8 t_i, *fgpt;
+    aAC_base_c	*abs_pt;
+
+    // 敵の出現フラグの初期化
+
+    fgpt = ENMY_SETFG(p_act); 
+    for( t_i = 0; t_i < 64; t_i++ ){
+	*fgpt = 0; 
+	*fgpt++;
+    }
+    for( t_i=0; t_i<A_ENMY_NO; t_i++ ){
+	
+	abs_pt = &(p_act->a_base[t_i]);
+	if( ABASE_ONPTRN(abs_pt) == 0 ){
+	    ENTY_ENBASE(p_act)[t_i] = abase_clear;
+	    ENTY_ENCMOD(p_act)[t_i] = DUMMY;
+	    ENTY_ENSYNO(p_act)[t_i] = 0;
+	    ENTY_SCRDTNO(p_act)[t_i] = 0;
+	    ENMY_OAMNO(p_act)[t_i] = 0;
+	}
+    }
+
+    EXITFG = 0;
+    EXCONT = 0;
+    EXTIME = 0;
+    EXOPEN = 0;
+    ESETFG = 0;
+    FIRESCT = 0;
+    FAILCNT = 0;
+    DREAMCT = 0;
+    BSDMCRL = 0;
+    MSMODE = 0;
+    // CASALIN_FG = 0;
+    BUBBLECT = 0;
+    BOSS_DEMOTIM = 0;
+    EGG_DEMOTIM = 0;
+    CLEAR_EXIT = 0;
+    CLEAR_CNT = 0;		// COUSE CLEAR 表示カウント
+    BGMSTART = 0;
+    EGGMODE = 0;
+
+    TILTFG = 0;
+    BOSSTILTFG = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		敵セット処理（テスト）				*/
+/*--------------------------------------------------------------*/
+void m_enemy_init(void)
+{
+    u8 name, i;
+    s16 *endt_pt, buf;
+    s16 KATYAD[] = { 0xfff9,0xffff,0x0000,0x0000,0x000c,0x0018,0x001a,
+		     0x0001,0x0006,0x000a,0x000c,0x0018,0x001a,0x001c };
+    s16	KATY0D[] = { 0xfffa,0xfff6,0xfffc,0xfff7,
+		     0x0002,0xfffe,0x0004,0xffff };
+ 
+    aAC_base_c	*abs_pt;
+    u8	enemy_index;
+
+    NRND[0] = 0xB6;                     //ランダム
+
+    REDCOIN_DTRD();		// レッドコインデータロード
+
+/*------------- ＲＡＭクリア -----------------------------------*/
+    if( PLAY_PLKATSG != 0 ){	// プレイヤーカギドアＯＵＴチェック
+	if( PLAY_ENKTFG == 0 )
+	    PLAY_PLCHRNO = DROUT;
+    }
+
+    SCRSTP = 0;
+    PLAY_PLXSPED = 0;
+    PLAY_PLSAFT = 0;
+    PLAY_PLKATSG = 0;
+    PLAY_PLWKTIM = 0;
+    PLAY_PLPWJPTM = 0;
+    PLAY_PLFLYTIM = 0;
+    PLAY_PLSAND = 0;
+    PLAY_BJUMP = 0;
+
+    for( i=0; i<0x0e; i++ )
+	PLAY_WKATYAD[i] = KATYAD[i];
+    PLAY_WKATYAD[0] = KATY0D[PLAY_PLSYNO];
+    PLAY_WKATYAD[7] = KATY0D[PLAY_PLSYNO+4];
+
+/*------------- １Ｗ－１プレイヤー落下サウンドセット -----------*/
+    if( (PLDSPNO | WORDNO) == 0 )
+	m4aSongNumStart( s_u_se_rakka );	// [S]
+
+/*------------- かつがれ敵のチェック ---------------------------*/
+    if( PLAY_ENKTFG != 0 ){
+	
+	if( (enemy_index = act_enemy_search()) == 0xff )
+	    enemy_index = A_ENMY_NO - 1;	// 強制セット
+	
+	abs_pt = &(p_act->a_base[enemy_index]);
+	ENTY_ENSYNO(p_act)[enemy_index] = PLAY_ENKTFG;
+	ENTY_ENCMOD(p_act)[enemy_index] = ENM;
+	ABASE_SORTDT(abs_pt) = 
+	    SORTDT[ENTY_ENSYNO(p_act)[enemy_index]];
+	if( PLAY_ENKTFG == ENEMY_RKET ){	// ロケット？
+	    RKETFG = PLAY_ENKTFG;
+	    ENCLST(abs_pt, enemy_index);
+	    ABASE_XPOSH(abs_pt) = 0x0078;
+	    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+	    ABASE_YPOSH(abs_pt) = 0x00e0;
+	    ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+	    ABASE_YSPD(abs_pt) = 0xfffffff0 << 12;
+	    ABASE_WORK0(abs_pt) = 1;		// ENCHMD
+	    ABASE_WORK2(abs_pt) = 1;
+	}
+	else{					// その他
+	    PLAY_ONENMY = enemy_index;
+	    ENINT01(abs_pt,enemy_index);
+	    ABASE_ONPTRN(abs_pt) = 1;
+	    PLAY_PLKATSG = 1;
+	    ENM190(abs_pt,enemy_index);
+	   
+	    if( PLAY_ENKTFG == ENEMY_KEY0 ){	// カギ？
+		
+		endt_pt = couse_endt_tbl[WORDNO*COS_MAX + COSUNO];
+		if( endt_pt != NULL ){
+		    while( *endt_pt != 0xFF ){ 
+			name = *endt_pt;
+			if(name == ENEMY_MASK0)
+			    break;
+			endt_pt += 3;
+		    }
+		}
+		
+		if( *endt_pt == 0xFF || endt_pt == NULL ){
+		    ABASE_ENSTAT(abs_pt)++;
+		    if( (enemy_index = act_enemy_search()) == 0xff )
+			enemy_index = A_ENMY_NO - 2;	// 強制セット
+		    abs_pt = &(p_act->a_base[enemy_index]);
+		    ENTY_ENSYNO(p_act)[enemy_index] = ENEMY_MASK0;
+		    ENTY_ENCMOD(p_act)[enemy_index] = ENM;
+		    ENINT01(abs_pt,enemy_index);
+		    ABASE_SORTDT(abs_pt) = SORTDT[ENEMY_MASK0];
+		    ABASE_XPOSH(abs_pt) = mGm_SCCH1;
+		    ABASE_XPOS(abs_pt) = ABASE_XPOSH(abs_pt) << 16;
+		    ABASE_YPOSH(abs_pt) = mGm_SCCV1;
+		    ABASE_YPOS(abs_pt) = ABASE_YPOSH(abs_pt) << 16;
+		    ABASE_HSIZE(abs_pt) = 0x200;
+		    ABASE_VSIZE(abs_pt) = 0x200;
+		}
+	    }else if( PLAY_ENKTFG == ENEMY_BKDN ){
+		ABASE_ENTIM(abs_pt) = BKDN_TIMER;
+	    }
+	}
+    }
+    m_score_clear();			// スコア構造体クリア
+    
+    act_InitEnmySet();	        // 共通敵湧き出し
+
+    // BGカメーンの部屋フラグセット
+    KAMEN_ROOM = 0;
+    for( i=0; i<KAMROMNUM*2; i+=2 ){
+	if( WORDNO == KAMROM[i] && COSUNO == KAMROM[i+1] ){
+	    KAMEN_ROOM = 1;
+	    break;
+	}
+    }
+
+}
+/*--------------------------------------------------------------*/
+/*		スクロールメイン処理				*/
+/*--------------------------------------------------------------*/
+static void (*scroll_menu[])() = {
+    GMPLAY,			/* (0) 縦スクロール */
+    GMPLYH,			/* (1) 横スクロール */
+};
+/*--------------------------------------------------------------*/
+
+void scroll_main(void)
+{
+    if( mGm_SLMODE == warp_mode )		// ワープモード？
+	return;					// ＹＥＳ
+
+/*------------- 水晶サウンドタイマー計算 -----------------------*/
+    if( BGMCLTM != 0 ){				// 水晶サウンドＯＮ？
+	BGMCLTM--;				// ＹＥＳ
+	if( (BGMCLTM == 0) && (PLAY_PLCMOD != PLFL) ){
+#if 0
+	    if( BGBGM == s_u_boss_mae ){
+		BGBGM = s_u_boss;
+	    }
+#endif
+	    if( PLAY_KENSHIRO > 8 )
+		m4aSongNumStart( s_u_star );	// [S] 無敵サウンドセット
+	    else
+		m4aSongNumStart( BGBGM );	// [S] ＢＧＭ復帰
+	}
+    }
+
+/*------------- スクロールメイン -------------------------------*/
+    scroll_menu[mGm_SCRCTL]();
+}
+
+/*--------------------------------------------------------------*/
+/*		縦スクロール					*/
+/*--------------------------------------------------------------*/
+void GMPLAY(void)
+{
+    if( KEYSCCH )		// Ｈオートスクロール？
+	H_scroll_auto_TATE();	// ＹＥＳ
+    else if( KEYSCCV )		// Ｖオートスクロール？
+	V_scroll_auto_TATE();	// ＹＥＳ
+    else
+	KEY11();
+}
+
+/*--------------------------------------------------------------*/
+/*		横スクロール					*/
+/*--------------------------------------------------------------*/
+void GMPLYH(void)
+{
+    if( KEYSCCV )		// Ｖオートスクロール？
+	V_scroll_auto_YOKO();	// ＹＥＳ
+    else
+	KEY22();
+}
+
+/*--------------------------------------------------------------*/
+/*		画面 スクロールフラグセット			*/
+/*==============================================================*/
+/*		< SKFLG >  1 :  上スクロール			*/
+/*			   2 :  下スクロール			*/
+/*--------------------------------------------------------------*/
+void SCRSET(void)
+{
+    u16	max_sccv;
+    u8	scroll_low;
+
+
+    if( (PLAY_PLYSPED < 0) && (PLAY_PLCMOD != PLTR) ||
+	KEYSCCV ||				// オートスクロール？
+//	ENSCROLL == 1 ||			// 敵自動スクロール？
+	(ENSCROLL == 1 && VGAMEN_POS == SHITA_MODE) ||	// 敵自動スクロール＆下モード？
+	PLAY_DORPTN )				// ドアＩＮ？
+	return;
+
+// TEST-----------------------------------------------------------
+
+    if( PLAY_PLCMOD != PLTR ){		// つる移動ではない？
+	if( ((PLAY_PLYSPED + PLAY_PLMVYSP_SV) < 0) &&
+	    (PLAY_OBJONFG == 0 ) )		// 敵に乗らずに上方向移動
+	    return;
+    }
+
+// TEST-----------------------------------------------------------
+
+    if( SKFLG == 0 ){
+	if( PLAY_PLCMOD < PLSTMV ){		// モードチェック
+	    if( PLAY_PLOBJYH == 0 ){
+		if( PLAY_OBJONFG != 0 ||	// 敵に乗ってる？
+		    PLAY_PLCMOD == PLTR )	// つる移動？
+		    scroll_low = VScroll_Start_Low[VGAMEN_POS] + 0x08;
+		else
+		    scroll_low = VScroll_Start_Low[VGAMEN_POS];
+
+		if( PLAY_PLOBJYL >= scroll_low ){
+		    if( WORDNO == 0x0d && COSUNO == 0x04 )	// ５Ｗ－２－４？
+			max_sccv = 0xc0;
+		    else
+			max_sccv = (MAX_disp << 8) - (MAX_disp << 4) + 0x40;
+		    if( mGm_SCCV1 < max_sccv )
+			SKFLG = 2;
+		}
+		else if( PLAY_PLOBJYL >= VScroll_Start_High[VGAMEN_POS]+1 ){
+		    return;
+		}
+		else if( PLAY_PLJUMP == 0 ){
+		    if( mGm_SCCV1 != 0 )
+			SKFLG = 1;
+		}
+		else{
+		    return;
+		}
+	    }
+	    else if( PLAY_PLOBJYH < 0 ){
+		if( (PLAY_PLJUMP == 0) && ( mGm_SCCV1 != 0 ) )
+		    SKFLG = 1;
+		else
+		    return;
+	    }
+	    else{
+		SKFLG = 2;
+	    }
+
+	    if( SKFLG != 0 ){
+		SCRLOCK = 0;		// Ｖスクロール固定解除
+		ENSCROLL = 0;		// 敵オートスクロール解除
+	    }
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤータイマー計算				*/
+/*--------------------------------------------------------------*/
+void player_TMCALC(void)
+{
+    u8	*timer_pt, i;
+
+/*------------- PLWKTIMから４つのタイマー計算 ------------------*/
+    timer_pt = &PLAY_PLWKTIM;
+    for( i=0; i<4; i++, timer_pt++ ){
+	if( *timer_pt != 0 )
+	    (*timer_pt)--;
+    }
+
+    if( BOSS_DEMOTIM != 0 )		// ボスデモ中？
+	PLAY_PLSAFT++;
+
+/*------------- 無敵タイマー計算 -------------------------------*/
+    if( PLAY_KENSHIRO != 0 ){
+	if( PLAY_FRONTTM == 0 &&	// プレイヤー正面向き？
+	    PLAY_PLSTFG == 0 ){		// プレイヤー停止？
+	    if( (FRCNT & 0x07) == 0 ){	// ＮＯ
+		PLAY_KENSHIRO--;
+		if( PLAY_KENSHIRO == 8 ){
+		    if( BGMCLTM == 0 )
+			m4aSongNumStart( BGBGM );	// [S] 無敵サウンドクリア
+		}
+	    }
+	}
+	if( RKETFG == 0 )
+	    ex_init_main(EX_Star);	// 無敵キラキラ セット
+    }
+
+/*------------- プレイヤー正面向きタイマー計算 -----------------*/
+#if 0
+    if( PLAY_FRONTTM != 0 ){
+	PLAY_FRONTTM--;
+	PLAY_PLSTTM = PLAY_FRONTTM;
+	if( PLAY_FRONTTM == 0 )
+	    PLAY_WATCHTM = 0;
+	else if( PLAY_WATCHTM <= 1 )
+	    PLAY_WATCHTM = 2;		// 敵もＳＴＯＰ
+    }
+#endif
+}
+
+/*--------------------------------------------------------------*/
+/*		次のコースイニシャル				*/
+/*--------------------------------------------------------------*/
+void game_next_init(void)		// (SFC) NEXTINT
+{
+    *(vu16 *)REG_DISPCNT = DISP_LCDC_OFF;	// 強制ブランク
+
+    TUBOCHK();			// つぼチェック
+
+    if( mGm_SCRCTL == V_SCROLL ){
+	if( TSBOFG == 2 ){
+	    PLAY_PLCMOD = PLTO;
+	    PLAY_PLCHRNO = SIT;
+	    PLAY_PLCLOR = 1;
+	    STTSBIN = 3;	// つぼＯＵＴ時無敵用
+	}
+	TSBOFG = 0;
+	PLAY_RUNFLG = 0;
+//	TUBWAD = 0;
+
+	if( BGCHGFG == 2 )
+	    TKCRON++;
+    }
+
+    NEXTCALC();
+    player_PLSTDTSV();		// プレイヤースタートデータＳＡＶＥ
+
+    BGCHGFG = 0;
+    BIGPWFG = 0;		// 倍角POW取得フラグクリア
+
+//    COSINIT();
+    VSYNC_OFF = 1;
+    game.GMMODE = gm_init;
+}
+
+/*--------------------------------------------------------------*/
+/*		次のコースＮｏ．セット				*/
+/*--------------------------------------------------------------*/
+void NEXTCALC(void)
+{
+    if( mGm_SCRCTL == H_SCROLL ){
+	INTGANO = BGCHDAT[(PLAY_PLXPOSH >> 8)] & 0xf;
+	COSUNO = (BGCHDAT[(PLAY_PLXPOSH >> 8)] & 0xf0) >> 4;
+	WORDNO = BGCHDAT[(PLAY_PLXPOSH >> 8)] >> 8;
+    }
+    else{
+	INTGANO = BGCHDAT[(PLAY_PLYPOSH / 0xf0)] & 0xf;
+	COSUNO = (BGCHDAT[(PLAY_PLYPOSH / 0xf0)] & 0xf0) >> 4;
+	WORDNO = BGCHDAT[(PLAY_PLYPOSH / 0xf0)] >> 8;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		コースイニシャル処理				*/
+/*--------------------------------------------------------------*/
+void COUSEIT(void)
+{
+//    player_LIFEIT();		// ライフイニシャル
+//    player_SLPLSET();		// セレクトデータセット
+
+    COSINIT();
+}
+
+/*--------------------------------------------------------------*/
+/*		コースイニシャル処理（ＳＵＢ）			*/
+/*--------------------------------------------------------------*/
+static void (*COUSEIT_TBL[])() = {
+    TATESET,			/* (0) 縦スクロール */
+    YOKOSET,			/* (1) 横スクロール */
+};
+/*--------------------------------------------------------------*/
+
+void COSINIT(void)
+{
+    u8 BGM_NO;
+
+    if( TKCRON == 0 )
+	ENDTSV();		// 敵データＳＡＶＥ
+
+    if( PLAY_ENSTOP != 0 ){
+	PLAY_WATCHTM = PLAY_WATMWK;
+	PLAY_ENSTOP = 0;
+    }
+
+    TKCRON = 0;
+    TBINFG = 0;
+    BGMCLTM = 0;
+    PLAY_DRMODE = 0;
+    PLAY_DRINFG = 0;
+    PLAY_PLTILT = 0;
+    KTUGROUND = 0;
+
+    RAMCLS();			// スクロールＲＡＭクリア
+
+    if( mGm_GMMODE == gm_next_init )
+	return;
+
+    COUSEIT_TBL[mGm_SCRCTL]();
+
+    KEYSCCH = 0;		// Ｈオートスクロールフラグ 
+    KEYSCCV = 0;		// Ｖオートスクロールフラグ
+    SCRLOCK = 0;		// Ｖスクロール固定フラグ
+    SCRLOCK_H = 0;		// Ｈスクロール固定フラグ
+    ENSCROLL = 0;		// 敵オートスクロール
+    OLD_SCCH1 = mGm_SCCH1;
+    SCRMUKI = 1;
+
+    if( PLAY_PLCMOD != PLTA )	// つる自動移動ではない？
+	PLAY_PLYSPED = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		スクロールＲＡＭクリア処理			*/
+/*--------------------------------------------------------------*/
+void RAMCLS(void)
+{
+    if( TBINFG == 0 ){
+	mGm_SCCH1 = 0;
+	mGm_SCCH2 = 0;
+	mGm_SCCH3 = 0;
+	mGm_SCCV1 = 0;
+	mGm_SCCV2 = 0;
+	mGm_SCCV3 = 0;
+	SKFLG = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		縦スクロールＢＧセット処理			*/
+/*--------------------------------------------------------------*/
+void TATESET(void)
+{
+    BGPTINT_V();		// スクロール値セット
+
+    if( TSBOFG == 2 ){
+	PLAY_PLCMOD = PLMV;
+	PLAY_PLCLOR = 0;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		横スクロールＢＧセット処理			*/
+/*--------------------------------------------------------------*/
+void YOKOSET(void)
+{
+    BGPTINT_H();		// スクロール値セット
+}
+
+/*--------------------------------------------------------------*/
+/*		縦スクロール スクロール値セット			*/
+/*--------------------------------------------------------------*/
+void BGPTINT_V(void)
+{
+    u16	max_sccv;
+
+/*------------- Ｈスクロールカウンタ ---------------------------*/
+    if( PLAY_PLXPOSH < SCCH_OFSET_POSL )
+	mGm_SCCH1 = 0;
+    else if( PLAY_PLXPOSH > SCCH_OFSET_POSR )
+	mGm_SCCH1 = SCCH_OFFSET_VAL;
+    else if( TSBOFG != 0 )		// つぼＩＮ？
+	mGm_SCCH1 = 8;
+
+/*------------- Ｖスクロールカウンタ ---------------------------*/
+    max_sccv = (MAX_disp << 8) - (MAX_disp << 4) + 0x40;
+
+    if( INTGANO == 0 ){			// ■■■ 一番上から ■■■
+	if( PLAY_PLYPOSH <= 0 )		// つる下り ｏｒ つぼＩＮ？
+	    mGm_SCCV1 = 0;		// ＹＥＳ
+	else if( (SCRMVY & 0xff) > 0x80 )
+	    mGm_SCCV1 = 0;
+
+	else if( INTGANO == MAX_disp )	// 11-15 追加
+	    mGm_SCCV1 = 0x0040;
+
+	else
+	    mGm_SCCV1 = SCRMVY & 0x00ff;
+    }
+    else if( INTGANO == MAX_disp ){	// ■■■ 一番下から ■■■
+	if( (SCRMVY & 0xff) >= 0x40 ){
+	    mGm_SCCV1 = (INTGANO << 8) + (SCRMVY & 0x00ff);
+	}
+	else{
+    	    mGm_SCCV1 = (INTGANO << 8) + (SCRMVY & 0x00ff);
+	}
+
+	if( mGm_SCCV1  > max_sccv )
+	    mGm_SCCV1 = max_sccv;
+	if( (SCRMVY & 0x00FF) > 0x80 ){
+	    if( (PLAY_PLYPOSH - mGm_SCCV1) >= 0x40 )
+	    mGm_SCCV1 = ((INTGANO-1) << 8) + (SCRMVY & 0x00ff) - ((PLAY_PLYPOSH - mGm_SCCV1) - 0x40 );
+	    else
+	    mGm_SCCV1 = ((INTGANO-1) << 8) + (SCRMVY & 0x00ff);
+	}
+    }
+    else{				// ■■■ 途中から ■■■
+	if( (SCRMVY & 0x00FF) >= 0x40 ){
+	    if( (SCRMVY & 0x00FF) > 0x80 )
+	    mGm_SCCV1 = ((INTGANO-1) << 8) + (SCRMVY & 0x00ff);
+	    else
+	    mGm_SCCV1 = PLAY_PLYPOSH - (SCRMVY & 0x00ff);
+	}
+	else
+	    mGm_SCCV1 = (INTGANO << 8) + (SCRMVY & 0x00ff);
+    }
+
+    if( TSBOFG != 0 )		// つぼＩＮ？
+	mGm_SCCH2 = 0;
+    else
+	mGm_SCCH2 = mGm_SCCH1 >> 1;
+
+    mGm_SCCH3 = mGm_SCCH1 >> 2;
+
+#if 0	//■■　@vscr_updown_set に移動　@■■■■■■■■■■■■■
+    if( INTGANO == MAX_disp ){	// 一番下の画面？
+	VGAMEN_POS = 1;		// スクロール開始位置（上モード）
+    }
+    else{
+	VGAMEN_POS = 2;		// スクロール開始位置（下モード）
+    }
+#endif	//■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+    HGAMEN_POS = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		横スクロール スクロール値セット			*/
+/*--------------------------------------------------------------*/
+void BGPTINT_H(void)
+{
+/*------------- Ｈスクロールカウンタ ---------------------------*/
+    if( INTGANO == 0 ){
+	if( SCRMVX < 0 )
+	    mGm_SCCH1 = 0;
+	else
+	    mGm_SCCH1 = SCRMVX;		// 2000-10-10 追加
+    }
+    else if( INTGANO == MAX_disp ){
+	if( SCRMVX < 0 ){
+//	if( (u8)SCRMVX > 0xb0 ){
+	    mGm_SCCH1 = (SCRMVX & 0x00ff) | ((INTGANO - 1) << 8);
+	}
+	else{
+	    mGm_SCCH1 = (INTGANO << 8) + 0x10;
+
+//01-24（いるのか？）	    if( (mGm_SCCH1 + 0x78) > PLAY_PLXPOSH )	// 2000-11-14 追加
+//01-24（いるのか？）		mGm_SCCH1 -= mGm_SCCH1 + 0x78 - PLAY_PLXPOSH;
+	}
+    }
+    else{
+//TEST	if( SCRMVX < 0 ){			// (SFC)
+	if( (u8)SCRMVX > 0x80 ){		// ８ドット左へ（イニシャル0x70）
+//	if( (u8)SCRMVX > 0xc0 ){		// もっと左へ（イニシャル0x30）
+	    mGm_SCCH1 = (SCRMVX & 0x00ff) | ((INTGANO - 1) << 8);
+	}
+	else{
+	    mGm_SCCH1 = (SCRMVX & 0x00ff) | (INTGANO << 8);
+//	    mGm_SCCH1 = PLAY_PLXPOSH - Hscr_scrmvx_pos[SCRMVX_POS];
+	}
+    }
+
+/*------------- Ｖスクロールカウンタ ---------------------------*/
+
+    if( PLAY_PLYPOSH <= 0 ){		// つる下り？
+	mGm_SCCV1 = 0;			// ＹＥＳ
+    }
+    else if( PLAY_PLYPOSH <= 0x80 ){
+	mGm_SCCV1 = PLAY_PLYPOSH - SCCV_OFFSET_POS_DOWN;
+
+	if( mGm_SCCV1 & 0x8000 )
+	    mGm_SCCV1 = 0;
+	else if( mGm_SCCV1 > 0x40 )
+	    mGm_SCCV1 = 0x40;
+    }
+    else{
+	mGm_SCCV1 = 0x40;
+    }
+
+    HScr_Limit_check();		// 縦方向スクロールリミットチェック
+    bg23_V_scroll_set();	// ＢＧ２・３ Ｖスクロール値セット
+
+    SCRMVX = 0;
+    SCRMVX_ADD = 0;
+    SCRMVX_FLAG = 0;
+    HGAMEN_POS = 0;
+    SCRMVX_POS = scrmvx_pos_data[HGAMEN_POS];
+//    SCRMVX_CENTER = Hscr_scrmvx_pos[SCRMVX_POS];	// スクロール開始中心
+//    SCRMVX_CENTER = SCCH_Center;
+//    PLAY_CENTER = SCCH_Center;	// プレイヤー中心位置
+
+    SCRMVX_CENTER = PLAY_PLXPOSH - mGm_SCCH1;
+    PLAY_CENTER = SCRMVX_CENTER;	// プレイヤー中心位置
+
+    PLAY_PLXSPED = 0;
+    VGAMEN_POS = UE_MODE;		// オートスクロール開始位置
+    ENONSCR = 0;			// 敵乗りスクロール
+}
+
+/*--------------------------------------------------------------*/
+/*		横スクロール 縦方向スクロールリミットチェック	*/
+/*--------------------------------------------------------------*/
+void HScr_Limit_check(void)
+{
+    if( HScr_Vcounter_UP[WORDNO*COS_MAX+COSUNO] != 0 ){
+	if( mGm_SCCV1 < HScr_Vcounter_UP[WORDNO*COS_MAX+COSUNO] ){
+	    mGm_SCCV1 = HScr_Vcounter_UP[WORDNO*COS_MAX+COSUNO];
+	    return;
+	}
+    }
+
+    if( HScr_Vcounter_DOWN[WORDNO*COS_MAX+COSUNO] != 0x40 ){
+	if( mGm_SCCV1 > HScr_Vcounter_DOWN[WORDNO*COS_MAX+COSUNO] ){
+	    mGm_SCCV1 = HScr_Vcounter_DOWN[WORDNO*COS_MAX+COSUNO];
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		モードチェック					*/
+/*--------------------------------------------------------------*/
+static void (*mode_check_menu[])() = {
+    PLYDOWN,			/* (1) プレイヤーやられ */
+    CONTUNE,			/* (2) ゲームオーバー   */
+    COUSCLR,			/* (3) コースクリアー   */
+    PLYWARP,			/* (4) プレイヤーワープ */
+    PLCANCL,			/* (5) ゲームキャンセル */
+};
+/*--------------------------------------------------------------*/
+
+void game_mode_check(void)		// (SFC) MODECHK
+{
+    u8	i;
+
+    TUBOCHK();			// つぼチェック
+
+    if( PLAY_PLGMOD == PLGM_CACL ){	// ゲームキャンセルの場合フリーしない！
+	for ( i=0; i<A_ENMY_NO; i++ )	// 敵クリアのみ
+	    ENTY_ENCMOD(p_act)[i] = ENTY_ENSYNO(p_act)[i] = 0;
+    }
+    else{
+	mGm_FREE_p_act();		// 敵フリー
+#if 1
+	mGm_FREE_p_scr();		// スコアフリー
+	mGm_FREE_p_eff();		// スター＆コインエフェクトフリー
+#endif
+	mGm_GC();
+    }
+
+    mode_check_menu[PLAY_PLGMOD-1]();
+
+    PLAY_PLGMOD = 0;
+    TILTFG = 0;
+    BOSSTILTFG = 0;
+
+    m4aMPlayAllStop();		// サウンドオールＳＴＯＰ
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤーやられ処理				*/
+/*--------------------------------------------------------------*/
+void PLYDOWN(void)
+{
+//<OLD>    PLAY_PLSMAL = 0;
+    PLAY_PLSMAL = 1;		// 死んだらちびから
+
+    player_PLSTDTLD();		// プレイヤースタートデータＬＯＡＤ
+
+    VSYNC_OFF = 1;
+    game.SLMODE = select_mode;
+    game.GMMODE = pl_sel_init;
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームオーバー処理（コンティニュー処理）	*/
+/*--------------------------------------------------------------*/
+void CONTUNE(void)
+{
+    FLAGCLR();
+    PLAY_PLSMAL = 0;
+
+    VSYNC_OFF = 1;
+    game.GMMODE = gm_over_init;
+}
+
+/*--------------------------------------------------------------*/
+/*		コースクリアー処理				*/
+/*--------------------------------------------------------------*/
+void COUSCLR(void)
+{
+//    PLAY_PLSMAL = 0;		// in FLGCLEAR
+    FLGCLEAR();
+    FLAGCLR();
+}
+
+/*--------------------------------------------------------------*/
+/*		プレイヤーワープ処理				*/
+/*--------------------------------------------------------------*/
+void PLYWARP(void)
+{
+}
+
+/*--------------------------------------------------------------*/
+/*		ゲームキャンセル処理				*/
+/*--------------------------------------------------------------*/
+void PLCANCL(void)
+{
+    PLAY_RUNFLG   = 0;
+    PLAY_PLPWJPTM = 0;
+    PLAY_DRINFG   = 0;
+    PLAY_PLTILT = 0;
+    PLAY_PLCHRNO = WALK21;
+    REDCOIN = 0;
+    YOSHI_EGG = 0;
+    BOSS_DEMOFG = 0;
+
+    FLAGCLR();
+
+    PLAY_PLSMAL = 1;		// キャンセルしたらちびから
+    PLAY_PLLIFE = 0x0f;
+
+//    player_PLSTDTLD();		// プレイヤースタートデータＬＯＡＤ
+
+    VSYNC_OFF =1;
+    game.GMMODE = gm_init;
+
+    FLGCLEAR();			// フラグクリアー（最初のコースから）
+//    FLGCLEAR2();		// フラグクリアー（同じコースから）
+
+    act_clear();		// アクター構造体クリア
+
+    BGBGM = 0xffff;
+}
+
+/*--------------------------------------------------------------*/
+/*		フラグクリアー処理				*/
+/*--------------------------------------------------------------*/
+void FLGCLEAR(void)
+{
+    COSUNO = STCOSNO = 0;
+    INTGANO = STINGNO = 0;
+    PLDSPNO = PLSTDSN = 0;
+    PLAY_PLCMOD = PLAY_PLSTCMD = 0;
+
+    FLGCLEAR_COMMON();
+}
+
+/*--------------------------------------------------------------*/
+/*		フラグクリアー処理（同じコース時）		*/
+/*--------------------------------------------------------------*/
+void FLGCLEAR2(void)
+{
+    COSUNO = STCOSNO;
+    INTGANO = STINGNO;
+    PLDSPNO = PLSTDSN;
+    PLAY_PLCMOD = PLAY_PLSTCMD;
+
+    FLGCLEAR_COMMON();
+}
+
+/*--------------------------------------------------------------*/
+/*		フラグクリアー処理（共通）			*/
+/*--------------------------------------------------------------*/
+void FLGCLEAR_COMMON(void)
+{
+    TSBIN = 0;
+    TSBOFG = 0;
+    PLAY_WATCHTM = 0;
+//    PLAY_PLSMAL = 0;
+    JUTANFG = 0;
+    STTSBIN = 0;
+    CAPFLG = 0;
+    BALLFLG = 0;
+    BIGPWFG = 0; // 倍角POWフラグクリア
+
+    PLAY_KENSHIRO = 0;
+    KABUCT = 0;
+    CRYCNT = 0;
+    PLAY_WATCHTM = 0;
+    PLAY_WATMWK = 0;
+    PLAY_FRONTTM = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		フラグクリアー処理				*/
+/*--------------------------------------------------------------*/
+void FLAGCLR(void)
+{
+//    PLAY_PLLIFE = 0x1f;
+    if( PLAY_PLLIFE <= 0x0f ){
+	PLAY_PLLIFE = 0x0f;
+	PLAY_PLSMAL = 1;
+    }
+    else{
+	PLAY_PLLIFE = 0x1f;
+	PLAY_PLSMAL = 0;
+    }
+    PLAY_PLLIFEB = 0;
+    PLAY_BJUMP = 0;
+
+    KEY0FG = 0;
+    ONEUPFG = 0;
+    HAT0FG = 0;
+    HAT1FG = 0;
+    HAT2FG = 0;
+    COINFG = 0;
+    FAILCT = 0;
+    COSUNO = 0;
+    COSUNO = 0;
+    usa_game->COINCT = 0;
+}
+
+/*--------------------------------------------------------------*/
+/*		フェードイン パラメータセット			*/
+/*--------------------------------------------------------------*/
+void fade_in_parameter_set(void)
+{
+    BLDCNT = 0x00b7;
+    BLDALPHA = 0x0000;
+    BLDY = 0x000f;
+    game.fade_flag = 1;
+    *(vu16 *)REG_BLDCNT = BLDCNT;
+    *(vu16 *)REG_BLDALPHA = BLDALPHA;
+    *(vu16 *)REG_BLDY = BLDY;
+
+    ex_mode_clear();		// 効果クリア
+}
+
+/*--------------------------------------------------------------*/
+/*		フェードアウト パラメータセット			*/
+/*--------------------------------------------------------------*/
+void fade_out_parameter_set(void)
+{
+    BLDCNT = 0x00b7;
+    BLDALPHA = 0x0000;
+    BLDY = 0x0000;
+    game.fade_flag = 1;
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼ・裏画面イニシャル				*/
+/*--------------------------------------------------------------*/
+void game_tsubo_init(void)
+{
+    lcdc_off();			//強制ブランキング処理
+//    m4aSoundVSyncOff();
+
+    TUBOCHK();			// つぼチェック
+
+    COINO = 0;
+
+    if( TSBIN != 2 ){		// 固定つぼＩＮ
+// [S] ＢＧＭサウンドセット
+	TBINFG = 1;
+    }
+    else{			// 裏画面ＩＮ
+	RAMREV();
+	if( PLAY_ENSTOP != 0 ){
+	    PLAY_WATCHTM = PLAY_WATMWK;	// ウオッチタイマーＬＯＡＤ
+	    PLAY_ENSTOP = 0;
+	}
+// [S] ＢＧＭサウンドセット
+//	BGBGMX();
+	ENDTSV();		// 敵データＳＡＶＥ
+
+	TBINFG = 2;
+//	KINSND = 0;
+    }
+
+TUBUINT_250:
+
+    m_enemy_clear();		//敵クリア処理
+
+    BGDTPSHB();			// スクロールＲＡＭ保存
+    one_room_in_set();
+    cos_vram_set();
+
+    m_enemy_init();		//敵セット処理（テスト）
+    ex_mode_clear();		// 効果クリア
+    All_Effect_Clear();		// star&coin effect clear
+
+//    if( TSBIN == 1 )
+//	TUBOFG = 0;		// ６Ｗ－１特殊つぼＩＮ
+
+    PLAY_PLXSPED = 0;
+    PLAY_PLCLOR = 0;
+    ENSCROLL = 0;		// 敵オートスクロール
+
+    if(TSBIN != 2){
+	PLAY_PLCMOD = PLMV;
+    }
+
+//    DISPCNT = 0;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+    NMI_NO = nmi_game;
+    IRQ_NO = irq_dummy;
+
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    m4aSongNumStart( BGBGM );
+    if(PLAY_KENSHIRO > 8)
+	m4aSongNumStartOrContinue( s_u_star );
+
+    if(PLAY_WATCHTM != 0 && PLAY_WATMWK != 0)
+	m4aSongNumStartOrContinue( s_u_se_timer );
+
+    game.GMMODE++;
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼ・裏画面メイン				*/
+/*--------------------------------------------------------------*/
+void game_tsubo_move(void)
+{
+
+/*------------- きのこＧＥＴ後、ＢＧＭ復帰チェック -------------*/
+    if( ((m4a_mplay030.stat & MUSICPLAYER_STATUS_TRACK) == 0) &&
+//	(PLAY_PLCMOD == PLMV) ){
+	(PLAY_PLCMOD <= PLKT) ){
+	if( PLAY_KENSHIRO > 8 )
+	    m4aSongNumStart( s_u_star );// [S] 無敵サウンドセット
+	else
+	    m4aSongNumStart( BGBGM );	// [S] ＢＧＭ復帰
+    }
+
+/*--------------------------------------*/
+
+    if( game.Trg & START_BUTTON &&
+	BOSS_DEMOTIM == 0 &&	// ボスデモフラグＯＮ？
+	SKFLG == 0 &&		// スクロール中？
+	PLAY_PLCMOD != PLFL &&	// プレイヤーやられた？
+	RKETFG == 0 &&		// ロケットの中？
+	EXOPEN == 0 &&		// 顔の出口処理中？
+	PLAY_PLSTFG == 0 &&	// プレイヤーストップ中？
+	PLAY_DRINFG == 0 &&	// プレイヤードアに入っている？
+	TSBIN == 1 ){		// はずれつぼ？
+	pause_init();
+	return;
+    }
+
+    scr_lock_cancel();		// スクロール固定解除
+    u_player_main();		// プレイヤーメイン
+    PLAY_OBJONFG = 0;		// 敵乗りフラグクリア
+    scroll_main();		// スクロールメイン
+    player_PLPOSCK();		// プレイヤー位置チェック
+    player_oamset(p_ply);	// プレイヤーＯＡＭセット
+//   player_scroll_offset();	// スクロール補正
+    act_main();			// 敵（アクター）メイン
+    u_score_disp();
+    player_scroll_offset();	// スクロール補正
+    player_TMCALC();		// プレイヤータイマー計算
+//    tubo_hosi_color();
+
+//    ice_color();
+
+/*------------- テスト -------------*/
+    *(u16 *)(DMA_INDEX) = 0;
+    char_change();
+
+#if 0
+//■■■■ 本来は　@DOORMV　@で計算 ■■■■■
+    if( TSBIN == 2 ){		// 裏画面？
+	if( (FRCNT & 0x03) == 0 ){ 
+	    PLAY_DRCLTM--;
+	    if( PLAY_DRCLTM == 0 ){
+		STTSBIN = TSBIN;
+		TSBIN = 0;
+		ENDTSV();			// 敵データＳＡＶＥ
+	    }
+	}
+    }
+//■■■■■■■■■■■■■■■■■■■■■
+#endif
+
+    if( PLAY_PLGMOD != 0 ){			// ＳＦＣではGMMODE
+	PLAY_KENSHIRO = 0;
+	KABUCT = 0;
+	CRYCNT = 0;
+//	CRYCNT2 = 0;
+	PLAY_WATCHTM = 0;
+	mGm_GMMODE = gm_mode_check;
+    }
+    else{
+	if( TSBIN != 0 )
+	    return;
+	if( COINO != 0 )
+	    COINFG++;
+	COSUNO = MVCOSUNO;
+	game.GMMODE++;
+	VSYNC_OFF = 1;
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼ・裏画面アウトイニシャル			*/
+/*--------------------------------------------------------------*/
+void game_tsubo_out_init(void)
+{
+    u8	tsbofg_save;
+
+    lcdc_off();			//強制ブランキング処理
+//    m4aSoundVSyncOff();
+
+    tsbofg_save = TSBOFG;
+    if( TSBOFG != 0 ){
+	ENDTSV();		// 固定つぼＯＵＴ
+	PLAY_PLCMOD = PLTO;
+	PLAY_PLCHRNO = SIT;
+	TSBOFG = 0;
+	PLAY_RUNFLG = 0;
+	PLAY_PLXSPED = 0;
+	PLAY_PLCLOR = 1;
+    }
+    else{
+	ENKYSV();		// 裏画面ＯＵＴ
+	PLAY_PLCLOR = 0;
+    }
+
+    m_enemy_clear();		//敵クリア処理
+    one_room_out_set();
+    BGDTPOPB();			// スクロールＲＡＭ取り出し
+    cos_vram_set();		//コースＢＧイニシャルセット
+    m_enemy_init();		//敵セット処理（テスト）
+
+    TBINFG = 0;
+    BLDCNT = 0;
+    BLDALPHA = 0;
+    BLDY = 0;
+//(2000-01-13)    PLAY_PLSAFT = 60;		// 点滅（無敵）タイマーセット
+    STTSBIN = 0;
+    PLAY_WATMWK = 0;
+
+    SCRMVX = 0;
+    SCRMVX_ADD = 0;
+    SCRMVX_FLAG = 0;
+    SCRMVX_CENTER = PLAY_PLXPOSH - mGm_SCCH1;
+    PLAY_CENTER = SCRMVX_CENTER;	// プレイヤー中心位置
+    ENONSCR = 0;			// 敵乗りスクロール
+
+    DmaClear(3, 0, BG1_UNIT_BUFFER + (10 * 0xf0) * 2, 0xf0 * 2, 16);
+
+/*------------- プレイヤ－カラーリセット -----------------------*/
+    DmaCopy(3, player_col_table[PLAY_PLSYNO], COL_BUF+0x200, 0x20, 16);
+    COL_FLAG = 1;
+
+//(2000-01-13)    if( (tsbofg_save == 0) && (PLAY_URADOOR != 0) )
+//(2000-01-13)	door_out_timer_set();		// ドアＯＵＴタイマーセット
+    if( tsbofg_save == 0 ){		// 裏画面ＯＵＴ？
+	PLAY_PLSAFT = 60;		// 点滅（無敵）タイマーセット
+	if( PLAY_URADOOR != 0 )		// ドアからＯＵＴ？
+	    door_out_timer_set();	// ドアＯＵＴタイマーセット
+    }
+
+    DISPCNT = 0;
+    *(vu16 *)REG_IE = V_BLANK_INTR_FLAG | CASSETTE_INTR_FLAG;
+    *(vu16 *)REG_STAT = STAT_V_BLANK_IF_ENABLE;
+    *(vu16 *)REG_IME = 1;
+
+    V_blank_wait();
+
+    if(BG3_scroll_type == 3){
+	DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON | DISP_BG3_ON
+	    | DISP_OBJ_ON;
+    }
+    else{
+	DISPCNT = DISP_MODE_0 | DISP_BG0_ON | DISP_BG1_ON
+	    | DISP_BG2_ON | DISP_BG3_ON | DISP_OBJ_ON;
+    }
+
+//    m4aSoundVSyncOff();
+    m4aSoundVSyncOn();
+    m4aSongNumStart( BGBGM );
+    if(PLAY_KENSHIRO > 8)
+	m4aSongNumStartOrContinue( s_u_star );
+
+//    if(PLAY_WATCHTM != 0 && PLAY_WATMWK != 0)
+    if(PLAY_WATCHTM != 0)
+	m4aSongNumStartOrContinue( s_u_se_timer );
+
+    mGm_GMMODE = gm_move;
+}
+
+/*--------------------------------------------------------------*/
+/*		ＲＡＭリバース					*/
+/*--------------------------------------------------------------*/
+void RAMREV(void)
+{
+	MVCOSUNO = COSUNO;
+
+	SCRMVX = (((mGm_SCCH1 & 0xff) + 8) & 0xf0) - (mGm_SCCH1 & 0xff);
+}
+
+/*--------------------------------------------------------------*/
+/*		つぼチェック					*/
+/*--------------------------------------------------------------*/
+void TUBOCHK(void)
+{
+    if( TSBOFG >= 2 )
+	ENDTSV();
+}
+
+/*--------------------------------------------------------------*/
+/*		敵データテーブルビットＳＡＶＥ			*/
+/*--------------------------------------------------------------*/
+void ENDTSV(void)
+{
+    aAC_base_c	*abs_pt;
+    u8	i, name, cmod;
+
+    PLAY_ENKTFG = 0;
+    PLAY_DRCLTM = 0;
+    PLAY_DORTIM = 0;
+
+    for( i=0; i<A_ENMY_NO; i++ ){
+	
+	cmod = ENTY_ENCMOD(p_act)[i];
+	name = ENTY_ENSYNO(p_act)[i];
+	
+	if( (cmod != 0) && (cmod != SMK) ){
+	    abs_pt = &(p_act->a_base[i]);
+	    if( name != ENEMY_HEART && name != ENEMY_BRKA && 
+		name != ENEMY_EGG ){
+		if( ABASE_ONPTRN(abs_pt) != 0 ){
+		    if( name == ENEMY_BKDN ){
+			BKDN_TIMER = ABASE_ENTIM(abs_pt);
+		    }else{
+			BKDN_TIMER = 0;
+		    }		   
+		    PLAY_ENKTFG = name;
+		}
+	    }
+	    ENCLER(abs_pt,i);
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		敵カギＳＡＶＥ					*/
+/*--------------------------------------------------------------*/
+void ENKYSV(void)
+{
+    aAC_base_c	*abs_pt;
+    u8	i;
+
+    for( i=0; i<A_ENMY_NO; i++ ){
+	abs_pt = &(p_act->a_base[i]);
+	if( ABASE_ONPTRN(abs_pt) != 0 ){
+	    if( ENTY_ENSYNO(p_act)[i] != ENEMY_BRKA )
+		PLAY_ENKTFG = ENTY_ENSYNO(p_act)[i];
+	}
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		スクロールＲＡＭ保存				*/
+/*--------------------------------------------------------------*/
+#define	BG1DT	0x0a
+
+void BGDTPSHB(void)
+{
+    MVSCCH = mGm_SCCH1;
+    MVSCCV = mGm_SCCV1;
+    INTGANO = BG1DT;		// １０画面目
+
+    player_PLPOSINT();
+}
+
+/*--------------------------------------------------------------*/
+/*		スクロールＲＡＭ取り出し			*/
+/*--------------------------------------------------------------*/
+void BGDTPOPB(void)
+{
+    mGm_SCCH1 = MVSCCH;
+    mGm_SCCV1 = MVSCCV;
+
+    bg23_V_scroll_set();	// ＢＧ２・３ Ｖスクロール値セット
+    player_PLPOSPOP();
+}
+
+/****************************************************************/
+/*		スクロール補正					*/
+/****************************************************************/
+static void (*SCROLL_TBL[])() = {
+    player_Hscroll_offset_TATE,		// 縦画面
+    player_Vscroll_offset_YOKO,		// 横画面
+};
+/*--------------------------------------------------------------*/
+
+void player_scroll_offset(void)
+{
+//    if( (KEYSCCV | KEYSCCH | SCRLOCK | ENSCROLL) == 0 )
+    if( (KEYSCCV | KEYSCCH) == 0 )
+	SCROLL_TBL[mGm_SCRCTL]();
+}
+
+/****************************************************************/
+/*		縦画面 Ｈスクロール値補正			*/
+/****************************************************************/
+void player_Hscroll_offset_TATE(void)
+{
+    u8	i;
+
+    if( SCRLOCK_H )		// スクロール固定？
+	return;			// ＹＥＳ
+
+    if( TSBOFG == 0 ){
+	if( PLAY_PLXPOSH < SCCH_OFSET_POSL ){
+	    for( i=0; i<SCCH_OFFSET_CNT; i++ ){
+		if( mGm_SCCH1 > 0 )
+		    mGm_SCCH1--;
+		else
+		    break;
+	    }
+	}
+	else if( PLAY_PLXPOSH > SCCH_OFSET_POSR ){
+	    for( i=0; i<SCCH_OFFSET_CNT; i++ ){
+		if( mGm_SCCH1 < SCCH_OFFSET_VAL )
+		    mGm_SCCH1++;
+		else
+		    break;
+	    }
+	}
+
+	mGm_SCCH2 = mGm_SCCH1 >> 1;
+	mGm_SCCH3 = mGm_SCCH1 >> 2;
+    }
+}
+
+/****************************************************************/
+/*		横画面 Ｖスクロール値補正			*/
+/*--------------------------------------------------------------*/
+/*	　@　@横画面において、上方向のみ				*/
+/*	　@　@一定のライン（SCCV_OFFSET_POS）を超えると、		*/
+/*	　@　@スクロールする					*/
+/****************************************************************/
+void player_Vscroll_offset_YOKO(void)
+{
+    u8	i;
+
+    if( SCRLOCK | ENSCROLL )
+	return;
+
+//----------------------------------------------------------------
+//		上限チェック
+//----------------------------------------------------------------
+    if( mGm_SCCV1 <= HScr_Vcounter_UP[WORDNO*COS_MAX+COSUNO] ){
+//	player_Vscroll_offset_key();	// キー入力補正
+	mGm_SCCV1 = HScr_Vcounter_UP[WORDNO*COS_MAX+COSUNO];
+	return;
+    }
+//----------------------------------------------------------------
+
+    if( PLAY_PLYSPED < 0 || PLAY_OBJONFG == 1 ){	// 上昇中？
+	if( PLAY_PLYPOSH < SCCV_OFFSET_POS_UP ){
+//(2001-01-30)	    if( D_KEY_ON_C == 0 ){			// 下キーＯＦＦ？
+		for( i=0; i<SCCV_OFFSET_CNT_UP; i++ ){
+		    if( mGm_SCCV1 > 0 )
+			mGm_SCCV1--;
+		    else
+			break;
+//(2001-01-30)		}
+	    }
+	}
+    }
+
+    bg23_V_scroll_set();	// ＢＧ２・３ Ｖスクロール値セット
+
+// ここでクリアしない    PLAY_OBJONFG = 0;
+}
+
+/****************************************************************/
+/*		スクロール補正（キー入力）			*/
+/****************************************************************/
+static void (*SCROLL_TBL_key[])() = {
+    player_scroll_offset_key_TATE,	// 縦画面
+    player_scroll_offset_key_YOKO,	// 横画面
+};
+/*--------------------------------------------------------------*/
+
+void player_scroll_offset_key(void)
+{
+//----------------------------------------------------------------
+//		キャンセルチェック
+//----------------------------------------------------------------
+    if( (KEYSCCV | KEYSCCH) ||
+	(PLAY_PLCMOD != PLMV) ||
+	(PLAY_PLJUMP != 0) ||
+	(ENSCROLL == 1) ||
+	PLAY_DORPTN )			// ドアＩＮ？
+	return;
+
+//----------------------------------------------------------------
+//		縦画面 強制上下モードセット
+//----------------------------------------------------------------
+    if( (mGm_SCRCTL == V_SCROLL) &&
+	(SKFLG == 0) &&
+	(SCRLOCK == 0) ){
+	if( mGm_SCCV1 == 0 ){
+	    if( !((WORDNO == 0x0b) && (COSUNO == 2) ||	// ４Ｗ－３－２
+		  (WORDNO == 0x12) && (COSUNO == 3)) )	// ７Ｗ－１－３以外？
+		VGAMEN_POS = SHITA_MODE;	// 強制下モードセット
+	}
+	else if( mGm_SCCV1 == ((MAX_disp << 8) - (MAX_disp << 4) + 0x40) ){
+	    if( !((WORDNO == 0x06) && (COSUNO == 1)) )	// ３Ｗ－１－１
+		VGAMEN_POS = UE_MODE;		// 強制上モードセット
+	}
+    }
+//----------------------------------------------------------------
+
+    if( ((PLAY_PLCRFG & FOOTCR) == 0) ||
+	(PLAY_PLXSPED != 0) ||
+	(PLAY_PLYSPED != 0) )
+	return;
+
+    SCROLL_TBL_key[mGm_SCRCTL]();
+}
+
+/****************************************************************/
+/*		縦画面 スクロール値補正（キー入力）		*/
+/****************************************************************/
+void player_scroll_offset_key_TATE(void)
+{
+    u16	key_input;
+
+    if( SKFLG == 0 ){
+
+//----------------------------------------------------------------
+//		キー入力ウエイトチェック
+//----------------------------------------------------------------
+#if 0
+	if( mGm_CONT & 0x01fb ){
+	    ATSCR_TIME = 0;
+	    return;
+	}
+
+	key_input = mGm_CONT & 0x0204;
+	if( key_input == 0 )
+	    return;
+
+	if( key_input == ATSCR_KEY ){
+	    ATSCR_TIME++;
+	    if( ATSCR_TIME != 0x16 )	// タイマーＯＫ？
+		return;			// ＮＯ
+	    else
+		ATSCR_TIME = 0;
+	}
+	else{
+	    ATSCR_TIME = 0;
+	    ATSCR_KEY = key_input;
+	    return;
+	}
+#endif
+//----------------------------------------------------------------
+//		左右
+//----------------------------------------------------------------
+//	if( key_input & SELECT_BUTTON ){	// ＳＥＬＥＣＴボタンＯＮ？
+	if( SELECT_BUTTON_ON ){			// ＳＥＬＥＣＴボタンＯＮ？
+	    if( TSBOFG == 0 ){
+		if( (PLAY_PLXPOSH < 0x0010) ||	// 範囲チェック
+		    (PLAY_PLXPOSH >= 0x00f0) )
+		    return;
+
+		HGAMEN_POS = HGAMEN_POS ^ 0x01;
+		KEYSCCH = 1;
+		m4aSongNumStart( s_u_se_shift );	// [S]
+	    }
+	}
+
+//----------------------------------------------------------------
+//		上下
+//----------------------------------------------------------------
+	else if( L_BUTTON_ON_T ){	// 肩ＬボタンＯＮ？
+
+	    if( PLAY_PLYPOSH < 0 )
+		return;
+
+//======================================================
+//	強制モードチェック
+//======================================================
+//実験(2001-01-26)	    if( (mGm_SCCV1 == 0 ) ||	// 強制モードセット？
+//実験(2001-01-26)		(mGm_SCCV1 == ((MAX_disp << 8) - (MAX_disp << 4) + 0x40)) )
+//実験(2001-01-26)		return;
+
+	    if( mGm_SCCV1 == 0 ){
+//		if( VGAMEN_POS == SHITA_MODE )	// 強制下モード？
+		if( PLAY_PLOBJYL <= VScroll_Stop_High[VGAMEN_POS] )	// 上限？
+		    return;
+		VGAMEN_POS = UE_MODE;		// 上モードセット
+	    }
+	    else if( mGm_SCCV1 == ((MAX_disp << 8) - (MAX_disp << 4) + 0x40) ){
+//		if( VGAMEN_POS == UE_MODE )	// 強制上モード？
+		if( PLAY_PLOBJYL >= VScroll_Stop_Low[VGAMEN_POS] )	// 下限？
+		    return;
+		VGAMEN_POS = SHITA_MODE;	// 下モードセット
+	    }
+//======================================================
+
+	    VGAMEN_POS ^= 0x01;
+	    KEYSCCV = 1;
+	    m4aSongNumStart( s_u_se_shift );	// [S]
+	}
+    }
+}
+
+/****************************************************************/
+/*		横画面 スクロール値補正（キー入力）		*/
+/****************************************************************/
+void player_scroll_offset_key_YOKO(void)
+{
+    u8	i;
+    u16	key_input;
+
+    if( SPSCROLL != 0 )			// スペシャルスクロール？
+	return;				// ＹＥＳ
+
+//----------------------------------------------------------------
+//		キー入力ウエイトチェック
+//----------------------------------------------------------------
+#if 0
+    if( mGm_CONT & 0x01fb ){
+	ATSCR_TIME = 0;
+	return;
+    }
+
+    key_input = mGm_CONT & 0x0204;
+    if( key_input == 0 )
+	return;
+
+    if( key_input == ATSCR_KEY ){
+	ATSCR_TIME++;
+	if( ATSCR_TIME != 0x16 )	// タイマーＯＫ？
+	    return;			// ＮＯ
+	else
+	    ATSCR_TIME = 0;
+    }
+    else{
+	ATSCR_TIME = 0;
+	ATSCR_KEY = key_input;
+	return;
+    }
+#endif
+//----------------------------------------------------------------
+//		上下
+//----------------------------------------------------------------
+    if( L_BUTTON_ON_T ){		// 肩ＬボタンＯＮ？
+	VGAMEN_POS = VGAMEN_POS ^ 0x01;
+	KEYSCCV = 1;
+	m4aSongNumStart( s_u_se_shift );	// [S]
+    }
+}
+
+/*--------------------------------------------------------------*/
+/*		デバッグモードＲＡＭクリア			*/
+/*--------------------------------------------------------------*/
+void DebugMode_RamClear(void)
+{
+	fade_out_parameter_set();
+	game.GMMODE = gm_pause_fade_out;
+	PLAY_PLCMOD  = PLMV;
+	PLAY_PLLIFE  = 0x1f;
+	PLAY_PLSMAL  = 0;
+	PLAY_PLKATSG = 0;
+	PLAY_PLSTFG  = 0;
+	PLAY_PLCLOR  = 0;
+	PLDSPNO = 0;
+	RKETFG = 0;
+	BGBGM = 0xffff;	// プレイヤーセレクトからＢＧＭを鳴らす為
+}
+
+/*--------------------------------------------------------------*/
+/*		BGM復帰						*/
+/*	bgm_no のサウンドが終わったら元のBGMに戻す		*/
+/*--------------------------------------------------------------*/
+void BGM_RETURN(u16 bgm_no)
+{
+    u16 song_no;
+    
+    if( BGMSTART > 0 ){
+	BGMSTART--;
+	if( BGMSTART == 0 ){
+	    if( PLAY_PLCMOD != PLFL ){
+		song_no = BGBGM;
+
+		if( PLAY_KENSHIRO > 8 )
+		    song_no = s_u_star;
+		
+		m4aSongNumStartOrChange(song_no);
+	    }
+	}
+    }
+}
+
+/****************************************************************/
+/*		スクロール固定解除（縦画面）			*/
+/****************************************************************/
+static void scr_lock_cancel_TATE(void)
+{
+/*------------- Ｈスクロール -----------------------------------*/
+    if( SCRLOCK_H ){
+	if( (PLAY_PLXPOSH < 0x0010) ||	// 範囲チェック
+	    (PLAY_PLXPOSH >= 0x00f0) )
+	    SCRLOCK_H = 0;
+    }
+}
+
+/****************************************************************/
+/*		スクロール固定解除（横画面）			*/
+/****************************************************************/
+static void scr_lock_cancel_YOKO(void)
+{
+/*------------- Ｖスクロール -----------------------------------*/
+    if( SCRLOCK ){
+	if( A_BUTTON_ON_T ||		// ジャンプでスクロール固定解除
+	    ((PLAY_PLOBJYH >= 0) && (PLAY_PLOBJYL >= 0x80)) ){
+	    SCRLOCK = 0;
+	}
+    }
+}
+
+/****************************************************************/
+/*		スクロール固定解除				*/
+/****************************************************************/
+static void (*SCROLL_LOCK_TBL[])() = {
+    scr_lock_cancel_TATE,		// 縦画面
+    scr_lock_cancel_YOKO,		// 横画面
+};
+/*--------------------------------------------------------------*/
+
+void scr_lock_cancel(void)
+{
+    SCROLL_LOCK_TBL[mGm_SCRCTL]();
+}
+
+/****************************************************************/
+/*		スクロール向きセット				*/
+/****************************************************************/
+void scr_muki_set(void)
+{
+    if( OLD_SCCH1 < mGm_SCCH1 )
+	SCRMUKI = 1;		// 右移動
+    else if( OLD_SCCH1 > mGm_SCCH1 )
+	SCRMUKI = 0;		// 左移動
+
+    OLD_SCCH1 = mGm_SCCH1;
+}
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

@@ -1,0 +1,67 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.20;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@ /*
+ *****************************************************************
+ *              
+ *     ヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __CM_GAME_H_
+#define __CM_GAME_H_
+
+/*-------------------- EXTURN  ----------------------*/
+extern void cmGm_Main(void);
+extern void multi_error(void);
+extern void SioError(void);
+extern const u32 d_error_schDT0[8*3];
+extern const u32 d_error_schDT1[8*3];
+
+
+/*-------------------- メインゲームクラス定義 ------------------*/
+enum {
+    GM_TITLE,		// タイトル
+    GM_PLAY,		// ゲーム
+    GM_ERROR,		// エラー
+};
+
+
+/*----------------------------------------------------------*/
+
+#endif /* __CM_GAME_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

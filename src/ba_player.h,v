@@ -1,0 +1,323 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.19;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ *****************************************************************
+ *              
+ *	プレイヤーヘッダー
+ *
+ *****************************************************************
+ */
+#ifndef __BA_PLAYER_H_
+#define __BA_PLAYER_H_
+
+#include <agb.h>
+
+/*--------------------- 特殊ＳＯＢ構造体 ---------------------*/
+typedef struct{
+    u32		Ypos;
+    u32		Xpos;
+    u16		chrNO;
+} PLOamData;
+
+/*-------------------------- 構造体 --------------------------*/
+typedef struct{
+    u8		TBLNo;		// 登録されているテーブルナンバー
+    u8		mode;		// モードナンバー
+    u8		chrNO;		// パターンナンバー
+    u8		stamina;	// 体力
+    u8		CoinCount;	// ゲットしたコインの枚数
+
+    u8		Priority:2;	// 表示優先
+    u8		Direction:1;	// 進行方向(0=左,1=右)
+    u8		BigJumpFG:1;	// 大ジャンプフラグ
+    u8		FlashID:2;	// フラッシングインデックス
+    u8		SizeFG:2;	// プレイヤーサイズフラグ
+
+    u8		DispHMVFG;	// 画面横移動フラグ
+    u16		DispVMVCT;	// 画面縦移動カウンタ
+
+    u8		HFlip:1;	// Ｈフリップ
+    u8		VFlip:1;	// Ｖフリップ
+    u8		JumpFG:2;	// ジャンプフラグ
+				//	１：普通のジャンプ
+				//	２：回転ジャンプ
+    u8		Pltt:3;		// パレット
+    u8		HitFG:1;	// 当るかフラグ ０：当る
+				//		１：当らない
+
+    s32		Xpos;		// Ｘポジション
+    s32		Ypos;		// Ｙポジション
+    s32		Xspd;		// Ｘスピード
+    s32		Yspd;		// Ｙスピード
+    u16		scch;		// Ｈスクロール値
+    u16		sccv;		// Ｖスクロール値
+    s32		HoSeI;		// 補正値
+    s32		GMOV_X;		// "？Ｐ勝ち"の表示Ｘ座標
+    s32		GMOV_Y;		// "？Ｐ勝ち"の表示Ｙ座標
+    s32		GMOV_YSPD;	// "？Ｐ勝ち"の表示Ｙスピード
+
+    u8		XCenter;	// Ｘ方向の中心までの距離
+    u8		YCenter;	// Ｙ方向の中心までの距離
+    u8		XSize;		// 中心からのＸサイズ
+    u8		YSize;		// 中心からのＹサイズ
+
+    u8		AnimeTM;	// アニメーションタイマー
+    u16		Timer;		// 処理用タイマー
+    u8		HitTime;	// 敵に当った時のタイマー
+    u8		KickTime;	// キックタイマー
+    u8		smokeTM;	// 煙発生タイマー
+    u8		CrouchTM;	// しゃがみタイマー
+    u8		WalkTM;		// サウンド用歩行タイマー
+    u8		ScoreTM;	// スコアタイマー
+    u8		ShrinkTM;	// 縮みタイマー
+    u8		ThrowTM;	// 投げポーズタイマー
+    u8		QuakeTM;	// 地震ストップタイマー
+    u8		ShrinkUpTM;	// 縮んでる奴が上に乗った奴を跳ね上げるタイマー
+    u8		BigJumpTM;	// 大ジャンプアニメーションタイマー
+    u16		MuTeKiTM;	// 無敵タイマー
+    u8		CoinFlashTM;	// スコアコインフラッシングタイマー
+    u16		AscensionTM;	// 昇天タイマー
+    u16		RevivalTM;	// 復活後の無敵タイマー
+    u16		PlacardTM;	// プラカード表示タイPlacardTMマー
+
+    u8		BlockFG:1;	// ブロックを叩@いたかフラグ
+    u8		slipFG:1;	// スリップフラグ
+    u8		HalfBlockFG:1;	// 半当りブロックフラグ
+    u8		HeadHitFG:1;	// 頭めり込みフラグ
+    u8		BucketINFG:1;	// バケツに入っているかフラグ
+    u8		RepulsionFG:2;	// オートスクロール時の補正フラグ
+    u8		OtherHitFG:1;	// 自分以外のプレイヤーＨｉｔフラグ
+
+    u8		HandsUpFG:2;	// 持ち上げフラグ(１:他のプレイヤー２:アイテム)
+    u8		SafetyFG:1;	// 安全地帯フラグ
+    u8		IceFG:1;	// 氷の上フラグ
+    u8		CoinReach:1;	// コインリーチフラグ
+    u8		flyingFG:1;	// 空中浮遊フラグ
+    u8		BattleLoseFG:2;	// バトルゲーム時のゲームオーバーフラグ
+
+    u8		GameOverSLCT:1;	// ゲームオーバー時のセレクトカーソル
+    u8		LookSccvFG:2;	// 視界を広げる為のオートスクロールフラグ
+    u8		LoseSelectFG:2;	// 最後の一人に勝ちを譲るかの選択待ちフラグ
+    u8		LastKickFG:1;	// 最後にキックしたかフラグ
+    u8		NoUsed:2;	// 未使用
+
+    u8		BackUpMode;	// モードナンバーのバックアップ
+    u8		BigCHGTM;	// 大マリオへのチェンジタイマー
+
+    u8		AnimeIDX;	// アニメーションインデックス
+    u8		ScoreIDX;	// スコアインデックス
+    u8		WalkIDX;	// サウンド用歩行インデックス
+    u8		BigJumpIDX;	// 大ジャンプアニメーションインデックス
+    u8		CoinFlashIDX;	// スコアコインフラッシングインデックス
+
+    void	*HandsUpPL;	// 持ち上げているプレイヤーのポインタ登録用
+    acterDT_c	*BucketON;	// バケツの上に乗っている時のポインタ登録用
+    void	*LastPlayer;	// 最後の一人プレイヤーポインタ登録用
+} playerDT_c;
+
+#define	aP_TBLNO(p)		((p)->TBLNo)
+#define	aP_MODE(p)		((p)->mode)
+#define	aP_CHRNO(p)		((p)->chrNO)
+#define	aP_STAMINA(p)		((p)->stamina)
+#define	aP_COINCOUNT(p)		((p)->CoinCount)
+
+#define	aP_PRIORITY(p)		((p)->Priority)
+#define	aP_DIREC(p)		((p)->Direction)
+#define	aP_BIGJUMPFG(p)		((p)->BigJumpFG)
+#define	aP_FLASHID(p)		((p)->FlashID)
+#define	aP_SIZEFG(p)		((p)->SizeFG)
+
+#define	aP_DISPHMVFG(p)		((p)->DispHMVFG)
+#define	aP_DISPVMVCT(p)		((p)->DispVMVCT)
+
+#define	aP_HFLIP(p)		((p)->HFlip)
+#define	aP_VFLIP(p)		((p)->VFlip)
+#define	aP_JUMPFG(p)		((p)->JumpFG)
+#define	aP_PLTT(p)		((p)->Pltt)
+#define	aP_HITFG(p)		((p)->HitFG)
+
+
+#define	aP_XPOS(p)		((p)->Xpos)
+#define	aP_YPOS(p)		((p)->Ypos)
+#define	aP_XSPD(p)		((p)->Xspd)
+#define	aP_YSPD(p)		((p)->Yspd)
+#define	aP_SCCH(p)		((p)->scch)
+#define	aP_SCCV(p)		((p)->sccv)
+#define	aP_HoSeI(p)		((p)->HoSeI)
+#define	aP_GMOV_X(p)		((p)->GMOV_X)
+#define	aP_GMOV_Y(p)		((p)->GMOV_Y)
+#define	aP_GMOV_YSPD(p)		((p)->GMOV_YSPD)
+
+#define	aP_XCENTER(p)		((p)->XCenter)
+#define	aP_YCENTER(p)		((p)->YCenter)
+#define	aP_XSIZE(p)		((p)->XSize)
+#define	aP_YSIZE(p)		((p)->YSize)
+
+#define	aP_ANIMETM(p)		((p)->AnimeTM)
+#define	aP_TIMER(p)		((p)->Timer)
+#define	aP_HitTime(p)		((p)->HitTime)
+#define	aP_KickTime(p)		((p)->KickTime)
+#define	aP_smokeTM(p)		((p)->smokeTM)
+#define	aP_CrouchTM(p)		((p)->CrouchTM)
+#define	aP_WalkTM(p)		((p)->WalkTM)
+#define	aP_ScoreTM(p)		((p)->ScoreTM)
+#define	aP_ShrinkTM(p)		((p)->ShrinkTM)
+#define	aP_ThrowTM(p)		((p)->ThrowTM)
+#define	aP_QuakeTM(p)		((p)->QuakeTM)
+#define	aP_ShrinkUpTM(p)	((p)->ShrinkUpTM)
+#define	aP_BigJumpTM(p)		((p)->BigJumpTM)
+#define	aP_MuTeKiTM(p)		((p)->MuTeKiTM)
+#define	aP_CoinFlashTM(p)	((p)->CoinFlashTM)
+#define	aP_AscensionTM(p)	((p)->AscensionTM)
+#define	aP_RevivalTM(p)		((p)->RevivalTM)
+#define	aP_PlacardTM(p)		((p)->PlacardTM)
+
+#define	aP_BlockFG(p)		((p)->BlockFG)
+#define	aP_slipFG(p)		((p)->slipFG)
+#define	aP_HalfBlockFG(p)	((p)->HalfBlockFG)
+#define	aP_HeadHitFG(p)		((p)->HeadHitFG)
+#define	aP_BucketINFG(p)	((p)->BucketINFG)
+#define	aP_RepulsionFG(p)	((p)->RepulsionFG)
+#define	aP_OtherHitFG(p)	((p)->OtherHitFG)
+
+#define	aP_HandsUpFG(p)		((p)->HandsUpFG)
+#define	aP_SafetyFG(p)		((p)->SafetyFG)
+#define	aP_IceFG(p)		((p)->IceFG)
+#define	aP_CoinReach(p)		((p)->CoinReach)
+#define	aP_flyingFG(p)		((p)->flyingFG)
+#define	aP_BattleLoseFG(p)	((p)->BattleLoseFG)
+
+#define	aP_GameOverSLCT(p)	((p)->GameOverSLCT)
+#define	aP_LookSccvFG(p)	((p)->LookSccvFG)
+#define	aP_LoseSelectFG(p)	((p)->LoseSelectFG)
+#define	aP_LastKickFG(p)	((p)->LastKickFG)
+
+#define	aP_BackUpMode(p)	((p)->BackUpMode)
+#define	aP_BigCHGTM(p)		((p)->BigCHGTM)
+
+#define	aP_ANIMEIDX(p)		((p)->AnimeIDX)
+#define	aP_ScoreIDX(p)		((p)->ScoreIDX)
+#define	aP_WalkIDX(p)		((p)->WalkIDX)
+#define	aP_BigJumpIDX(p)	((p)->BigJumpIDX)
+#define	aP_CoinFlashIDX(p)	((p)->CoinFlashIDX)
+
+#define	aP_HANDSUPPL(p)		((p)->HandsUpPL)
+#define	aP_BucketON(p)		((p)->BucketON)
+#define	aP_LastPlayer(p)		((p)->LastPlayer)
+
+/*------------------------- 定数定義 -------------------------*/
+#define	PL_JPSPD		0x0410		// 普通のその場ジャンプ
+#define	PL_MAXJPSPD		0x0492		// 普通のランニングジャンプ
+#define	PL_MAXSPDX		0x011F		// 最大Ｘスピード
+#define	PLSHRINKYCENTER		0x18		// 縮み時の中心までのＹ距離
+#define	PLSHRINKYSIZE		0x07		// 縮み時のＹサイズ
+#define	PLSOBDATAENDCODE	0xFFFFFFFF	// オブジェデータのＥＮＤコード
+#define	MAX_PLAYER		4		// 最大プレイヤー人数
+#define	QUAKETIMER		0x30		// 地震ストップタイマー
+#define	PLPRION			1		// 表示優先　@前
+#define	BIG_JUMP_MAXTM		0x30		// 大ジャンプ最大タイマー
+///////#define	MAX_STAMINA		3		// 体力の最大値
+#define	MAX_STAMINA		2		// 体力の最大値
+#define	SMALL_STAMINA		1		// 体力の最小値
+#define	MUTEKI_MAXTM		380		// 最大無敵タイマー
+#define	MAX_PLCOUNT		3		// 最大残機@数
+#define	CLASSIC_ONE_GMOVTM	104		// クラシック時のゲームオーバータイマー
+#define	CLASSIC_ALLGMOVTM	330		// クラシック時のゲームオーバータイマー
+
+/*------------------------ モード定義 ------------------------*/
+enum {
+    PL_INIT,		// イニシャル処理
+    PL_MOVE,		// プレイヤー移動ＭＡＩＮ処理
+    PL_SQUAT,		// しゃがみ処理
+    PL_SHRINK,		// 縮む処理
+    PL_HANDSUP,		// プレイヤー持ち上げ処理
+
+//
+// これより下は、ＰＯＷブロックに影響されない処理
+//
+    PL_NO_POW,
+    PL_RESTART = PL_NO_POW,	// 再スタート処理
+    PL_POWHANDSUP,	// ＰＯＷ持ち上げ処理
+    PL_HANDSUP2,	// プレイヤー持ち上げられ処理
+    PL_ENHIT,		// 敵に当った処理
+    PL_DOWN,		// ダウン処理
+    PL_DOWNWAIT,	// ダウンＷＡＩＴ処理
+    PL_ENTR,		// 登場処理
+    PL_ASCENSION,	// 昇天デモ
+//
+// これより下は、アニメーションパターンチェンジ無し
+//
+    PL_NOMOVE,		// 動かない
+    PL_CHGBIG,		// 大マリオへの変身処理
+    PL_CHGSML,		// チビマリオへの変身処理
+    PL_STOP,		// ＳＴＯＰ処理
+    PL_END,		// 勝敗が決定した後処理
+    PL_GAMEOVER,	// 個人別ＧＡＭＥ ＯＶＥＲ表示処理
+    PL_ALLGAMEOVER,	// ＧＡＭＥ ＯＶＥＲ表示処理
+    PL_LOSEDEMO,	// "まけ"文字デモ処理(バトル時のみ)
+    PL_ALLLOSEWAIT,	// 全員負け待ち処理(バトル時のみ)
+    PL_ACCEPT,		// 負けを認め待ち処理(バトル時のみ)
+    PL_SLCTLOSE,	// 負けた奴全員の選択待ち処理(バトル時のみ)
+    PL_SLCTOUT,		// 選択文退場デモ
+    PL_LASTCHK,		// 最後の一人が死ぬかコイン５枚取るまで待つ処理
+    PL_NOT,		// 存在していない時のナンバー
+};
+
+/*-------------------------- EXTURN  -------------------------*/
+extern	void	MakePlayer(void);
+extern	void	PerfectDeletePlayer(void);
+extern	void	ShrinkInit(playerDT_c *);
+extern	u8	PLEnemyHitCheck(playerDT_c *);
+extern	void	PlayerDownCheck(playerDT_c *);
+////////extern	void	BGHeartWrite(playerDT_c *);
+extern	void	BattleLoseDisp(playerDT_c *);
+extern	void	PlayerCountDisp(playerDT_c *);
+extern	void	player_OamSet(playerDT_c *);
+extern	void	player_main(void);
+extern	u8	player_coinGet(playerDT_c *);
+extern	const	u8	WinBitDT[4];
+extern	u16	*ScoreCoinBGAddress[MAX_PLAYER];
+extern	void	SizeChange(playerDT_c *, u8);
+extern	void	DaIOamSet(s32, s32, u16);
+extern	const	u16	DaI_data[3];
+extern	void	WhiteOutInit(void);
+extern	void	MoToColorReset(u8);
+extern	const	u16	POffsetDT[4];
+
+#endif /* __BA_PLAYER_H_ */
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@

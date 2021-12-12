@@ -1,0 +1,255 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 yoyo:1.1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2004.02.02.07.28.12;  author panda;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@//------------------------------------------------------------//
+//             mks4agbLib.h ( m4aLib.h ) ver1.05              //
+//                                                            //
+//          Copyright (C) 1999-2001 NINTENDO Co.,Ltd.         //
+//------------------------------------------------------------//
+
+#ifndef _M4A_LIB_H
+#define _M4A_LIB_H
+
+#define _M4A_LIB_VER 105
+
+#include <AgbSound.h>
+
+
+//ＣＧＢ仮想チャンネルの構造
+typedef struct {
+    u8 ch1[64];
+    u8 ch2[64];
+    u8 ch3[64];
+    u8 ch4[64];
+} CgbChannels;
+
+//ミュージックプレイヤー・テーブルの構造
+typedef struct {
+    MusicPlayerArea *ma;
+    MusicPlayerTrack *ta;
+    u32 tn;
+} MPlayTable;
+
+//ソング・テーブルの構造
+typedef struct {
+    SongHeader *so;
+    u16 ms, me;
+} SongTable;
+
+
+#define CGB1_P12 ((WaveData *)0)
+#define CGB1_P25 ((WaveData *)1)
+#define CGB1_P50 ((WaveData *)2)
+#define CGB1_P75 ((WaveData *)3)
+#define CGB2_P12 CGB1_P12
+#define CGB2_P25 CGB1_P25
+#define CGB2_P50 CGB1_P50
+#define CGB2_P75 CGB1_P75
+#define CGB4_C15 ((WaveData *)0)
+#define CGB4_C07 ((WaveData *)1)
+
+
+extern const u8 __sound_mode_i[];
+#define sound_mode_i ((u32)__sound_mode_i)
+extern const u8 __total_mplay_n[];
+#define total_mplay_n ((u16)__total_mplay_n)
+extern const u8 __total_song_n[];
+#define total_song_n ((u16)__total_song_n)
+
+extern SoundArea m4a_sound;
+extern const MPlayTable mplay_table[];
+extern const SongTable song_table[];
+extern u8 m4a_memacc_area[];
+
+
+extern void m4aSoundInit(void);
+
+#define m4aSoundMode(P1) SoundMode_rev01(P1)
+extern void SoundMode_rev01(u32 mode);
+
+extern void m4aSoundMain(void);
+
+#define m4aSoundVSync() SoundVSync_rev01()
+extern void SoundVSync_rev01(void);
+
+#define m4aSoundVSyncOff() SoundVSyncOff_rev01()
+extern void SoundVSyncOff_rev01(void);
+
+#define m4aSoundVSyncOn() SoundVSyncOn_rev01()
+extern void SoundVSyncOn_rev01(void);
+
+#define m4aMPlayStart(P1,P2) MPlayStart_rev01(P1,P2)
+extern void MPlayStart_rev01(MusicPlayerArea *ma, SongHeader *so);
+
+extern void m4aSongNumStart(u16 n);
+
+extern void m4aSongNumStartOrChange(u16 n);
+
+extern void m4aSongNumStartOrContinue(u16 n);
+
+extern void m4aMPlayImmInit(MusicPlayerArea *ma);
+
+#define m4aMPlayStop(P1) MPlayStop_rev01(P1)
+extern void MPlayStop_rev01(MusicPlayerArea *ma);
+
+extern void m4aSongNumStop(u16 n);
+
+extern void m4aMPlayAllStop(void);
+
+extern void m4aMPlayContinue(MusicPlayerArea *ma);
+
+extern void m4aSongNumContinue(u16 n);
+
+extern void m4aMPlayAllContinue(void);
+
+extern void m4aMPlayFadeOut(MusicPlayerArea *ma, u16 sp);
+
+#define m4aMPlayTempoControl(P1,P2) MPlayTempoControl(P1,P2)
+extern void MPlayTempoControl(MusicPlayerArea *ma, u16 te);
+
+#define m4aMPlayVolumeControl(P1,P2,P3) MPlayVolumeControl(P1,P2,P3)
+extern void MPlayVolumeControl(MusicPlayerArea *ma, u16 tb, u16 vo);
+
+#define m4aMPlayPitchControl(P1,P2,P3) MPlayPitchControl(P1,P2,P3)
+extern void MPlayPitchControl(MusicPlayerArea *ma, u16 tb, s16 pi);
+
+#define m4aMPlayPampotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+#define m4aMPlayPanpotControl(P1,P2,P3) MPlayPanpotControl(P1,P2,P3)
+extern void MPlayPanpotControl(MusicPlayerArea *ma, u16 tb, s8 pa);
+
+#define m4aMPlayModDepthSet(P1,P2,P3) MPlayModDepthSet(P1,P2,P3)
+extern void MPlayModDepthSet(MusicPlayerArea *ma, u16 tb, u8 md);
+
+#define m4aMPlayLFOSpeedSet(P1,P2,P3) MPlayLFOSpeedSet(P1,P2,P3)
+extern void MPlayLFOSpeedSet(MusicPlayerArea *ma, u16 tb, u8 ls);
+
+
+#endif // _M4A_LIB_H
+
+// MusicPlayers
+extern MusicPlayerArea m4a_mplay000;
+extern MusicPlayerArea m4a_mplay001;
+extern MusicPlayerArea m4a_mplay002;
+extern MusicPlayerArea m4a_mplay003;
+extern MusicPlayerArea m4a_mplay004;
+extern MusicPlayerArea m4a_mplay005;
+extern MusicPlayerArea m4a_mplay006;
+extern MusicPlayerArea m4a_mplay007;
+extern MusicPlayerArea m4a_mplay008;
+extern MusicPlayerArea m4a_mplay009;
+extern MusicPlayerArea m4a_mplay010;
+extern MusicPlayerArea m4a_mplay011;
+extern MusicPlayerArea m4a_mplay012;
+extern MusicPlayerArea m4a_mplay013;
+extern MusicPlayerArea m4a_mplay014;
+extern MusicPlayerArea m4a_mplay015;
+extern MusicPlayerArea m4a_mplay030;
+extern MusicPlayerArea m4a_mplay031;
+
+// Song files
+extern SongHeader sn_KEKKA0;
+extern SongHeader sn_STAGE1;
+extern SongHeader sn_STAGE2;
+extern SongHeader sn_CLEAR;
+extern SongHeader sn_KEKKA1;
+extern SongHeader sn_KEKKA2;
+extern SongHeader sn_KEKKA;
+extern SongHeader sn_KEKKA3;
+extern SongHeader sn_BATTLE_DEAD;
+extern SongHeader sn_HEART;
+extern SongHeader sn_COIN5;
+extern SongHeader sn_JUMP;
+extern SongHeader sn_SLIP;
+extern SongHeader sn_WALK_C;
+extern SongHeader sn_WALK_E;
+extern SongHeader sn_WALK_G;
+extern SongHeader sn_MR_DEAD;
+extern SongHeader sn_MR_DOWN;
+extern SongHeader sn_MR_NEXT;
+extern SongHeader sn_POW;
+extern SongHeader sn_PAUSE1UP;
+extern SongHeader sn_KAME;
+extern SongHeader sn_KANI;
+extern SongHeader sn_HAE;
+extern SongHeader sn_COIN_OUT;
+extern SongHeader sn_TEKI_ATTACK;
+extern SongHeader sn_TEKI_DEAD;
+extern SongHeader sn_DOBON;
+extern SongHeader sn_COIN_GET;
+extern SongHeader sn_FREEZER;
+extern SongHeader sn_FREEZ_DEAD;
+extern SongHeader sn_FIRE;
+extern SongHeader sn_boss_bros;
+extern SongHeader sn_star_bros;
+extern SongHeader sn_KUPPA;
+extern SongHeader sn_KUPPA_DOSIN;
+extern SongHeader sn_win1;
+extern SongHeader sn_lose1;
+extern SongHeader sn_win2;
+extern SongHeader sn_lose2;
+extern SongHeader sn_KEKKA4;
+extern SongHeader sn_battle2;
+extern SongHeader sn_battlekekka;
+extern SongHeader sn_zelda_fan;
+extern SongHeader sn_KUPPAFIRE;
+extern SongHeader sn_BAKETU;
+extern SongHeader sn_MOTI;
+extern SongHeader sn_NAGE;
+extern SongHeader sn_TAME;
+extern SongHeader sn_DAMAGE;
+extern SongHeader sn_TIBI;
+extern SongHeader sn_NORI;
+extern SongHeader sn_BUTUKARI;
+extern SongHeader sn_HEART_GET;
+extern SongHeader sn_DEKA;
+extern SongHeader sn_KAO;
+extern SongHeader sn_PUSH;
+extern SongHeader sn_KUPPA_DAMAGE;
+extern SongHeader sn_KUPPA_DEAD;
+extern SongHeader sn_SHIFT;
+extern SongHeader sn_SAVE;
+extern SongHeader sn_intro_battle;
+extern SongHeader sn_KAMEKERI1;
+extern SongHeader sn_KAMEKERI2;
+extern SongHeader sn_KAMEKERI3;
+extern SongHeader sn_KAMEKERI4;
+extern SongHeader sn_PINPON;
+extern SongHeader sn_BUU;
+extern SongHeader sn_battlekekka_intro;
+extern SongHeader sn_FIREDEAD;
+extern SongHeader sn_TURARA_DEAD;
+@
+
+
+1.1.1.1
+log
+@start
+@
+text
+@@
